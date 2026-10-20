@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "project": "Digital Evidence Authenticity & Integrity Verification Platform (PS-05)",
+  "version": "1.0.0",
+  "archify": {
+    "version": "0.4.2",
+    "engine": "offline-static",
+    "ir_version": "1.2.0",
+    "report_title": "PS-05 Forensic Analysis & Integrity Verification Dossier",
+    "output_dir": "dist/reports",
+    "theme": "forensic-dark",
+    "diagram_types": [
+      "evidence-provenance",
+      "multimodal-timeline",
+      "signal-spectrogram",
+      "error-level-analysis",
+      "cctv-frame-cadence"
+    ],
+    "trust_boundary": {
+      "host_fs_direct_access": false,
+      "allowed_input_sources": [
+        "parsed_json_ir",
+        "derived_visual_artifacts"
+      ],
+      "immutable_vault_isolation": true
+    },
+    "court_admissibility": {
+      "standard": "Section 65B Indian Evidence Act / Section 63 Bharatiya Sakshya Adhiniyam 2023",
+      "hash_algorithms": ["SHA-256", "SHA3-512"],
+      "include_environment_manifest": true
+    }
+  }
+}
