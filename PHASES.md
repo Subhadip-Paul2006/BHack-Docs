@@ -61,12 +61,30 @@ flowchart TD
         VA12 --> VA13["VISTA-A13: End-to-End Video Validation & Benchmark Corpus"]
     end
 
-    subgraph IMAGE_WORKSTREAM["🖼️ AIF Image Forensics Subsystem"]
-        P1 --> P4["Phase 4: Image Forensics Subsystem (IVE, IRE, AIM, FPA)"]
+    subgraph IMAGE_WORKSTREAM["🖼️ AIF Image Forensics Playbook"]
+        direction TB
+        IA0["AIF-A0: Repo Discovery & Architecture Baseline"] --> IA1["AIF-A1: Shared Contracts & CEIPL Hasher"]
+        IA1 --> IA2["AIF-A2: Secure Image Intake & Safe Decoding"]
+        IA2 --> IA3["AIF-A3: Hierarchical Taxonomy & Multi-label Classifier"]
+        IA3 --> IA4["AIF-A4: Object Detection, Segmentation & People Count"]
+        
+        IA2 --> IA5["AIF-A5: FPA Face, Portrait & Biometric Landmarks"]
+        IA2 --> IA6["AIF-A6: Document Layout, Quad Warp & OCR Engine"]
+        IA2 --> IA7["AIF-A7: Metadata Audit & Signal Profiling (IRE)"]
+        IA7 --> IA8["AIF-A8: Classical CV & Geometric Forensics"]
+        IA8 --> IA9["AIF-A9: CMFD Splicing & PRNU Sensor Noise"]
+        
+        IA3 & IA7 --> IA10["AIF-A10: Multi-Branch AI-Gen & TruFor Inpainting"]
+        IA5 --> IA11["AIF-A11: Face Swap, Morphing & Synthesis Forensics"]
+        IA2 --> IA12["AIF-A12: Steganalysis & Malformed File Defense"]
+        
+        IA1 & IA9 & IA10 & IA11 & IA12 --> IA13["AIF-A13: CEIPL Provenance & Custody Hardening"]
+        IA13 --> IA14["AIF-A14: Evidence Fusion & Examiner Reporting"]
+        IA14 --> IA15["AIF-A15: End-to-End Image Validation & Release"]
     end
 
     subgraph PLATFORM_DELIVERY["🚀 Platform Delivery & Legal Certification"]
-        A10 & VA13 & P4 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
+        A10 & VA13 & IA15 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
         P7 --> P8["Phase 8: Web Dashboard & Examiner Workbench"]
         P8 --> P9["Phase 9: Security Hardening & Air-Gapped Packaging"]
         P9 --> P10["Phase 10: Final Hackathon Demonstration & Release"]
@@ -105,8 +123,23 @@ flowchart TD
 | **VISTA-A11**| Cross-Engine Video Evidence Fusion | Fusion / VISTA | `PLANNED` | VISTA-A5, A8, A10 | Multi-track timeline alignment, conflict resolution matrix, finding merger |
 | **VISTA-A12**| Video Legal Reporting & Sec 65B/63 BSA | Reporting / VISTA | `PLANNED` | VISTA-A11 Gate | Section 65B/63 BSA PDF certificate, Archify JSON IR, digital signature |
 | **VISTA-A13**| End-to-End Video Validation & Benchmark | Validation / Release | `PLANNED` | VISTA-A12 Gate | FF++, Celeb-DF, DFDC, CCTV synthetic corpus, air-gap verification |
-| **Phase 4** | Image Forensics Subsystem (IFS) | IFS Engine | `PLANNED` | Phase 1 Gate | EXIF audit, ELA heatmaps, JPEG ghost, SIFT CMFD |
-| **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, P4 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
+| **AIF-A0**  | AIF Architecture Baseline & Audit | AIF Core / Docs | `PLANNED` | Phase 0 Gate | Directory structure, module boundary contracts, threat model |
+| **AIF-A1**  | Shared Contracts & CEIPL Foundation | CEIPL / AIF Core | `PLANNED` | AIF-A0 Gate | Pre-decode dual-hasher, WORM vault, RFC 8785 canonical manifests |
+| **AIF-A2**  | Secure Image Intake & Safe Decoding | IVE Baseline | `PLANNED` | AIF-A1 Gate | Magic bytes, Pillow 128MP quota, isolated parser sandbox |
+| **AIF-A3**  | Hierarchical Taxonomy & Scene Triage | IVE Taxonomy | `PLANNED` | AIF-A2 Gate | 150-category registry, SigLIP multi-label classifier, temperature calib |
+| **AIF-A4**  | Object Detection & People Counting | IVE Vision | `PLANNED` | AIF-A2 Gate | YOLOv8/SAM 2, high-res tiling DAG, occlusion-aware people counter |
+| **AIF-A5**  | FPA Face, Portrait & Biometric Landmarks| FPA Module | `PLANNED` | AIF-A2 Gate | RetinaFace, MediaPipe 468 mesh, pose/blur/occlusion, ArcFace 1:1 gate |
+| **AIF-A6**  | Document Layout, Quad Rectification & OCR| IVE Docs | `PLANNED` | AIF-A2 Gate | Perspective transform, PaddleOCR Indian scripts, seal/signature detect |
+| **AIF-A7**  | Metadata Audit & Signal Profiling | IRE Baseline | `PLANNED` | AIF-A2 Gate | ExifTool deep audit, 2D FFT log-spectrum, DCT quantization check |
+| **AIF-A8**  | Classical CV & Geometric Forensics | IRE Geometric | `PLANNED` | AIF-A7 Gate | Canny, Sobel, Hough, SIFT/ORB + RANSAC homography alignment |
+| **AIF-A9**  | CMFD Splicing & Camera Sensor PRNU | IRE Advanced | `PLANNED` | AIF-A8 Gate | DBSCAN SIFT keypoint CMFD, DCT block match, PRNU sensor noise |
+| **AIF-A10** | Multi-Branch AI-Gen & TruFor Inpainting | AIM Detection | `PLANNED` | AIF-A2 Gate | Multi-branch ResNet/FFT/SigLIP, TruFor inpainting localization mask |
+| **AIF-A11** | Face Swap, Morphing & Synthesis | AIM Facial | `PLANNED` | AIF-A5 Gate | Face X-Ray blend boundary, landmark asymmetry, corneal specularity |
+| **AIF-A12** | Steganalysis & Malformed File Defense | AIM Security | `PLANNED` | AIF-A2 Gate | LSB randomness, RS analysis, trailing bytes quarantine, polyglot block |
+| **AIF-A13** | CEIPL Provenance & Custody Hardening | CEIPL Hardening | `PLANNED` | AIF-A1, A10 Gates| Ed25519 signer, RFC 3161 TSA, hash-chained log, Merkle inclusion proofs |
+| **AIF-A14** | Evidence Fusion & Legal Reporting | Reporting / AIF | `PLANNED` | AIF-A10..A13 Gates| Cross-engine finding merger, Archify JSON IR, Section 65B/63 BSA PDF |
+| **AIF-A15** | End-to-End Image Validation & Release | Validation / Release | `PLANNED` | AIF-A14 Gate | Benchmark suite, CoMoFoD, TruFor eval, 5-run determinism, air-gap |
+| **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
 | **Phase 8** | Web Dashboard & Examiner Workbench | UI / Presentation | `PLANNED` | Phase 7 Gate | Next.js interactive UI, multi-modal waveform viewer |
 | **Phase 9** | Security Hardening & Air-Gapped Packaging | DevOps / Security | `PLANNED` | Phase 8 Gate | Offline Docker containers, POSIX 0400 WORM scripts |
 | **Phase 10** | Final Hackathon Demonstration & Release | Quality & Release | `PLANNED` | Phase 9 Gate | Verified demonstration scripts & curated case pack |
@@ -1356,14 +1389,973 @@ Execute `pytest tests/` covering all video unit, integration, and benchmark test
 
 ---
 
-## 5. Image Forensics Subsystem & Platform Milestones
+## 5. Dedicated Image Forensics Engineering Playbook (AIF-A0 through AIF-A15)
 
-The platform's image forensics subsystem and delivery milestones operate in parallel with the audio and video workstreams:
+The Advanced Image Forensics (AIF) engineering roadmap defines sixteen sequential, research-oriented, and cryptographically grounded implementation phases. Each phase provides an exhaustive engineering specification with verifiable completion criteria and independent checkpoint tables:
 
-### Phase 4: Image Forensics Subsystem (IFS)
-- **Status:** `PLANNED`
-- **Scope:** EXIF & metadata tampering audit, Error Level Analysis (ELA) multi-quality heatmaps, JPEG double-compression DCT ghost analysis, and Copy-Move Forgery Detection (CMFD) via SIFT keypoint clustering.
-- **Deliverables:** `src/ps05/engines/image/` modules and image benchmark suite.
+### Phase AIF-A0: AIF Architecture Baseline, Repository Audit & Standards Integration
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Establish an empirical, research-backed architecture baseline for the Advanced Image Forensics (AIF) subsystem, verify existing codebase assets, enforce legal evidentiary standards (Section 65B IEA / Section 63 BSA), and establish strict module boundaries.
+
+**2. Topics & Subtopics:**  
+Repository inspection, Archify integration status audit, file validation threat model, legal compliance boundaries, AIF engine directory scaffold, dependency license review.
+
+**3. Modules Covered:**  
+AIF Core, IVE, IRE, AIM, FPA, CEIPL Shared Cryptographic Layer.
+
+**4. Exact Tasks:**  
+1. Perform comprehensive audit of repository tree, verifying that existing AURAS audio engines (ARE, MVSI, ADDE) and VISTA video engines remain completely untouched.
+2. Audit Archify integration status; document that Archify CLI is not in system PATH and operates via static JSON IR schema in archify.config.json.
+3. Establish module boundary contracts between IVE (Visual Evidence), IRE (Reverse Engineering), AIM (Manipulation & Steganography), and FPA (Biometric Face Module).
+4. Formulate the AIF Threat Model addressing decompression bombs, malformed header exploits, adversarial generative perturbations, and privacy-violating biometric queries.
+5. Design Python packaging structure under `src/ps05/engines/image/` and `src/ps05/core/crypto/` with clean interface abstractions.
+
+**5. Execution Workflow:**  
+Execute automated file checks -> Audit Archify config -> Create directory package scaffold -> Draft interface contracts -> Validate threat model -> Formulate baseline checkpoints.
+
+**6. Tools & Technologies:**  
+Python 3.12, git, archify.config.json, pytest, Pydantic v2.
+
+**7. Prerequisites & Dependencies:**  
+Phase 0 Platform Architecture baseline completed; existing AURAS and VISTA documentation intact.
+
+**8. Expected Artifacts:**  
+`src/ps05/engines/image/__init__.py`, `src/ps05/engines/image/common/schemas.py`, `tests/unit/test_aif_baseline.py`.
+
+**9. Validation Plan:**  
+Verify directory trees, ensure clean imports without cyclic dependencies, and confirm that all existing test suites pass without regression.
+
+**10. Failure Cases & Risks:**  
+Accidental coupling between image decoders and shared core; mitigated by strict Pydantic contract layer.
+
+**11. Security Considerations:**  
+Enforce zero-trust parser execution; untrusted file bytes must never be ingested by system-level decoders without sandbox isolation.
+
+**12. Acceptance Criteria:**  
+Clean package hierarchy established; interface schemas defined; Archify integration status truthfully documented.
+
+**13. Definition of Done:**  
+Directory tree scaffolded, Pydantic schemas compiled, threat model reviewed, all 4 checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF0-CP-01** | Repository & Subsystem Isolation Audit | Automated scan confirms zero AURAS/VISTA code altered | `NOT_STARTED` | No audio/video files modified |
+| **AIF0-CP-02** | Archify Integration Status Verification | Documentation truthfully reflects offline JSON IR status | `NOT_STARTED` | Zero claim of fictional CLI output |
+| **AIF0-CP-03** | AIF Package Boundary Contract Review | Pydantic abstract base classes compile cleanly | `NOT_STARTED` | Zero cyclic import dependencies |
+| **AIF0-CP-04** | AIF Forensic Threat Model Formulation | Documented STRIDE defenses for image ingestion | `NOT_STARTED` | Covers decompression bombs & polyglots |
+
+---
+
+### Phase AIF-A1: Shared Evidence Contracts & Cryptographic Foundation (CEIPL Core)
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Implement the shared Cryptographic Evidence Integrity & Provenance Layer (CEIPL) direct pre-decode dual-hasher, RFC 8785 canonical JSON serializer, WORM storage vault, and append-only custody event structure.
+
+**2. Topics & Subtopics:**  
+Direct byte-stream hashing, FIPS 180-4 SHA-256, FIPS 202 SHA3-512, POSIX 0400 WORM write-blocking, RFC 8785 Canonical JSON Serialization (JCS), custody event schema.
+
+**3. Modules Covered:**  
+`ps05.core.crypto.direct_hasher`, `ps05.core.crypto.canonical_json`, `ps05.core.storage`.
+
+**4. Exact Tasks:**  
+1. Implement chunked (64KB block) streaming dual-hasher calculating SHA-256 and SHA3-512 directly from raw seized socket stream before disk write or decoding.
+2. Implement POSIX 0400 read-only file permission locking and S3 Object Lock compliance layer to guarantee immutable WORM vault storage.
+3. Implement deterministic RFC 8785 Canonical JSON Serialization (JCS) library for exhibit manifests.
+4. Define relational schema and SQLAlchemy models for `custody_events` enforcing append-only hash-chained event links.
+5. Build comprehensive test vector suite validating hash calculation against known NIST CAVP vectors.
+
+**5. Execution Workflow:**  
+Stream bytes -> Accumulate SHA-256/SHA3-512 -> Write raw vault -> Lock POSIX 0400 -> Build RFC 8785 manifest -> Commit custody event -> Verify bitstream equality.
+
+**6. Tools & Technologies:**  
+Python `hashlib`, `canonicaljson`, `cryptography`, PostgreSQL 15, S3 Object Lock.
+
+**7. Prerequisites & Dependencies:**  
+AIF-A0 baseline approved; database migrations initialized.
+
+**8. Expected Artifacts:**  
+`src/ps05/core/crypto/direct_hasher.py`, `src/ps05/core/crypto/canonical_json.py`, `tests/unit/test_ceipl_hasher.py`.
+
+**9. Validation Plan:**  
+Feed 100 test vectors with known SHA-256 digests; assert zero discrepancy; verify POSIX 0400 file permissions prevent modification (`chmod -w`).
+
+**10. Failure Cases & Risks:**  
+File system caching concealing modification; mitigated by explicit flush and direct sync I/O.
+
+**11. Security Considerations:**  
+Enforce strict separation between raw seized exhibit bytes and all derived analysis representations.
+
+**12. Acceptance Criteria:**  
+Dual-hasher computes matching digests; WORM vault write-blocks correctly; canonical JSON produces identical bytes across platforms.
+
+**13. Definition of Done:**  
+All hasher and canonicalization tests pass with 100% code coverage; custody event table indexed; checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF1-CP-01** | Pre-Decode Dual-Hashing Bitstream Parity | NIST test vectors match bit-for-bit with OpenSSL SHA-256 | `NOT_STARTED` | Evaluated on 1KB to 1GB files |
+| **AIF1-CP-02** | WORM Storage Vault Permission Enforcement | Write attempts to locked exhibit return EACCES (Permission Denied) | `NOT_STARTED` | POSIX 0400 and S3 Compliance mode |
+| **AIF1-CP-03** | RFC 8785 Canonical JSON Determinism | Randomized dictionary keys produce identical UTF-8 byte hashes | `NOT_STARTED` | Compliant with RFC 8785 test suite |
+| **AIF1-CP-04** | Append-Only Custody Chain Integrity | Tampering with row $i$ breaks hash link $H_{i+1}$ | `NOT_STARTED` | Detects row deletion or modification |
+
+---
+
+### Phase AIF-A2: Secure Image Intake, File Validation & Universal Profiling (IVE-01)
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Provide safe, sandboxed ingestion and structural profiling of seized digital image exhibits, enforcing strict decompression bomb quotas and rejecting polyglot binaries.
+
+**2. Topics & Subtopics:**  
+Magic byte detection (`python-magic`), Pillow safety limits (`Image.MAX_IMAGE_PIXELS = 128_000_000`), subprocess memory cgroups (2GB RAM, 30s timeout), universal container profiling, colour space detection.
+
+**3. Modules Covered:**  
+`ps05.engines.image.common.safe_decode`, `ps05.engines.image.common.profiling`.
+
+**4. Exact Tasks:**  
+1. Implement `python-magic` signature validator to identify real image formats (JPEG, PNG, TIFF, WebP, HEIC, BMP, camera RAW) regardless of filename extension.
+2. Configure Pillow decompression bomb protection: enforce hard ceiling at 128 Megapixels; raise `DECOMPRESSION_BOMB_PREVENTED` on violations.
+3. Build isolated decoding subprocess harness with POSIX cgroups capping memory to 2GB and execution time to 30 seconds.
+4. Extract universal profile: dimensions, pixel count, aspect ratio, bit depth, colour mode, colour space, orientation tag, alpha channel, and frame count.
+5. Build malformed image test suite containing corrupt markers, truncated streams, and extreme dimension headers.
+
+**5. Execution Workflow:**  
+Receive seized bytes -> Check magic bytes -> Spawn isolated subprocess -> Enforce 128MP limit -> Parse metadata profile -> Write `image_exhibits` DB record.
+
+**6. Tools & Technologies:**  
+`python-magic`, Pillow 10.3.0, OpenCV (headless), resource limits (`resource` module / cgroups).
+
+**7. Prerequisites & Dependencies:**  
+AIF-A1 shared cryptographic foundation completed.
+
+**8. Expected Artifacts:**  
+`src/ps05/engines/image/common/safe_decode.py`, `src/ps05/engines/image/common/profiling.py`, `tests/unit/test_ive_safe_decode.py`.
+
+**9. Validation Plan:**  
+Ingest 50 malformed and bomb image fixtures; assert 100% catch rate without crashing host worker; assert memory stays under 2GB.
+
+**10. Failure Cases & Risks:**  
+Zero-day vulnerabilities in underlying C libraries (libjpeg, libpng); mitigated by sandboxed worker processes.
+
+**11. Security Considerations:**  
+Never execute embedded scripts or metadata payloads; isolate decoders in unprivileged sub-processes.
+
+**12. Acceptance Criteria:**  
+Real format correctly extracted; decompression bombs prevented; comprehensive profile stored in PostgreSQL.
+
+**13. Definition of Done:**  
+Safe decoding harness operational; malformed test suite passing; all 4 checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF2-CP-01** | Magic Byte Format Identification | Images with spoofed extensions correctly identified by real magic bytes | `NOT_STARTED` | Tested on renamed .exe and .zip |
+| **AIF2-CP-02** | Decompression Bomb Quota Enforcement | 1-Gigapixel sparse PNG blocked with DECOMPRESSION_BOMB_PREVENTED | `NOT_STARTED` | Memory stays under 512MB |
+| **AIF2-CP-03** | Decoder Subprocess Resource Isolation | Worker timeout (30s) and memory cap (2GB) enforced via cgroups | `NOT_STARTED` | Process killed safely on runaway CPU |
+| **AIF2-CP-04** | Universal Ingestion Profile Schema Integrity | `image_exhibits` table populated with verified dimensions & colour space | `NOT_STARTED` | Validated on 10 image formats |
+
+---
+
+### Phase AIF-A3: Hierarchical Image Evidence Taxonomy & Visual Classification (IVE-02 & IVE-03)
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Implement a versioned, 150-category hierarchical taxonomy covering forensic and evidentiary domains, coupled with a multi-label classification pipeline for scene triage and priority flagging.
+
+**2. Topics & Subtopics:**  
+15 parent forensic domains, 150 leaf classes, multi-label classification, SigLIP (ViT-SO400M) / CLIP embeddings, temperature calibration, triage alert indicators.
+
+**3. Modules Covered:**  
+`ps05.engines.image.ive.taxonomy`, `ps05.engines.image.ive.classifier`.
+
+**4. Exact Tasks:**  
+1. Implement relational database schema and registry for the 15-parent, 150-leaf category taxonomy (`image_taxonomy_categories`).
+2. Establish formal inclusion/exclusion criteria, model compatibility flags, and validation states per taxonomy label.
+3. Implement multi-label zero-shot and fine-tuned visual classification pipeline using SigLIP (ViT-SO400M) visual backbone.
+4. Implement temperature scaling and Platt calibration to produce calibrated category probabilities $p_c \in [0, 1]$.
+5. Build triage alert router identifying urgent investigative categories (e.g. violent incidents, weapons, forensic trauma) as prioritization flags.
+
+**5. Execution Workflow:**  
+Load image exhibit -> Resample to $336	imes 336$ normalized tensor -> Forward pass SigLIP -> Calibrate logits -> Filter by threshold -> Store taxonomy annotations.
+
+**6. Tools & Technologies:**  
+PyTorch 2.3, Hugging Face `transformers` (SigLIP / CLIP), scikit-learn (calibration).
+
+**7. Prerequisites & Dependencies:**  
+AIF-A2 safe intake operational; taxonomy relational tables created.
+
+**8. Expected Artifacts:**  
+`src/ps05/engines/image/ive/taxonomy.py`, `src/ps05/engines/image/ive/classifier.py`, `tests/benchmarks/test_ive_taxonomy.py`.
+
+**9. Validation Plan:**  
+Evaluate classifier across test splits for all 15 domains; assert Macro-F1 $\ge 0.82$; verify calibration curve linearity.
+
+**10. Failure Cases & Risks:**  
+Conflating visual triage flags with automated legal conclusions; mitigated by mandatory disclaimer strings.
+
+**11. Security Considerations:**  
+Sanitize taxonomy query inputs; prevent prompt injection in visual-language reasoning descriptions.
+
+**12. Acceptance Criteria:**  
+150 categories indexed; multi-label probabilities calibrated; triage alerts flag urgent evidence categories.
+
+**13. Definition of Done:**  
+Taxonomy loaded, classifier inference operational, calibration verified, checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF3-CP-01** | 150-Category Taxonomy Schema & Registry | All 15 domains and 150 leaf categories seeded in database | `NOT_STARTED` | Version 1.0.0 taxonomy locked |
+| **AIF3-CP-02** | Multi-Label Classification Pipeline | SigLIP extracts multi-label predictions across test images | `NOT_STARTED` | Macro-F1 >= 0.82 on test split |
+| **AIF3-CP-03** | Probability Temperature Calibration | Expected Calibration Error (ECE) < 0.06 on validation split | `NOT_STARTED` | Platt scaling parameters fitted |
+| **AIF3-CP-04** | Forensic Triage Alerting Router | Weapons and trauma categories correctly raise triage alert flags | `NOT_STARTED` | Visual triage distinct from verdict |
+
+---
+
+### Phase AIF-A4: Object Detection, Instance Segmentation & People Counting (IVE-04 & IVE-05)
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Deploy high-resolution object detection, zero-shot instance segmentation (SAM 2), and occlusion-aware people counting with high-resolution tiling and coordinate transform tracking.
+
+**2. Topics & Subtopics:**  
+YOLOv8x / YOLOv10x detectors, SAM 2 instance masks, $1024	imes 1024$ overlapping tiling, NMS boundary suppression, dual-head people counting, crowd density estimation.
+
+**3. Modules Covered:**  
+`ps05.engines.image.ive.detector`, `ps05.engines.image.ive.segmentor`, `ps05.engines.image.ive.people_count`.
+
+**4. Exact Tasks:**  
+1. Implement YOLOv8x/v10x object detection pipeline mapped to forensic taxonomy categories.
+2. Implement SAM 2 (Segment Anything 2) promptable instance segmentation to generate precise polygon masks.
+3. Implement high-resolution tiling dispatcher: partition images $> 2048	imes 2048$ into $1024	imes 1024$ tiles with 128px overlap; merge boxes via NMS.
+4. Record linear affine coordinate mappings in Derived Artifact DAG to guarantee pixel-accurate projection back to original exhibit.
+5. Implement occlusion-aware people counter combining head-box and full-body detectors; resolve overlaps via Hungarian matching.
+
+**5. Execution Workflow:**  
+Tile high-res image -> Parallel YOLO & SAM 2 inference -> NMS cross-tile suppression -> Map coordinates to parent -> Execute people counter -> Store findings.
+
+**6. Tools & Technologies:**  
+`ultralytics` (YOLOv8/v10), `segment-anything-2`, OpenCV, NumPy.
+
+**7. Prerequisites & Dependencies:**  
+AIF-A2 safe intake operational; GPU worker nodes configured.
+
+**8. Expected Artifacts:**  
+`src/ps05/engines/image/ive/detector.py`, `src/ps05/engines/image/ive/segmentor.py`, `src/ps05/engines/image/ive/people_count.py`, `tests/benchmarks/test_ive_detection.py`.
+
+**9. Validation Plan:**  
+Evaluate on COCO and CrowdHuman benchmark splits; assert mAP@50 $\ge 0.65$; assert people count MAE $\le 1.8$ on crowds under 30 persons.
+
+**10. Failure Cases & Risks:**  
+False positive detections on mannequins and posters; mitigated by 2D frequency texture depth check.
+
+**11. Security Considerations:**  
+Enforce worker memory quotas ($\le 8	ext{GB}$ VRAM); prevent GPU Out-Of-Memory errors during high-res tiling.
+
+**12. Acceptance Criteria:**  
+Bounding boxes and masks correctly mapped to parent image; people count separated from face count.
+
+**13. Definition of Done:**  
+Detection, segmentation, and people counting operational with full test suite passing; checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF4-CP-01** | Forensic Object Detection Engine | YOLOv8x identifies evidence objects with mAP@50 >= 0.65 | `NOT_STARTED` | Evaluated on standard splits |
+| **AIF4-CP-02** | SAM 2 Polygon Instance Segmentation | Precise object boundary masks extracted and stored as SVG/polygons | `NOT_STARTED` | Zero loss of boundary fidelity |
+| **AIF4-CP-03** | High-Resolution Tiling & DAG Mapping | Coordinate transform maps tile detections back to parent with zero drift | `NOT_STARTED` | Affine error < 0.001 pixels |
+| **AIF4-CP-04** | Occlusion-Aware People Counting | People count accurately separated from face count; MAE <= 1.8 | `NOT_STARTED` | Evaluated on CrowdHuman split |
+
+---
+
+### Phase AIF-A5: FPA Face, Portrait & Biometric Evidence Analysis (IVE-06 & IVE-07)
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Implement the shared Face, Portrait & Biometric Evidence Analysis (FPA) module, supporting multi-scale face detection, 468 3D facial landmarks, face quality gating, and authorized 1:1 ArcFace reference comparison.
+
+**2. Topics & Subtopics:**  
+RetinaFace / SCRFD face detection, MediaPipe 468-point 3D facial mesh, head pose estimation (solvePnP yaw/pitch/roll), blur and occlusion metrics, 1:1 ArcFace / MagFace feature extraction, judicial case token gating.
+
+**3. Modules Covered:**  
+`ps05.engines.image.fpa.detector`, `ps05.engines.image.fpa.landmarks`, `ps05.engines.image.fpa.quality`, `ps05.engines.image.fpa.matcher`.
+
+**4. Exact Tasks:**  
+1. Implement RetinaFace / SCRFD detector extracting face bounding boxes across micro-faces ($\ge 20	ext{px}$) and high-res portraits.
+2. Implement MediaPipe Face Landmarker extracting 468 3D landmark coordinates.
+3. Implement face quality scoring evaluating Laplacian blur variance, illumination symmetry, and head pose angles.
+4. Enforce strict biometric privacy gating: automated 1:N searching prohibited; 1:1 feature extraction enabled ONLY when authorized `case_token` is present.
+5. Implement ArcFace (IResNet-100) / MagFace 512-dimensional embedding extraction and cosine similarity comparison with suspect reference mugshot.
+
+**5. Execution Workflow:**  
+Detect faces -> Gate by quality -> Extract 468 landmarks -> Check case authorization token -> (If authorized) Extract 512-d embedding -> Compute cosine distance -> Store encrypted blob.
+
+**6. Tools & Technologies:**  
+RetinaFace, `mediapipe`, `insightface` (ArcFace), OpenCV solvePnP, AES-256-GCM.
+
+**7. Prerequisites & Dependencies:**  
+AIF-A2 safe intake operational; biometric privacy access control layer configured.
+
+**8. Expected Artifacts:**  
+`src/ps05/engines/image/fpa/detector.py`, `src/ps05/engines/image/fpa/landmarks.py`, `src/ps05/engines/image/fpa/matcher.py`, `tests/unit/test_fpa_biometrics.py`.
+
+**9. Validation Plan:**  
+Evaluate face detection recall on WIDER FACE (Hard split $\ge 88\%$); verify 1:1 ArcFace cosine similarity on LFW dataset (Accuracy $\ge 99.2\%$).
+
+**10. Failure Cases & Risks:**  
+Unconstitutional biometric mass surveillance; mitigated by cryptographic case authorization token requirement.
+
+**11. Security Considerations:**  
+Raw biometric embeddings encrypted with AES-256-GCM; never exported in unencrypted reports.
+
+**12. Acceptance Criteria:**  
+Faces detected, landmarks extracted, quality gated, and 1:1 comparison executed strictly under valid case token.
+
+**13. Definition of Done:**  
+FPA module fully integrated; biometric privacy tests passing; checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF5-CP-01** | RetinaFace Multi-Scale Face Detection | High recall on micro-faces and portraits (WIDER FACE Hard >= 88%) | `NOT_STARTED` | Bboxes normalized to [0, 1] |
+| **AIF5-CP-02** | MediaPipe 468-Point 3D Facial Mesh | Complete facial topology extracted with yaw/pitch/roll pose angles | `NOT_STARTED` | Pose angles within +/- 2 deg error |
+| **AIF5-CP-03** | Face Quality Gating & Degradation Tagging | Severely blurred or occluded faces flagged as unsuitable for biometrics | `NOT_STARTED` | Blur threshold < 0.85 enforced |
+| **AIF5-CP-04** | Authorized 1:1 ArcFace Comparison Gate | Biometric comparison blocked without valid judicial CaseAuthorizationToken | `NOT_STARTED` | Zero unauthorized feature storage |
+
+---
+
+### Phase AIF-A6: Document Layout Analysis, Quadrilateral Rectification & OCR Engine (IVE-08)
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Provide specialized forensics for questioned documents, official seals, and signatures, including convex hull quadrilateral rectification and multilingual OCR across Indian scripts.
+
+**2. Topics & Subtopics:**  
+Canny edge detection, convex hull polygon approximation, $3	imes 3$ perspective transformation matrix, PaddleOCR Indian script models (Hindi, Bhojpuri, Maithili, Bengali, English), seal and stamp region detection.
+
+**3. Modules Covered:**  
+`ps05.engines.image.ive.ocr_engine`, `ps05.engines.image.common.transforms`.
+
+**4. Exact Tasks:**  
+1. Implement document boundary localization using Canny edge filtering and convex hull 4-corner polygon approximation.
+2. Compute perspective homography matrix $H_{	ext{persp}} \in \mathbb{R}^{3	imes 3}$ and warp document to normalized rectangular plane.
+3. Integrate PaddleOCR text recognition supporting Devanagari (Hindi, Maithili, Bhojpuri), Bengali, and English scripts.
+4. Implement official seal, rubber stamp, and handwritten signature region localization.
+5. Register rectified document as child artifact in Derived Artifact DAG with complete affine transform parameters.
+
+**5. Execution Workflow:**  
+Detect document corners -> Compute perspective warp -> Rectify image -> Execute PaddleOCR -> Localize seals/signatures -> Store extracted text and coordinates.
+
+**6. Tools & Technologies:**  
+OpenCV (`findContours`, `getPerspectiveTransform`), PaddleOCR 2.7.3, Tesseract 5.
+
+**7. Prerequisites & Dependencies:**  
+AIF-A2 safe intake operational; PaddleOCR language models downloaded.
+
+**8. Expected Artifacts:**  
+`src/ps05/engines/image/ive/ocr_engine.py`, `tests/benchmarks/test_ive_ocr.py`.
+
+**9. Validation Plan:**  
+Evaluate OCR accuracy on scanned legal contracts and FIRs; assert Character Error Rate (CER) $\le 4.5\%$ on clean scans.
+
+**10. Failure Cases & Risks:**  
+Perspective rectification distortion on non-planar (folded/curved) documents; report distortion warning when non-linear.
+
+**11. Security Considerations:**  
+Sanitize OCR recognized text strings to prevent SQL/XSS injection during report compilation.
+
+**12. Acceptance Criteria:**  
+Document rectified to flat plane; Indian script text extracted; seals and signatures localized.
+
+**13. Definition of Done:**  
+Document rectification and multilingual OCR operational; benchmarks verified; checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF6-CP-01** | Document Quadrilateral Corner Detection | 4 corners of document boundary accurately localized via convex hull | `NOT_STARTED` | Corner error < 3 pixels |
+| **AIF6-CP-02** | Planar Perspective Rectification Warp | Homography matrix transforms skewed document to rectangular plane | `NOT_STARTED` | DAG records transform matrix H |
+| **AIF6-CP-03** | Multilingual Indian Script PaddleOCR | Recognizes Hindi, English, and regional Indian scripts with CER <= 4.5% | `NOT_STARTED` | Outputs text + bbox confidence |
+| **AIF6-CP-04** | Official Seal & Signature Localization | Detects circular/oval rubber stamps and handwritten signature zones | `NOT_STARTED` | Tagged with bounding coordinates |
+
+---
+
+### Phase AIF-A7: Metadata Deep Extraction & Signal Reverse Engineering (IRE-01 & IRE-02)
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Perform deep container, EXIF, XMP, IPTC, and ICC metadata inspection, combined with 2D Fast Fourier Transform (FFT) and Discrete Cosine Transform (DCT) signal analysis to detect processing traces.
+
+**2. Topics & Subtopics:**  
+ExifTool parser wrapper, DQT Quantization Tables, 2D FFT magnitude spectrum, periodic resampling peaks, DCT block coefficient variance, timestamp discrepancy checks.
+
+**3. Modules Covered:**  
+`ps05.engines.image.ire.exif_deep`, `ps05.engines.image.ire.signal_2d`.
+
+**4. Exact Tasks:**  
+1. Implement sandboxed ExifTool wrapper extracting full tag dictionary across EXIF, MakerNotes, IPTC, and XMP blocks.
+2. Extract JPEG Quantization Tables (Luminance and Chrominance) and compare against catalog of 20,000 camera and editor profiles.
+3. Implement 2D Fast Fourier Transform on grayscale luminance; compute centered log-magnitude spectrum to detect periodic resampling spikes.
+4. Analyze $8	imes 8$ block DCT coefficient histograms for truncation and double-quantization periodicity.
+5. Execute internal timestamp cross-validation: `DateTimeOriginal` vs `DateTimeDigitized` vs `FileModifyDate`.
+
+**5. Execution Workflow:**  
+Run ExifTool -> Parse DQT markers -> Compute 2D FFT spectrum -> Analyze DCT histograms -> Check timestamp consistency -> Store findings.
+
+**6. Tools & Technologies:**  
+ExifTool 12.84, NumPy, SciPy (2D FFT), Pillow.
+
+**7. Prerequisites & Dependencies:**  
+AIF-A2 safe intake operational; ExifTool binary vendored.
+
+**8. Expected Artifacts:**  
+`src/ps05/engines/image/ire/exif_deep.py`, `src/ps05/engines/image/ire/signal_2d.py`, `tests/unit/test_ire_metadata.py`.
+
+**9. Validation Plan:**  
+Verify extraction against 100 reference images from 20 camera models; assert 100% EXIF tag parity with official ExifTool CLI.
+
+**10. Failure Cases & Risks:**  
+Over-interpreting editing software tags as proof of malicious manipulation; mitigated by strict evidentiary disclaimer.
+
+**11. Security Considerations:**  
+Sanitize all ExifTool command-line arguments to prevent shell command injection (`-` flag escaping).
+
+**12. Acceptance Criteria:**  
+EXIF/XMP tags parsed; DQT tables cataloged; 2D FFT spectrum generated; timestamp anomalies flagged.
+
+**13. Definition of Done:**  
+Metadata and signal analysis modules operational; unit tests passing; checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF7-CP-01** | ExifTool Deep Tag Extraction | Recursively extracts EXIF, MakerNotes, XMP, and IPTC blocks safely | `NOT_STARTED` | Zero shell injection risk |
+| **AIF7-CP-02** | JPEG Quantization Table Profiling | Extracts DQT luminance/chrominance tables and matches camera profile | `NOT_STARTED` | Identifies non-standard matrices |
+| **AIF7-CP-03** | 2D FFT Frequency Magnitude Spectrum | Computes log-magnitude FFT spectrum and flags periodic resampling peaks | `NOT_STARTED` | Detects affine interpolation grids |
+| **AIF7-CP-04** | Timestamp Discrepancy Cross-Validation | Flags timeline contradictions between Original, Digitized, and Modify dates | `NOT_STARTED` | Deterministic consistency verdict |
+
+---
+
+### Phase AIF-A8: Classical Computer Vision & Geometric Forensics (IRE-03)
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Deploy classical computer vision algorithms for edge detection, structural contour analysis, Hough line/circle alignment, and SIFT/ORB keypoint matching with RANSAC homography estimation.
+
+**2. Topics & Subtopics:**  
+Canny edge detection with Otsu thresholding, Sobel/Scharr gradients, Laplacian focus measures, Hough transforms, SIFT/ORB feature matching, RANSAC homography estimation, residual difference maps.
+
+**3. Modules Covered:**  
+`ps05.engines.image.ire.geom_cv`.
+
+**4. Exact Tasks:**  
+1. Implement Canny edge detection with automated Otsu dual-thresholding and Sobel/Scharr gradient directionality.
+2. Implement Hough Line and Circle transforms for architectural structure, ballistic trajectory, and tire-track alignment.
+3. Implement SIFT and ORB multi-scale feature detection with $k$-NN descriptor matching ($d_1 / d_2 < 0.70$).
+4. Implement RANSAC homography estimation to align questioned exhibits with authorized physical reference photographs.
+5. Compute pixel-level absolute residual maps $\Delta = |I_Q - \mathcal{W}(I_R, H)|$ and local SSIM correlation.
+
+**5. Execution Workflow:**  
+Extract edges/gradients -> Detect SIFT/ORB features -> Estimate RANSAC homography -> Warp reference -> Compute residual map -> Store alignment artifact.
+
+**6. Tools & Technologies:**  
+OpenCV (headless) 4.9.0, NumPy, SciPy.
+
+**7. Prerequisites & Dependencies:**  
+AIF-A7 signal analysis operational.
+
+**8. Expected Artifacts:**  
+`src/ps05/engines/image/ire/geom_cv.py`, `tests/unit/test_ire_geom_cv.py`.
+
+**9. Validation Plan:**  
+Evaluate RANSAC homography on synthetic rotated/scaled image pairs; assert reprojection RMSE $\le 1.2	ext{px}$.
+
+**10. Failure Cases & Risks:**  
+Treating Canny edges or SIFT matches as proof of tampering; mitigated by framing outputs strictly as geometric properties.
+
+**11. Security Considerations:**  
+Enforce bounded RANSAC iterations ($\le 5000$) to prevent thread hanging on degenerate point clouds.
+
+**12. Acceptance Criteria:**  
+Edges localized; homography estimated; reference aligned; residual difference map generated.
+
+**13. Definition of Done:**  
+Classical CV module operational; geometric alignment verified; checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF8-CP-01** | Canny Edge & Gradient Directionality | Extracts sub-pixel edges and Sobel gradients with adaptive thresholding | `NOT_STARTED` | Noise filtered via Gaussian kernel |
+| **AIF8-CP-02** | Hough Line & Circle Alignment | Detects rectilinear architectural boundaries and circular impact marks | `NOT_STARTED` | Stores vector line equations |
+| **AIF8-CP-03** | SIFT / ORB Keypoint RANSAC Homography | Estimates 3x3 homography matrix aligning questioned and reference photos | `NOT_STARTED` | Reprojection RMSE <= 1.2 pixels |
+| **AIF8-CP-04** | Residual Difference & SSIM Map | Computes absolute pixel residual map highlighting localized discrepancies | `NOT_STARTED` | Stored as normalized heatmap artifact |
+
+---
+
+### Phase AIF-A9: Copy-Move Forgery Localization & Camera Sensor Forensics (IRE-04 & IRE-05)
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Localize duplicated copy-move image regions via keypoint and block-based matching, and implement Photo-Response Non-Uniformity (PRNU) sensor noise extraction to associate images with camera sensors.
+
+**2. Topics & Subtopics:**  
+SIFT keypoint DBSCAN clustering, DCT block matching, affine transformation consistency, Mihcak wavelet denoising, PRNU sensor noise fingerprinting, normalized cross-correlation (NCC).
+
+**3. Modules Covered:**  
+`ps05.engines.image.ire.cmfd`, `ps05.engines.image.ire.prnu_sensor`.
+
+**4. Exact Tasks:**  
+1. Implement dual-branch Copy-Move Forgery Detection (CMFD): keypoint-based SIFT matching with DBSCAN spatial clustering and block-based DCT matching.
+2. Generate source and destination polygon bounding boxes enclosing cloned and pasted image regions.
+3. Implement Mihcak wavelet denoising filter to extract sensor noise residual $W = I - F(I)$.
+4. Implement Normalized Cross-Correlation (NCC) against camera reference fingerprint $K_{	ext{ref}}$ from 25 flat-field images.
+5. Explicitly document PRNU degradation under social media compression (WhatsApp, Facebook) and state verification limitations.
+
+**5. Execution Workflow:**  
+Extract SIFT keypoints -> Match $k$-NN -> Cluster DBSCAN -> Verify affine consistency -> Extract wavelet noise -> Correlate PRNU -> Store polygon masks.
+
+**6. Tools & Technologies:**  
+OpenCV, `PyWavelets` 1.6.0, scikit-learn (DBSCAN), FAISS.
+
+**7. Prerequisites & Dependencies:**  
+AIF-A8 classical vision operational; reference flat photos available for PRNU.
+
+**8. Expected Artifacts:**  
+`src/ps05/engines/image/ire/cmfd.py`, `src/ps05/engines/image/ire/prnu_sensor.py`, `tests/benchmarks/test_ire_cmfd.py`.
+
+**9. Validation Plan:**  
+Evaluate CMFD on CoMoFoD benchmark; assert detection recall $\ge 90\%$; test PRNU correlation on native camera stills ($ho > 0.15$).
+
+**10. Failure Cases & Risks:**  
+PRNU false matches on images with shared ISP scene processing; mitigated by high significance threshold ($p < 0.001$).
+
+**11. Security Considerations:**  
+Enforce spatial distance thresholds ($r > 30	ext{px}$) to eliminate self-matching keypoint trivial loops.
+
+**12. Acceptance Criteria:**  
+Cloned polygons localized; PRNU correlation calculated with legal limitations noted.
+
+**13. Definition of Done:**  
+CMFD and PRNU modules operational; benchmark evaluations recorded; checkpoints completed.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF9-CP-01** | Keypoint-Based SIFT DBSCAN CMFD | Localizes cloned patches with spatial separation r > 30px (Recall >= 90%) | `NOT_STARTED` | Evaluated on CoMoFoD dataset |
+| **AIF9-CP-02** | Block-Based DCT Texture CMFD | Detects smooth duplicated regions lacking high-contrast keypoints | `NOT_STARTED` | Blocks sorted via lexicographic index |
+| **AIF9-CP-03** | Wavelet Noise Residual Extraction | Mihcak filter separates high-frequency PRNU sensor noise from scene | `NOT_STARTED` | Stores noise artifact in DAG |
+| **AIF9-CP-04** | PRNU Sensor Fingerprint Correlation | Computes NCC correlation rho against suspect camera reference flats | `NOT_STARTED` | States degradation on compressed media |
+
+---
+
+### Phase AIF-A10: AI-Generated Image Detection & Generative Inpainting Localization (AIM-01 & AIM-02)
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Deploy an independent, multi-branch architecture to detect fully synthetic AI-generated images, and implement dense pixel-level inpainting localization using TruFor and CAT-Net.
+
+**2. Topics & Subtopics:**  
+Multi-branch classifier (ResNet50 spatial head, 2D FFT Fourier head, SigLIP foundation head), Platt scaling calibration, detector disagreement warning, TruFor RGB+noise inpainting localization, CAT-Net DCT stream.
+
+**3. Modules Covered:**  
+`ps05.engines.image.aim.ai_detect`, `ps05.engines.image.aim.inpaint_loc`.
+
+**4. Exact Tasks:**  
+1. Implement multi-branch AI image classifier combining spatial convolutional features, 2D FFT spectral falloff, and SigLIP embeddings.
+2. Calibrate model logits using Platt scaling fitted on diverse generative engines (Stable Diffusion, Midjourney, DALL-E 3, Flux, StyleGAN).
+3. Implement detector disagreement metric: flag `DETECTOR_DISAGREEMENT_WARNING` if branch predictions diverge by $> 0.50$.
+4. Integrate TruFor (Transformer-based RGB and noise residual fusion architecture) for dense inpainting anomaly localization.
+5. Generate pixel-level floating-point anomaly heatmaps $M(x, y) \in [0, 1]$ and vector polygon contours enclosing edited regions.
+
+**5. Execution Workflow:**  
+Input exhibit -> Parallel inference (Spatial + Fourier + SigLIP) -> Calibrate $P(	ext{AI})$ -> Execute TruFor localization -> Binarize mask -> Store heatmap & polygons.
+
+**6. Tools & Technologies:**  
+PyTorch 2.3, TruFor (`grip-unina/TruFor`), Hugging Face `transformers`, NumPy.
+
+**7. Prerequisites & Dependencies:**  
+AIF-A2 safe intake operational; GPU inference nodes allocated.
+
+**8. Expected Artifacts:**  
+`src/ps05/engines/image/aim/ai_detect.py`, `src/ps05/engines/image/aim/inpaint_loc.py`, `tests/benchmarks/test_aim_trufor.py`.
+
+**9. Validation Plan:**  
+Evaluate AI detector across 10,000 real and synthetic images; assert ROC-AUC $\ge 0.94$; evaluate TruFor pixel-level IoU $\ge 0.72$ on inpainting splits.
+
+**10. Failure Cases & Risks:**  
+Domain shift on newly released diffusion/flow-matching generators; mitigated by Mahalanobis OOD uncertainty flag.
+
+**11. Security Considerations:**  
+Enforce model checkpoint SHA-256 verification before loading weights into GPU memory.
+
+**12. Acceptance Criteria:**  
+Calibrated $P(	ext{AI})$ score produced; inpainting heatmaps generated; disagreement warnings logged.
+
+**13. Definition of Done:**  
+AI detection and inpainting localization operational; benchmark metrics verified; checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF10-CP-01** | Multi-Branch Synthetic AI-Image Classifier | Combines spatial, spectral, and foundation heads with ROC-AUC >= 0.94 | `NOT_STARTED` | Tested on 5 generative engines |
+| **AIF10-CP-02** | Fourier Spectral Logit Head | Detects high-frequency circular falloff anomalies in 2D FFT domain | `NOT_STARTED` | Independent of image content |
+| **AIF10-CP-03** | TruFor Generative Inpainting Localization | Dense pixel anomaly heatmap localizes generative fill with IoU >= 0.72 | `NOT_STARTED` | Outputs full-res floating point map |
+| **AIF10-CP-04** | Detector Disagreement & OOD Uncertainty | Flags DETECTOR_DISAGREEMENT_WARNING when branch logits diverge > 0.50 | `NOT_STARTED` | Prevents false certainty on unseen models |
+
+---
+
+### Phase AIF-A11: Face Manipulation, Face Swap & Portrait Forensics (AIM-03)
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Deploy specialized face tampering forensics to detect face swaps (DeepFakes, SimSwap, Roop), face morphs, and generative portrait modifications, separating manipulation from biometric recognition.
+
+**2. Topics & Subtopics:**  
+Face X-Ray boundary inconsistency, facial landmark geometric asymmetry, corneal specularity reflection consistency, deepfake face swap classifier, beauty filter discrimination.
+
+**3. Modules Covered:**  
+`ps05.engines.image.aim.face_tamper`.
+
+**4. Exact Tasks:**  
+1. Implement Face X-Ray blend boundary detection network to expose blending edges between inserted face patch and original head/neck.
+2. Implement facial landmark geometric asymmetry analysis to detect unnatural morphing distortions.
+3. Implement corneal specularity reflection consistency checker: verify lighting direction across left and right pupils.
+4. Build beauty filter and retouching discriminator to prevent ordinary mobile skin-smoothing from triggering deepfake false positives.
+5. Package findings into structured `FaceManipulationResult` with localization heatmaps.
+
+**5. Execution Workflow:**  
+Receive FPA face crops -> Extract Face X-Ray boundary -> Analyze landmark asymmetry -> Check corneal specularity -> Score retouching -> Output face swap probability.
+
+**6. Tools & Technologies:**  
+PyTorch 2.3, OpenCV (pupil corneal segmentation), MediaPipe Face Mesh.
+
+**7. Prerequisites & Dependencies:**  
+AIF-A5 FPA face landmark module completed.
+
+**8. Expected Artifacts:**  
+`src/ps05/engines/image/aim/face_tamper.py`, `tests/benchmarks/test_aim_face_tamper.py`.
+
+**9. Validation Plan:**  
+Evaluate on FaceForensics++ (FaceSwap and DeepFakes c23 splits); assert AUC-ROC $\ge 0.92$; verify beauty filter false positive rate $\le 3\%$.
+
+**10. Failure Cases & Risks:**  
+Low-light camera sensor noise mimicking blend boundary artifacts; mitigated by quality gating.
+
+**11. Security Considerations:**  
+Enforce biometric privacy invariants: zero biometric vector comparison inside manipulation detector.
+
+**12. Acceptance Criteria:**  
+Face swaps detected; blend boundaries localized; beauty filters correctly discriminated.
+
+**13. Definition of Done:**  
+Face tampering module operational; benchmark evaluations passing; checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF11-CP-01** | Face X-Ray Blend Boundary Localization | Exposes blending edges between donor face patch and recipient neck | `NOT_STARTED` | AUC-ROC >= 0.92 on FF++ splits |
+| **AIF11-CP-02** | Corneal Specularity Reflection Consistency | Detects lighting discrepancies between left and right corneal highlights | `NOT_STARTED` | Verifies vector light source angle |
+| **AIF11-CP-03** | Landmark Geometric Asymmetry Scoring | Flags unnatural warping distortions characteristic of face morphing | `NOT_STARTED` | Quantifies bilateral mesh variance |
+| **AIF11-CP-04** | Portrait Retouching & Filter Discrimination | Mobile skin-smoothing filters do not trigger deepfake false alerts | `NOT_STARTED` | False positive rate <= 3% on selfies |
+
+---
+
+### Phase AIF-A12: Steganalysis, Concealed Data & File Security Defense (AIM-04 & AIM-05)
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Implement statistical and structural steganalysis to detect hidden payloads, trailing data, and malformed container structures, enforcing zero-payload execution.
+
+**2. Topics & Subtopics:**  
+Least Significant Bit (LSB) plane randomness, Sample Pair Analysis (SPA), Chi-square ($\chi^2$) statistical tests, Regular-Singular (RS) steganalysis, trailing byte detection, polyglot binary quarantine.
+
+**3. Modules Covered:**  
+`ps05.engines.image.aim.steganalysis`, `ps05.engines.image.aim.file_defense`.
+
+**4. Exact Tasks:**  
+1. Implement LSB plane visual extraction and bit-distribution entropy calculation.
+2. Implement Sample Pair Analysis (SPA) and Chi-square ($\chi^2$) statistical tests to estimate spatial embedding rates.
+3. Implement Regular-Singular (RS) steganalysis calculating flipping group proportions across $2	imes 2$ pixel blocks.
+4. Implement container structural inspection detecting unexpected trailing bytes past standard End-Of-Image markers (JPEG `FF D9`, PNG `IEND`).
+5. Enforce zero-execution policy: quarantined trailing bytes and steganographic payloads are never executed.
+
+**5. Execution Workflow:**  
+Scan bitstream -> Check trailing bytes -> Extract LSB planes -> Compute RS & Chi-square -> Flag stego anomalies -> Quarantine non-image payloads.
+
+**6. Tools & Technologies:**  
+Python standard library, NumPy, SciPy (stats), Pillow.
+
+**7. Prerequisites & Dependencies:**  
+AIF-A2 safe intake operational.
+
+**8. Expected Artifacts:**  
+`src/ps05/engines/image/aim/steganalysis.py`, `src/ps05/engines/image/aim/file_defense.py`, `tests/unit/test_aim_steganography.py`.
+
+**9. Validation Plan:**  
+Evaluate on BOSSbase test set with known Steghide and LSB injected payloads; assert detection rate $\ge 85\%$ for embedding rates $> 0.1	ext{ bpp}$.
+
+**10. Failure Cases & Risks:**  
+Statistical anomalies in high-noise raw photos misinterpreted as steganography; label findings as statistical indicators.
+
+**11. Security Considerations:**  
+Quarantined payloads written to isolated vault partition with zero execution permissions (`0600`).
+
+**12. Acceptance Criteria:**  
+LSB and RS steganalysis functional; trailing bytes quarantined; zero execution verified.
+
+**13. Definition of Done:**  
+Steganalysis and defensive modules operational; unit tests passing; checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF12-CP-01** | LSB Bit-Plane Randomness & Entropy | Extracts LSB planes and flags statistically anomalous entropy | `NOT_STARTED` | Detects sequential LSB injection |
+| **AIF12-CP-02** | RS & Chi-Square Steganalysis Engine | Computes regular/singular groups and estimates embedding rate | `NOT_STARTED` | Detection rate >= 85% at > 0.1 bpp |
+| **AIF12-CP-03** | Trailing Byte Detection & Quarantine | Flags and isolates appended payloads past JPEG FF D9 / PNG IEND | `NOT_STARTED` | Quarantined to read-only vault |
+| **AIF12-CP-04** | Zero-Payload Execution Security Invariant | Quarantined payloads are never executed as system processes | `NOT_STARTED` | Verified by process monitor test |
+
+---
+
+### Phase AIF-A13: Cryptographic Provenance, Custody Hardening & Merkle Integrity (CEIPL Hardening)
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Harden CEIPL with RFC 8032 Ed25519 digital signatures, RFC 3161 Trusted Timestamp Authority (TSA) integration, RFC 6962 binary Merkle trees with inclusion proofs, and C2PA Content Credentials parsing.
+
+**2. Topics & Subtopics:**  
+Ed25519 digital signatures, RFC 3161 TSA tokens, X.509 PKI certificate chain validation, append-only custody logs, RFC 6962 Merkle tree batch checkpoints, C2PA Content Credentials JUMBF parser.
+
+**3. Modules Covered:**  
+`ps05.core.crypto.ed25519_signer`, `ps05.core.crypto.tsa_client`, `ps05.core.crypto.merkle_tree`, `ps05.core.crypto.c2pa_adapter`.
+
+**4. Exact Tasks:**  
+1. Implement Ed25519 digital signature signing and verification for all canonical manifests and reports.
+2. Integrate RFC 3161 Trusted Timestamp Authority (TSA) client, validating ASN.1 timestamp tokens and X.509 certificate chains.
+3. Implement RFC 6962 binary Merkle trees aggregating batch exhibits and generating compact $O(\log N)$ inclusion proofs.
+4. Integrate C2PA Content Credentials parser extracting JUMBF claim boxes and verifying claim signatures and content bindings.
+5. Build cryptographic failure test suite verifying explicit typed error returns (`HASH_MISMATCH`, `SIGNATURE_INVALID`, `CUSTODY_CHAIN_BROKEN`).
+
+**5. Execution Workflow:**  
+Build canonical manifest -> Sign with Ed25519 -> Request RFC 3161 TSA token -> Commit to Merkle tree -> Parse C2PA credentials -> Verify proof.
+
+**6. Tools & Technologies:**  
+`cryptography` 42.0.7, `rfc3161ng`, `c2pa-python`, PostgreSQL 15.
+
+**7. Prerequisites & Dependencies:**  
+AIF-A1 shared cryptographic core completed; PKI certificates configured.
+
+**8. Expected Artifacts:**  
+`src/ps05/core/crypto/ed25519_signer.py`, `src/ps05/core/crypto/tsa_client.py`, `src/ps05/core/crypto/merkle_tree.py`, `src/ps05/core/crypto/c2pa_adapter.py`, `tests/integration/test_ceipl_cryptography.py`.
+
+**9. Validation Plan:**  
+Execute 500 signature and Merkle verification cycles; assert 100% mathematical validity; assert tamper detection on single bit flip.
+
+**10. Failure Cases & Risks:**  
+External TSA network timeout; handle gracefully by recording `TSA_UNREACHABLE` without invalidating local Ed25519 signature.
+
+**11. Security Considerations:**  
+Private signing keys protected in HSM / KMS; never logged or exposed in client bundles.
+
+**12. Acceptance Criteria:**  
+Ed25519 signatures verified; TSA tokens validated; Merkle inclusion proofs generate and verify; C2PA claims parsed.
+
+**13. Definition of Done:**  
+Complete cryptographic hardening suite operational; integration tests passing; checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF13-CP-01** | Ed25519 Manifest Signing & Verification | Digital signatures verified mathematically against judicial public keys | `NOT_STARTED` | RFC 8032 compliant implementation |
+| **AIF13-CP-02** | RFC 3161 TSA Timestamp Token Client | Obtains and verifies ASN.1 timestamp tokens from trusted TSA authority | `NOT_STARTED` | Validates X.509 certificate chain |
+| **AIF13-CP-03** | RFC 6962 Merkle Tree Inclusion Proofs | Generates compact O(log N) proofs verifying exhibit presence in batch | `NOT_STARTED` | Proof verifies against committed root |
+| **AIF13-CP-04** | C2PA Content Credentials Claim Validator | Parses JUMBF metadata boxes and validates claim signature & content binding | `NOT_STARTED` | Flags broken bindings and untrusted roots |
+
+---
+
+### Phase AIF-A14: Cross-Engine Evidence Fusion, Legal Reporting & Investigator Review
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Implement the cross-engine finding aggregator, Archify JSON IR visual compiler, and Section 65B IEA / Section 63 BSA court-admissible PDF certificate generator with digital signature sealing.
+
+**2. Topics & Subtopics:**  
+Cross-engine finding fusion (IVE + IRE + AIM + FPA + CEIPL), uncertainty calibration, detector conflict resolution, Archify JSON IR schema, Section 65B/63 BSA PDF compilation via WeasyPrint.
+
+**3. Modules Covered:**  
+`ps05.reporting.compiler`, `ps05.reporting.cert_65b`, `ps05.reporting.archify_adapter`.
+
+**4. Exact Tasks:**  
+1. Implement finding aggregation engine correlating visual taxonomy, metadata anomalies, CMFD cloned patches, and inpainting heatmaps.
+2. Implement conflict resolution matrix: handle cases where metadata suggests camera capture but AIM detects generative inpainting.
+3. Implement Archify JSON IR compiler formatting image provenance flow, localization heatmaps, and finding graphs into `archify.report.json`.
+4. Implement court-admissible PDF generator compiling Section 65B IEA / Section 63 BSA electronic evidence certificates with device custody declarations.
+5. Apply cryptographic sealing: embed Ed25519 signature, SHA-256 exhibit checksums, and RFC 3161 timestamp token into the exported PDF.
+
+**5. Execution Workflow:**  
+Aggregate findings -> Correlate anomalies -> Compile Archify JSON IR -> Render HTML template -> Generate WeasyPrint PDF -> Seal digital signature.
+
+**6. Tools & Technologies:**  
+Jinja2, WeasyPrint 61.2, Archify JSON IR, `ps05.core.crypto`.
+
+**7. Prerequisites & Dependencies:**  
+AIF-A3 through AIF-A13 engine milestones completed.
+
+**8. Expected Artifacts:**  
+`src/ps05/reporting/compiler.py`, `src/ps05/reporting/cert_65b.py`, `src/ps05/reporting/archify_adapter.py`, `tests/integration/test_image_reporting.py`.
+
+**9. Validation Plan:**  
+Generate 20 court certificates; assert presence of all mandatory Section 65B / 63 BSA custody clauses, valid SHA-256 hashes, and valid Ed25519 signatures.
+
+**10. Failure Cases & Risks:**  
+Overstating statistical detection as judicial proof; mitigated by standardized legal disclaimer templates.
+
+**11. Security Considerations:**  
+Enforce strict PDF generation sandboxing; block SSRF by disabling external network resource fetching in WeasyPrint.
+
+**12. Acceptance Criteria:**  
+Findings aggregated; Archify IR generated; certified PDF produced with digital signature seal.
+
+**13. Definition of Done:**  
+Reporting pipeline operational; sample certificates reviewed and verified; checkpoints recorded.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF14-CP-01** | Cross-Engine Finding Aggregation Matrix | Correlates IVE, IRE, and AIM findings into unified evidence summary | `NOT_STARTED` | Handles detector disagreement |
+| **AIF14-CP-02** | Archify JSON IR Image Dossier Compiler | Compiles visual provenance and anomaly heatmaps into Archify schema | `NOT_STARTED` | Deterministic JSON output |
+| **AIF14-CP-03** | Section 65B / 63 BSA Certified PDF Export | Generates court-admissible certificate with mandatory custody clauses | `NOT_STARTED` | Compliant with Indian Evidence Act |
+| **AIF14-CP-04** | Cryptographic PDF Sealing & Verification | Embeds Ed25519 signature and SHA-256 exhibit hashes into final PDF | `NOT_STARTED` | Verified by standalone verifier tool |
+
+---
+
+### Phase AIF-A15: End-to-End Image Forensics Validation, Benchmark Suite & Release Readiness
+
+**Status:** `PLANNED`
+
+**1. Purpose:**  
+Execute comprehensive end-to-end platform validation across curated forensic image benchmarks, verify 5-run deterministic reproducibility, enforce air-gap network isolation, and conduct open-source license audits.
+
+**2. Topics & Subtopics:**  
+Curated image forensic corpus, CoMoFoD, TruFor benchmarks, 5-run deterministic reproducibility, air-gap network isolation test, license compliance audit, documentation parity check.
+
+**3. Modules Covered:**  
+All AIF engines, tests/benchmarks, documentation.
+
+**4. Exact Tasks:**  
+1. Assemble curated evaluation corpus: authentic camera photos, smartphone captures, CoMoFoD copy-move images, TruFor inpainting splits, AI-generated images, and C2PA signed exhibits.
+2. Execute 5-run reproducibility audit: re-run full pipeline on identical exhibits 5 times; assert bit-for-bit identical JSON manifests and scores.
+3. Verify air-gap network isolation: execute complete test suite on network-isolated runner; assert zero outbound HTTP requests.
+4. Conduct open-source dependency license audit: verify all libraries (Pillow, OpenCV, PyTorch, SAM 2, PaddleOCR, WeasyPrint) comply with permissive/hackathon licenses.
+5. Verify documentation parity across README.md, PRD.md, TRD.md, PHASES.md, and AI_INSTRUCTIONS.md.
+
+**5. Execution Workflow:**  
+Run test corpus -> Verify 5-run determinism -> Disable network adapters -> Audit licenses -> Validate documentation -> Issue release tag.
+
+**6. Tools & Technologies:**  
+`pytest`, `pip-licenses`, packet monitor, Python 3.12.
+
+**7. Prerequisites & Dependencies:**  
+AIF-A0 through AIF-A14 completed and verified.
+
+**8. Expected Artifacts:**  
+`tests/benchmarks/test_image_benchmarks.py`, `scripts/run_image_demo.py`, `RELEASE_NOTES_AIF.md`.
+
+**9. Validation Plan:**  
+Execute full test suite; assert 100% green pass rate (exit code 0); assert zero non-deterministic score variance; assert zero network packets emitted.
+
+**10. Failure Cases & Risks:**  
+Floating-point non-determinism across GPU architectures; mitigated by deterministic PyTorch CUDA flags (`torch.use_deterministic_algorithms(True)`).
+
+**11. Security Considerations:**  
+Enforce complete air-gapped execution capability for classified forensic deployments.
+
+**12. Acceptance Criteria:**  
+100% test pass; deterministic reproducibility verified; air-gap validated; documentation consistent.
+
+**13. Definition of Done:**  
+All 16 AIF phases validated; benchmark report compiled; all 64 checkpoints initialized and accounted for.
+
+**14. Explicit Status:** `PLANNED`
+
+**15. Phase Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF15-CP-01** | Full Image Forensics Test Suite Pass | pytest tests/ executes covering all AIF engines with 100% pass rate | `NOT_STARTED` | Exit code 0 across all suites |
+| **AIF15-CP-02** | 5-Run Deterministic Reproducibility Audit | Identical exhibits produce bit-for-bit identical JSON scores across 5 runs | `NOT_STARTED` | Zero floating-point variance |
+| **AIF15-CP-03** | Air-Gap Network Isolation Verification | Suite executes completely offline with zero outbound network calls | `NOT_STARTED` | Verified via packet monitor |
+| **AIF15-CP-04** | Open-Source License & Documentation Audit | All dependencies licensed permissively; 5 target docs 100% aligned | `NOT_STARTED` | Zero license or naming conflicts |
+
+---
+
+## 6. Unified Platform Delivery & Security Milestones
+
+The platform delivery, dashboard, and hackathon packaging milestones synthesize findings across all forensic domains (AURAS Audio, VISTA Video, and AIF Image):
 
 ### Phase 7: Unified Platform Cross-Engine Reporting
 - **Status:** `PLANNED`
@@ -1371,7 +2363,7 @@ The platform's image forensics subsystem and delivery milestones operate in para
 
 ### Phase 8: Web Dashboard & Forensic Examiner Workbench
 - **Status:** `PLANNED`
-- **Scope:** Next.js / React interactive web frontend; multi-modal evidence viewer with synchronized audio waveform, spectrogram, video frame player, and ELA error-slider.
+- **Scope:** Next.js / React interactive web frontend; multi-modal evidence viewer with synchronized audio waveform, spectrogram, video frame player, and image ELA/TruFor error-sliders.
 
 ### Phase 9: Security Hardening & Air-Gapped Deployment
 - **Status:** `PLANNED`
@@ -1381,9 +2373,9 @@ The platform's image forensics subsystem and delivery milestones operate in para
 - **Status:** `PLANNED`
 - **Scope:** End-to-end platform validation, automated demonstration script (`scripts/run_demo.py`), curated evidence showcase, and technical presentation defense.
 
----
 
-## 6. Development Roadmap Timeline (Gantt Chart)
+---
+## 7. Development Roadmap Timeline (Gantt Chart)
 
 ```mermaid
 gantt

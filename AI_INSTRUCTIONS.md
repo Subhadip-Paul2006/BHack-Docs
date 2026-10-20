@@ -46,12 +46,17 @@ AI agents operating on this repository must strictly adhere to the following arc
      - **ARE:** Audio Reverse Engineering Engine (signal integrity, spectral flux, PELT splicing, noise consistency, repeated phrases, ENF).
      - **MVSI:** Multilingual Voice & Speaker Intelligence Engine (Silero VAD, speech segmentation, overlap-aware diarization, Indian language ID, code-switching).
      - **ADDE:** Audio Deepfake Detection Engine (RawNet2, AASIST, WavLM foundation features, calibrated late fusion, out-of-distribution uncertainty).
-3. **Image Forensics Subsystem (IFS) is Separate:**
-   - Covers EXIF metadata tampering, Error Level Analysis (ELA), JPEG double-compression ghosting, and Copy-Move Forgery Detection (CMFD).
-4. **Video & CCTV Forensics Subsystem (VFS) is Separate:**
+3. **AIF — Advanced Image Forensics Subsystem:**
+   - AIF operates as the multi-engine image forensics subsystem of PS-05, comprising:
+     - **IVE:** Image Understanding & Visual Evidence Engine (universal profile, 150-category taxonomy, multi-label scene classifier, YOLOv8/v10 & SAM 2 object segmentation, occlusion-aware people counting, document layout & PaddleOCR).
+     - **IRE:** Image Reverse Engineering Engine (deep EXIF/XMP/IPTC/ICC container audit, 2D FFT & DCT signal statistics, Canny/SIFT/ORB + RANSAC classical geometric forensics, CMFD copy-move detection, camera sensor PRNU noise fingerprinting, re-compression provenance).
+     - **AIM:** AI, Image Manipulation & Steganography Engine (multi-branch synthetic AI-image detector, TruFor & CAT-Net generative inpainting localization, Face X-Ray & blend boundary tampering, LSB/RS steganalysis, polyglot binary defense).
+     - **FPA:** Face, Portrait & Biometric Evidence Module (RetinaFace/SCRFD detection, MediaPipe 468 3D facial mesh, head pose/blur/occlusion quality gating, authorized 1:1 ArcFace/MagFace reference comparison).
+   - AIF is anchored by the shared **CEIPL** cryptographic layer.
+4. **Video & CCTV Forensics Subsystem (VFS / VISTA) is Separate:**
    - Covers container PTS/DTS continuity, missing/duplicated/inserted/reordered CCTV frames, on-screen timestamp OCR correlation, and audio track extraction linked to source video.
-5. **Shared Evidence & Orchestration Foundation:**
-   - Handles case registration, cryptographic dual-hashing (SHA-256 / SHA3-512), immutable WORM storage, derived artifact lineage DAGs, and Section 65B IEA / Section 63 BSA legal report generation.
+5. **CEIPL — Cryptographic Evidence Integrity & Provenance Layer (Shared Core):**
+   - Direct raw-byte dual-hashing (SHA-256 / SHA3-512), WORM vault storage (POSIX 0400 / S3 Object Lock), RFC 8785 Canonical JSON Serialization, Ed25519 digital signatures, RFC 3161 Trusted Timestamp Authority tokens, append-only hash-chained custody logs, RFC 6962 binary Merkle trees with $O(\log N)$ inclusion proofs, and C2PA Content Credentials validation. Serves AURAS, AIF, and VISTA.
 
 ---
 
@@ -277,19 +282,117 @@ When continuing implementation on the repository:
 
 ---
 
-## 5. Summary: Agent Decision Flow
+## 5. Dedicated Image Forensics Engineering Rules (AIF Playbook Discipline)
+
+### 5.1 Raw Image Preservation & Pre-Decode Hashing
+- **Never mutate seized original bytes:** The raw exhibit file stored in the WORM vault must never be resized, transcoded, normalized, or overwritten.
+- **Direct pre-decode dual hashing:** Primary SHA-256 and auxiliary SHA3-512 hashes must be calculated directly from the raw byte stream **before** any image parsing, decoding, or metadata extraction begins.
+- Any hash discrepancy upon retrieval triggers an immediate `HASH_MISMATCH` critical alert and halts analysis.
+
+### 5.2 Derived Artifacts & Coordinate System Integrity
+- All operations (grayscale conversions, rotations, perspective rectifications, crops, tiles, frequency spectra, ELA heatmaps, inpainting masks) produce **derived artifacts** registered in the `artifacts` table.
+- Every derived crop or tile must record its affine transformation matrix ($M \in \mathbb{R}^{3\times 3}$) in the `derived_artifact_lineage` table.
+- **Coordinate preservation invariant:** Any bounding box $[x_1, y_1, x_2, y_2]$ or landmark localized on a derived crop must project back to the master exhibit's original pixel coordinate system with zero drift ($|\Delta| < 0.001\text{ px}$).
+
+### 5.3 Biometric Privacy, Purpose Limitation & Judicial Token Gating
+- **Strictly disable automated biometric search:** Automated 1:N surveillance search across facial databases is strictly prohibited.
+- **1:1 Reference comparison requires judicial authorization:** Facial feature extraction (ArcFace/MagFace) against a reference mugshot must be explicitly authorized by a valid, unexpired `case_authorization_token` signed by the investigating officer.
+- **Encrypted feature vectors:** Biometric embeddings must be encrypted with AES-256-GCM before database storage; raw floating-point embedding vectors must never be exported in unencrypted reports or frontend payloads.
+- Background and bystander faces must be tagged as `ANONYMIZED` and blurred by default in public court exhibits unless explicitly designated as evidentiary subjects.
+
+### 5.4 Functional Separation of Biometrics and Deepfake Detection
+- **ArcFace is an identity embedding model, NOT a deepfake detector:** Never interpret an ArcFace cosine similarity score as an indicator of authenticity, tampering, or AI synthesis.
+- **Manipulation detectors are NOT identity recognizers:** Face X-Ray, landmark asymmetry, and blend boundary detectors in AIM determine whether facial pixels were digitally manipulated, not who the subject is.
+- Keep the FPA biometric comparison pipeline strictly decoupled from AIM face-swap and morphing forensics.
+
+### 5.5 Scientific Claim Discipline on Unverified Algorithms
+- Treat unfamiliar or unverified algorithm names (e.g. "ArcMSD") as **unresolved research candidates**.
+- Never invent functionality, pseudo-code, or benchmarks for unverified algorithms.
+- If an algorithm cannot be verified against peer-reviewed literature or official repository documentation, record its status as `RESEARCH_REQUIRED` and state the limitation with complete transparency.
+
+### 5.6 Classical Vision Routing & Forensic Inference Boundaries
+- Classical computer vision algorithms (Canny edge detection, Sobel gradients, Hough transforms, SIFT/ORB keypoints, RANSAC homography) analyze geometric, spatial, and boundary properties.
+- **Classical CV outputs are supporting evidence, NOT tampering proofs:**
+  - Canny edges and contours identify contrast boundaries, not the cause of those boundaries.
+  - RANSAC homography verifies planar geometric consistency; it does not prove the underlying image is authentic.
+  - SIFT descriptor matching finds repetitive patterns; it does not determine criminal intent.
+
+### 5.7 Defensive Decoding & Decompression Bomb Protection
+- Enforce Pillow decompression bomb limit: `Image.MAX_IMAGE_PIXELS = 128_000_000`. Rejects images exceeding 128 Megapixels with `DECOMPRESSION_BOMB_PREVENTED`.
+- Isolate external image parsers (libjpeg, libpng, OpenCV) inside sandboxed subprocesses with POSIX cgroups capping memory to 2GB and execution time to 30 seconds.
+- Verify real file formats via `python-magic` magic bytes; never trust user-supplied file extensions.
+
+### 5.8 Zero-Execution of Embedded Payloads & Defensive Quarantine
+- Image bitstreams often contain non-image payloads (steganography, polyglots, concatenated ZIP/PE archives, trailing bytes past `FF D9` or `IEND`).
+- **Zero-execution invariant:** Quarantined trailing bytes and steganographic extractions must **NEVER** be executed as system processes.
+- Quarantined payloads must be written to an isolated vault partition with zero execution permissions (`0600`) and logged for forensic inspection.
+
+### 5.9 Missing Metadata vs Malicious Tampering
+- **Absence of metadata is NOT proof of fraud:** Mainstream messaging applications (WhatsApp, Telegram, Signal) and social media platforms routinely strip all EXIF, XMP, and IPTC metadata to protect user privacy and optimize bandwidth.
+- Never assert that an image is manipulated solely because its EXIF tags are missing, empty, or generic.
+- A software tag (e.g. "Photoshop") indicates the presence of editing metadata, but does not prove pixels were altered.
+
+### 5.10 Model Checkpoint Versioning, SHA-256 Hashes & Permissive Licensing
+- All pre-trained model weights (SigLIP, YOLOv8, SAM 2, RetinaFace, MediaPipe, ArcFace, PaddleOCR, TruFor) must have their exact SHA-256 checksums pinned in `model_registry`.
+- Verify checksums before loading weights into GPU/CPU memory; abort with an explicit error on hash mismatch.
+- Audit all model and library licenses to ensure compatibility with permissive or cyber-police hackathon use (MIT, Apache 2.0, BSD-3-Clause).
+
+### 5.11 Cryptographic Verification, Failure Reporting & Non-Repudiation
+- When cryptographic checks fail, CEIPL and AIF must return explicit, typed failure codes:
+  - `HASH_MISMATCH`: File altered since seizure.
+  - `SIGNATURE_INVALID`: Ed25519 signature mathematical failure.
+  - `SIGNING_KEY_REVOKED`: Key revoked in CRL/OCSP.
+  - `CUSTODY_CHAIN_BROKEN`: Event hash does not link to previous event.
+  - `CONTENT_BINDING_MISMATCH`: C2PA claim hash differs from image pixels.
+- **Never convert cryptographic failure into a passing verdict:** If verification fails or a service is unreachable, return `VERIFICATION_INCONCLUSIVE` or `FAIL`, never `PASS`.
+
+### 5.12 AIF Phase-by-Phase Execution & Checkpoint Updating Discipline
+When implementing image forensics modules:
+1. Identify the target phase in `PHASES.md` (`AIF-A0` through `AIF-A15`).
+2. Read the phase purpose, tasks, and checkpoint table.
+3. Implement the code following the 15-item readiness checklist below.
+4. Execute the verification action declared in the phase's Checkpoint Table.
+5. **Only after the test command executes and produces concrete evidence (exit code 0), update the checkpoint status in `PHASES.md` from `NOT_STARTED` to `PASS`.**
+6. Never mark a checkpoint as `PASS` without verified test execution.
+
+### 5.13 Mandatory 15-Item Image Module Readiness Checklist
+Before declaring any image forensics module ready, the agent must verify all 15 items:
+1. **Requirement Mapped:** Explicitly linked to stable requirement IDs (`AIF-FR-xxx`, `IVE-FR-xxx`, `IRE-FR-xxx`, `AIM-FR-xxx`, `CEIPL-FR-xxx`).
+2. **Supported Evidence Types Documented:** Supported formats (JPEG, PNG, TIFF, WebP, HEIC, RAW) declared.
+3. **Input and Output Contracts Defined:** Pydantic v2 schemas compile cleanly with typed fields.
+4. **Original / Derived Artifact Behavior Documented:** DAG lineage and affine matrix transforms recorded.
+5. **Tool / Model Version Recorded:** Specific package versions and model checkpoints documented.
+6. **License & Compatibility Checked:** Permissive open-source licenses verified.
+7. **Validation Corpus Defined:** Standard test sets identified (WIDER FACE, LFW, CoMoFoD, TruFor, FF++).
+8. **Relevant Metrics Selected:** Quantitative metrics specified (mAP, EER, IoU, count MAE, CER).
+9. **False-Positive & Failure Cases Tested:** Natural shadows, beauty filters, and compression artifacts tested.
+10. **Resource / Security Limits Established:** 128MP pixel ceiling, 2GB RAM cap, 30s timeout enforced.
+11. **Evidence Traceability Verified:** Finding records link directly to artifact IDs, engine runs, and manifests.
+12. **Report Schema & Limitations Documented:** Section 65B / 63 BSA legal disclaimers and limitations included.
+13. **Cryptographic Requirements Checked:** Pre-decode SHA-256 and Ed25519 signatures verified.
+14. **Checkpoint Evidence Attached:** Test output tracebacks or exit code 0 recorded.
+15. **Current Implementation Status Verified:** Status marker correctly set (`PLANNED`, `NOT_STARTED`, or `IMPLEMENTED_AND_VERIFIED`).
+
+---
+
+## 6. Summary: Agent Decision Flow
 
 ```mermaid
 flowchart TD
     START["🤖 AI Agent Receives Task"] --> RESEARCH["Apply RULE 3<br/>10-step research"]
-    RESEARCH --> IDENTIFY_PHASE["Identify target phase in PHASES.md<br/>(e.g., AURAS-A1)"]
-    IDENTIFY_PHASE --> PLAN["Apply RULE 4<br/>Structured plan"]
+    RESEARCH --> IDENTIFY_WORKSTREAM{"Identify target workstream in PHASES.md"}
+    
+    IDENTIFY_WORKSTREAM -->|Audio| P_AUD["AURAS Track (AURAS-A0..A10)<br/>Apply Section 4 Rules"]
+    IDENTIFY_WORKSTREAM -->|Video| P_VID["VISTA Track (VISTA-A0..A13)<br/>Apply Video Forensic Rules"]
+    IDENTIFY_WORKSTREAM -->|Image| P_IMG["AIF Track (AIF-A0..A15)<br/>Apply Section 5 Rules & Checklist"]
+    
+    P_AUD & P_VID & P_IMG --> PLAN["Apply RULE 4<br/>Structured plan"]
     PLAN --> MODIFY["Apply RULE 5<br/>Minimal changes"]
     MODIFY --> TEST["Apply RULE 13<br/>Test after changes"]
     TEST --> VERIFY{"Tests pass with Exit 0?"}
     VERIFY -->|No| FIX["Apply RULE 13<br/>Inspect traceback & fix"]
     FIX --> TEST
-    VERIFY -->|Yes| UPDATE_CP["Apply Sec 4.8<br/>Update Checkpoint Table in PHASES.md"]
-    UPDATE_CP --> REPORT["Apply RULE 20<br/>Final implementation report"]
+    VERIFY -->|Yes| UPDATE_CP["Apply Sec 4.8 / 5.12<br/>Update Checkpoint Table in PHASES.md"]
+    UPDATE_CP --> REPORT["Final implementation report"]
     REPORT --> STOP["STOP<br/>(per RULE 12)"]
 ```
