@@ -591,6 +591,81 @@ erDiagram
         string current_merkle_root
         timestamp timestamp
     }
+
+    IMAGE_EXHIBITS {
+        uuid id PK
+        uuid evidence_id FK
+        string detected_format
+        int width
+        int height
+        string colour_mode
+        string colour_space
+        int bit_depth
+        boolean has_alpha
+        int orientation
+        string safe_decode_status
+        string c2pa_manifest_status
+        jsonb metadata_summary
+    }
+
+    IMAGE_TAXONOMY_TAGS {
+        uuid id PK
+        uuid evidence_id FK
+        string category_id
+        string category_label
+        float confidence
+        string validation_status
+        jsonb source_model
+    }
+
+    FACE_BIOMETRIC_REGIONS {
+        uuid id PK
+        uuid evidence_id FK
+        string face_id
+        jsonb bounding_box
+        jsonb landmarks_468
+        float pose_yaw
+        float pose_pitch
+        float pose_roll
+        float quality_score
+        string privacy_classification
+        uuid authorized_case_token_id
+        string embedding_storage_uri
+    }
+
+    DERIVED_ARTIFACT_DAG {
+        uuid id PK
+        uuid parent_artifact_id FK
+        uuid child_artifact_id FK
+        string transform_operator
+        jsonb transform_parameters
+        jsonb affine_matrix
+        string child_sha256
+        timestamp generated_at
+    }
+
+    CUSTODY_EVENTS {
+        uuid id PK
+        uuid evidence_id FK
+        string event_type
+        string actor_identity
+        timestamp event_timestamp
+        string prev_event_hash
+        string event_data_hash
+        string ed25519_signature
+        string verification_status
+    }
+
+    MERKLE_CHECKPOINTS {
+        uuid id PK
+        uuid case_id FK
+        string batch_identifier
+        int leaf_count
+        string root_sha256
+        string rfc3161_token_uri
+        string signature_ed25519
+        timestamp anchored_at
+    }
 ```
 
 ### 4.2 Relational DDL for Video & CCTV Forensics Data Models
@@ -721,6 +796,134 @@ CREATE INDEX idx_sync_segments_evidence ON sync_segments(evidence_id);
 CREATE INDEX idx_deepfake_scores_evidence ON deepfake_scores(evidence_id);
 CREATE INDEX idx_object_tracks_evidence ON object_tracks(evidence_id);
 CREATE INDEX idx_cross_modal_events_evidence ON cross_modal_events(evidence_id);
+```
+
+### 4.3 Relational DDL for Image Forensics & CEIPL Cryptographic Core
+
+```sql
+-- Image exhibit properties parsed defensively during pre-flight intake (IVE-01)
+CREATE TABLE image_exhibits (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    evidence_id UUID NOT NULL UNIQUE REFERENCES evidence(id) ON DELETE CASCADE,
+    detected_format VARCHAR(16) NOT NULL,
+    detected_mime VARCHAR(64) NOT NULL,
+    width INT NOT NULL,
+    height INT NOT NULL,
+    pixel_count BIGINT NOT NULL,
+    aspect_ratio NUMERIC(8, 4) NOT NULL,
+    bit_depth INT NOT NULL DEFAULT 8,
+    colour_mode VARCHAR(16) NOT NULL DEFAULT 'RGB',
+    colour_space VARCHAR(32) NOT NULL DEFAULT 'sRGB',
+    has_alpha BOOLEAN NOT NULL DEFAULT FALSE,
+    orientation INT NOT NULL DEFAULT 1,
+    is_animated BOOLEAN NOT NULL DEFAULT FALSE,
+    frame_count INT NOT NULL DEFAULT 1,
+    safe_decode_status VARCHAR(32) NOT NULL CHECK (safe_decode_status IN ('VERIFIED_SAFE', 'DECOMPRESSION_BOMB_PREVENTED', 'DECODER_WARNING', 'MALFORMED_HEADER', 'CORRUPT_BITSTREAM')),
+    c2pa_manifest_status VARCHAR(32) NOT NULL DEFAULT 'NOT_PRESENT' CHECK (c2pa_manifest_status IN ('NOT_PRESENT', 'VALID_SIGNATURE', 'UNTRUSTED_ROOT', 'TAMPERED_BINDING', 'UNSUPPORTED_VERSION')),
+    embedded_thumb_present BOOLEAN NOT NULL DEFAULT FALSE,
+    metadata_summary JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Master hierarchical 150-category image taxonomy registry (IVE-02)
+CREATE TABLE image_taxonomy_categories (
+    category_id VARCHAR(64) PRIMARY KEY,
+    parent_id VARCHAR(64) REFERENCES image_taxonomy_categories(category_id),
+    category_label VARCHAR(128) NOT NULL,
+    description TEXT NOT NULL,
+    inclusion_criteria TEXT,
+    exclusion_criteria TEXT,
+    validation_status VARCHAR(32) NOT NULL DEFAULT 'DEFINED' CHECK (validation_status IN ('DEFINED', 'TRAINING_AVAILABLE', 'MODEL_SUPPORTED', 'INDEPENDENTLY_VALIDATED', 'DEPLOYED_ACTIVE')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Multi-label classification tags assigned per evidence exhibit (IVE-03)
+CREATE TABLE image_taxonomy_annotations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    evidence_id UUID NOT NULL REFERENCES evidence(id) ON DELETE CASCADE,
+    category_id VARCHAR(64) NOT NULL REFERENCES image_taxonomy_categories(category_id),
+    confidence NUMERIC(5, 4) NOT NULL CHECK (confidence BETWEEN 0.0 AND 1.0),
+    is_triage_alert BOOLEAN NOT NULL DEFAULT FALSE,
+    assigned_by_model VARCHAR(64) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Biometric face detections, 468 landmarks, and access-controlled embeddings (IVE-06, IVE-07, FPA)
+CREATE TABLE face_biometric_regions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    evidence_id UUID NOT NULL REFERENCES evidence(id) ON DELETE CASCADE,
+    face_index INT NOT NULL DEFAULT 0,
+    bounding_box JSONB NOT NULL,
+    landmarks_468 JSONB,
+    pose_yaw NUMERIC(5, 2),
+    pose_pitch NUMERIC(5, 2),
+    pose_roll NUMERIC(5, 2),
+    blur_score NUMERIC(5, 4),
+    occlusion_score NUMERIC(5, 4),
+    quality_score NUMERIC(5, 4) NOT NULL,
+    privacy_classification VARCHAR(32) NOT NULL DEFAULT 'RESTRICTED_BIOMETRIC' CHECK (privacy_classification IN ('ANONYMIZED', 'RESTRICTED_BIOMETRIC', 'JUDICIAL_EXHIBIT')),
+    authorized_case_token_id UUID,
+    embedding_storage_uri VARCHAR(512),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Derived Artifact Directed Acyclic Graph (DAG) with exact affine coordinate transforms (CEIPL-07)
+CREATE TABLE derived_artifact_lineage (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    parent_artifact_id UUID NOT NULL REFERENCES artifacts(id) ON DELETE CASCADE,
+    child_artifact_id UUID NOT NULL REFERENCES artifacts(id) ON DELETE CASCADE,
+    transform_operator VARCHAR(64) NOT NULL,
+    transform_parameters JSONB NOT NULL DEFAULT '{}'::jsonb,
+    affine_matrix JSONB,
+    parent_sha256 CHAR(64) NOT NULL,
+    child_sha256 CHAR(64) NOT NULL,
+    tool_name VARCHAR(64) NOT NULL,
+    tool_version VARCHAR(32) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Append-only hash-chained custody event log (CEIPL-05)
+CREATE TABLE custody_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    evidence_id UUID NOT NULL REFERENCES evidence(id) ON DELETE CASCADE,
+    event_sequence_num BIGINT NOT NULL,
+    event_type VARCHAR(64) NOT NULL CHECK (event_type IN (
+        'EVIDENCE_RECEIVED', 'HASH_CALCULATED', 'EVIDENCE_VALIDATED', 'EVIDENCE_STORED',
+        'EVIDENCE_ACCESSED', 'EVIDENCE_EXPORTED', 'EVIDENCE_TRANSFERRED', 'JOB_CREATED',
+        'DERIVED_ARTIFACT_CREATED', 'MANIFEST_SIGNED', 'SIGNATURE_VERIFIED',
+        'RETENTION_HOLD_APPLIED', 'DELETION_BLOCKED'
+    )),
+    actor_identity VARCHAR(128) NOT NULL,
+    event_timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    prev_event_hash CHAR(64) NOT NULL,
+    event_data_hash CHAR(64) NOT NULL,
+    ed25519_signature VARCHAR(128),
+    signing_key_id VARCHAR(64),
+    verification_status VARCHAR(32) NOT NULL DEFAULT 'CHAIN_VALID' CHECK (verification_status IN ('CHAIN_VALID', 'TAMPER_DETECTED', 'SIGNATURE_INVALID', 'KEY_UNTRUSTED')),
+    UNIQUE(evidence_id, event_sequence_num)
+);
+
+-- Merkle tree batch checkpoints and RFC 3161 TSA timestamps (CEIPL-04, CEIPL-06)
+CREATE TABLE merkle_batch_checkpoints (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    case_id UUID NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    batch_identifier VARCHAR(64) NOT NULL UNIQUE,
+    leaf_count INT NOT NULL,
+    merkle_root_sha256 CHAR(64) NOT NULL,
+    rfc3161_timestamp_token_uri VARCHAR(512),
+    tsa_authority_name VARCHAR(128),
+    tsa_verification_status VARCHAR(32) NOT NULL DEFAULT 'PENDING' CHECK (tsa_verification_status IN ('VALID_TSA_TOKEN', 'TSA_UNREACHABLE', 'CERT_CHAIN_REVOKED', 'TOKEN_MISMATCH', 'PENDING')),
+    ed25519_signature VARCHAR(128) NOT NULL,
+    signing_key_id VARCHAR(64) NOT NULL,
+    anchored_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_image_exhibits_evidence ON image_exhibits(evidence_id);
+CREATE INDEX idx_image_taxonomy_evidence ON image_taxonomy_annotations(evidence_id);
+CREATE INDEX idx_face_biometric_evidence ON face_biometric_regions(evidence_id);
+CREATE INDEX idx_artifact_lineage_child ON derived_artifact_lineage(child_artifact_id);
+CREATE INDEX idx_custody_events_evidence ON custody_events(evidence_id, event_sequence_num);
+CREATE INDEX idx_merkle_checkpoints_case ON merkle_batch_checkpoints(case_id);
 ```
 
 ---
@@ -1042,39 +1245,656 @@ flowchart TD
 
 ---
 
-## 10. Image Forensics Subsystem (IFS) Technical Boundary
+## 10. AIF Image Forensics Subsystem Technical Architecture & Engine Specifications
 
-The Image Forensics Subsystem detects both conventional structural tampering (splicing, copy-move, compression anomalies) and modern generative synthesis:
+The **AIF (Advanced Image Forensics)** subsystem provides an explainable, cryptographically grounded, multi-engine evidentiary platform for the analysis of seized digital images, documents, facial exhibits, and synthetic media. AIF operates in strict compliance with Section 65B of the Indian Evidence Act (IEA) and Section 63 of the Bharatiya Sakshya Adhiniyam (BSA 2023).
 
-### 10.1 EXIF & Metadata Audit Module (`ps05.engines.image.exif_audit`)
-- **Library Stack:** `piexif`, `exiftool-vendored` (wrapper), `PIL.ExifTags`.
+### 10.1 High-Level AIF Engine Architecture & Subsystem Boundaries
+
+AIF partitions image analysis across three specialized forensic engines and a dedicated cross-cutting biometric module, coordinated by the task-aware router and anchored by CEIPL:
+
+```mermaid
+flowchart TB
+    subgraph INTAKE["1️⃣ Intake & Pre-Flight Verification"]
+        RAW_IMAGE["Seized Image Exhibit (JPEG / PNG / TIFF / WebP / HEIC / RAW)"]
+        CEIPL_HASH["CEIPL Direct Pre-Decode Hasher (SHA-256 / SHA3-512)"]
+        WORM_STORE["WORM Raw Vault (POSIX 0400 / S3 Object Lock)"]
+        SAFE_DEC["Safe Parser & Decompression Bomb Guard (Pillow max_pixels=128M)"]
+    end
+
+    subgraph AIF_CORE["🖼️ AIF Subsystem Core & Task-Aware Router"]
+        ROUTER["Task-Aware Forensic Router & Tiling Dispatcher"]
+        LINEAGE_DAG["Derived Artifact DAG & Linear Affine Transform Mapper"]
+        
+        subgraph IVE_ENGINE["1️⃣ IVE: Visual Evidence & Understanding Engine"]
+            IVE01["IVE-01: Universal Ingestion Profiling"]
+            IVE02["IVE-02: 150-Category Hierarchical Taxonomy"]
+            IVE03["IVE-03: Multi-Label Scene Classifier (SigLIP / ViT)"]
+            IVE04["IVE-04: Object Detection & Instance Segmentation (YOLOv8 / SAM 2)"]
+            IVE05["IVE-05: Occlusion-Aware Crowd & Person Counter"]
+            IVE06["IVE-06: Face & Portrait Pipeline Dispatch"]
+            IVE07["IVE-07: Authorized 1:1 Reference Face Comparison"]
+            IVE08["IVE-08: Document Layout, Quad Rectification & PaddleOCR"]
+        end
+
+        subgraph FPA_MODULE["👤 FPA: Face, Portrait & Biometric Module"]
+            FPA_DET["RetinaFace / SCRFD High-Recall Detector"]
+            FPA_LM["MediaPipe 468-point 3D Facial Landmarker"]
+            FPA_QUAL["Face Quality, Pose (Yaw/Pitch/Roll), Blur & Occlusion"]
+            FPA_EMB["ArcFace / MagFace Biometric Feature Extractor"]
+        end
+
+        subgraph IRE_ENGINE["2️⃣ IRE: Image Reverse Engineering Engine"]
+            IRE01["IRE-01: Deep Metadata (ExifTool, XMP, IPTC, ICC, Quantization)"]
+            IRE02["IRE-02: Signal Statistics, 2D FFT & DCT Frequency Analysis"]
+            IRE03["IRE-03: Classical CV & Geometric Forensics (Canny, SIFT/ORB, RANSAC)"]
+            IRE04["IRE-04: Copy-Move Forgery Detection (DBSCAN + DCT Grid)"]
+            IRE05["IRE-05: Camera Sensor Forensics (PRNU Noise Fingerprint)"]
+            IRE06["IRE-06: Re-Compression & Social Media Provenance Clues"]
+        end
+
+        subgraph AIM_ENGINE["3️⃣ AIM: AI, Manipulation & Steganography Engine"]
+            AIM01["AIM-01: Multi-Branch AI-Generated Image Detector"]
+            AIM02["AIM-02: Generative Inpainting & Splicing Localization (TruFor / CAT-Net)"]
+            AIM03["AIM-03: Face Swap, Morphing & Synthetic Boundary Forensics"]
+            AIM04["AIM-04: Steganography & Concealed Data Analysis (LSB, RS, Rich Models)"]
+            AIM05["AIM-05: Defensive Security & Malformed Payload Quarantine"]
+        end
+    end
+
+    subgraph PERSISTENCE["💾 Evidentiary Persistence & Aggregation"]
+        POSTGRES["PostgreSQL 15 (Relational Data & JSONB Findings)"]
+        DERIVED_STORE["Derived Artifact Vault (Crops, Warps, Heatmaps, Spectra)"]
+        FUSION["Evidence Fusion, Uncertainty Calibration & Cross-Engine Aggregator"]
+    end
+
+    RAW_IMAGE --> CEIPL_HASH --> WORM_STORE
+    CEIPL_HASH --> SAFE_DEC --> ROUTER
+    
+    ROUTER --> LINEAGE_DAG
+    LINEAGE_DAG --> IVE_ENGINE
+    LINEAGE_DAG --> IRE_ENGINE
+    LINEAGE_DAG --> AIM_ENGINE
+    
+    IVE06 --> FPA_MODULE
+    FPA_MODULE -.->|Face Crops & Landmarks| AIM03
+    FPA_MODULE -.->|Authorized Biometric Embedding| IVE07
+
+    IVE_ENGINE --> POSTGRES
+    IRE_ENGINE --> POSTGRES
+    AIM_ENGINE --> POSTGRES
+    FPA_MODULE --> DERIVED_STORE
+    
+    POSTGRES --> FUSION
+```
+
+---
+
+### 10.2 Image Ingestion, Decompression Bomb Mitigation & Safe Decoding Sequence
+
+To guarantee evidentiary integrity and protect forensic worker nodes from adversarial image exploits (decompression bombs, malformed header integer overflows, polyglots), all incoming image exhibits execute a strict non-destructive intake sequence:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Officer as Evidence Custodian / Investigator
+    participant API as FastAPI Ingestion Gateway
+    participant Hasher as CEIPL Direct Pre-Decode Hasher
+    participant WORM as WORM Storage Vault (POSIX 0400)
+    participant Worker as Isolated Sandboxed Decoding Worker
+    participant DB as PostgreSQL Database
+    participant Celery as Redis Task Queue
+
+    Officer->>API: POST /api/v1/evidence/upload (raw binary stream + FIR metadata)
+    activate API
+    API->>Hasher: Stream raw bytes through chunked SHA-256 & SHA3-512
+    activate Hasher
+    Hasher-->>API: Compute raw_sha256, raw_sha3_512, byte_length
+    deactivate Hasher
+    
+    API->>WORM: Write unmodified bitstream to WORM path (`evidence_id.bin`)
+    API->>WORM: Apply write-block chmod 0400
+    
+    API->>Worker: Dispatch raw bytes to isolated sub-process (max_memory=2GB, timeout=30s)
+    activate Worker
+    Worker->>Worker: Check magic bytes via python-magic (reject executable polyglots)
+    Worker->>Worker: Verify Pillow decompression limit (Image.MAX_IMAGE_PIXELS = 128_000_000)
+    Worker->>Worker: Extract dimensions (width, height), colour_mode, EXIF header tags
+    Worker-->>API: Return ImageProfile(format, dimensions, colour_space, safe_decode_status)
+    deactivate Worker
+
+    API->>DB: INSERT INTO evidence (id, sha256_hash, sha3_512_hash, storage_uri)
+    API->>DB: INSERT INTO image_exhibits (evidence_id, detected_format, width, height, safe_decode_status)
+    API->>DB: INSERT INTO custody_events (event_type='EVIDENCE_RECEIVED', actor_identity, event_data_hash)
+    
+    API->>Celery: Publish forensic task `orchestrator.dispatch_image_analysis(evidence_id)`
+    API-->>Officer: 201 Created (evidence_id, sha256_hash, safe_decode_status)
+    deactivate API
+```
+
+---
+
+### 10.3 Multi-Engine Image Forensic Execution Sequence
+
+Once ingested, the Task-Aware Router examines evidence dimensions, metadata flags, and requested analytical depth to schedule parallel forensic engines:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Router as Task-Aware Router & Tiling Dispatcher
+    participant DAG as Derived Artifact DAG Manager
+    participant IVE as IVE Engine Worker
+    participant FPA as FPA Face Biometric Worker
+    participant IRE as IRE Engine Worker
+    participant AIM as AIM Manipulation Worker
+    participant Aggregator as Cross-Engine Finding Aggregator
+
+    Router->>DAG: Register working base artifact (Normalized sRGB PNG)
+    par Visual Evidence & Taxonomy
+        Router->>IVE: Execute IVE-01..05 (Taxonomy, Multi-label, YOLO, People Count)
+        IVE->>DAG: Store detected object crops and coordinates
+        IVE-->>Aggregator: Post Taxonomy & Object Findings
+    and Face & Biometric Extraction
+        Router->>FPA: Execute RetinaFace detection & MediaPipe 468 landmarks
+        FPA->>DAG: Store canonical aligned face crops (112x112 / 256x256)
+        FPA-->>Aggregator: Post Face Quality & Pose Metrics
+    and Physical & Reverse Engineering
+        Router->>IRE: Execute IRE-01..06 (EXIF audit, 2D FFT, CMFD, PRNU)
+        IRE->>DAG: Store 2D FFT magnitude spectrum & ELA heatmap
+        IRE-->>Aggregator: Post Metadata & Structural Discrepancy Findings
+    and Manipulation & Steganography
+        Router->>AIM: Execute AIM-01..05 (AI-Gen, TruFor Inpainting, Steganalysis)
+        AIM->>DAG: Store TruFor manipulation localization mask & heatmap
+        AIM-->>Aggregator: Post Synthetic Probability P(AI) & Anomaly Masks
+    end
+
+    Aggregator->>Aggregator: Cross-correlate findings (e.g. Inpainting mask vs CMFD vs EXIF)
+    Aggregator->>Aggregator: Calibrate uncertainty & evaluate detector disagreement
+    Aggregator-->>Router: Analysis Job Complete (Aggregate Finding Summary IR)
+```
+
+---
+
+### 10.4 FPA Face & Portrait Forensic Routing Sequence
+
+The Face, Portrait & Biometric Analysis module enforces strict judicial privacy boundaries:
+
+```mermaid
+flowchart TD
+    IN_IMG["RGB Normalized Image Array"] --> DET["FPA-01: RetinaFace / SCRFD Face Detector"]
+    DET --> BBOX["Detected Face Bounding Boxes $[y_1, x_1, y_2, x_2]$"]
+    
+    BBOX --> QUAL{"Face Quality Gate<br/>Resolution $\ge 64\times 64$, Blur $< 0.85$, Pose $|\theta| \le 45^\circ$"}
+    
+    QUAL -- No --> LOW_QUAL["Tag FACE_DEGRADED_UNSUITABLE_FOR_BIOMETRIC"]
+    LOW_QUAL --> AIM_ROUTING["Forward to AIM-03 for Face-Swap / Retouching Forensics"]
+    
+    QUAL -- Yes --> LM["FPA-02: MediaPipe 468 3D Facial Mesh Landmarker"]
+    LM --> ALIGN["5-Point Similarity Affine Transform Alignment (112x112)"]
+    
+    ALIGN --> ROUTE_AUTH{"Authorized 1:1 Reference Mugshot Provided?"}
+    
+    ROUTE_AUTH -- "No (General Triage)" --> NO_BIO["Record Landmarks & Pose Angles Only<br/>(ZERO Biometric Feature Storage)"]
+    NO_BIO --> AIM_ROUTING
+    
+    ROUTE_AUTH -- "Yes (Court Order / Case Token Valid)" --> EMB["FPA-04: ArcFace / MagFace 512-d Feature Extractor"]
+    EMB --> ENCRYPT["AES-256-GCM Encrypt Embedding Vector"]
+    ENCRYPT --> COSINE["Compute Cosine Distance vs Reference Mugshot"]
+    COSINE --> BIO_FINDING["Produce 1:1 Similarity Finding with Legal Disclaimer"]
+    BIO_FINDING --> AIM_ROUTING
+```
+
+---
+
+### 10.5 Classical CV & Reference Comparison Alignment Flow
+
+IRE employs classical computer vision algorithms strictly for geometric registration, edge localization, and reference comparison, never as standalone tampering proofs:
+
+```mermaid
+flowchart LR
+    subgraph INPUTS["Input Exhibits"]
+        Q["Questioned Image Exhibit $I_Q$"]
+        R["Authorized Reference Image $I_R$"]
+    end
+
+    subgraph PREPROC["Preprocessing & Derivatives"]
+        Q_GRAY["Grayscale Gradients $\nabla I_Q$"]
+        R_GRAY["Grayscale Gradients $\nabla I_R$"]
+        CANNY["Canny Edge & Sobel Gradient"]
+    end
+
+    subgraph REGISTRATION["Geometric Registration Pipeline"]
+        FEAT["ORB / SIFT Multi-Scale Keypoints & Descriptors"]
+        MATCH["k-NN Feature Matching ($d_1 / d_2 < 0.70$)"]
+        RANSAC["RANSAC Homography Estimation Matrix $H \in \mathbb{R}^{3\times 3}$"]
+        WARP["Affine / Perspective Warp: $I_R' = \mathcal{W}(I_R, H)$"]
+    end
+
+    subgraph RESIDUAL["Residual & Difference Analysis"]
+        DIFF["Absolute Residual Map $\Delta = |I_Q - I_R'|$"]
+        SSIM["Local SSIM & Gradient Correlation Map"]
+        REPORT["Geometric Alignment Finding + Residual Heatmap Artifact"]
+    end
+
+    Q --> Q_GRAY --> CANNY
+    Q_GRAY --> FEAT
+    R --> R_GRAY --> FEAT
+    FEAT --> MATCH --> RANSAC --> WARP
+    WARP & Q --> DIFF --> SSIM --> REPORT
+```
+
+---
+
+### 10.6 AI Generation & Synthetic Manipulation Localization Pipeline
+
+AIM provides a multi-branch, multi-scale architecture for detecting AI-generated content and localizing generative inpainting:
+
+```mermaid
+flowchart TD
+    IMG["Working Image Exhibit (RGB)"] --> TILES["Tiling Dispatcher (512x512 with 64px overlap)"]
+    
+    subgraph BRANCH1["Branch 1: Whole-Image Generative Classifier (AIM-01)"]
+        CLIP_B["SigLIP / ViT-L/14 Feature Backbone"]
+        CNN_B["ResNet50 / EfficientNet Spatial Texture Backbone"]
+        FREQ_B["2D FFT High-Frequency Spectrum Classifier"]
+        CLIP_B & CNN_B & FREQ_B --> FUSE_LOGIT["Multi-Head Fusion Logit $z_{\text{gen}}$"]
+    end
+
+    subgraph BRANCH2["Branch 2: Generative Inpainting Localization (AIM-02)"]
+        TRUFOR["TruFor Feature Extractor (RGB + Noise Fingerprint)"]
+        CATNET["CAT-Net DCT Domain Inconsistency Network"]
+        TRUFOR & CATNET --> HEATMAP_LOC["Dense Pixel-Level Anomaly Probability Map $M(x, y)$"]
+    end
+
+    subgraph BRANCH3["Branch 3: Facial Boundary & Synthesis Forensics (AIM-03)"]
+        FACE_CROPS["FPA Aligned Face Crops"]
+        BLEND_NET["Face X-Ray / Blend Boundary Network"]
+        MORPH_NET["Facial Landmark Geometry & Texture Warping Net"]
+        FACE_CROPS --> BLEND_NET & MORPH_NET
+        BLEND_NET & MORPH_NET --> FACE_SCORE["Facial Tampering Logit $z_{\text{face}}$"]
+    end
+
+    IMG --> BRANCH1
+    TILES --> BRANCH2
+    IMG --> BRANCH3
+
+    FUSE_LOGIT --> CALIB1["Platt Scaling Calibration: $P(\text{AI})$"]
+    HEATMAP_LOC --> CONTOUR_LOC["Binarization & Polygon Contour Extraction"]
+    FACE_SCORE --> CALIB2["Platt Scaling: $P(\text{FaceSwap})$"]
+
+    CALIB1 & CONTOUR_LOC & CALIB2 --> ENSEMBLE["Cross-Detector Disagreement & Quality-Weighted Ensemble"]
+    ENSEMBLE --> FINDINGS["Structured Forensic Findings + Localization Masks"]
+```
+
+---
+
+### 10.7 IVE Technical Specification (Image Understanding & Visual Evidence Engine)
+
+#### IVE-01: Universal Image Ingestion Profiling & Safe Decoding
+- **Purpose:** Safely inspect, profile, and validate seized image files, enforcing decompression bomb limits and extracting complete structural container parameters without altering the bitstream.
+- **Inputs:** Seized raw image file path in WORM storage.
+- **Processing Steps:**
+  1. Inspects magic bytes using `python-magic` to establish real file format independently of file extension.
+  2. Sets Pillow safety boundary: `Image.MAX_IMAGE_PIXELS = 128_000_000`. Rejects images exceeding 128 Megapixels with `DECOMPRESSION_BOMB_PREVENTED`.
+  3. Executes isolated worker process decoding to capture dimensions $(W, H)$, aspect ratio, bit depth, channel configuration (RGB, RGBA, CMYK, Grayscale), colour space (sRGB, AdobeRGB, Display P3, uncalibrated), orientation flag (EXIF Tag 274), and animation frame count.
+  4. Parses embedded thumbnail availability and validates structural container completeness.
+- **Outputs:** `ImageProfile(detected_format, width, height, pixel_count, aspect_ratio, bit_depth, colour_mode, colour_space, has_alpha, orientation, safe_decode_status, embedded_thumb_present)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A2).
+
+#### IVE-02: Hierarchical 150-Category Image Evidence Taxonomy
+- **Purpose:** Organize forensic visual evidence into a structured, multi-label taxonomy spanning 15 parent domains and approximately 150 leaf classes.
+- **Taxonomy Domains:**
+  1. Human Presence & Context (Portrait, Selfie, Group, Family, Identification Photo, Distant Face).
+  2. Injury & Medical Evidence (Abrasion, Laceration, Contusion, Burn, Fracture Radiograph).
+  3. Possible Violent-Incident Context (Scene Triage, Struggle Disturbance, Bloodstain Pattern).
+  4. Physical Traces & Evidence (Tool Marks, Footwear Impression, Tire Tread, Ballistic Mark).
+  5. Weapon & Weapon-like Objects (Firearm Handgun, Long Gun, Edged Weapon, Blunt Object, Explosive).
+  6. Property & Property Crime (Forced Entry Point, Broken Glass, Vandalism, Graffiti, Burglary).
+  7. Vehicle & Transport Evidence (License Plate, Collision Damage, Vehicle Undercarriage, Skid Marks).
+  8. Fire, Explosion & Disaster (Arson Origin, Char Pattern, Blast Crater, Structural Collapse).
+  9. Digital Devices & Electronic Exhibits (Mobile Screen Display, Laptop/Desktop, Storage Media).
+  10. Documents & Alterations (Official Stamp, Seal, Signature, Handwritten Note, Identity Card).
+  11. Substances & Packaging (Narcotic Packaging, Contraband Container, Chemical Label).
+  12. Environmental & Biological Context (Outdoor Scene, Vegetation, Soil Disturbance, Water Body).
+  13. Public Safety & Infrastructure (Road Hazard, Traffic Signal, CCTV Enclosure, Power Line).
+  14. Neutral & Everyday Context (Landscape, Architecture Exterior, Food/Beverage, Household Object).
+  15. Specialized Forensic Modalities (Infrared/Thermal, X-Ray Radiograph, Microscopy, Aerial/Drone).
+- **Taxonomy Validation Invariant:** A taxonomy category is an indexing and triage label, never an automated judicial verdict.
+- **Implementation Status:** `PLANNED` (Phase AIF-A3).
+
+#### IVE-03: Multi-Label Scene Classification & Visual Reasoning
+- **Purpose:** Assign calibrated multi-label taxonomy tags and generate structured scene descriptions.
+- **Model Candidates:** SigLIP (ViT-SO400M), CLIP (ViT-L/14@336px), Swin Transformer v2.
+- **Processing Steps:** Passes normalized $336\times 336$ image representation through zero-shot text-image embedding projections and domain-specific classification heads. Applies temperature calibration to generate multi-label probabilities $p_c \in [0, 1]$.
+- **Outputs:** `List[TaxonomyAnnotation(category_id, confidence, is_triage_alert, calibration_status)]`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A3).
+
+#### IVE-04: Object Detection & Instance Segmentation
+- **Purpose:** Localize physical evidence items, weapons, vehicles, and documents with bounding boxes and polygon masks.
+- **Model Candidates:** YOLOv8x / YOLOv10x for real-time bounding boxes; Grounding DINO for open-vocabulary queries; SAM 2 (Segment Anything 2) for zero-shot promptable polygon segmentation.
+- **Tiling Architecture:** For high-resolution exhibits ($> 2048\times 2048$), image is partitioned into $1024\times 1024$ tiles with $128\text{px}$ overlap. Detections across tile boundaries are merged using Non-Maximum Suppression (NMS) with IoU threshold 0.50, and mapped back to parent coordinates via affine coordinate transforms stored in the Derived Artifact DAG.
+- **Outputs:** `List[DetectedObject(class_id, label, confidence, bbox_normalized, polygon_mask_uri)]`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A4).
+
+#### IVE-05: Occlusion-Aware People & Crowd Counting
+- **Purpose:** Accurately count visible human individuals, resolving occlusions and separating people counts from face counts.
+- **Methodology:** Executes dual-head detection: head-box detection (high recall in dense crowds) and full-body pedestrian bounding boxes. Resolves overlaps via Hungarian matching. Rejects mannequins, posters, and reflections by cross-checking texture depth and 2D frequency variance.
+- **Outputs:** `PeopleCountResult(visible_people_count, detected_faces_count, estimated_crowd_density, count_mae_uncertainty, occlusion_index)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A4).
+
+#### IVE-06: Face, Portrait & Selfie Handling (FPA Integration)
+- **Purpose:** Detect, crop, land-mark, and assess quality of all human faces appearing in seized imagery.
+- **Candidate Stack:** RetinaFace (ResNet50 backbone) or SCRFD for multi-scale face detection; MediaPipe Face Landmarker for 468-point 3D facial topology mesh.
+- **Quality Metrics:** Computes head pose angles ($\text{Yaw}, \text{Pitch}, \text{Roll}$ via solvePnP on canonical 3D mesh points), Laplacian blur variance, and illumination symmetry. Faces with quality score $< 0.40$ or resolution $< 48\times 48$ are tagged as degraded and restricted from downstream biometric matching.
+- **Outputs:** `List[FaceRegion(face_id, bbox, landmarks_468, pose_angles, quality_score, crop_artifact_id)]`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A5).
+
+#### IVE-07: Authorized Biometric Reference Comparison
+- **Purpose:** Perform 1:1 facial biometric feature comparison against an authorized suspect mugshot under strict judicial access controls.
+- **Privacy & Legal Invariant:** Biometric comparison is **strictly disabled by default**. It requires an active `CaseAuthorizationToken` signed by the investigating officer. Automated 1:N surveillance search across external databases is **prohibited**.
+- **Model Candidates:** ArcFace (ResNet-100 / IResNet-100 pre-trained on Glint360k), Sub-center ArcFace, AdaFace, MagFace.
+- **Mathematical Specification:**
+  Extracts 512-dimensional normalized feature vectors $u, v \in \mathbb{R}^{512}$ ($\|u\|_2 = \|v\|_2 = 1$). Computes cosine similarity:
+  $$\text{sim}(u, v) = u^T v = \cos(\theta)$$
+- **Outputs:** `BiometricComparisonResult(similarity_score, calibrated_match_probability, threshold_reference, false_match_rate_operating_point, legal_disclaimer)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A5).
+
+#### IVE-08: Document Layout, Quadrilateral Rectification & OCR
+- **Purpose:** Detect document boundaries, rectify perspective distortion, and extract machine-readable text from contracts, FIRs, and identity cards.
+- **Methodology:** Localizes quadrilateral corners via convex hull polygon approximation on Canny contours. Computes $3\times 3$ perspective transformation matrix $H_{\text{persp}}$ to warp the document to a flat rectangular plane. Executes PaddleOCR / Tesseract 5 with specialized Hindi, English, and regional Indian language language packs.
+- **Outputs:** `DocumentOCRResult(rectified_artifact_id, detected_boxes, recognized_text, avg_confidence, seals_detected, signatures_detected)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A6).
+
+---
+
+### 10.8 IRE Technical Specification (Image Reverse Engineering Engine)
+
+#### IRE-01: Deep Metadata, EXIF, XMP, IPTC & Container Inspection
+- **Purpose:** Extract and cross-validate embedded metadata blocks to identify editing software tags, camera settings, and timestamp discrepancies.
+- **Parser Stack:** ExifTool (vendored read-only execution with argument sanitization), Pillow `_getexif()`, and format-specific container parsers (libjpeg, libpng, tifffile).
+- **Extracted Fields:**
+  - EXIF: Make, Model, LensModel, ExposureTime, FNumber, ISO, FocalLength, DateTimeOriginal, CreateDate, ModifyDate, GPSLatitude, GPSLongitude.
+  - XMP / IPTC: HistoryAction, HistorySoftwareAgent, CreatorTool, DocumentID, InstanceID.
+  - JPEG Markers: DQT (Quantization Tables for Luminance and Chrominance), SOF0/SOF2 (Chroma Subsampling 4:2:0, 4:2:2, 4:4:4), DHT (Huffman tables).
+- **Tampering Invariants:**
+  1. Software tag (e.g. "Adobe Photoshop CC 2024") proves presence of editing application metadata, but does not prove pixels were tampered.
+  2. Missing EXIF metadata does **not** prove malicious modification (messaging apps routinely strip all metadata).
+- **Outputs:** `MetadataAuditReport(exif_tags, xmp_history, quantization_tables, camera_profile, software_signatures_found, timestamp_consistency_verdict)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A7).
+
+#### IRE-02: Signal Statistics, 2D FFT & DCT Frequency Analysis
+- **Purpose:** Analyze 2D frequency spectra and local noise residuals to detect re-sampling, periodic interpolation, and filtering artifacts.
 - **Methodology:**
-  1. Recursively extracts all tags across EXIF, MakerNote, IPTC, and XMP blocks.
-  2. Compares embedded EXIF software strings against an allowlist/blocklist of common image editors (Adobe Photoshop, GIMP, Pixelmator, Canva).
-  3. Verifies internal timestamp consistency: `DateTimeOriginal` vs `DateTimeDigitized` vs `FileModifyDate`.
-  4. Camera Fingerprint Matching: Compares embedded camera model (e.g., iPhone 13 Pro) with focal length, 35mm equivalent, aperture, and sensor dimensions.
+  1. Computes 2D Fast Fourier Transform on grayscale luminance:
+     $$F(u, v) = \sum_{x=0}^{M-1} \sum_{y=0}^{N-1} I(x, y) e^{-j 2\pi (\frac{ux}{M} + \frac{vy}{N})}$$
+  2. Shifts DC component to center and computes log-magnitude spectrum $\log(1 + |F(u, v)|)$. Detects radial periodic spikes indicating periodic resampling or affine interpolation grids.
+  3. Computes Discrete Cosine Transform (DCT) coefficient distributions across $8\times 8$ blocks to measure quantization error variance.
+- **Outputs:** `SignalAnalysisResult(fft_magnitude_artifact_id, periodic_peaks_detected, noise_variance_map_id, frequency_anomaly_score)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A7).
 
-### 10.2 Error Level Analysis (ELA) Module (`ps05.engines.image.ela`)
-- **Methodology:**
-  1. Re-compresses the input image at a known quality level (nominal $Q_1 = 95\%$) using PIL/OpenCV JPEG encoder.
-  2. Computes the absolute per-pixel error magnitude between the original image $I(x, y)$ and the recompressed image $I_{\text{recomp}}(x, y)$:
-     $$\Delta(x, y) = |I(x, y) - I_{\text{recomp}}(x, y)|$$
-  3. Scales the error dynamically by an amplification factor $S = 10\times$ to $20\times$.
-  4. Generates a multi-channel normalized heatmap. Untampered regions exhibit homogeneous error levels, whereas foreign spliced regions display stark high-contrast boundaries.
+#### IRE-03: Classical Vision & Geometric Forensics
+- **Purpose:** Apply classical computer vision primitives for edge detection, shape analysis, and planar reference alignment.
+- **Algorithms:**
+  - Canny Edge Detection with automatic Otsu thresholding.
+  - Sobel and Scharr gradient operators for edge directionality.
+  - Hough Line and Circle transforms for architectural and ballistic alignment.
+  - ORB / SIFT feature extraction with RANSAC homography estimation for multi-image reference registration.
+- **Forensic Principle:** Classical CV outputs describe geometric and boundary properties; they do **not** establish intent, authenticity, or fraud.
+- **Outputs:** `GeometricForensicResult(edge_map_artifact_id, contours_detected, homography_matrix, alignment_error_rmse)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A8).
 
-### 10.3 JPEG Double Compression & Ghost Detection (`ps05.engines.image.double_jpeg`)
-- **Methodology:**
-  1. Inspects Quantization Tables (Luminance and Chrominance 8x8 matrices) in DQT markers.
-  2. Analyzes discrete cosine transform (DCT) coefficients across 8x8 pixel grids for histogram periodicity.
-  3. Computes the blocking artifact discrepancy (BAD) metric to detect non-aligned 8x8 grid splicing.
+#### IRE-04: Copy-Move Forgery Detection (CMFD) & Splicing Localization
+- **Purpose:** Localize cloned or duplicated image regions within the same exhibit.
+- **Dual-Branch Architecture:**
+  1. Keypoint-Based Branch: SIFT keypoints with $k$-d tree nearest-neighbor search, filtering spatial proximity ($r > 30\text{px}$), clustered via DBSCAN and validated via RANSAC affine consistency.
+  2. Block-Based Branch: Overlapping $16\times 16$ blocks transformed via 2D DCT; lexicographically sorted or indexed in FAISS to detect smooth or textured duplicated patches lacking high-contrast keypoints.
+- **Outputs:** `CMFDResult(cloned_pairs_count, source_polygon_mask, destination_polygon_mask, confidence, visualization_artifact_id)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A9).
 
-### 10.4 Copy-Move Forgery Detection (CMFD) (`ps05.engines.image.copy_move`)
+#### IRE-05: Camera Sensor Forensics & PRNU Noise Fingerprinting
+- **Purpose:** Extract Photo-Response Non-Uniformity (PRNU) sensor noise patterns to associate an image with a specific physical camera sensor.
+- **Mathematical Model:**
+  Sensor output $I = I^{(0)} + I^{(0)} \cdot K + \Theta$, where $K$ is the deterministic sensor PRNU noise fingerprint and $\Theta$ is random noise.
+  Extracts noise residual $W = I - F(I)$ using a Mihcak wavelet denoising filter.
+  Computes Normalized Cross-Correlation (NCC) against a reference camera fingerprint $K_{\text{ref}}$:
+  $$\rho(W, K_{\text{ref}}) = \frac{(W - \bar{W}) \cdot (K_{\text{ref}} - \bar{K}_{\text{ref}})}{\|W - \bar{W}\|_2 \|K_{\text{ref}} - \bar{K}_{\text{ref}}\|_2}$$
+- **Operational Requirement:** Device association requires at least 20–30 flat-field reference photographs taken with the suspect device. Social-media re-compression severely degrades PRNU.
+- **Outputs:** `PRNUResult(noise_residual_artifact_id, correlation_coefficient, p_value, device_match_verdict)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A9 — Research Candidate).
+
+#### IRE-06: Processing History, Re-Compression & Social Media Provenance
+- **Purpose:** Detect multiple lossy compression cycles and identify characteristic social media platform transformations (WhatsApp, Facebook, Telegram, X).
+- **Methodology:** Compares quantization table fingerprints against a catalog of 20,000 known mobile camera and platform profiles. Detects Blocking Artifact Discrepancy (BAD) across misaligned JPEG 8x8 grids resulting from cropping followed by re-compression.
+- **Outputs:** `CompressionProvenanceResult(estimated_compression_cycles, matched_platform_signature, bad_discrepancy_score)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A9).
+
+---
+
+### 10.9 AIM Technical Specification (AI, Manipulation & Steganography Engine)
+
+#### AIM-01: Multi-Branch AI-Generated Image Detection
+- **Purpose:** Discriminate authentic photographic captures from fully synthetic generative images (Stable Diffusion, Midjourney, DALL-E, Flux, Imagen, StyleGAN).
+- **Multi-Branch Classifier Ensemble:**
+  1. Patch-Level Spatial Texture Head: ResNet50 / ConvNeXt trained on multi-generator artifact datasets.
+  2. High-Frequency Fourier Head: Classifies 2D FFT spectral abnormalities and radial falloff signatures.
+  3. Foundation Representation Head: SigLIP / CLIP visual embeddings with linear probe.
+- **Calibration & Disagreement:** Raw logits are calibrated using Platt scaling on a held-out benchmark split. If individual branch predictions disagree by $> 0.50$, the system records `DETECTOR_DISAGREEMENT_WARNING` and reports high uncertainty.
+- **Outputs:** `AIGenerationResult(p_synthetic_calibrated, raw_branch_scores, generator_family_clue, uncertainty_flag)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A10).
+
+#### AIM-02: Generative Inpainting, Fill & Local Splicing Localization
+- **Purpose:** Localize pixel-level modified regions resulting from generative fill, object removal, or local splicing.
+- **Candidate Architectures:** TruFor (Transformer-based RGB and noise residual fusion architecture) and CAT-Net (DCT coefficient stream combined with RGB stream).
+- **Output Artifacts:** Produces a dense floating-point anomaly probability map $M(x, y) \in [0, 1]$ at native image resolution, along with vector polygon contours of the suspected edited zones.
+- **Outputs:** `InpaintingLocalizationResult(tampered_area_percentage, anomaly_mask_artifact_id, localized_polygons, confidence)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A10).
+
+#### AIM-03: Face Swap, Morphing & Synthetic Portrait Manipulation
+- **Purpose:** Detect face-swapped portraits (DeepFakes, SimSwap, Roop), face morphs, and generative face edits.
 - **Methodology:**
-  1. Extracts Scale-Invariant Feature Transform (SIFT) keypoints and descriptors across the image.
-  2. Applies $k$-d tree nearest neighbor matching to identify descriptor pairs with Euclidean distance $d < 0.6 \cdot d_{\text{second}}$.
-  3. Filters trivial self-matches with a minimum spatial distance threshold ($r > 20$ pixels).
-  4. Groups matching keypoints using DBSCAN and evaluates affine transformation matrices via RANSAC.
-  5. Outputs polygon bounding boxes enclosing the source cloned patch and destination pasted patch.
+  1. Face X-Ray / Boundary Inconsistency: Detects blending boundaries between the inserted face patch and the background head/neck texture.
+  2. Facial Landmark & Geometry Consistency: Measures bilateral facial asymmetry and unnatural landmark configurations.
+  3. Eye Reflection & Corneal Specularity: Verifies consistency of corneal light reflections across left and right pupils.
+- **Outputs:** `FaceManipulationResult(p_face_swap, blend_boundary_score, specularity_consistent, heatmap_artifact_id)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A11).
+
+#### AIM-04: Steganography & Concealed Data Analysis
+- **Purpose:** Inspect image bitstreams for steganographic payloads and hidden data.
+- **Detection Primitives:**
+  - Least Significant Bit (LSB) plane visual and statistical randomness analysis.
+  - Sample Pair Analysis (SPA) and Chi-square ($\chi^2$) statistical tests on spatial pixel pairs.
+  - Regular-Singular (RS) steganalysis to detect spatial-domain LSB embedding rates.
+  - Spatial Rich Models (SRM) and sub-scale co-occurrence matrices for adaptive steganalysis (HUGO, WOW, S-UNIWARD).
+- **Execution Invariant:** Payload extraction is attempted only under an explicit authorized command. Extracted data is **never executed**.
+- **Outputs:** `SteganalysisResult(lsb_randomness_score, rs_anomaly_detected, estimated_payload_ratio, alert_status)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A12).
+
+#### AIM-05: Defensive Security & Malformed Payload Quarantine
+- **Purpose:** Defend the platform against maliciously crafted image files, polyglot exploits, parser crashes, and buffer overflows.
+- **Controls:**
+  1. Magic byte verification rejecting executable binaries disguised as images (e.g. PE, ELF, ZIP polyglots).
+  2. Trailing byte inspection: flags appended data beyond end-of-image markers (e.g. data appended past JPEG `FF D9` or PNG `IEND`).
+  3. Execution Sandboxing: All external decoders (libjpeg-turbo, libvips, OpenCV) run inside memory-capped, isolated worker processes.
+- **Outputs:** `FileSecurityAudit(trailing_bytes_detected, trailing_bytes_length, polyglot_risk_level, quarantine_status)`.
+- **Implementation Status:** `PLANNED` (Phase AIF-A12).
+
+---
+
+## 10.B CEIPL: Cryptographic Evidence Integrity & Provenance Layer
+
+CEIPL is the shared, immutable cryptographic foundation serving AIF, AURAS, and VFS across the entire PS-05 platform. It enforces mathematical evidence preservation from the moment of seizure through final court presentation.
+
+### 10.B.1 Cryptographic Manifest Creation & Signature Verification Sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Officer as Forensic Investigator
+    participant Core as CEIPL Evidence Core
+    participant Hasher as Direct Streaming Hasher
+    participant JCS as RFC 8785 Canonical Serializer
+    participant Signer as Ed25519 Signer / KMS
+    participant TSA as RFC 3161 Timestamp Authority
+    participant DB as Evidentiary PostgreSQL DB
+
+    Officer->>Core: Finalize Evidence Exhibit (evidence_id)
+    activate Core
+    Core->>Hasher: Re-verify raw bitstream against original SHA-256
+    Hasher-->>Core: Checksum Verified (Bit-for-bit identity confirmed)
+    
+    Core->>JCS: Compile structured exhibit manifest into Canonical JSON (RFC 8785)
+    activate JCS
+    JCS-->>Core: Return deterministic byte string $B_{\text{canonical}}$
+    deactivate JCS
+
+    Core->>Signer: Sign $B_{\text{canonical}}$ with Ed25519 Private Key
+    activate Signer
+    Signer-->>Core: Return Ed25519 Signature $\sigma_{\text{ed25519}}$ (64 bytes hex)
+    deactivate Signer
+
+    opt RFC 3161 Trusted Timestamp Authority Enabled
+        Core->>TSA: Request Timestamp Token for $\text{SHA-256}(B_{\text{canonical}})$
+        activate TSA
+        TSA-->>Core: Return RFC 3161 ASN.1 TimeStampToken + Cert Chain
+        deactivate TSA
+    end
+
+    Core->>DB: INSERT INTO custody_events (event_type='MANIFEST_SIGNED', event_data_hash, ed25519_signature)
+    Core-->>Officer: Canonical Manifest Sealed & Court-Admissible
+    deactivate Core
+```
+
+---
+
+### 10.B.2 Custody Event Hash-Chaining & Merkle Batch Checkpointing Flow
+
+```mermaid
+flowchart TD
+    subgraph CHAIN["Append-Only Hash-Chained Custody Event Log"]
+        E1["Event 1: Seizure & Ingestion<br/>$H_1 = \text{SHA-256}(D_1 \parallel 0^{64})$"]
+        E2["Event 2: Safe Profile Generated<br/>$H_2 = \text{SHA-256}(D_2 \parallel H_1)$"]
+        E3["Event 3: Derived Artifact Created<br/>$H_3 = \text{SHA-256}(D_3 \parallel H_2)$"]
+        E4["Event 4: Report Signed<br/>$H_4 = \text{SHA-256}(D_4 \parallel H_3)$"]
+        E1 --> E2 --> E3 --> E4
+    end
+
+    subgraph MERKLE["Periodic Batch Merkle Tree Checkpoint (RFC 6962)"]
+        L1["Leaf 1: $H_1$"]
+        L2["Leaf 2: $H_2$"]
+        L3["Leaf 3: $H_3$"]
+        L4["Leaf 4: $H_4$"]
+        
+        N12["Node 1-2: $\text{SHA-256}(0x01 \parallel L_1 \parallel L_2)$"]
+        N34["Node 3-4: $\text{SHA-256}(0x01 \parallel L_3 \parallel L_4)$"]
+        
+        ROOT["Merkle Root $R_{\text{batch}} = \text{SHA-256}(0x01 \parallel N_{12} \parallel N_{34})$"]
+        
+        L1 & L2 --> N12
+        L3 & L4 --> N34
+        N12 & N34 --> ROOT
+    end
+
+    subgraph ANCHOR["External Cryptographic Anchoring"]
+        ED["Ed25519 Batch Signature: $\text{Sign}(K_{\text{priv}}, R_{\text{batch}})$"]
+        TSA_TOK["RFC 3161 TSA Timestamp Token"]
+        ROOT --> ED
+        ROOT --> TSA_TOK
+    end
+```
+
+---
+
+### 10.B.3 CEIPL Component Specifications
+
+#### CEIPL-01: Raw-Byte Streaming SHA-256 Direct Hashing
+- Primary digest: FIPS 180-4 SHA-256 calculated directly from raw seized stream before any image decoding or metadata parsing.
+- Auxiliary digest: FIPS 202 SHA3-512 calculated concurrently using chunked 64KB buffers.
+- Verification Rule: Any byte alteration produces immediate `HASH_MISMATCH` critical alert.
+
+#### CEIPL-02: RFC 8785 Canonical JSON Manifests
+- Manifests are formatted using JSON Canonicalization Scheme (RFC 8785 / JCS), enforcing deterministic key sorting, whitespace removal, and IEEE 754 number representation.
+- Prevents signature invalidation caused by JSON key re-ordering across heterogeneous programming environments.
+
+#### CEIPL-03: Ed25519 Digital Signatures & Key Lifecycle
+- Manifests and certificates are signed with Ed25519 (RFC 8032) providing 128-bit security with high signing throughput.
+- Keys are managed in HSM or KMS (PKCS#11 / Cloud KMS). Private keys are **never** logged or exposed to application code.
+
+#### CEIPL-04: RFC 3161 Trusted Timestamp Authority (TSA) Integration
+- Requests trusted timestamp tokens from an external RFC 3161 compliant Time Stamping Authority.
+- Verifies X.509 certificate chains, ensuring independent proof that an exhibit existed at an exact point in time.
+
+#### CEIPL-05: Append-Only Hash-Chained Custody Event Logs
+- Every action on an evidence exhibit creates an immutable event record chained to the previous event:
+  $$H_i = \text{SHA-256}(\text{CanonicalData}_i \parallel H_{i-1})$$
+- Detects unauthorized deletion, modification, or reordering of custody records.
+
+#### CEIPL-06: RFC 6962 Merkle Tree Batch Checkpoints & Inclusion Proofs
+- Aggregates custody events and exhibits into RFC 6962 compliant binary Merkle trees.
+- Generates compact cryptographic inclusion proofs of size $O(\log N)$, allowing court verification of specific exhibits without disclosing unrelated case records.
+
+#### CEIPL-07: Derived Artifact Lineage DAG & Coordinate Transform Manifests
+- Every derived image (crop, normalized array, perspective rectification, tile) is registered in an immutable DAG with its parent artifact ID, parent SHA-256, child SHA-256, transform operator, parameters, and linear affine matrix $M \in \mathbb{R}^{3\times 3}$.
+- Guarantees that any finding on a derived crop can be mapped back to original exhibit pixel coordinates with mathematical certainty.
+
+#### CEIPL-08: C2PA Content Credentials & Trust Chain Verification
+- Parses C2PA (Coalition for Content Provenance and Authenticity) JUMBF metadata boxes.
+- Validates claim signatures, signer X.509 certificate chains, and content bindings. Reports whether an image contains valid provenance metadata or an altered claim.
+
+#### CEIPL-09: Authenticated Storage Encryption (AES-256-GCM / KMS)
+- Exhibits and derived artifacts at rest are encrypted using AES-256-GCM with unique initialization vectors (IVs). Key management is decoupled from evidence storage.
+
+#### CEIPL-10: Immutable WORM Storage & POSIX 0400 Enforcement
+- Original raw files are stored in write-once-read-many partitions with POSIX `0400` read-only permissions and S3 Object Lock in Compliance Mode.
+
+#### CEIPL-11: Cryptographic Failure Code Taxonomy
+When verification fails, CEIPL returns explicit typed failure codes:
+- `HASH_MISMATCH`: Seized file bitstream differs from acquisition checksum.
+- `SIGNATURE_INVALID`: Digital signature failed mathematical verification against public key.
+- `SIGNING_KEY_UNTRUSTED`: Public key not found in authorized judicial certificate authority.
+- `SIGNING_KEY_REVOKED`: Key is flagged revoked in CRL or OCSP check.
+- `TIMESTAMP_INVALID`: RFC 3161 TSA token signature invalid or certificate expired.
+- `CONTENT_BINDING_MISMATCH`: C2PA claim hash differs from image pixel hash.
+- `MANIFEST_UNSUPPORTED`: Manifest schema version not recognized by platform.
+- `CUSTODY_CHAIN_BROKEN`: Event hash does not equal hash of previous event link.
+- `MERKLE_PROOF_INVALID`: Leaf inclusion proof failed to hash to committed Merkle root.
+- `RETENTION_POLICY_FAILURE`: Unauthorized attempt to modify or delete WORM-locked exhibit.
+- `ENCRYPTION_OR_RETRIEVAL_FAILURE`: Key decryption failure or missing vault segment.
+- `VERIFICATION_INCONCLUSIVE`: Verification service unreachable or prerequisite data missing.
+
+---
+
+### 10.C AIF & CEIPL Technology Registry & Module-to-Tool Matrix
+
+The following matrix documents every planned tool, library, and deep learning model across the AIF subsystem and shared CEIPL foundation:
+
+| Module ID | Forensic Responsibility | Candidate Tool / Model | Official Repo / Source | License Status | Input Contract | Output Contract | Hardware / RAM Target | Version Pinning | Known Limitations | Current Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **IVE-01** | Safe format profiling & limits | Pillow + python-magic | `python-pillow/Pillow` | HPND (Permissive) | Raw image byte stream | `ImageProfile` JSON | CPU (1 core, 512MB RAM) | `Pillow==10.3.0` | Malformed Exif in rare camera RAW formats | `PLANNED` |
+| **IVE-02/03** | 150-category multi-label scene triage | SigLIP / ViT-SO400M | `google-research/big_vision` | Apache-2.0 | Normalized sRGB ($336\times 336$) | `List[TaxonomyAnnotation]` | GPU ($\ge 4\text{GB}$ VRAM) / CPU float32 | `transformers==4.40.2` | Zero-shot open vocabulary domain drift on forensic injury | `PLANNED` |
+| **IVE-04** | Object detection & instance masks | YOLOv8x / SAM 2 | `ultralytics/ultralytics`, `facebookresearch/segment-anything-2` | AGPL-3.0 / Apache-2.0 | Tiled RGB ($1024\times 1024$) | `List[DetectedObject]` | GPU ($\ge 8\text{GB}$ VRAM) | `ultralytics==8.2.14`, `sam2==1.0` | Heavy memory footprint with SAM 2; NMS boundary overlap | `PLANNED` |
+| **IVE-05** | Occlusion-aware people counting | Custom dual-head YOLO + Hungarian | `ps05.engines.image.ive` | Proprietary (PS-05) | High-res RGB tensor | `PeopleCountResult` | GPU ($\ge 4\text{GB}$ VRAM) | Internal | Severe crowd occlusion ($> 85\%$) degrades person bounding | `PLANNED` |
+| **IVE-06 / FPA**| Face detection & 468 3D landmarks | RetinaFace + MediaPipe Face Mesh | `biubug6/Pytorch_Retinaface`, `google/mediapipe` | MIT / Apache-2.0 | Bounding face crop | `FaceRegion` + 468 mesh | CPU (2 cores) / GPU | `mediapipe==0.10.14`, `retinaface-pytorch` | Degrades under extreme yaw ($> 60^\circ$) or resolution $< 48\text{px}$ | `PLANNED` |
+| **IVE-07 / FPA**| Authorized 1:1 face similarity | ArcFace (IResNet-100) / MagFace | `deepinsight/insightface` | MIT | Aligned $112\times 112$ face crop + Case Token | `BiometricComparisonResult` | GPU / CPU float32 | `insightface==0.7.3` | Cross-age and cross-resolution false match variance | `PLANNED` |
+| **IVE-08** | Document layout & OCR | Canny + Homography + PaddleOCR | `PaddlePaddle/PaddleOCR` | Apache-2.0 | Document image | `DocumentOCRResult` | CPU / GPU | `paddleocr==2.7.3` | Complex curved/wrinkled documents distort quad warp | `PLANNED` |
+| **IRE-01** | Deep EXIF/XMP/IPTC container audit | ExifTool read-only wrapper | `PhilHarvey/Image-ExifTool` | Artistic / GPL-1.0+ | File path on disk | `MetadataAuditReport` | CPU (minimal) | `exiftool==12.84` | Metadata easily stripped by messaging intermediaries | `PLANNED` |
+| **IRE-02** | 2D FFT & DCT spectral statistics | NumPy / SciPy 2D FFT | `scipy/scipy` | BSD-3-Clause | Grayscale luminance matrix | `SignalAnalysisResult` | CPU (1 core, 1GB RAM) | `scipy==1.13.0`, `numpy==1.26.4` | Downsampling removes high-frequency resampling peaks | `PLANNED` |
+| **IRE-03** | Classical CV geometric forensics | OpenCV (Canny, SIFT, RANSAC) | `opencv/opencv-python` | Apache-2.0 | Grayscale questioned + reference | `GeometricForensicResult` | CPU (2 cores) | `opencv-python-headless==4.9.0.80` | Featureless, smooth surfaces yield insufficient SIFT matches | `PLANNED` |
+| **IRE-04** | Copy-Move Forgery Detection (CMFD) | SIFT k-d tree DBSCAN + DCT | `ps05.engines.image.ire` | Proprietary (PS-05) | Full-res RGB array | `CMFDResult` + polygon masks | CPU / GPU | Internal | High computational complexity $O(N^2)$ on 50MP images | `PLANNED` |
+| **IRE-05** | Sensor PRNU noise fingerprinting | Wavelet denoising + NCC | `ps05.engines.image.ire` | Proprietary (PS-05) | Questioned image + 25 reference flats | `PRNUResult` + correlation $\rho$ | CPU (4 cores, 4GB RAM) | `PyWavelets==1.6.0` | Social-media lossy recompression damages PRNU noise | `RESEARCH_CANDIDATE` |
+| **IRE-06** | Re-compression & platform history | DQT Catalog + Blocking Discrepancy | `ps05.engines.image.ire` | Proprietary (PS-05) | JPEG binary bitstream | `CompressionProvenanceResult` | CPU (1 core) | Internal | Non-JPEG images lack standard quantization markers | `PLANNED` |
+| **AIM-01** | Synthetic AI-image classifier | Multi-branch ResNet50 + FFT + SigLIP | `ps05.engines.image.aim` | Proprietary (PS-05) | $512\times 512$ patches & full-res | `AIGenerationResult` | GPU ($\ge 8\text{GB}$ VRAM) | Internal + PyTorch 2.3 | Out-of-distribution generators (unseen architectures) | `PLANNED` |
+| **AIM-02** | Generative inpainting localization | TruFor / CAT-Net | `grip-unina/TruFor` | Academic / Research | Full-res RGB array | `InpaintingLocalizationResult` | GPU ($\ge 8\text{GB}$ VRAM) | `torch==2.3.0` | False positives on natural high-contrast shadow boundaries | `PLANNED` |
+| **AIM-03** | Face swap & morphing forensics | Face X-Ray blend boundary net | `ps05.engines.image.aim` | Proprietary (PS-05) | Aligned face crop ($256\times 256$) | `FaceManipulationResult` | GPU ($\ge 4\text{GB}$ VRAM) | Internal | Heavy skin airbrushing / beauty filters mimic tampering | `PLANNED` |
+| **AIM-04** | Steganography & hidden data audit | LSB / SPA / RS / Rich Models | `ps05.engines.image.aim` | Proprietary (PS-05) | Bitstream + pixel arrays | `SteganalysisResult` | CPU (2 cores) | Internal | High miss rate on low embedding rates ($< 0.05$ bpp) | `PLANNED` |
+| **AIM-05** | Defensive file vulnerability defense | Magic bytes + trailing byte parser | `ps05.engines.image.aim` | Proprietary (PS-05) | Seized raw bitstream | `FileSecurityAudit` | CPU (1 core) | Internal | Zero-day parser vulnerabilities in underlying C libraries | `PLANNED` |
+| **CEIPL-01** | Raw direct dual-hashing | `hashlib` (FIPS OpenSSL backend) | Python standard library | Python Software Foundation | Chunked raw byte stream | SHA-256 and SHA3-512 hex | CPU (1 core) | Native Python 3.12 | None | `IMPLEMENTED` |
+| **CEIPL-02** | Deterministic canonical JSON | `canonicaljson` (RFC 8785 JCS) | `matrix-org/python-canonicaljson` | Apache-2.0 | Arbitrary JSON dict | Deterministic UTF-8 bytes | CPU (minimal) | `canonicaljson==2.0.0` | Floating-point rounding edge cases | `PLANNED` |
+| **CEIPL-03** | Digital signatures & key management | `cryptography` (Ed25519 / RFC 8032) | `pyca/cryptography` | Apache-2.0 / BSD | Canonical byte string | 64-byte Ed25519 signature | CPU (minimal) | `cryptography==42.0.7` | Key compromise without revocation mechanism | `PLANNED` |
+| **CEIPL-04** | RFC 3161 Trusted Timestamping | `rfc3161ng` / PyKCS11 | `trbs/rfc3161ng` | MIT | SHA-256 exhibit digest | ASN.1 TimeStampToken | Network I/O (HTTPS) | `rfc3161ng==2.1.3` | TSA service unavailability / network timeouts | `PLANNED` |
+| **CEIPL-05** | Append-only hash-chained custody | `ps05.core.crypto.custody_chain` | Proprietary (PS-05) | Proprietary (PS-05) | Custody event payload | 64-char hex chain hash | CPU (minimal) | Internal | Privileged DB admin rewriting all rows (requires Merkle) | `PLANNED` |
+| **CEIPL-06** | Merkle tree batch checkpoints | `ps05.core.crypto.merkle_tree` | Proprietary (PS-05) | Proprietary (PS-05) | List of leaf hashes | Merkle Root + Inclusion Proof | CPU (1 core) | Internal | Dynamic re-ordering of uncommitted batches | `PLANNED` |
+| **CEIPL-07** | Derived Artifact Lineage DAG | `ps05.core.crypto.lineage` | Proprietary (PS-05) | Proprietary (PS-05) | Parent ID + Operator + $M_{3\times 3}$ | Child Artifact Record | CPU (minimal) | Internal | Cyclic dependency attempts (rejected by DAG validator) | `PLANNED` |
+| **CEIPL-08** | C2PA Content Credentials audit | `c2pa-python` (Rust C2PA library) | `contentauth/c2pa-rs` | MIT / Apache-2.0 | Image file path | `C2PAValidationResult` | CPU (1 core) | `c2pa-python==0.5.0` | Proprietary / non-standard claim formats rejected | `PLANNED` |
 
 ---
 
@@ -1840,7 +2660,104 @@ class AudioJobResultsResponse(BaseModel):
     model_manifest_hashes: Dict[str, str]
 ```
 
-### 12.3 Video Evidence Ingestion & Registration Contract
+### 12.3 Image Evidence Ingestion & Safe Profile Contract
+```python
+class ImageEvidenceRegistrationRequest(BaseModel):
+    case_id: UUID
+    exhibit_number: str = Field(..., max_length=32)
+    acquisition_officer: str = Field(..., max_length=128)
+    acquired_at: datetime
+    trusted_sha256_reference: Optional[str] = Field(None, min_length=64, max_length=64)
+    case_authorization_token: Optional[UUID] = None # Mandatory for biometric matching
+
+class ImageProfile(BaseModel):
+    detected_format: str
+    detected_mime: str
+    width: int
+    height: int
+    pixel_count: int
+    aspect_ratio: float
+    bit_depth: int
+    colour_mode: str
+    colour_space: str
+    has_alpha: bool
+    orientation: int
+    is_animated: bool
+    frame_count: int
+    safe_decode_status: str # VERIFIED_SAFE, DECOMPRESSION_BOMB_PREVENTED, DECODER_WARNING
+    c2pa_manifest_status: str # NOT_PRESENT, VALID_SIGNATURE, UNTRUSTED_ROOT, TAMPERED_BINDING
+    embedded_thumb_present: bool
+
+class ImageEvidenceRegistrationResponse(BaseModel):
+    evidence_id: UUID
+    case_id: UUID
+    exhibit_number: str
+    original_filename: str
+    sha256_hash: str
+    sha3_512_hash: str
+    storage_uri: str
+    file_size_bytes: int
+    profile: ImageProfile
+    created_at: datetime
+```
+
+### 12.4 Image Forensic Job Execution & Router Contract
+```python
+class ImageJobCreateRequest(BaseModel):
+    evidence_id: UUID
+    profile_name: str = "FULL_IMAGE_FORENSIC" # FAST_TRIAGE, FULL_IMAGE_FORENSIC, FACIAL_ONLY, MANIPULATION_ONLY
+    enabled_engines: List[str] = ["IVE", "IRE", "AIM", "FPA"]
+    reference_mugshot_evidence_id: Optional[UUID] = None
+    case_authorization_token: Optional[UUID] = None
+    tiling_enabled: bool = True
+    tile_size: int = 1024
+    tile_overlap: int = 128
+    options: Dict[str, Any] = Field(default_factory=dict)
+
+class ImageTaxonomyItem(BaseModel):
+    category_id: str
+    category_label: str
+    confidence: float
+    is_triage_alert: bool
+    assigned_by_model: str
+
+class FaceBiometricItem(BaseModel):
+    face_index: int
+    bounding_box: List[float] # [ymin, xmin, ymax, xmax]
+    landmarks_468_present: bool
+    pose_angles: Dict[str, float] # yaw, pitch, roll
+    quality_score: float
+    privacy_classification: str
+    biometric_similarity: Optional[float] = None
+    legal_disclaimer: Optional[str] = None
+
+class ManipulationFinding(BaseModel):
+    module: str # IRE_CMFD, AIM_AIGEN, AIM_INPAINT, AIM_FACESWAP, AIM_STEG
+    finding_type: str
+    confidence: float
+    calibrated_score: Optional[float] = None
+    affected_bounding_box: Optional[List[float]] = None
+    anomaly_mask_artifact_id: Optional[UUID] = None
+    technical_details: Dict[str, Any] = Field(default_factory=dict)
+
+class ImageJobResultsResponse(BaseModel):
+    job_id: UUID
+    evidence_id: UUID
+    status: str
+    overall_verdict: str
+    aggregate_confidence: float
+    summary: str
+    taxonomy_tags: List[ImageTaxonomyItem]
+    visible_people_count: int
+    detected_faces_count: int
+    faces: List[FaceBiometricItem]
+    manipulation_findings: List[ManipulationFinding]
+    c2pa_status: str
+    canonical_manifest_sha256: str
+    ed25519_signature: str
+```
+
+### 12.5 Video Evidence Ingestion & Registration Contract
 ```python
 class VideoEvidenceRegistrationRequest(BaseModel):
     case_id: UUID
@@ -2007,6 +2924,15 @@ flowchart TD
             A_INTEG["AURAS Ingestion & WORM Vault Tests"]
             A_BENCH["ASVspoof & Synthetic Splice Benchmarks"]
         end
+        subgraph IMAGE_TESTS["🖼️ Image & Cryptographic Verification Suite"]
+            I_UNIT["IVE Decompression Bomb & Profiling Tests"]
+            I_DAG["Derived Artifact Lineage & Affine Transform Invariance"]
+            I_TAX["IVE Multi-Label Taxonomy & People Counting Tests"]
+            I_FPA["FPA RetinaFace & MediaPipe 468-point Mesh Tests"]
+            I_IRE["IRE CMFD (DBSCAN/DCT) & 2D FFT Anomaly Tests"]
+            I_AIM["AIM TruFor Inpainting & Multi-Branch AI-Gen Tests"]
+            I_CRYPTO["CEIPL RFC 8785 Canonical JSON & Merkle Proof Tests"]
+        end
         subgraph VIDEO_TESTS["📹 Video Verification Suite"]
             V_UNIT["VRE Demux & Bitstream Tests"]
             V_INTEG["AFB Stream-Copy & DAG Lineage Tests"]
@@ -2017,6 +2943,7 @@ flowchart TD
     end
     
     AUDIO_TESTS --> CI_GATE["CI/CD Automated Gate (Exit Code 0)"]
+    IMAGE_TESTS --> CI_GATE
     VIDEO_TESTS --> CI_GATE
     CI_GATE --> BENCH_REPORT["Forensic Benchmark Dossier & Section 65B Validation"]
 ```
@@ -2034,7 +2961,29 @@ flowchart TD
 5. **Diarization Error Rate (DER) Evaluation (`tests/benchmarks/test_mvsi_der.py`):**
    - Computes DER, JER, and overlap-specific F1 on multi-talker conversational benchmark sets.
 
-### 13.2 Video, CCTV & Deepfake Benchmark Architecture
+### 13.2 Image Forensics & CEIPL Verification Suite
+1. **Safe Ingestion & Decompression Quota Tests (`tests/unit/test_ive_safe_decode.py`):**
+   - Ingests decompression bomb test fixtures (e.g. 10000x10000 pixel sparse PNGs, recursive TIFFs); asserts `DECOMPRESSION_BOMB_PREVENTED` exception within $< 500\text{ ms}$ and memory utilization $\le 512\text{ MB}$.
+   - Tests binary polyglots (GIF/ZIP, JPEG/PE); asserts non-image execution blocks and quarantine logging.
+2. **Derived Artifact DAG & Coordinate Transform Tests (`tests/unit/test_ceipl_lineage.py`):**
+   - Validates that crops, rotated views, and perspective warps record invertibility in affine matrix $M_{3\times 3}$.
+   - Asserts that re-projecting bounding box $[x_1, y_1, x_2, y_2]$ from derived crop to parent exhibit produces zero coordinate drift ($|\Delta| < 0.001\text{ px}$).
+3. **Taxonomy & People Counting Evaluation (`tests/benchmarks/test_ive_taxonomy.py`):**
+   - Evaluates multi-label SigLIP / ViT classifier across 15 parent domains; measures macro-F1 and confusion matrices.
+   - Evaluates occlusion-aware people counter on dense crowd datasets (ShanghaiTech, CrowdHuman); verifies Count MAE $\le 1.8$ on crowds under 30 persons.
+4. **Facial Biometrics & Privacy Invariant Tests (`tests/unit/test_fpa_biometrics.py`):**
+   - Asserts that 1:1 ArcFace matching fails with `UNAUTHORIZED_ACCESS_EXCEPTION` when `case_authorization_token` is missing or expired.
+   - Verifies 468 MediaPipe facial landmark stability across yaw/pitch variations ($\pm 30^\circ$).
+5. **Copy-Move & Inpainting Localization Benchmarks (`tests/benchmarks/test_aim_trufor.py`):**
+   - Evaluates CMFD DBSCAN keypoint matcher on CoMoFoD dataset; asserts detection recall $\ge 92\%$ for smooth and textured duplicated patches.
+   - Evaluates TruFor / CAT-Net generative inpainting localization on synthetic fill datasets; measures pixel-level F1, IoU, and false-positive rate on natural contrast edges.
+6. **CEIPL Cryptographic Resilience & Failure Suite (`tests/integration/test_ceipl_cryptography.py`):**
+   - Ingests test vectors with bit flips at byte offsets 0, mid, and end; asserts `HASH_MISMATCH` raised.
+   - Tests RFC 8785 canonical JSON serialization against heterogeneous JSON key orderings; asserts identical SHA-256 digest.
+   - Tests Merkle inclusion proofs for batch sizes $N \in \{1, 10, 100, 1000\}$; asserts proof size $O(\log N)$ and bitstream verification.
+   - Tests Ed25519 signature tampering, revoked key rejection, and RFC 3161 TSA token timestamp verification.
+
+### 13.3 Video, CCTV & Deepfake Benchmark Architecture
 1. **Bitstream & Container Verification (`tests/unit/test_vre_bitstream.py`):**
    - Ingests test vectors with intentionally corrupted `moov` atoms, non-monotonic PTS cadences, and artificial VFR jitter; verifies deterministic error trapping and PTS continuity regression.
 2. **Stream-Copy Extraction & Lineage (`tests/integration/test_afb_pipeline.py`):**
@@ -2072,14 +3021,18 @@ Archify (`https://github.com/tt-a1i/archify`) functions as the architectural and
 | Threat Category | Potential Forensic Risk | Architectural Defense & Mitigation |
 | :--- | :--- | :--- |
 | **Spoofing (Platform)** | Rogue operator uploads forged exhibits or impersonates senior examiner. | Mandatory mTLS or JWT with claims; cryptographically signed audit logs per session. |
+| **Spoofing (Image/Face)**| Suspect uploads AI-generated synthetic face or face morph to impersonate individual. | FPA landmark topology analysis, Face X-Ray boundary detector, AIM multi-branch synthetic image classifier. |
 | **Spoofing (Video/CCTV)**| Malicious actor injects synthetic face-swap frames or forges ONVIF digital certificates. | Multi-head spatial and temporal deepfake detectors (FTCN, VideoMAE); X.509 PKI chain validation against root CAs. |
 | **Tampering (Storage)** | Investigator alters raw file or deletes intermediate splice findings to compromise case. | WORM storage (POSIX 0400 / S3 Object Lock); Merkle tree audit log prevents silent DB mutation. |
+| **Tampering (Image)**   | Suspect performs generative fill to erase weapon or clone document stamps. | TruFor / CAT-Net inpainting localization, CMFD SIFT/DCT duplicated patch analysis, EXIF DQT quantization audit. |
 | **Tampering (Video)**   | Suspect excises incriminating video sequence, replaces audio track (re-dubbing), or manipulates OSD clock. | VRE PTS cadence regression, AVSC SyncNet lip-sync verification, PaddleOCR clock continuity regression $\delta(t)$. |
-| **Repudiation (Report)**| Examiner denies signing or approving a flawed forensic certificate. | Dual-signature signing (PKCS#7) with examiner certificate and timestamp server counter-signature. |
+| **Repudiation (Report)**| Examiner denies signing or approving a flawed forensic certificate. | Dual-signature signing (PKCS#7 / Ed25519) with examiner certificate and timestamp server counter-signature. |
 | **Repudiation (CCTV)**  | Defense claims camera source parameters were fabricated or altered by police. | CCTVContext versioned data model, automated pre-questioning extraction audit trail, immutable questionnaire responses. |
-| **Information Disclosure**| Sensitive victim/suspect media or facial biometrics leaked to unauthorized parties. | AES-256-GCM data at rest; strict RBAC case boundaries; ephemeral pre-signed URLs (max 15 mins); anonymized bystander crops. |
-| **Denial of Service**   | Malicious 100GB video bomb, recursive container atom, or infinite GOP uploaded to exhaust server workers. | Strict chunked streaming upload validation; maximum file size quotas; container allocation caps ($\le 256\text{ MB}$); worker cgroups. |
-| **Elevation of Privilege**| Worker process exploits libavformat/libavcodec buffer overflow to gain host root. | Workers execute inside unprivileged container sandboxes with seccomp profiles, AppArmor, and read-only root filesystems. |
+| **Information Disclosure (Biometrics)** | Facial feature vectors leaked or utilized for unconstitutional mass surveillance. | AES-256-GCM encrypted feature blobs; strict 1:1 matching policy; mandatory judicial `case_authorization_token`; zero 1:N searching. |
+| **Information Disclosure (Media)** | Sensitive victim/suspect media leaked to unauthorized parties. | AES-256-GCM data at rest; strict RBAC case boundaries; ephemeral pre-signed URLs (max 15 mins); anonymized bystander crops. |
+| **Denial of Service (Image)** | Malicious 100-Megapixel decompression bomb or crafted polyglot uploaded to freeze server. | Pillow 128M pixel limit (`Image.MAX_IMAGE_PIXELS = 128_000_000`); isolated worker decoding sandbox with 2GB RAM / 30s timeout quota. |
+| **Denial of Service (Video)** | Malicious 100GB video bomb, recursive container atom, or infinite GOP uploaded to exhaust server workers. | Strict chunked streaming upload validation; maximum file size quotas; container allocation caps ($\le 256\text{ MB}$); worker cgroups. |
+| **Elevation of Privilege**| Worker process exploits libavformat/libjpeg-turbo buffer overflow to gain host root. | Workers execute inside unprivileged container sandboxes with seccomp profiles, AppArmor, and read-only root filesystems. |
 
 ### 15.2 Legal Compliance Standards: Section 65B IEA / Section 63 BSA 2023
 To guarantee court admissibility across Indian jurisdictions, the platform automatically records and embeds the following mandatory electronic evidence custody fields in every generated certificate:
