@@ -110,12 +110,18 @@ flowchart TB
     WORM --> ROUTER
     ROUTER --> QUEUE
     QUEUE --> DERIVE
-    DERIVE --> AURAS
-    DERIVE --> AIF
-    DERIVE --> VISTA
-    CRYPTO -.->|Integrity & Provenance Layer| INTAKE & AIF & AURAS & VISTA & REPORT
-    AFB -.->|Extracted Audio Stream (DAG Linked)| AURAS
-    AURAS & AIF & VISTA --> AGG
+    DERIVE --> ARE
+    DERIVE --> IVE
+    DERIVE --> VRE
+    CRYPTO -.->|"Integrity and Provenance Layer"| CEIPL_HASH
+    CRYPTO -.->|"Integrity and Provenance Layer"| ARE
+    CRYPTO -.->|"Integrity and Provenance Layer"| IVE
+    CRYPTO -.->|"Integrity and Provenance Layer"| VRE
+    CRYPTO -.->|"Integrity and Provenance Layer"| AGG
+    AFB -.->|"Extracted Audio Stream, DAG Linked"| ARE
+    ARE --> AGG
+    IVE --> AGG
+    VRE --> AGG
     AGG --> ARCHIFY
     AGG --> PDF
 ```
@@ -199,15 +205,17 @@ flowchart TD
         end
     end
     
-    ART_NATIVE --> ARE_ENG
-    ART_16K --> MVSI_ENG
-    ART_SLICES --> ADDE_ENG
+    ART_NATIVE --> ARE_SIG
+    ART_16K --> MV_VAD
+    ART_SLICES --> AD_RAW
     
-    ARE_ENG --> FIND_ARE["ARE Findings & Spectral Visuals"]
-    MVSI_ENG --> FIND_MVSI["MVSI Speaker Timeline & Language Breakdown"]
-    ADDE_ENG --> FIND_ADDE["ADDE Suspicion Curves & Calibrated Scores"]
+    ARE_ENF --> FIND_ARE["ARE Findings & Spectral Visuals"]
+    MV_CODE --> FIND_MVSI["MVSI Speaker Timeline & Language Breakdown"]
+    AD_ENS --> FIND_ADDE["ADDE Suspicion Curves & Calibrated Scores"]
     
-    FIND_ARE & FIND_MVSI & FIND_ADDE --> AGGREGATOR["5. Cross-Engine Finding Aggregator & Correlator"]
+    FIND_ARE --> AGGREGATOR["5. Cross-Engine Finding Aggregator & Correlator"]
+    FIND_MVSI --> AGGREGATOR
+    FIND_ADDE --> AGGREGATOR
     AGGREGATOR --> REVIEWER["6. Examiner Review Workbench (Annotations & Sanity Checks)"]
     REVIEWER --> DOSSIER["7. Section 65B/63 BSA Certified PDF Report & Archify JSON IR"]
 ```
@@ -304,13 +312,13 @@ flowchart TD
         end
     end
     
-    ROUTER --> IVE_ENG
-    ROUTER --> IRE_ENG
-    ROUTER --> AIM_ENG
+    ROUTER --> IVE_TAX
+    ROUTER --> IRE_EXIF
+    ROUTER --> AIM_GEN
     
-    IVE_ENG --> DERIVE_DAG["6. Derived Artifact Factory: Log Lineage Manifests & DAG Hashes"]
-    IRE_ENG --> DERIVE_DAG
-    AIM_ENG --> DERIVE_DAG
+    IVE_OCR --> DERIVE_DAG["6. Derived Artifact Factory: Log Lineage Manifests & DAG Hashes"]
+    IRE_CAM --> DERIVE_DAG
+    AIM_SEC --> DERIVE_DAG
     
     DERIVE_DAG --> AGG["7. Cross-Engine Finding Aggregator & Conflict Resolver"]
     AGG --> REVIEW["8. Forensic Examiner Workbench (Calibrated Overlays & Review)"]
@@ -391,8 +399,8 @@ flowchart TD
     SAFE_PROBE --> VRE_01["4. VRE-01: Container, Codec, PTS/DTS Cadence & Stream Inventory"]
     
     VRE_01 --> CCTV_TRIAGE{"5. CCTV-01: Automatic Source Triage"}
-    CCTV_TRIAGE -->|Likely CCTV| CCTV_AUTO["CCTV-02: Auto-Extract OSD Clues, Channel & Recorder Metadata"]
-    CCTV_TRIAGE -->|General Video| VISTA_DISPATCH["6. Task-Aware Engine Dispatcher"]
+    CCTV_TRIAGE -->|"Likely CCTV"| CCTV_AUTO["CCTV-02: Auto-Extract OSD Clues, Channel & Recorder Metadata"]
+    CCTV_TRIAGE -->|"General Video"| VISTA_DISPATCH["6. Task-Aware Engine Dispatcher"]
     CCTV_AUTO --> CCTV_ADAPTIVE["CCTV-03/05: Formulate Targeted Questions (A-E) if context missing"]
     CCTV_ADAPTIVE --> VISTA_DISPATCH
     
@@ -441,17 +449,22 @@ flowchart TD
         end
     end
     
-    VISTA_DISPATCH --> VRE_ENG
-    VISTA_DISPATCH --> AFB_BRIDGE
-    VISTA_DISPATCH --> AVSC_ENG
-    VISTA_DISPATCH --> VDF_ENG
-    VISTA_DISPATCH --> VCI_ENG
-    VISTA_DISPATCH --> CCTV_SPEC
+    VISTA_DISPATCH --> VRE_CAD
+    VISTA_DISPATCH --> AFB_EXT
+    VISTA_DISPATCH --> AVSC_ALIGN
+    VISTA_DISPATCH --> VDF_FRAME
+    VISTA_DISPATCH --> VCI_TAX
+    VISTA_DISPATCH --> CCTV_CLK
     
-    AFB_EXT -.->|Derived Working WAV| AURAS_SUBSYSTEM["🎧 AURAS Subsystem Execution (ARE / MVSI / ADDE)"]
-    AURAS_SUBSYSTEM -.->|Audio Findings| AFB_ROUTE
+    AFB_EXT -.->|"Derived Working WAV"| AURAS_SUBSYSTEM["AURAS Subsystem Execution (ARE / MVSI / ADDE)"]
+    AURAS_SUBSYSTEM -.->|"Audio Findings"| AFB_ROUTE
     
-    VRE_ENG & AFB_BRIDGE & AVSC_ENG & VDF_ENG & VCI_ENG & CCTV_SPEC --> DERIVE_DAG["7. Derived Artifact Factory: Log Lineage Manifests & Child Hashes"]
+    VRE_HIST --> DERIVE_DAG["7. Derived Artifact Factory: Log Lineage Manifests & Child Hashes"]
+    AFB_SPK --> DERIVE_DAG
+    AVSC_EVT --> DERIVE_DAG
+    VDF_CALIB --> DERIVE_DAG
+    VCI_OCR --> DERIVE_DAG
+    CCTV_MULTI --> DERIVE_DAG
     
     DERIVE_DAG --> AGG["8. Cross-Engine Finding Aggregator & Conflict Resolver"]
     AGG --> REVIEW["9. Forensic Examiner Workbench (Calibrated Multi-Track Player)"]
@@ -691,7 +704,3 @@ Refer to [PHASES.md](PHASES.md) for full phase gates and definitions of done:
 - [archify.config.json](archify.config.json) — Archify JSON IR and report configuration
 - [pyproject.toml](pyproject.toml) — Project packaging and dependency manifest
 - [.env.example](.env.example) — Documented configuration template
-#   B H a c k - D o c s  
- #   B H a c k - D o c s  
- #   B H a c k - D o c s  
- 
