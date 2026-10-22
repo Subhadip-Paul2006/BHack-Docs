@@ -84,6 +84,21 @@ The **ONTF (Offline Network Traffic Forensics)** subsystem fulfills twelve core 
 11. **OBJ-ONTF-11 (Multi-Stage Correlation & MITRE ATT&CK):** Correlate discrete network anomalies into multi-stage attack scenarios (Reconnaissance -> C2 -> Exfiltration) and tag verified findings to MITRE ATT&CK tactics and techniques.
 12. **OBJ-ONTF-12 (Court-Admissible Forensic Certification):** Assemble an 11-part court-ready electronic evidence dossier under Section 65B IEA / Section 63 BSA, sealed with Ed25519 digital signatures and RFC 3161 timestamps.
 
+### 3.5 Dedicated AIF-GEO (Geospatial Forensics & Evidence Correlation) Product Objectives
+The **AIF-GEO (Geospatial Forensics & Evidence Correlation)** subsystem fulfills twelve foundational objectives for spatial-temporal electronic evidence analysis:
+1. **OBJ-GEO-01 (Non-Destructive Location Metadata Extraction):** Extract all embedded EXIF GPS tags, XMP/IPTC spatial metadata, and format-specific MakerNotes without altering a single bit of the original image exhibit.
+2. **OBJ-GEO-02 (Rigorous Coordinate & Hemisphere Validation):** Enforce strict geodetic boundary checks ($-90 \le \phi \le 90$, $-180 \le \lambda \le 180$), safe rational-number decoding, zero-denominator trapping, and cross-tag conflict detection.
+3. **OBJ-GEO-03 (Geodetic Precision & Uncertainty Modeling):** Compute high-precision WGS84 ellipsoidal geodesic distances and propagate measurement uncertainties ($\sigma_{\text{diff}} = \sqrt{\sigma_1^2 + \sigma_2^2}$) without simplistic spherical approximations.
+4. **OBJ-GEO-04 (Air-Gapped Reverse Geocoding & Spatial Enrichment):** Resolve coordinates to administrative boundaries, street names, and points of interest using local offline gazetteers or strictly whitelisted, privacy-preserving provider adapters.
+5. **OBJ-GEO-05 (Multi-Source Time & Clock Synchronization):** Compare embedded GPS UTC timestamps, camera clocks (`DateTimeOriginal`), and file-system dates, rigorously modeling camera clock drift, leap seconds, and timezone ambiguities.
+6. **OBJ-GEO-06 (Kinematic Consistency & Velocity Gating):** Evaluate travel plausibility between chronologically ordered photographs using physical movement models ($v = d / \Delta t$) to flag coordinate teleportation and impossible transit speeds.
+7. **OBJ-GEO-07 (Authorized External GPS Track Correlation):** Ingest and align authorized external location logs (GPX, KML, NMEA, FIT, CSV) with photo timelines using geodesic interpolation and explicit bounds enforcement.
+8. **OBJ-GEO-08 (Visual Location Recovery Without GPS):** Recover candidate geographic locations for GPS-stripped images by combining multilingual OCR sign extraction, visual landmark retrieval, and SIFT/ORB + RANSAC geometric homography verification.
+9. **OBJ-GEO-09 (Astrometric & Environmental Verification):** Cross-examine claimed capture times and coordinates against NOAA solar position calculations, shadow geometry ($\tan\alpha \approx h/L$), historical weather reanalysis, and DEM terrain elevation profiles.
+10. **OBJ-GEO-10 (Multi-Image Spatio-Temporal Clustering):** Cluster multi-image case collections into distinct geographic stops and transit legs using DBSCAN on geodesic distance matrices with temporal constraints.
+11. **OBJ-GEO-11 (Location-Claim Conflict Graph & Provenance):** Construct a typed evidence graph linking exhibits, candidate coordinates, tracks, and findings; anchor all derivatives in the CEIPL cryptographic custody log.
+12. **OBJ-GEO-12 (Court-Admissible Section 65B/63 BSA Dossier):** Assemble an evidence-traceable geospatial forensic certificate and Archify JSON IR visual dossier that explicitly states uncertainty bounds and alternative hypotheses.
+
 ---
 
 ## 4. Target User Personas & User Journeys
@@ -439,6 +454,91 @@ flowchart TD
   - Traceable threat findings citing exact packet offsets, flow IDs, and MITRE ATT&CK tags.
   - Explicit limitation statement explaining unencrypted metadata limits and absence of payload decryption.
   - Statutory Section 65B IEA / Section 63 BSA certificate with examiner affidavit and Ed25519 digital signature.
+
+### 5.5 Detailed AIF-GEO Geospatial Forensics User Journey Walkthroughs
+
+The **AIF-GEO** subsystem handles real-world investigative scenarios across digital photographs, scanned documents, external GPS logs, and surveillance feeds:
+
+```mermaid
+flowchart TD
+    GEO_START["Image Exhibit Ingested & Hashed"] --> GEO_CHK{"GPS Metadata Present?"}
+    GEO_CHK -->|Yes| GEO_VAL["Journey GEO-J01: Validate Coordinates & Geodesy"]
+    GEO_CHK -->|No / Stripped| GEO_VIS["Journey GEO-J02: Visual Geolocation (OCR & Landmarks)"]
+    
+    GEO_VAL --> GEO_CONF{"Coordinate Conflicts?"}
+    GEO_CONF -->|Yes| GEO_CONFLICT["Journey GEO-J03: Conflict Adjudication & Clock Drift"]
+    GEO_CONF -->|No| GEO_ENRICH["Journey GEO-J04: Offline Geocoding & Map Display"]
+    
+    GEO_ENRICH --> GEO_EXT{"External Tracks Available?"}
+    GEO_EXT -->|Yes| GEO_TRACK["Journey GEO-J05: Track Log (GPX/KML) Alignment"]
+    GEO_EXT -->|No| GEO_PHYS["Journey GEO-J08: Solar/Shadow & Weather Physics Check"]
+    
+    GEO_TRACK --> GEO_PHYS
+    GEO_VIS --> GEO_PHYS
+    
+    GEO_PHYS --> GEO_GRAPH["Journey GEO-J10: Cross-Evidence Linking & Conflict Graph"]
+    GEO_GRAPH --> GEO_REPORT["Journey GEO-J12: Sec 65B/63 BSA Geospatial Dossier"]
+```
+
+#### Journey GEO-J01: Ingesting & Preserving a GPS-Tagged Crime Scene Image
+- **Actor:** Cyber Police Investigating Officer (P-1) & Evidence Custodian (P-4).
+- **Workflow:** IO uploads a seized smartphone photograph taken at a rural extortion site.
+- **System Action:** Ingests raw file, calculates streaming SHA-256 and SHA3-512 hashes, commits to WORM vault (`POSIX 0400`), extracts raw GPS tags (latitude, longitude, altitude, GPS date/time, image direction), normalises degrees-minutes-seconds to signed decimal degrees, calculates horizontal uncertainty radius from DOP, and emits a validated `GeospatialObservation` record.
+
+#### Journey GEO-J02: Investigating an Image with Stripped / Missing GPS Metadata
+- **Actor:** Forensic Examiner (P-2).
+- **Workflow:** IO forwards an extortion photograph received via WhatsApp with zero EXIF metadata.
+- **System Action:** Flags `GPS_METADATA_ABSENT` with explicit caveat (*absence is typical of messaging platforms and does not prove tampering*). Dispatches image to visual recovery pipeline (`GEO-09`): runs PaddleOCR extracting visible street signs and shop banners; runs landmark retrieval matching visual features against regional database; ranks candidate localities with Top-5 confidence scores; renders candidate regions as dashed polygons on the interactive map.
+
+#### Journey GEO-J03: Detecting & Adjudicating Contradictory GPS Coordinates & Timestamps
+- **Actor:** Senior Digital Forensic Examiner (P-2).
+- **Workflow:** Questioned photograph contains EXIF GPS coordinates indicating New Delhi, but XMP location tags claim Patna, and file creation date precedes the GPS timestamp.
+- **System Action:** Flags `CONTRADICTORY_METADATA_TAGS`. Evaluates camera local clock against GPS UTC timestamp, accounting for leap seconds (18s) and Indian Standard Time (UTC+05:30). Computes clock offset regression across case photos. Marks findings as `CONFLICTING`, highlights conflicting values side-by-side in examiner workbench, and preserves both claims in the conflict graph.
+
+#### Journey GEO-J04: Correlating Photographs with an Authorized Suspect GPS Track Log (GPX/KML)
+- **Actor:** Cyber Crime Investigator (P-1) & Forensic Examiner (P-2).
+- **Workflow:** IO seizes a Garmin handheld GPS or exports a Google Location History timeline from suspect's phone and uploads it as evidence exhibit `EXT-TRK-01`.
+- **System Action:** Safely parses GPX/KML track into timestamped geodetic waypoints. Aligns image capture timestamps with track timecodes. Performs WGS84 geodesic interpolation between bounding track samples. Renders the suspect's continuous travel path on the interactive map, snapping photo thumbnails to their respective interpolated trajectory points with error bounds.
+
+#### Journey GEO-J05: Investigating Alleged GPS Metadata Spoofing & Teleportation
+- **Actor:** Forensic Examiner (P-2) & Public Prosecutor (P-3).
+- **Workflow:** Defense claims suspect was in Mumbai based on a photo's GPS tag, but surveillance CCTV places them in Patna 30 minutes earlier.
+- **System Action:** `GEO-07` computes WGS84 ellipsoidal distance between sequential exhibits ($d = 1,450\text{ km}$) and elapsed time ($\Delta t = 1,800\text{ s}$). Calculates implied velocity $v = 2,900\text{ km/h}$. Flags `PHYSICALLY_IMPOSSIBLE_VELOCITY` ($v > 950\text{ km/h}$ supersonic threshold). Cross-examines sensor PRNU noise and quantization history, documenting that GPS coordinates were injected post-capture.
+
+#### Journey GEO-J06: Multi-Image Travel Route & Geographic Timeline Reconstruction
+- **Actor:** Senior Forensic Examiner (P-2).
+- **Workflow:** Examiner analyzes 45 photographs seized from a suspect's smartphone to reconstruct their movements across Bihar districts during an incident week.
+- **System Action:** Extracts timestamps and coordinates from all 45 images. Applies DBSCAN spatio-temporal clustering ($\epsilon_{\text{dist}} = 500\text{m}$, $\epsilon_{\text{time}} = 2\text{h}$) to identify geographic stops. Computes pairwise transit legs with velocity checks. Renders a synchronized timeline scrubber and vector map showing the chronological route with stop durations and outlier flags.
+
+#### Journey GEO-J07: Landmark Recognition & Geometric Verification Against Reference Imagery
+- **Actor:** Senior Examiner (P-2).
+- **Workflow:** Questioned image depicts a suspect outside a distinctive historical monument, but location is disputed.
+- **System Action:** Recovers candidate reference orthophotos. Extracts SIFT and ORB feature keypoints from questioned image and reference imagery. Executes RANSAC homography estimation ($\mathbf{x}' \sim \mathbf{H}\mathbf{x}$), requiring $\ge 25$ inliers and inlier ratio $\ge 0.35$. Emits visual match overlay displaying geometric correspondence lines, bounding boxes, and reprojection error metrics.
+
+#### Journey GEO-J08: Capture-Time Verification via Solar Position & Shadow Geometry
+- **Actor:** Senior Digital Forensic Examiner (P-2).
+- **Workflow:** Questioned photo claims capture at 12:30 PM on a specific date in Muzaffarpur, but shadows appear long and slanted.
+- **System Action:** `GEO-11` computes astronomical solar coordinates via NOAA algorithm: expected solar elevation $\alpha = 64.2^\circ$, expected azimuth $\Phi_s = 185.1^\circ$. Examiner annotates a vertical light pole and horizontal ground shadow. Algorithm computes observed elevation $\tan\alpha \approx h/L = 0.52 \implies \alpha_{\text{obs}} = 27.5^\circ$. Flags `SOLAR_SHADOW_INCONSISTENCY` ($\Delta\alpha = 36.7^\circ$), indicating the photograph was taken in late afternoon or the claimed date/location is false.
+
+#### Journey GEO-J09: Historical Weather & Digital Elevation Model (DEM) Terrain Cross-Check
+- **Actor:** Forensic Examiner (P-2).
+- **Workflow:** A suspect claims a photograph was taken on a clear sunny afternoon in a mountain valley, but the photo shows overcast drizzle.
+- **System Action:** Queries local Open-Meteo historical weather reanalysis cache for the candidate coordinates and timestamp: retrieves precipitation ($12.4\text{ mm}$), cloud cover ($98\%$), and temperature ($14.2^\circ\text{C}$). Concurrently, queries Copernicus DEM GeoTIFF via Rasterio, comparing GPS altitude ($1,840\text{m}$) against ground elevation ($1,822\text{m} \pm 15\text{m}$). Emits weather consistency confirmation and terrain elevation compatibility report.
+
+#### Journey GEO-J10: Cross-Evidence Geospatial Linking (Image <-> CCTV <-> Network Trajectory)
+- **Actor:** Senior Forensic Examiner (P-2) & Incident Lead.
+- **Workflow:** Investigating a coordinated heist involving digital photos from suspect phones, CCTV clips from nearby banks (VISTA), and Wi-Fi probe logs from seized routers (ONTF).
+- **System Action:** Integrates multi-modal evidence into the shared `GeospatialConflictGraph`: links image coordinates to fixed CCTV camera positions within 100 meters, aligns photo capture times with CCTV vehicle tracking timelines, and correlates device Wi-Fi connection bursts from ONTF. Preserves all corroborating and conflicting edges.
+
+#### Journey GEO-J11: Inspecting C2PA / Content Credentials Signed Location Manifests
+- **Actor:** Forensic Examiner (P-2).
+- **Workflow:** Seized photograph from an enterprise camera includes a C2PA Content Credentials provenance manifest.
+- **System Action:** `GEO-20` parses C2PA JUMBF container, validates X.509 certificate chain, verifies Ed25519/ECDSA digital signature over the claim assertion, and checks content binding hashes. Extracts cryptographically signed location assertion and cross-checks it against embedded EXIF GPS tags. Flags `PROVENANCE_CONFIRMED` when signed claims match, or `PROVENANCE_SIGNATURE_INVALID` if bitstream was modified.
+
+#### Journey GEO-J12: Generating a Section 65B IEA / Section 63 BSA Certified Geospatial Dossier
+- **Actor:** Forensic Examiner (P-2) & Public Prosecutor (P-3).
+- **Workflow:** Case moves to trial in Sessions Court; formal electronic evidence certificate required for location evidence.
+- **System Action:** Compiles comprehensive Section 65B/63 BSA certified dossier embedding: original file dual hashes, raw and normalised GPS coordinates, geodetic distance calculations, reverse geocoding descriptions with provider attribution, solar/shadow and weather verification annexures, interactive map snapshot, conflict graph summary, and examiner affidavit sealed with Ed25519 digital signature and RFC 3161 TSA token.
 
 ---
 
