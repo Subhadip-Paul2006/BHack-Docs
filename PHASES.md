@@ -14,7 +14,8 @@
 The PS-05 development lifecycle is structured into eleven platform-level phases (Phase 0 through Phase 10). Subsystems are decomposed into dedicated, sequential engineering tracks:
 - **AURAS Audio Forensics Subsystem:** Eleven engineering phases (**AURAS-A0 through AURAS-A10**).
 - **VISTA Video Forensics Subsystem:** Fourteen engineering phases (**VISTA-A0 through VISTA-A13**).
-- **AIF Image Forensics Subsystem:** Retained as Phase 4 with its multi-branch visual examination modules.
+- **AIF Image Forensics Subsystem:** Retained as Phase 4 with its multi-branch visual examination modules (**AIF-A0 through AIF-A15**).
+- **ONTF Network Traffic Forensics Subsystem:** Fourteen engineering phases (**ONTF-A0 through ONTF-A13**).
 - **Shared Platform Layer:** Common pre-decode dual-hashing, WORM vault persistence, Celery worker orchestration, and Section 65B/63 BSA legal reporting infrastructure.
 
 ```mermaid
@@ -83,8 +84,25 @@ flowchart TD
         IA14 --> IA15["AIF-A15: End-to-End Image Validation & Release"]
     end
 
+    subgraph NETWORK_WORKSTREAM["🌐 ONTF Network Traffic Forensics Playbook"]
+        direction TB
+        NA0["ONTF-A0: Network Architecture & Sandbox Baseline"] --> NA1["ONTF-A1: Intake, Dual Hashing & WORM Vault"]
+        NA1 --> NA2["ONTF-A2: Defensive Packet Parsing (TShark & Scapy)"]
+        NA1 --> NA3["ONTF-A3: Offline Zeek Batch Processing Engine"]
+        NA2 & NA3 --> NA4["ONTF-A4: Common Network Telemetry Schema & Normalisation"]
+        NA4 --> NA5["ONTF-A5: Statistical Flow & Inter-Arrival Feature Engineering"]
+        NA4 --> NA6["ONTF-A6: Dual-Mode Scoping & Target-Device Attribution"]
+        NA5 & NA6 --> NA7["ONTF-A7: Deterministic Threat & Port Scan Detection"]
+        NA5 & NA6 --> NA8["ONTF-A8: Machine Learning Anomaly & Traffic Baselines"]
+        NA5 & NA6 --> NA9["ONTF-A9: Optional Temporal Sequence & Graph Models"]
+        NA7 & NA8 & NA9 --> NA10["ONTF-A10: Multi-Stage Attack Correlation & MITRE ATT&CK"]
+        NA4 & NA6 & NA10 --> NA11["ONTF-A11: Forensic Investigation Workbench & Graph UI"]
+        NA11 --> NA12["ONTF-A12: Section 65B/63 BSA Legal Dossier & Certification"]
+        NA12 --> NA13["ONTF-A13: End-to-End Network Validation & Benchmark Corpus"]
+    end
+
     subgraph PLATFORM_DELIVERY["🚀 Platform Delivery & Legal Certification"]
-        A10 & VA13 & IA15 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
+        A10 & VA13 & IA15 & NA13 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
         P7 --> P8["Phase 8: Web Dashboard & Examiner Workbench"]
         P8 --> P9["Phase 9: Security Hardening & Air-Gapped Packaging"]
         P9 --> P10["Phase 10: Final Hackathon Demonstration & Release"]
@@ -139,7 +157,21 @@ flowchart TD
 | **AIF-A13** | CEIPL Provenance & Custody Hardening | CEIPL Hardening | `PLANNED` | AIF-A1, A10 Gates| Ed25519 signer, RFC 3161 TSA, hash-chained log, Merkle inclusion proofs |
 | **AIF-A14** | Evidence Fusion & Legal Reporting | Reporting / AIF | `PLANNED` | AIF-A10..A13 Gates| Cross-engine finding merger, Archify JSON IR, Section 65B/63 BSA PDF |
 | **AIF-A15** | End-to-End Image Validation & Release | Validation / Release | `PLANNED` | AIF-A14 Gate | Benchmark suite, CoMoFoD, TruFor eval, 5-run determinism, air-gap |
-| **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
+| **ONTF-A0** | Network Architecture & Sandbox Baseline | ONTF Core / Shared | `PLANNED` | Phase 0 Gate | Directory scaffold, defensive sandbox harness, typing contracts, exceptions |
+| **ONTF-A1** | Intake, Dual Hashing & WORM Vault | CEIPL / ONTF Core | `PLANNED` | ONTF-A0 Gate | Pre-parse dual-hasher, WORM vault, metadata registry, RFC 8785 receipt |
+| **ONTF-A2** | Defensive Packet Parsing (TShark & Scapy) | ONTF Ingestion | `PLANNED` | ONTF-A1 Gate | Magic bytes, snaplen validation, sandboxed TShark/Scapy deep packet dissection |
+| **ONTF-A3** | Offline Zeek Batch Processing Engine | ONTF Extraction | `PLANNED` | ONTF-A1 Gate | Offline batch `zeek -r`, conn/dns/ssl log parsing, connection state mapping |
+| **ONTF-A4** | Common Network Telemetry Schema | ONTF Schema | `PLANNED` | ONTF-A2, A3 Gates | Unified flow schema, 5-tuple hashing, IPv4/v6 dual-stack, privacy masking |
+| **ONTF-A5** | Statistical Flow & Inter-Arrival Features | ONTF Features | `PLANNED` | ONTF-A4 Gate | 80+ bidirectional flow metrics, IAT jitter profiling, TCP flag cadence |
+| **ONTF-A6** | Dual-Mode Scoping & Target-Device Attribution | ONTF Attribution | `PLANNED` | ONTF-A4 Gate | Mode A/B filtering, DHCP 12/55/60, OUI lookup, confidence tiers 1-4 |
+| **ONTF-A7** | Deterministic Threat & Port Scan Detection | ONTF Threats | `PLANNED` | ONTF-A5, A6 Gates | Horizontal/vertical scan detection, DNS tunneling, DGA, C2 beaconing |
+| **ONTF-A8** | ML Anomaly & Traffic Baselines | ONTF ML Models | `PLANNED` | ONTF-A5, A6 Gates | Isolation Forest, LightGBM classifier, zero-leakage splits, OOD gating |
+| **ONTF-A9** | Optional Temporal Sequence & Graph Models | ONTF Advanced | `PLANNED` | ONTF-A5, A6 Gates | NetworkX communication graph, graph centrality, LSTM sequences, world-model |
+| **ONTF-A10**| Multi-Stage Attack Correlation & ATT&CK | ONTF Correlation | `PLANNED` | ONTF-A7..A9 Gates| Attack scenario synthesizer, MITRE ATT&CK v14 mapping, evidence pointers |
+| **ONTF-A11**| Forensic Investigation Workbench & Graph UI | UI / Presentation | `PLANNED` | ONTF-A4, A6, A10 | Timeline scrubber, force-directed graph UI, target card, flow inspection table |
+| **ONTF-A12**| Section 65B/63 BSA Legal Dossier | Reporting / ONTF | `PLANNED` | ONTF-A10, A11 Gates| 11-part court-admissible PDF dossier, Ed25519 signature, TSA timestamp |
+| **ONTF-A13**| End-to-End Network Validation & Benchmark | Validation / Release | `PLANNED` | ONTF-A12 Gate | Regression suite, immutability check, 5-run determinism, air-gap audit |
+| **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15, NA13 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
 | **Phase 8** | Web Dashboard & Examiner Workbench | UI / Presentation | `PLANNED` | Phase 7 Gate | Next.js interactive UI, multi-modal waveform viewer |
 | **Phase 9** | Security Hardening & Air-Gapped Packaging | DevOps / Security | `PLANNED` | Phase 8 Gate | Offline Docker containers, POSIX 0400 WORM scripts |
 | **Phase 10** | Final Hackathon Demonstration & Release | Quality & Release | `PLANNED` | Phase 9 Gate | Verified demonstration scripts & curated case pack |
@@ -2500,33 +2532,768 @@ All 16 AIF phases validated; benchmark report compiled; all 64 checkpoints initi
 
 ---
 
-## 6. Unified Platform Delivery & Security Milestones
+## 6. Dedicated Offline Network Traffic Forensics Engineering Playbook (ONTF-A0 through ONTF-A13)
 
-The platform delivery, dashboard, and hackathon packaging milestones synthesize findings across all forensic domains (AURAS Audio, VISTA Video, and AIF Image):
+The Offline Network Traffic Forensics (ONTF) engineering roadmap defines fourteen sequential, rigorous, and cryptographically grounded implementation phases for seized packet captures (`.pcap`, `.pcapng`). Each phase provides an exhaustive engineering specification with verifiable completion criteria and independent 5-column checkpoint tables conforming strictly to Indian evidentiary standards under Section 65B of the Indian Evidence Act (IEA) and Section 63 of the Bharatiya Sakshya Adhiniyam (BSA 2023):
 
-### Phase 7: Unified Platform Cross-Engine Reporting
-- **Status:** `PLANNED`
-- **Scope:** Cross-engine finding aggregation across audio (AURAS), image (AIF), and video/CCTV (VISTA) evidence; Section 65B Indian Evidence Act / Section 63 Bharatiya Sakshya Adhiniyam (BSA 2023) certified PDF compilation; Archify JSON IR visual dossier export.
+---
 
-### Phase 8: Web Dashboard & Forensic Examiner Workbench
-- **Status:** `PLANNED`
-- **Scope:** Next.js / React interactive web frontend; multi-modal evidence viewer with synchronized audio waveform, spectrogram, video frame player, and image ELA/TruFor error-sliders.
+### Phase ONTF-A0: Network Architecture Baseline & Sandbox Execution Harness
 
-### Phase 9: Security Hardening & Air-Gapped Deployment
-- **Status:** `PLANNED`
-- **Scope:** Offline containerization (Docker Compose), local model checkpoint verification scripts, POSIX 0400 WORM vault locking, and security compliance audit.
+**1. Phase ID & Title:** `ONTF-A0: Network Architecture Baseline & Sandbox Execution Harness`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Establish the structural, algorithmic, defensive, and legal foundation for the ONTF subsystem. Initialize package hierarchies under `src/ps05/engines/ontf/`, configure typing contracts, establish defensive subprocess sandbox execution harnesses (`safe_exec.py`) for external CLI tools (TShark, Scapy, Zeek), enforce memory allocation ceilings ($\le 4	ext{ GB}$ RAM) and execution timeouts (300s), trap malformed packet bombs, and link ONTF into the shared platform service locator.  
+**4. Topics & Subtopics:**
+- Directory & Module Scaffold: Sub-packages (`common`, `ingest`, `parsers`, `schema`, `features`, `attribution`, `threats`, `ml`, `graph`, `correlation`, `ui`, `reporting`).
+- Defensive Subprocess Sandbox: `safe_exec.py` wrapping external binaries with strict 300-second timeouts, resource quotas, and non-root user execution (`uid 10002`).
+- Memory & CPU Quotas: Linux cgroups / process limits capping worker RAM to $\le 4	ext{ GB}$ with disk-backed streaming iterators.
+- ONTF Domain Exception Hierarchy: Standardized typed error handling (`PCAPFormatError`, `TruncatedCaptureError`, `ZeekExecutionError`, `AttributionAmbiguityError`).
+- Legal Evidentiary Invariants: Section 65B/63 BSA pre-flight integrity rules.
+**5. Exact Tasks:**
+1. Create directory hierarchy under `src/ps05/engines/ontf/` with `__init__.py` files and type exports.
+2. Implement `BaseNetworkForensicEngine` abstract base class defining `analyze()`, `health_check()`, and `model_manifest()`.
+3. Build defensive execution wrapper `safe_exec.py` trapping hung CLI processes, infinite loop dissectors, and buffer overruns.
+4. Formulate ONTF error hierarchy (`PCAPFormatError`, `CorruptedHeaderError`, `DissectionTimeoutError`, `AttributionAmbiguityError`).
+5. Configure Pytest harness for network forensic engine testing.
+**6. Detailed Execution Workflow:**
+Capture Exhibit Path Received -> Subprocess Sandbox Initialized -> Magic Byte Inspection -> Resource Limits Bound -> Base Engine Registry Updated -> Ready for Ingestion.
+**7. Technologies, Tools & Models:**
+Python 3.12, Pydantic v2, pytest, subprocess, resource/cgroups.
+**8. Prerequisites & Dependencies:**
+Phase 0 architectural baseline completed; system Wireshark/TShark and Zeek binaries available in execution PATH.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/ontf/__init__.py`
+- `src/ps05/engines/ontf/common/base.py`
+- `src/ps05/engines/ontf/common/safe_exec.py`
+- `src/ps05/engines/ontf/common/exceptions.py`
+- `tests/unit/test_ontf_scaffold.py`
+**10. Failure Cases & Risks:**
+- C-level segmentation faults inside Libpcap/TShark: Mitigated via isolated subprocess sandboxing and process group SIGKILL on timeout.
+- Unhandled packet dissector recursion bombs: Mitigated via hard 300s timeout per worker.
+**11. Security Considerations:**
+Sandboxed worker execution with unprivileged Linux user (`uid 10002`); zero network socket access during offline analysis; read-only mounts for source exhibits.
+**12. Acceptance Criteria:**
+- 100% clean package imports without circular dependency warnings.
+- Defensive sandbox terminates hung processes within 300 seconds and traps memory exhaustion.
+- Base engine interface exports type-safe `analyze()` signature.
+**13. Definition of Done:**
+Scaffold committed, unit test suite passing with 100% exit code 0, typing verified via `mypy --strict`.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
 
-### Phase 10: Final Hackathon Demonstration & Release
-- **Status:** `PLANNED`
-- **Scope:** End-to-end platform validation, automated demonstration script (`scripts/run_demo.py`), curated evidence showcase, and technical presentation defense.
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-00-01** | Package Architecture & Module Imports | Clean import of all 12 ONTF sub-packages in virtualenv | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-00-02** | Defensive Sandbox & Resource Ceilings | Subprocess quota terminates runaway test process at 4 GB RAM | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-00-03** | Base Engine Contract & Strict Typing | `mypy --strict` passes across all common ONTF interfaces | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-00-04** | Domain Exception Hierarchy | Typed exceptions correctly trap and bubble malformed inputs | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase ONTF-A1: Capture Evidence Ingestion, Dual Hashing & WORM Vault Locking
+
+**1. Phase ID & Title:** `ONTF-A1: Capture Evidence Ingestion, Dual Hashing & WORM Vault Locking`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement secure intake and tamper-evident preservation of seized `.pcap` and `.pcapng` network capture files. Compute streaming dual cryptographic hashes (SHA-256 and SHA3-512) prior to parsing, store untouched raw bitstreams in the WORM vault under POSIX `0400` read-only mode, record comprehensive intake metadata, strictly distinguish self-calculated hashes from reference hashes, and emit an RFC 8785 canonical JSON intake receipt signed with Ed25519.  
+**4. Topics & Subtopics:**
+- Streaming Dual-Hasher: Chunked 64 KB read loop computing SHA-256 and SHA3-512 in a single streaming pass.
+- WORM Vault Persistence: Storage in isolated vault with POSIX `0400` read-only flags and S3 Object Lock compliance.
+- Ingestion Metadata Registration: Recording `evidence_id`, `original_filename`, `file_size_bytes`, `upload_timestamp`, `hash_sha256`, `hash_sha3_512`, `source_reference_hash`, and `hash_verification_status`.
+- Evidentiary Hash Caveats: Enforcing the legal distinction between an intake baseline hash and proof of pre-seizure capture authenticity.
+- RFC 8785 Receipt Generation: Cryptographically signed evidence intake certificate.
+**5. Exact Tasks:**
+1. Implement `NetworkCaptureIngestService` streaming hash processor (`hasher.py`).
+2. Implement POSIX `0400` vault locking and immutable file retention handler (`vault.py`).
+3. Build schema-validated `CaptureIntakeManifest` adhering to RFC 8785 Canonical JSON (`manifest.py`).
+4. Implement Ed25519 signature generator binding ingestion metadata to CEIPL platform keys.
+5. Write unit and integration tests verifying bitstream immutability and dual-hash accuracy.
+**6. Detailed Execution Workflow:**
+Capture File Uploaded -> Chunked Dual-Hash Stream Executed -> File Locked in WORM Vault -> Intake Metadata Schema Validated -> RFC 8785 Manifest Signed -> Registration Emitted to Audit Ledger.
+**7. Technologies, Tools & Models:**
+Python 3.12, hashlib, cryptography (Ed25519), canonicaljson (RFC 8785), Pydantic v2.
+**8. Prerequisites & Dependencies:**
+Phase ONTF-A0 completed; CEIPL platform key store available.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/ontf/ingest/hasher.py`
+- `src/ps05/engines/ontf/ingest/vault.py`
+- `src/ps05/engines/ontf/ingest/manifest.py`
+- `tests/unit/test_ontf_ingest.py`
+**10. Failure Cases & Risks:**
+- Out-of-memory on multi-gigabyte captures: Mitigated via chunked streaming buffer (64 KB).
+- Premature file modification during hashing: Mitigated by locking file permissions before hashing begins.
+**11. Security Considerations:**
+Original capture bitstream is marked immutable immediately; no parser execution before cryptographic hashing completes.
+**12. Acceptance Criteria:**
+- Dual-hash computation completes in $< 3.0	ext{ s}$ per GB of capture data.
+- Vault files are strictly read-only (`0400`); overwrite attempts raise `PermissionError`.
+- Intake manifest accurately records whether a reference hash was matched or newly established.
+**13. Definition of Done:**
+Ingestion service committed, verified by `test_ontf_ingest.py` with 100% pass rate.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-01-01** | Streaming Dual-Hash Accuracy | SHA-256 and SHA3-512 match sha256sum/sha3sum on 2GB capture | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-01-02** | WORM Vault Bitstream Locking | Vault files enforce POSIX `0400`; modification attempts rejected | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-01-03** | RFC 8785 Signed Intake Manifest | Canonical JSON manifest validates with valid Ed25519 signature | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-01-04** | Reference Hash Status Segregation | Distinguishes newly calculated hash from verified reference hash | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase ONTF-A2: Defensive Packet Parsing & Multi-Tool Dissection (TShark & Scapy)
+
+**1. Phase ID & Title:** `ONTF-A2: Defensive Packet Parsing & Multi-Tool Dissection (TShark & Scapy)`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Validate container structure, detect capture anomalies, and dissect packet headers using isolated TShark and Scapy workers. Verify magic bytes for standard PCAP (`0xa1b2c3d4`), nanosecond PCAP (`0xa1b23c4d`), and PCAPNG Section Header Block (`0x0a0d0d0a`); validate link-layer header types (Ethernet, Linux Cooked SLL, Raw IP, 802.11); detect snaplen limits, truncated frames, and interface drop counters; export structured packet JSON and perform selective deep dissection.  
+**4. Topics & Subtopics:**
+- Magic Byte & Container Header Inspection: Distinguishing PCAP (microsecond vs nanosecond) and PCAPNG.
+- Link-Layer Type Parsing: Handling DLT_EN10MB (Ethernet), DLT_LINUX_SLL (Linux Cooked), and DLT_RAW.
+- Packet Boundary & Snaplen Validation: Flagging truncated packets (`packet_len < wire_len`) and frame offset corruption.
+- Sandboxed TShark JSON Extraction: Structured field extraction (`-T json -e frame.number -e frame.time_epoch ...`).
+- Scapy Custom Dissection: Packet-level fallback for non-standard encapsulation and custom protocol layers.
+**5. Exact Tasks:**
+1. Implement `CaptureFormatValidator` inspecting magic bytes and container headers (`format_validator.py`).
+2. Implement snaplen and frame integrity checker detecting truncated or dropped frames (`frame_checker.py`).
+3. Build sandboxed TShark JSON stream parser extracting frame metadata and protocol headers (`tshark_parser.py`).
+4. Build Scapy packet-level analyzer for custom layer dissection and edge-case protocols (`scapy_parser.py`).
+5. Write unit tests evaluating parser resilience on corrupted, truncated, and malformed PCAP test files.
+**6. Detailed Execution Workflow:**
+Vault Capture Path Received -> Format & Magic Bytes Checked -> Snaplen & Truncation Evaluated -> Sandboxed TShark Export Executed -> Scapy Custom Analysis Run -> Dissected Packet Stream Yielded.
+**7. Technologies, Tools & Models:**
+Python 3.12, Wireshark/TShark (>= 4.0), Scapy (>= 2.5), Pydantic v2.
+**8. Prerequisites & Dependencies:**
+Phase ONTF-A1 completed; TShark installed in system execution PATH.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/ontf/parsers/format_validator.py`
+- `src/ps05/engines/ontf/parsers/frame_checker.py`
+- `src/ps05/engines/ontf/parsers/tshark_parser.py`
+- `src/ps05/engines/ontf/parsers/scapy_parser.py`
+- `tests/unit/test_ontf_parsers.py`
+**10. Failure Cases & Risks:**
+- Malicious PCAPs designed to trigger TShark buffer overflow: Trapped via isolated child subprocess execution.
+- Giant captures exhausting memory during JSON parsing: Mitigated via streaming line-by-line JSON parsing (`ijson`).
+**11. Security Considerations:**
+TShark runs in read-only sandbox without network privileges; output parsed as untrusted text.
+**12. Acceptance Criteria:**
+- Accurate identification of PCAP (microsecond/nanosecond) and PCAPNG container formats.
+- Correct flagging of truncated frames with explicit truncation length metadata.
+- Streaming JSON extraction completes with $< 500	ext{ MB}$ memory footprint on 100,000 packet captures.
+**13. Definition of Done:**
+Parsers implemented and passing test suite against crafted malformed and standard capture fixtures.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-02-01** | Magic Byte & Container Identification | Correctly identifies standard PCAP, nanosecond PCAP, and PCAPNG | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-02-02** | Truncated Frame & Snaplen Detection | Flags packets with `captured_len < wire_len` as truncated | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-02-03** | Sandboxed TShark JSON Extraction | Exports structured fields for 100,000 packets without error | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-02-04** | Malformed Packet Bomb Containment | Subprocess traps crafted packet crash without parent process failure | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase ONTF-A3: Offline Zeek Batch Processing Engine
+
+**1. Phase ID & Title:** `ONTF-A3: Offline Zeek Batch Processing Engine`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Execute Zeek in offline batch mode (`zeek -r capture.pcap local`) to generate structured forensic connection, protocol, and notice logs without running continuous live network daemons. Ingest and parse Zeek TSV/JSON logs (`conn.log`, `dns.log`, `ssl.log`, `http.log`, `ssh.log`, `notice.log`), decode connection state codes (`SF`, `S0`, `REJ`, `RSTO`, etc.), extract TLS handshake ciphersuites, SNI domain names, and certificate hashes, and handle missing protocol logs gracefully.  
+**4. Topics & Subtopics:**
+- Offline Batch Invocation: Running `zeek -r <pcap_path>` in isolated temporary directories with local forensic scripts.
+- Log Parsing & Model Mapping: Ingesting Zeek TSV/JSON logs into structured Pydantic record models.
+- Connection State Semantics: Mapping Zeek connection state codes (`SF`, `S0`, `REJ`, `RSTO`, `RSTR`, `SH`, `SHR`) to forensic flags.
+- Protocol Metadata Extraction: Parsing DNS query types/responses, TLS SNI/JA3/JA4 indicators, HTTP user-agents, and SSH kex algorithms.
+- Graceful Absence Handling: Treating missing protocol logs as `TELEMETRY_UNAVAILABLE` rather than errors.
+**5. Exact Tasks:**
+1. Implement `ZeekBatchRunner` executing `zeek -r` inside isolated sandboxed working directories (`zeek_runner.py`).
+2. Build parsers for Zeek log files (`conn.log`, `dns.log`, `ssl.log`, `http.log`, `notice.log`) (`zeek_parsers.py`).
+3. Implement connection state code mapper translating Zeek codes to semantic connection lifecycle states (`conn_state.py`).
+4. Implement TLS handshake metadata extractor recovering SNI, ciphersuite, and certificate subject (`ssl_extractor.py`).
+5. Write integration tests validating Zeek batch execution on sample PCAP files.
+**6. Detailed Execution Workflow:**
+Capture File Provided -> Isolated Scratch Dir Initialized -> `zeek -r` Batch Executed -> Generated Logs Discovered -> Logs Ingested & Parsed -> Pydantic Protocol Records Emitted -> Scratch Dir Cleaned.
+**7. Technologies, Tools & Models:**
+Python 3.12, Zeek Network Security Monitor (>= 6.0), Pydantic v2.
+**8. Prerequisites & Dependencies:**
+Phase ONTF-A1 completed; Zeek installed in execution environment.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/ontf/parsers/zeek_runner.py`
+- `src/ps05/engines/ontf/parsers/zeek_parsers.py`
+- `src/ps05/engines/ontf/parsers/conn_state.py`
+- `src/ps05/engines/ontf/parsers/ssl_extractor.py`
+- `tests/unit/test_ontf_zeek.py`
+**10. Failure Cases & Risks:**
+- Zeek script execution error on malformed protocols: Trapped via stderr capture; engine continues with partial logs.
+- High memory usage on massive captures: Handled by passing packet slice or stream chunking.
+**11. Security Considerations:**
+Zeek executes in unprivileged offline mode with no network socket bindings or live capture permissions.
+**12. Acceptance Criteria:**
+- Batch execution completes with exit code 0 on standard PCAP fixtures.
+- Correct extraction and schema validation of `conn.log`, `dns.log`, and `ssl.log`.
+- Missing logs for protocols not present in capture cleanly emit empty lists with `TELEMETRY_UNAVAILABLE` flag.
+**13. Definition of Done:**
+Zeek batch runner committed and passing all integration tests with verified log output models.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-03-01** | Offline Zeek Batch Execution | `zeek -r` completes in isolated dir with exit code 0 | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-03-02** | Structured Log Model Extraction | `conn.log`, `dns.log`, and `ssl.log` parsed into Pydantic models | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-03-03** | Connection State Semantic Mapping | Accurately translates all 13 Zeek connection state codes | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-03-04** | Missing Protocol Log Resilience | Empty or missing protocol logs yield clean empty lists without crash | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase ONTF-A4: Common Network Telemetry Schema & Normalisation Layer
+
+**1. Phase ID & Title:** `ONTF-A4: Common Network Telemetry Schema & Normalisation Layer`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Build the normalisation layer mapping heterogeneous outputs from TShark, Scapy, and Zeek into a unified, extensible schema. Enforce microsecond UTC timestamp precision, compute deterministic 5-tuple flow keys (`flow_id`), provide full IPv4 and IPv6 dual-stack compatibility, safely handle missing fields with explicit `None` or typed sentinels without inventing zeros, deduplicate overlapping records, and implement privacy-preserving data minimisation (masking HTTP auth headers, cookies, and scrubbing packet payloads).  
+**4. Topics & Subtopics:**
+- Unified Flow & Event Schemas: Pydantic models `NetworkFlowRecord` and `NetworkProtocolEvent`.
+- Deterministic 5-Tuple Hashing: SHA-256 canonical hash of sorted IP/port pairs and protocol.
+- Dual-Stack IPv4/IPv6 Support: Standardized IP string representations and subnet parsing (RFC 4291).
+- Missing-Value Conventions: Explicit status markers (`FIELD_NOT_PRESENT`, `TELEMETRY_UNAVAILABLE`).
+- Privacy Minimisation & Masking: Stripping plaintext passwords, session cookies, and masking payload bodies.
+**5. Exact Tasks:**
+1. Define Pydantic schema models `NetworkFlowRecord`, `DNSQueryEvent`, `TLSHandshakeEvent`, and `HTTPTransactionEvent` (`models.py`).
+2. Implement 5-tuple flow key generator creating canonical bidirectional flow IDs (`flow_key.py`).
+3. Build normalisation pipeline reconciling TShark and Zeek records into unified flow entities (`normalizer.py`).
+4. Implement privacy scrubber masking sensitive HTTP headers, credentials, and payload contents (`privacy_scrubber.py`).
+5. Write unit tests evaluating normalisation accuracy across IPv4, IPv6, and mixed-protocol test records.
+**6. Detailed Execution Workflow:**
+Raw Parsed Records Received -> Flow 5-Tuple Key Calculated -> Timestamp & IP Normalized -> TShark/Zeek Records Merged -> Privacy Scrubber Applied -> Schema-Validated `NetworkFlowRecord` Stream Produced.
+**7. Technologies, Tools & Models:**
+Python 3.12, Pydantic v2, ipaddress, hashlib.
+**8. Prerequisites & Dependencies:**
+Phases ONTF-A2 and ONTF-A3 completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/ontf/schema/models.py`
+- `src/ps05/engines/ontf/schema/flow_key.py`
+- `src/ps05/engines/ontf/schema/normalizer.py`
+- `src/ps05/engines/ontf/schema/privacy_scrubber.py`
+- `tests/unit/test_ontf_schema.py`
+**10. Failure Cases & Risks:**
+- Inconsistent timestamps across parsers: Resolved by standardizing on epoch float seconds with microsecond resolution.
+- Duplicate flow records from multiple parsers: Merged using canonical 5-tuple and time-window deduplication.
+**11. Security Considerations:**
+Sensitive packet payloads (passwords, tokens, cookies) are masked or scrubbed before persistence; raw payloads never stored in cleartext.
+**12. Acceptance Criteria:**
+- 100% of parsed flows map cleanly to `NetworkFlowRecord` with zero schema validation errors.
+- Canonical 5-tuple flow keys produce identical hashes regardless of packet initiation direction.
+- Plaintext HTTP authorization headers and cookies are replaced with `[MASKED]` or SHA-256 hashes.
+**13. Definition of Done:**
+Schema models and normalisation pipeline committed and validated by `test_ontf_schema.py`.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-04-01** | Unified Flow Schema Normalisation | 10,000 heterogeneous flow records map to `NetworkFlowRecord` | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-04-02** | Canonical 5-Tuple Flow Hashing | Bidirectional flow directions produce identical `flow_id` | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-04-03** | IPv4 & IPv6 Dual-Stack Support | RFC 4291 IPv6 addresses correctly parsed and represented | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-04-04** | Privacy Masking & Sensitive Scrubbing | Plaintext credentials and cookies replaced with `[MASKED]` | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase ONTF-A5: Statistical Flow & Inter-Arrival Feature Engineering
+
+**1. Phase ID & Title:** `ONTF-A5: Statistical Flow & Inter-Arrival Feature Engineering`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement a reproducible, zero-data-leakage feature-engineering pipeline extracting 80+ bidirectional and unidirectional flow metrics. Calculate packet count forward/backward, byte volume forward/backward, packet size distribution statistics (min, max, mean, stddev, skewness), flow duration, active and idle duration, TCP flag distributions (SYN, ACK, FIN, RST, PSH, URG), inter-arrival time (IAT) distribution, and coefficient of variation ($CV_{	ext{IAT}} = \sigma_{	ext{IAT}} / \mu_{	ext{IAT}}$) for beaconing/jitter analysis. Enforce strict numerical determinism across re-runs.  
+**4. Topics & Subtopics:**
+- 80+ Bidirectional Flow Metrics: Standard flow statistics compatible with CICFlowMeter definitions.
+- Inter-Arrival Time (IAT) Statistics: Forward and backward IAT mean, stddev, min, max, and jitter.
+- Beaconing Metric Formulation: Coefficient of variation ($CV_{	ext{IAT}}$) measuring periodicity ($< 0.15$ indicates regular heartbeat).
+- TCP Flag Cadence: SYN-to-ACK ratios, FIN/RST termination patterns, and abnormal flag occurrences.
+- Zero-Leakage Contract: Feature generation calculated strictly on causal packet arrival windows.
+**5. Exact Tasks:**
+1. Implement bidirectional flow packet aggregator tracking forward and backward packet streams (`flow_aggregator.py`).
+2. Build statistical feature extractor calculating packet length and duration moments (`flow_stats.py`).
+3. Build inter-arrival time and jitter analyzer computing $CV_{	ext{IAT}}$ and periodicity metrics (`iat_analyzer.py`).
+4. Implement TCP flag counter and cadence evaluator (`flag_analyzer.py`).
+5. Write unit tests asserting numerical determinism against synthetic reference packet sequences.
+**6. Detailed Execution Workflow:**
+Normalized Flow Records Ingested -> Forward/Backward Streams Separated -> Duration & Volume Moments Calculated -> IAT Jitter & $CV_{	ext{IAT}}$ Extracted -> Flag Cadence Formulated -> Feature Vector Output.
+**7. Technologies, Tools & Models:**
+Python 3.12, NumPy, SciPy, Pydantic v2.
+**8. Prerequisites & Dependencies:**
+Phase ONTF-A4 completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/ontf/features/flow_aggregator.py`
+- `src/ps05/engines/ontf/features/flow_stats.py`
+- `src/ps05/engines/ontf/features/iat_analyzer.py`
+- `src/ps05/engines/ontf/features/flag_analyzer.py`
+- `tests/unit/test_ontf_features.py`
+**10. Failure Cases & Risks:**
+- Division by zero on single-packet flows: Handled with safe defaults ($CV_{	ext{IAT}} = 0.0$, duration $= 0.0$).
+- Floating-point discrepancies across OS platforms: Handled by rounding to 6 decimal places.
+**11. Security Considerations:**
+Features computed entirely in memory without writing intermediate unencrypted data to temporary files.
+**12. Acceptance Criteria:**
+- Exact numerical parity with verified mathematical reference formulas on test packet vectors.
+- $CV_{	ext{IAT}}$ calculation correctly identifies simulated periodic beacons with $CV < 0.10$.
+- Feature extractor executes at $\ge 50,000	ext{ packets/sec}$ on standard CPU.
+**13. Definition of Done:**
+Feature engineering modules implemented and passing all parity and performance tests.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-05-01** | 80+ Flow Feature Parity | Matches mathematical reference formulas on synthetic fixtures | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-05-02** | IAT Jitter & Periodicity ($CV_{	ext{IAT}}$) | Detects periodic heartbeats with $CV_{	ext{IAT}} < 0.15$ accurately | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-05-03** | TCP Flag Cadence Accuracy | Correct counts of SYN, ACK, FIN, RST, PSH, URG flags per flow | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-05-04** | Deterministic Reproducibility | 5 identical re-runs produce identical feature vectors to 6 decimals | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase ONTF-A6: Dual-Mode Scoping & Target-Device Attribution Engine
+
+**1. Phase ID & Title:** `ONTF-A6: Dual-Mode Scoping & Target-Device Attribution Engine`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement the dual-mode operational architecture: Mode A (Whole-Capture Analysis) and Mode B (Target-Device-Centred Analysis). Build the device attribution engine correlating candidate IP addresses, MAC addresses (with IEEE OUI vendor resolution), DHCP lease transactions (Option 12 Hostname, Option 55 Parameter Request List, Option 60 Vendor Class Identifier), ARP/NDP tables, and connection frequencies. Assign Attribution Confidence Tiers (Tier 1: High, Tier 2: Medium, Tier 3: Low, Tier 4: Inconclusive) and enforce the 9 mandatory attribution caveats.  
+**4. Topics & Subtopics:**
+- Mode A vs Mode B Filtering: Scoping analysis to the full capture or a candidate target device and its peers.
+- Device Identifier Correlation: Resolving IP, MAC, DHCP, ARP, and DNS records into candidate device profiles.
+- IEEE OUI Vendor Lookup: Mapping MAC prefixes to hardware manufacturers; detecting randomized MAC addresses (`b1=1`).
+- DHCP Parameter Extraction: Parsing Option 12 (Client FQDN/Hostname), Option 55 (PRL fingerprint), Option 60 (Vendor Class).
+- Attribution Confidence Tiers: Formulating calibrated attribution scoring with mandatory inconclusive thresholds.
+- Mandatory Attribution Caveats: Prominently documenting NAT, DHCP reassignment, and MAC randomisation limits.
+**5. Exact Tasks:**
+1. Implement mode filtering router directing capture flows to Mode A or Mode B pipelines (`scoping_router.py`).
+2. Build device profile extractor aggregating IP, MAC, DHCP, and ARP records (`device_profiler.py`).
+3. Implement IEEE OUI vendor database resolver with local offline SQLite/JSON lookup (`oui_resolver.py`).
+4. Build attribution scoring engine assigning Tier 1 through Tier 4 confidence ratings (`attribution_scorer.py`).
+5. Write unit tests evaluating attribution accuracy across local Wi-Fi, routed gateway, and NAT capture fixtures.
+**6. Detailed Execution Workflow:**
+Scoping Mode Selected -> Ingested Flows Filtered -> Device Profile Extracted -> OUI & DHCP Fingerprints Resolved -> Attribution Confidence Tier Assigned -> Caveats Appended -> Candidate Profile Emitted.
+**7. Technologies, Tools & Models:**
+Python 3.12, IEEE OUI offline database, Pydantic v2.
+**8. Prerequisites & Dependencies:**
+Phase ONTF-A4 completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/ontf/attribution/scoping_router.py`
+- `src/ps05/engines/ontf/attribution/device_profiler.py`
+- `src/ps05/engines/ontf/attribution/oui_resolver.py`
+- `src/ps05/engines/ontf/attribution/attribution_scorer.py`
+- `tests/unit/test_ontf_attribution.py`
+**10. Failure Cases & Risks:**
+- Capture lacks Layer-2 Ethernet headers (e.g. Linux SLL / Raw IP): Attribution automatically falls back to Tier 3 or Tier 4 with explicit `NO_LAYER2_EVIDENCE` flag.
+- Investigating officer supplies invalid target IP: Router raises `TargetDeviceNotFoundError` with list of candidate active IPs.
+**11. Security Considerations:**
+Device attribution is treated as an investigative hypothesis, never judicial proof of physical possession or identity.
+**12. Acceptance Criteria:**
+- Mode B correctly filters traffic involving the target IP/MAC and its direct communication partners.
+- DHCP Hostname (Option 12) and Vendor Class (Option 60) accurately extracted when present.
+- Mandatory "Inconclusive Attribution" emitted whenever MAC is absent or multiple devices share a single NAT IP.
+**13. Definition of Done:**
+Attribution engine and mode routers implemented, passing all test cases with verified caveat attachments.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-06-01** | Mode A vs Mode B Scoping Filter | Mode B isolates target device traffic and direct peers | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-06-02** | DHCP Option 12/55/60 Extraction | Recovers client hostname, vendor class, and parameter list | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-06-03** | IEEE OUI Vendor & Randomisation Detection | Resolves manufacturer and flags randomized MAC addresses | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-06-04** | Attribution Confidence Tier Scoring | Assigns valid tiers (1-4) with mandatory caveats attached | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase ONTF-A7: Deterministic Threat & Port Scan Detection Engine
+
+**1. Phase ID & Title:** `ONTF-A7: Deterministic Threat & Port Scan Detection Engine`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement explainable, rule-based deterministic threat detection modules. Detect horizontal port scans (single destination port probed across $\ge 15$ destination IPs in 60s), vertical port scans ($\ge 25$ distinct destination ports on a single host in 60s), stealth scans (SYN-only, FIN, XMAS, NULL), suspicious DNS activity (Iodine/DNScat2 TXT tunneling, high Shannon entropy domain names $> 3.8$ bits/char indicating DGA, NXDOMAIN storms $> 50$ failures/min), periodic C2 beaconing ($CV_{	ext{IAT}} < 0.15$ with $\ge 20$ recurring flows), and protocol port/flag anomalies.  
+**4. Topics & Subtopics:**
+- Network Reconnaissance Detection: Horizontal, vertical, and stealth TCP/UDP port scans.
+- DNS Anomaly Analysis: Shannon entropy calculation, TXT record size thresholding, and NXDOMAIN tracking.
+- Periodic C2 Beaconing Detector: Clustering recurring flows by destination IP/port/SNI and evaluating $CV_{	ext{IAT}}$.
+- Protocol & Flag Anomalies: SYN+FIN combinations, NULL scans, and non-standard port communications (e.g. HTTP on port 4444).
+- Rule Explainability: Emitting exact triggering criteria, threshold values, and source flow identifiers.
+**5. Exact Tasks:**
+1. Implement port scan detector identifying horizontal, vertical, and stealth scan patterns (`scan_detector.py`).
+2. Implement DNS threat analyzer detecting DGA entropy, tunneling payloads, and NXDOMAIN bursts (`dns_threats.py`).
+3. Implement C2 beaconing detector evaluating $CV_{	ext{IAT}}$ and recurring flow periodicity (`beacon_detector.py`).
+4. Implement protocol anomaly checker flagging abnormal TCP flag combinations and port mismatches (`protocol_anomalies.py`).
+5. Write unit tests evaluating detection accuracy across curated attack PCAP captures.
+**6. Detailed Execution Workflow:**
+Flow & Event Records Received -> Port Scan Rules Evaluated -> DNS Queries Inspected -> Beaconing Periodicity Clustered -> Protocol Flags Audited -> Structured Threat Findings Emitted.
+**7. Technologies, Tools & Models:**
+Python 3.12, NumPy, math (Shannon entropy), Pydantic v2.
+**8. Prerequisites & Dependencies:**
+Phases ONTF-A5 and ONTF-A6 completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/ontf/threats/scan_detector.py`
+- `src/ps05/engines/ontf/threats/dns_threats.py`
+- `src/ps05/engines/ontf/threats/beacon_detector.py`
+- `src/ps05/engines/ontf/threats/protocol_anomalies.py`
+- `tests/unit/test_ontf_threats.py`
+**10. Failure Cases & Risks:**
+- False positives from legitimate CDN or web crawlers: Mitigated by setting configurable threshold windows and whitelisting common public DNS providers.
+- Ephemeral port confusion: Handled by checking source vs destination port ranges.
+**11. Security Considerations:**
+Deterministic rules produce explainable outputs without opaque black-box scoring; all thresholds documented.
+**12. Acceptance Criteria:**
+- Port scan detector achieves $\ge 98\%$ recall on curated Nmap scan PCAP fixtures.
+- DNS tunnel detector identifies simulated Iodine/DNScat2 queries with $\ge 95\%$ precision.
+- Beaconing detector identifies periodic C2 heartbeats with $CV_{	ext{IAT}} < 0.15$.
+**13. Definition of Done:**
+Threat detection modules committed and validated against benchmark test captures.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-07-01** | Horizontal & Vertical Port Scan Recall | Detects Nmap SYN, Connect, and XMAS scans with $\ge 98\%$ recall | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-07-02** | DNS Tunneling & DGA Entropy Detection | Flags Iodine/DNScat2 TXT tunnels and DGA domains ($H > 3.8$) | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-07-03** | Periodic C2 Beaconing Identification | Detects periodic heartbeats across intervals from 1s to 3600s | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-07-04** | Protocol Flag & Port Anomaly Engine | Flags invalid TCP flag pairs (SYN+FIN, NULL) and non-standard ports | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase ONTF-A8: Machine Learning Anomaly & Traffic Baselines Engine
+
+**1. Phase ID & Title:** `ONTF-A8: Machine Learning Anomaly & Traffic Baselines Engine`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Build, calibrate, and evaluate machine learning models for network traffic anomaly detection and classification. Implement unsupervised anomaly detection (Isolation Forest, Local Outlier Factor) to identify outliers deviating from benign traffic baselines; implement supervised flow classification (LightGBM, Random Forest) trained on standard open datasets (CIC-IDS2017, UNSW-NB15, CTU-13) with strict temporal and host-partitioned cross-validation (zero data leakage); apply TreeSHAP for explainable feature attribution; and enforce Mahalanobis out-of-distribution (OOD) gating.  
+**4. Topics & Subtopics:**
+- Unsupervised Anomaly Detection: Isolation Forest trained on benign flow feature baselines.
+- Supervised Flow Classification: LightGBM / Random Forest classifying attack categories (DoS, Probe, C2, Exfil).
+- Zero-Leakage Validation Split: Strict train/test separation by recording date and IP subnet.
+- Explainable AI Attribution: TreeSHAP computing per-prediction feature contributions.
+- Platt Probability Calibration & OOD Gating: Calibrating probabilities and gating predictions exceeding $3.0\sigma$ OOD distance.
+**5. Exact Tasks:**
+1. Implement unsupervised anomaly detector using Isolation Forest (`isolation_forest.py`).
+2. Implement supervised flow classifier using LightGBM (`lightgbm_classifier.py`).
+3. Build evaluation pipeline with zero-leakage temporal and host-separated splits (`eval_splits.py`).
+4. Implement TreeSHAP feature explainer extracting top influential features for positive alerts (`explainer.py`).
+5. Write model inference tests verifying Platt calibration and OOD rejection on synthetic anomalous vectors.
+**6. Detailed Execution Workflow:**
+Engineered Flow Features Received -> Baselines Evaluated -> Isolation Forest Anomaly Scored -> Supervised Classifier Evaluated -> SHAP Explanations Computed -> Calibrated Predictions Emitted.
+**7. Technologies, Tools & Models:**
+Python 3.12, scikit-learn, LightGBM, SHAP, NumPy.
+**8. Prerequisites & Dependencies:**
+Phase ONTF-A5 completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/ontf/ml/isolation_forest.py`
+- `src/ps05/engines/ontf/ml/lightgbm_classifier.py`
+- `src/ps05/engines/ontf/ml/eval_splits.py`
+- `src/ps05/engines/ontf/ml/explainer.py`
+- `tests/unit/test_ontf_ml.py`
+**10. Failure Cases & Risks:**
+- Overfitting to specific IP addresses: Mitigated by stripping all IP and port identifiers from ML feature vectors.
+- Low confidence predictions: Gated by mandatory inconclusive threshold when probability is between 0.40 and 0.60.
+**11. Security Considerations:**
+Models run 100% locally offline; no external cloud model API calls or telemetry.
+**12. Acceptance Criteria:**
+- Supervised classifier achieves Macro-F1 $> 0.90$ on held-out CIC-IDS2017 test splits.
+- TreeSHAP generates top-5 feature attributions for every alert.
+- Out-of-distribution flows exceeding $3.0\sigma$ Mahalanobis distance emit `OOD_INCONCLUSIVE` status.
+**13. Definition of Done:**
+ML models implemented, calibrated, and passing zero-leakage evaluation benchmarks.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-08-01** | Unsupervised Isolation Forest Anomaly | Outlier score accurately flags high-dimensional feature anomalies | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-08-02** | Supervised Flow Classification Macro-F1 | Macro-F1 $> 0.90$ on held-out benchmark test sets | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-08-03** | Zero-Leakage Cross-Validation | Cross-validation strictly separated by capture date and subnet | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-08-04** | Platt Calibration & SHAP Attribution | Emits calibrated probabilities and top-5 SHAP feature contributions | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase ONTF-A9: Optional Temporal Sequence & Graph Models
+
+**1. Phase ID & Title:** `ONTF-A9: Optional Temporal Sequence & Graph Models`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Evaluate and optionally implement temporal sequence models and communication graph architectures for advanced traffic forensics. Construct host-to-host directed graphs with packet/byte edge weights using NetworkX; calculate graph centrality metrics (PageRank, betweenness, in-degree/out-degree hubs); evaluate sequential flow order using LSTM/Transformer models on discretized flow token sequences; and integrate bounded 5-step world-model rollouts for hypothetical defensive threat forecasting, strictly segregating historical facts from simulated forecasts.  
+**4. Topics & Subtopics:**
+- Host Communication Graph Construction: Directed multigraph with nodes as hosts and edges as aggregated flows.
+- Graph Centrality Metrics: PageRank, betweenness centrality, and in/out degree ratios identifying pivots and hubs.
+- Temporal Sequence Modeling: LSTM / Transformer evaluating sequential multi-packet flow transitions.
+- Bounded World-Model Forecast Integration: 5-step horizon rollout simulating potential defensive threat progressions.
+- Evidentiary Simulation Invariants: Strictly labeling forecasted states as hypothetical simulations.
+**5. Exact Tasks:**
+1. Implement host communication graph builder using NetworkX (`comm_graph.py`).
+2. Build graph centrality and community detection analyzer (`graph_analytics.py`).
+3. Implement optional temporal sequence LSTM model for sequential flow modeling (`sequence_lstm.py`).
+4. Build bounded 5-step threat rollout simulator with strict simulation caveats (`world_model_sim.py`).
+5. Write tests asserting graph structure validity and simulation caveat enforcement.
+**6. Detailed Execution Workflow:**
+Flow Stream Ingested -> Host Graph Constructed -> Centrality Metrics Computed -> Sequence Features Evaluated -> Optional 5-Step Simulation Executed -> Graph Telemetry Emitted.
+**7. Technologies, Tools & Models:**
+Python 3.12, NetworkX (>= 3.2), PyTorch (optional), Pydantic v2.
+**8. Prerequisites & Dependencies:**
+Phases ONTF-A5 and ONTF-A6 completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/ontf/graph/comm_graph.py`
+- `src/ps05/engines/ontf/graph/graph_analytics.py`
+- `src/ps05/engines/ontf/graph/sequence_lstm.py`
+- `src/ps05/engines/ontf/graph/world_model_sim.py`
+- `tests/unit/test_ontf_graph.py`
+**10. Failure Cases & Risks:**
+- Graph explosion on massive multi-host enterprise captures: Mitigated by top-K node filtering and degree pruning.
+- Confusion of forecasted states with actual events: Prevented by explicit schema field `is_simulation_forecast = True`.
+**11. Security Considerations:**
+Graph analysis operates strictly on in-memory representations; simulation outputs barred from legal certificates without disclaimers.
+**12. Acceptance Criteria:**
+- Accurate construction of directed host communication graph with correct edge weights.
+- Graph centrality identifies high-degree C2 servers and scanning source nodes.
+- Simulated future states carry mandatory `HYPOTHETICAL_SIMULATION` labels.
+**13. Definition of Done:**
+Graph modules implemented, tested, and integrated with caveat enforcement.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-09-01** | Communication Graph Construction | Builds directed host graph with accurate packet/byte edge weights | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-09-02** | Centrality & Hub Identification | Correctly ranks scanning hosts and C2 hub nodes via PageRank | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-09-03** | Temporal Sequence Modeling | LSTM evaluates sequential flow transitions on test fixtures | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-09-04** | World-Model Forecast Isolation | Simulated future states strictly tagged with `HYPOTHETICAL` caveat | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase ONTF-A10: Multi-Stage Attack Correlation & MITRE ATT&CK Mapping
+
+**1. Phase ID & Title:** `ONTF-A10: Multi-Stage Attack Correlation & MITRE ATT&CK Mapping`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Correlate isolated deterministic findings, ML anomaly scores, and communication graph anomalies into coherent multi-stage attack scenarios across time (e.g., Reconnaissance -> Exploitation -> C2 Establishment -> Lateral Movement -> Data Exfiltration). Map validated findings to MITRE ATT&CK v14 Enterprise tactics and techniques (e.g., T1046 Network Service Discovery, T1071.004 DNS C2, T1048 Exfiltration Over Alternative Protocol, T1059 Command and Scripting Interpreter); attach source packet/flow evidence pointers; and formulate causation caveats.  
+**4. Topics & Subtopics:**
+- Multi-Stage Attack Synthesis: Grouping temporal alerts into coherent incident timelines.
+- MITRE ATT&CK v14 Taxonomy Mapping: Mapping findings to Enterprise tactics (TA0007, TA0011, TA0010) and techniques.
+- Evidence Pointers & Traceability: Linking every correlation node to source flow IDs, packet numbers, and timestamps.
+- Causal Uncertainty & Alternative Hypotheses: Documenting benign explanations for correlated patterns.
+- Correlation Scoring: Formulating composite incident severity without uncalibrated scalar probabilities.
+**5. Exact Tasks:**
+1. Implement attack scenario correlation engine grouping alerts into multi-stage timelines (`scenario_engine.py`).
+2. Build MITRE ATT&CK v14 mapper using local STIX 2.1 taxonomy database (`mitre_mapper.py`).
+3. Implement evidence traceability resolver attaching packet indices and flow keys to findings (`traceability.py`).
+4. Build alternative hypothesis generator formulating benign explanations (`alternative_hypotheses.py`).
+5. Write unit tests evaluating multi-stage correlation on end-to-end attack capture fixtures.
+**6. Detailed Execution Workflow:**
+Alert Stream Received -> Temporal & Host Proximity Evaluated -> Multi-Stage Phases Clustered -> MITRE ATT&CK IDs Mapped -> Evidence Pointers Attached -> Alternative Hypotheses Formulated -> Incident Dossier Emitted.
+**7. Technologies, Tools & Models:**
+Python 3.12, MITRE ATT&CK v14 STIX JSON, Pydantic v2.
+**8. Prerequisites & Dependencies:**
+Phases ONTF-A7, ONTF-A8, and ONTF-A9 completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/ontf/correlation/scenario_engine.py`
+- `src/ps05/engines/ontf/correlation/mitre_mapper.py`
+- `src/ps05/engines/ontf/correlation/traceability.py`
+- `src/ps05/engines/ontf/correlation/alternative_hypotheses.py`
+- `tests/unit/test_ontf_correlation.py`
+**10. Failure Cases & Risks:**
+- False correlation of unrelated background noise: Mitigated by requiring strict temporal proximity and shared host edges.
+- Over-attribution to advanced threat groups: Mitigated by prohibiting threat actor attribution from network telemetry alone.
+**11. Security Considerations:**
+Correlations state observed patterns, never definitive criminal culpability or physical actor identity.
+**12. Acceptance Criteria:**
+- Correctly links Reconnaissance -> C2 -> Exfiltration timeline on multi-stage test capture.
+- 100% of mapped ATT&CK technique IDs validate against official MITRE Enterprise STIX taxonomy.
+- Every correlated finding includes exact source flow IDs and packet timestamp intervals.
+**13. Definition of Done:**
+Correlation engine and ATT&CK mapper committed and validated against multi-stage incident captures.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-10-01** | Multi-Stage Attack Correlation | Correlates Scan -> C2 -> Exfiltration into unified incident narrative | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-10-02** | MITRE ATT&CK v14 Mapping | Maps findings to valid ATT&CK tactic/technique IDs | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-10-03** | Evidence Traceability Binding | Findings link to exact flow IDs, packet timestamps, and byte offsets | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-10-04** | Alternative Hypotheses Formulation | Emits benign alternative explanations for ambiguous dual-use traffic | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase ONTF-A11: Forensic Investigation Workbench & Graph UI
+
+**1. Phase ID & Title:** `ONTF-A11: Forensic Investigation Workbench & Graph UI`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Develop interactive web frontend components for forensic investigators to explore offline network captures. Build an interactive timeline scrubber with packet rate spikes, a force-directed communication graph visualizer (highlighting the candidate target device and external peers), protocol breakdown charts (sunburst and stacked bar), a Target Device Profile card with attribution confidence badge and limitation warnings, a flow inspection table with search, column filters, and deep packet header inspection, and an examiner finding annotation system.  
+**4. Topics & Subtopics:**
+- Interactive Traffic Timeline: Scrubbing packet and byte volume time series with zoomable anomaly regions.
+- Force-Directed Graph Visualizer: Interactive network topology rendering host relationships with node sizing by volume.
+- Target-Device Profile Card: Displaying candidate IP, MAC, DHCP Hostname, attribution tier, and caveats.
+- Flow Inspection Table: Searchable, sortable flow records with packet drill-down modal.
+- Examiner Finding Annotation: Interface allowing investigators to record qualitative notes and legal findings.
+**5. Exact Tasks:**
+1. Build interactive timeline scrubber component with volume spike overlay (`NetworkTimeline.tsx`).
+2. Build force-directed communication graph visualizer using D3 / Cytoscape (`NetworkGraph.tsx`).
+3. Build target-device attribution card with confidence badge and caveat drawer (`DeviceProfileCard.tsx`).
+4. Build flow table and packet drill-down modal (`FlowInspectionTable.tsx`).
+5. Write frontend component tests validating responsiveness and event dispatch.
+**6. Detailed Execution Workflow:**
+Analysis Results Loaded -> Timeline Rendered -> Graph Topology Initialized -> Device Profile Displayed -> Examiner Interacts with Flows & Records Annotations.
+**7. Technologies, Tools & Models:**
+TypeScript, React, Next.js, D3.js / Cytoscape.js, TailwindCSS (if permitted) or Vanilla CSS.
+**8. Prerequisites & Dependencies:**
+Phases ONTF-A4, ONTF-A6, and ONTF-A10 completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/frontend/components/network/NetworkTimeline.tsx`
+- `src/frontend/components/network/NetworkGraph.tsx`
+- `src/frontend/components/network/DeviceProfileCard.tsx`
+- `src/frontend/components/network/FlowInspectionTable.tsx`
+- `tests/frontend/test_network_components.test.tsx`
+**10. Failure Cases & Risks:**
+- Browser freezing on rendering $> 10,000$ graph nodes: Handled by server-side top-100 peer node filtering and WebGL graph rendering.
+- UI latency during timeline scrubbing: Mitigated by downsampled client-side time-bucket histograms.
+**11. Security Considerations:**
+Frontend sanitizes all packet header strings to prevent XSS from maliciously crafted HTTP User-Agents or DNS queries.
+**12. Acceptance Criteria:**
+- Timeline smoothly scrubs across captures up to 24 hours in duration.
+- Graph clearly highlights target device in distinct accent color and displays peer connections.
+- Flow inspection table enables filtering by protocol, IP, port, and threat alert status.
+**13. Definition of Done:**
+Workbench components implemented, tested, and integrated into the platform examiner dashboard.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-11-01** | Interactive Traffic Timeline | Renders zoomable timeline with packet volume and anomaly flags | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-11-02** | Force-Directed Communication Graph | Displays interactive topology with target host highlighted | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-11-03** | Target Device Profile Card | Surfaces candidate device details, confidence tier, and caveats | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-11-04** | Flow Table & Packet Drill-Down | Allows filtering, sorting, and modal packet header inspection | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase ONTF-A12: Section 65B/63 BSA Legal Dossier & Forensic Certification
+
+**1. Phase ID & Title:** `ONTF-A12: Section 65B/63 BSA Legal Dossier & Forensic Certification`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement the automated legal reporting engine compiling the court-admissible electronic evidence forensic certificate and technical annexure in PDF (WeasyPrint) and JSON-LD formats. Generate the complete 11-part dossier: (1) Seizure metadata, (2) Dual SHA-256 and SHA3-512 hashes, (3) Capture environment and tool versions manifest, (4) Operational mode (Mode A / Mode B), (5) Target device profile with attribution tier, (6) 9 mandatory attribution caveats, (7) Protocol and volume statistics, (8) Suspicious flow findings with source packet references, (9) MITRE ATT&CK mapping matrix, (10) Evidence communication graph snapshot, and (11) Examiner declaration with Ed25519 digital signature and RFC 3161 TSA timestamp.  
+**4. Topics & Subtopics:**
+- 11-Part Legal Dossier Structure: Standardized sections compliant with Indian courtroom standards.
+- Section 65B IEA & Section 63 BSA Compliance: Formulating statutory examiner certificates.
+- PDF Generation via WeasyPrint: Rendering clean, paginated, tamper-evident PDF dossiers.
+- Machine-Readable JSON-LD Manifest: Structured forensic data export conforming to legal ontologies.
+- Cryptographic Sealing: Ed25519 signature over canonical JSON manifest and RFC 3161 timestamp embedding.
+**5. Exact Tasks:**
+1. Implement 11-part forensic dossier template engine using Jinja2 and WeasyPrint (`dossier_builder.py`).
+2. Build Section 65B / Section 63 BSA certificate generator with statutory examiner declaration (`statutory_cert.py`).
+3. Build machine-readable JSON-LD evidence manifest exporter (`jsonld_exporter.py`).
+4. Implement Ed25519 signature and RFC 3161 TSA binding module (`crypto_sealer.py`).
+5. Write integration tests validating PDF rendering, field completeness, and signature verification.
+**6. Detailed Execution Workflow:**
+Analysis Telemetry Aggregated -> Dossier Context Assembled -> HTML Rendered -> WeasyPrint PDF Generated -> Ed25519 Signature & TSA Timestamp Applied -> Court-Ready Dossier Saved.
+**7. Technologies, Tools & Models:**
+Python 3.12, WeasyPrint, Jinja2, cryptography (Ed25519), RFC 3161 client.
+**8. Prerequisites & Dependencies:**
+Phases ONTF-A10 and ONTF-A11 completed; platform signing keys available.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/ontf/reporting/dossier_builder.py`
+- `src/ps05/engines/ontf/reporting/statutory_cert.py`
+- `src/ps05/engines/ontf/reporting/jsonld_exporter.py`
+- `src/ps05/engines/ontf/reporting/crypto_sealer.py`
+- `tests/unit/test_ontf_reporting.py`
+**10. Failure Cases & Risks:**
+- Incomplete findings in report: Enforced by schema assertion requiring all 11 dossier sections.
+- Missing signing keys: Raises `SigningKeyUnavailableError` and halts certificate sealing.
+**11. Security Considerations:**
+PDF dossiers are digitally signed; cryptographic hashes ensure any post-issuance alteration invalidates the certificate.
+**12. Acceptance Criteria:**
+- Generated PDF contains all 11 required sections with complete hash manifests.
+- Ed25519 signature and RFC 3161 timestamp verify successfully with platform public key.
+- All 9 evidentiary caveats are printed prominently in the certificate.
+**13. Definition of Done:**
+Reporting engine implemented and passing all dossier compilation and cryptographic sealing tests.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-12-01** | 11-Part Legal Dossier PDF Compilation | Compiles complete Section 65B/63 BSA PDF with all 11 sections | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-12-02** | Cryptographic Sealing & TSA Verification | Ed25519 signature and RFC 3161 timestamp verify successfully | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-06-03** | Mandatory Evidentiary Caveat Inclusion | All 9 attribution and evidence limitations explicitly rendered | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-12-04** | Machine-Readable JSON-LD Manifest | Structured JSON-LD evidence manifest validates against schema | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase ONTF-A13: End-to-End Network Validation & Benchmark Corpus
+
+**1. Phase ID & Title:** `ONTF-A13: End-to-End Network Validation & Benchmark Corpus`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Formulate a comprehensive end-to-end regression test harness and curated benchmark evaluation corpus for the ONTF subsystem. Assemble test PCAPs covering benign enterprise baselines, malformed/truncated captures, large captures (500 MB), IPv4 and IPv6 dual-stack traffic, Nmap port scans, DNS tunnels (Iodine/DNScat2), Cobalt Strike C2 beaconing, and ransomware data exfiltration; verify bit-for-bit bitstream immutability on original exhibits; assert 5-run deterministic score reproducibility; validate parser sandbox resource quotas; verify 100% offline air-gapped execution; and compile the Final ONTF Subsystem Verification Report.  
+**4. Topics & Subtopics:**
+- Benchmark Capture Corpus: Curated dataset of genuine and synthetic attack PCAPs with ground truth.
+- Bitstream Immutability Invariant: Verifying source PCAP bytes remain identical before and after analysis.
+- 5-Run Deterministic Reproducibility: Asserting identical numerical scores and findings across 5 runs.
+- Sandbox Quota Verification: Validating memory ceiling ($\le 4	ext{ GB}$) and 300s timeout enforcement under load.
+- Air-Gapped Network Isolation: Verifying zero outbound network sockets during analysis.
+**5. Exact Tasks:**
+1. Assemble curated benchmark capture corpus under `tests/fixtures/network/` (`corpus_manifest.json`).
+2. Implement master regression test suite executing full ONTF pipeline (`test_ontf_e2e.py`).
+3. Build immutability verifier checking SHA-256 before and after end-to-end execution (`test_immutability.py`).
+4. Build 5-run reproducibility auditor evaluating metric variance (`test_reproducibility.py`).
+5. Compile Final ONTF Subsystem Verification & Benchmark Report.
+**6. Detailed Execution Workflow:**
+Benchmark Corpus Loaded -> Full Pipeline Executed -> Bitstream Hashes Verified -> Reproducibility Checked -> Resource Quotas Validated -> Verification Report Generated.
+**7. Technologies, Tools & Models:**
+Python 3.12, pytest, pytest-benchmark, Pydantic v2.
+**8. Prerequisites & Dependencies:**
+All previous ONTF phases (ONTF-A0 through ONTF-A12) completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `tests/fixtures/network/corpus_manifest.json`
+- `tests/e2e/test_ontf_e2e.py`
+- `tests/e2e/test_immutability.py`
+- `tests/e2e/test_reproducibility.py`
+- `docs/reports/ontf_verification_report.md`
+**10. Failure Cases & Risks:**
+- Floating-point variance across CPU microarchitectures: Controlled by fixed rounding thresholds.
+- Test capture licensing conflicts: All PCAPs curated from public CC-BY or Apache 2.0 forensic datasets.
+**11. Security Considerations:**
+Corpus malware PCAPs are strictly passive network packet data, never executable binaries or payloads.
+**12. Acceptance Criteria:**
+- 100% pass rate across all ONTF unit, integration, and E2E test suites.
+- Bitstream SHA-256 checksums verified identical before and after analysis.
+- Zero outbound network packets detected during air-gap network isolation test.
+**13. Definition of Done:**
+All 14 ONTF phases completed and verified; benchmark report published; all 56 checkpoints accounted for.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONTF-CP-13-01** | Master Regression Test Suite Pass | `pytest tests/` covering all ONTF modules achieves 100% pass | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-13-02** | Bitstream Zero-Alteration Invariant | Original capture SHA-256 hash bit-for-bit identical post-run | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-13-03** | 5-Run Deterministic Reproducibility | Identical outputs and metric scores across 5 independent runs | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-13-04** | Air-Gapped Offline Isolation Audit | Zero outbound sockets or external API calls during full execution | `NOT_STARTED` | Awaits phase activation |
 
 
 ---
-## 7. Development Roadmap Timeline (Gantt Chart)
+
+## 7. Unified Platform Delivery & Security Milestones
+
+The platform delivery, dashboard, and hackathon packaging milestones synthesize findings across all forensic domains (AURAS Audio, VISTA Video, AIF Image, and ONTF Offline Network Traffic):
+
+### Phase 7: Unified Platform Cross-Engine Reporting
+- **Status:** `PLANNED`
+- **Scope:** Cross-engine finding aggregation across audio (AURAS), image (AIF), video/CCTV (VISTA), and offline network traffic (ONTF) evidence; Section 65B Indian Evidence Act / Section 63 Bharatiya Sakshya Adhiniyam (BSA 2023) certified PDF compilation; Archify JSON IR visual dossier export.
+
+### Phase 8: Web Dashboard & Forensic Examiner Workbench
+- **Status:** `PLANNED`
+- **Scope:** Next.js / React interactive web frontend; multi-modal evidence viewer with synchronized audio waveform, spectrogram, video frame player, image ELA/TruFor error-sliders, and interactive network traffic flow / communication graph explorer.
+
+### Phase 9: Security Hardening & Air-Gapped Deployment
+- **Status:** `PLANNED`
+- **Scope:** Offline containerization (Docker Compose), local model checkpoint verification scripts, POSIX 0400 WORM vault locking, parser sandboxing (FFmpeg, TShark, Zeek), and security compliance audit.
+
+### Phase 10: Final Hackathon Demonstration & Release
+- **Status:** `PLANNED`
+- **Scope:** End-to-end platform validation, automated demonstration script (`scripts/run_demo.py`), curated multi-modal evidence showcase (audio, video, image, and network capture), and technical presentation defense.
+
+
+---
+## 8. Development Roadmap Timeline (Gantt Chart)
 
 ```mermaid
 gantt
-    title PS-05 Multi-Modal Forensics Roadmap (AURAS, VISTA & AIF)
+    title PS-05 Multi-Modal Forensics Roadmap (AURAS, VISTA, AIF & ONTF)
     dateFormat  YYYY-MM-DD
     axisFormat  %b %d
 
@@ -2565,6 +3332,22 @@ gantt
 
     section Image Forensics Subsystem (AIF)
     Phase 4: Image Forensics Subsystem (IFS):         p4, 2026-10-24, 2026-10-28
+
+    section ONTF Network Forensics Workstream
+    ONTF-A0: Network Architecture & Sandbox  :         na0, 2026-10-21, 2026-10-23
+    ONTF-A1: Intake, Dual Hashing & WORM     :         na1, 2026-10-23, 2026-10-25
+    ONTF-A2: Defensive Packet Parsing (TShark):        na2, 2026-10-25, 2026-10-27
+    ONTF-A3: Offline Zeek Batch Processing   :         na3, 2026-10-25, 2026-10-27
+    ONTF-A4: Common Telemetry & Normalisation:         na4, 2026-10-27, 2026-10-29
+    ONTF-A5: Statistical Flow Feature Eng   :         na5, 2026-10-29, 2026-10-31
+    ONTF-A6: Dual-Mode Scoping & Attribution :         na6, 2026-10-29, 2026-11-01
+    ONTF-A7: Deterministic Threat & Scans    :         na7, 2026-11-01, 2026-11-03
+    ONTF-A8: ML Anomaly & Traffic Baselines  :         na8, 2026-11-03, 2026-11-05
+    ONTF-A9: Temporal Sequence & Graph Models:         na9, 2026-11-05, 2026-11-07
+    ONTF-A10: Multi-Stage Attack Correlation :         na10, 2026-11-07, 2026-11-09
+    ONTF-A11: Investigation Workbench & UI   :         na11, 2026-11-09, 2026-11-11
+    ONTF-A12: Sec 65B/63 BSA Legal Dossier   :         na12, 2026-11-11, 2026-11-13
+    ONTF-A13: End-to-End Network Validation  :         na13, 2026-11-13, 2026-11-14
 
     section Platform Delivery
     Phase 7: Cross-Engine Legal Reporting   :         p7, 2026-11-10, 2026-11-11

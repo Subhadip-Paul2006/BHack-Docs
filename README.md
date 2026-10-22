@@ -28,24 +28,31 @@ Manual forensic examination is time-consuming, requires scarce specialized exper
    - **VDF (Video Deepfake & AI-Generation Detection Engine):** Multi-branch frame-level and temporal sequence detectors (Xception, EfficientNet, FTCN, STIL, VideoMAE) with calibrated late-fusion.
    - **VCI (Video Content Intelligence Engine):** Hierarchical source taxonomy, object/person detection (YOLO/SAM 2), ByteTrack tracking, and PaddleOCR timestamp overlay parsing.
    - **Dedicated CCTV Forensic Profile:** Source classification, automatic recorder discovery, adaptive follow-up questionnaires, timeline continuity audit, and native export / digital seal verification.
-5. **Court-Admissible Legal Certification:** Automated generation of tamper-evident electronic evidence certificates under **Section 65B of the Indian Evidence Act (IEA)** and **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** with Archify JSON Intermediate Representation (IR).
+5. **Offline Network Traffic Forensics Subsystem (ONTF):** Dedicated offline analysis of seized PCAP and PCAPNG traffic captures associated with PCs, mobile phones, or network endpoints. Evaluates traffic for reconnaissance scans, command-and-control (C2) beaconing, DNS exfiltration tunnels, anomalous protocol states, and MITRE ATT&CK patterns—with rigorous device attribution boundaries and zero requirement for live network sniffing.
+6. **AIF-GEO Geospatial Forensics & Evidence Correlation Subsystem:** Multi-source extraction, normalisation, and verification of geographic metadata and location evidence from digital images. Features geodetic distance and uncertainty modeling, capture-time solar/shadow alignment, historical weather and terrain elevation correlation, visual location recovery without GPS (OCR, landmark retrieval, SIFT/ORB + RANSAC geometric verification), external GPS track correlation (GPX, KML, NMEA), multi-image spatial clustering (DBSCAN), and an interactive evidence-linked map and location-claim conflict graph.
+7. **Court-Admissible Legal Certification:** Automated generation of tamper-evident electronic evidence certificates under **Section 65B of the Indian Evidence Act (IEA)** and **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** with Archify JSON Intermediate Representation (IR).
 
 ---
 
 ## 2. Goals & Non-Goals
 
 ### Project Goals
-- **G-1:** Ingest digital media (audio, image, video, CCTV) with zero modification to original bitstreams.
-- **G-2:** Localize tampering spatio-temporally (millisecond audio timestamps, frame indices, image bounding polygons) with explainable visual artifacts.
+- **G-1:** Ingest digital media and traffic captures (audio, image, video, CCTV, PCAP/PCAPNG) with zero modification to original bitstreams.
+- **G-2:** Localize tampering and suspicious activities spatio-temporally (millisecond audio timestamps, frame indices, image bounding polygons, packet stream offsets) with explainable visual artifacts.
 - **G-3:** Detect AI voice cloning and audio manipulation across Scheduled Indian Languages and regional Hindi dialects.
 - **G-4:** Identify surveillance video tampering (missing CCTV frames, looping sequences, tampered digital clock overlays, desynchronized audio).
-- **G-5:** Produce verifiable, court-ready PDF certificates and Archify JSON Intermediate Representation (IR) graphs.
-- **G-6:** Operate 100% offline in air-gapped forensic laboratory environments.
+- **G-5:** Ingest and analyze offline network traffic captures (PCAP/PCAPNG) associated with seized PCs or mobile devices to isolate attack patterns without requiring live network monitoring.
+- **G-6:** Extract, validate, enrich, and cross-correlate image location evidence (EXIF GPS, visual landmarks, external tracks, solar/shadows, terrain) while preserving raw originals and maintaining explicit uncertainty bounds.
+- **G-7:** Produce verifiable, court-ready PDF certificates and Archify JSON Intermediate Representation (IR) graphs.
+- **G-8:** Operate 100% offline in air-gapped forensic laboratory environments with zero external network dependencies.
 
 ### Non-Goals
 - **NG-1:** The platform is not an automated judicial judge. It outputs probabilistic evidence, anomaly heatmaps, and confidence intervals to assist certified human forensic examiners.
 - **NG-2:** It does not perform live physical memory chip extraction or hardware chip-off JTAG acquisition (evidence must be supplied as seized digital files).
-- **NG-3:** It does not claim 100% detection of unseen zero-day generative architectures without explicit uncertainty bounds.
+- **NG-3:** It is **NOT** a live intrusion detection system (IDS), network tap, or continuous packet sniffer. It analyzes previously captured, legally seized offline PCAP/PCAPNG files.
+- **NG-4:** It does not claim that a PCAP capture proves an endpoint's entire communication history or decrypts modern end-to-end encrypted payloads without authorized private keys.
+- **NG-5:** It does not claim 100% detection of unseen zero-day generative architectures or encrypted evasion techniques without explicit uncertainty bounds.
+- **NG-6:** It does not claim that extracting an EXIF GPS coordinate or matching an online reverse-geocoding place proves that an image was captured there, nor does it send sensitive evidence images or confidential coordinates to unauthorized external cloud APIs.
 
 ---
 
@@ -79,6 +86,7 @@ flowchart TB
             IRE["IRE: Image Reverse Engineering Engine"]
             AIM["AIM: AI, Manipulation & Steganography Engine"]
             FPA["FPA: Face, Portrait & Biometric Analysis Module"]
+            GEO["AIF-GEO: Geospatial Forensics & Evidence Correlation Engine"]
         end
         subgraph VISTA["📹 VISTA Video Forensics Subsystem"]
             VRE["VRE: Video Reverse Engineering Engine"]
@@ -87,6 +95,14 @@ flowchart TB
             VDF["VDF: Video Deepfake & AI-Generation Detection"]
             VCI["VCI: Video Content Intelligence Engine"]
             CCTV_PROF["🛡️ CCTV Adaptive Forensic Profile (Cross-Cutting)"]
+        end
+        subgraph ONTF["🌐 ONTF Offline Network Traffic Forensics Subsystem"]
+            ONTF_INGEST["Offline PCAP/PCAPNG Ingestion & Validation"]
+            ONTF_PARSER["Pluggable Parser Pipeline (TShark, Scapy, Zeek Logs)"]
+            ONTF_SCHEMA["Common Telemetry Normalisation (Flows, DNS, TLS)"]
+            ONTF_FEAT["Feature Engineering (Time-Window, Graph, Jitter)"]
+            ONTF_DETECT["Layered Threat Detection (Rules, ML, ATT&CK)"]
+            ONTF_DEV["Target Device Attribution & Scope Filter (Mode A / B)"]
         end
     end
 
@@ -113,9 +129,10 @@ flowchart TB
     DERIVE --> AURAS
     DERIVE --> AIF
     DERIVE --> VISTA
-    CRYPTO -.->|Integrity & Provenance Layer| INTAKE & AIF & AURAS & VISTA & REPORT
+    DERIVE --> ONTF
+    CRYPTO -.->|Integrity & Provenance Layer| INTAKE & AIF & AURAS & VISTA & ONTF & REPORT
     AFB -.->|Extracted Audio Stream (DAG Linked)| AURAS
-    AURAS & AIF & VISTA --> AGG
+    AURAS & AIF & VISTA & ONTF --> AGG
     AGG --> ARCHIFY
     AGG --> PDF
 ```
@@ -548,6 +565,259 @@ For deeper technical and implementation details, see:
 
 ---
 
+### 4.15 Offline Network Traffic Forensics Subsystem (ONTF)
+
+> **Architectural Boundary Clarification:** The **ONTF (Offline Network Traffic Forensics)** subsystem is dedicated strictly to the post-incident examination of previously captured, legally seized network traffic files (`.pcap` and `.pcapng`).  
+> **Strict Operational Boundary:** ONTF is an **offline forensic analysis tool**, NOT an intrusion detection system (IDS), network sniffer, continuous Zeek monitor, or live packet tap. It operates entirely on static capture artifacts in air-gapped environments.
+
+In contemporary cyber investigations—ranging from corporate espionage and ransomware outbreaks to mobile spyware and unauthorized data exfiltration—seized PCs, smartphones, or network appliances are often accompanied by historical packet captures. Investigating raw packet captures manually via generic packet viewers is labor-intensive, error-prone, and struggles to establish court-admissible device attribution or timeline correlation.
+
+The ONTF subsystem automates offline evidence intake, safe parsing, telemetry normalization, multi-dimensional feature extraction, and MITRE ATT&CK mapping while strictly preserving the raw evidentiary bitstream.
+
+#### Supported Analysis Modes
+To accommodate diverse investigative scenarios, ONTF provides two distinct operational modes:
+1. **Mode A — Whole-Capture Analysis:**
+   - Exhaustively analyzes all packets, flows, sessions, and protocol transactions represented across the entire uploaded PCAP/PCAPNG file.
+   - Generates global network conversation graphs, autonomous system (ASN) distributions, protocol breakdowns, and capture-wide anomaly scores.
+2. **Mode B — Target-Device-Centred Analysis:**
+   - Focuses analysis on communications directly involving a specific device of interest (e.g., a seized suspect laptop or victim Android/iOS smartphone).
+   - Allows investigators to identify the candidate target device using available in-capture evidence:
+     - Specific IPv4 or IPv6 addresses.
+     - Hardware MAC addresses (where captured at layer 2).
+     - DHCP lease transactions (`Option 12` Hostname, `Option 55` Parameter Request List).
+     - ARP / IPv6 Neighbor Discovery (NDP) mappings.
+     - Clear investigator-supplied device labels (flagged strictly as `USER_REPORTED`).
+   - Filters and prioritizes inbound, outbound, lateral, and peer communications relative to the target entity.
+
+---
+
+### 4.16 ONTF Engine & Processing Architecture Matrix
+
+The ONTF subsystem is structured into six decoupled, modular functional engines:
+
+| Engine / Component | Primary Forensic Responsibility | Candidate Technologies | Key Input / Output Contracts |
+| :--- | :--- | :--- | :--- |
+| **1. Intake & Validation Engine (`ONTF-INTAKE`)** | Safe file intake, magic-byte format validation (`.pcap` / `.pcapng`), link-layer detection, truncation trapping, pre-decode dual hashing (SHA-256 / SHA3-512), and WORM storage lock. | Python `hashlib`, `scapy`, `libpcap` wrappers | **In:** Raw seized file. <br/>**Out:** `NetworkEvidenceRecord`, Dual hashes, Link type, Packet count. |
+| **2. Pluggable Parser Engine (`ONTF-PARSE`)** | Sandboxed offline extraction of packet headers, transport states, and application metadata; offline Zeek log batch generation (`zeek -r`). | Wireshark / TShark 4.x, Scapy, Zeek (offline batch), PyShark | **In:** Pristine PCAP file. <br/>**Out:** Raw dissection tables, Zeek structured TSV/JSON logs. |
+| **3. Telemetry Normalisation Engine (`ONTF-NORM`)** | Normalizes disparate parser outputs into the unified `NetworkFlowRecord` and protocol schemas with data minimization and payload masking. | Pydantic v2, Python `ipaddress` | **In:** Dissection streams & Zeek logs. <br/>**Out:** Normalized flows, DNS records, TLS sessions. |
+| **4. Feature Engineering Engine (`ONTF-FEAT`)** | Extracts statistical flow metrics, packet length distributions, inter-arrival time (IAT) jitter, TCP flag ratios, and communication graph metrics. | NumPy, SciPy, Pandas, NetworkX | **In:** Normalized flow records. <br/>**Out:** Flow feature vectors, windowed aggregates, graph adjacency matrices. |
+| **5. Threat Detection & Correlation Engine (`ONTF-DETECT`)** | Layered threat analysis: deterministic rules (scans, DGA, tunnels, beacons), ML anomaly classification, multi-stage attack correlation, and MITRE ATT&CK mapping. | Scikit-learn, LightGBM, custom rule evaluators | **In:** Feature vectors & timeline events. <br/>**Out:** Calibrated threat findings, attack narratives, ATT&CK tags. |
+| **6. Target Device Attribution Engine (`ONTF-ATTR`)** | Evaluates candidate device identity, resolves DHCP/ARP bindings, correlates hostnames, and enforces attribution confidence tiering. | Custom attribution logic, Scapy DHCP/ARP | **In:** Telemetry records + investigator target criteria. <br/>**Out:** Device profile, attribution confidence tier, filtered sessions. |
+
+---
+
+### 4.17 End-to-End ONTF Offline Processing Workflow
+
+The canonical 7-step offline network forensics pipeline is executed as an auditable, deterministic Directed Acyclic Graph (DAG):
+
+```mermaid
+flowchart TD
+    RAW_PCAP["📦 Seized Packet Capture Exhibit<br/>(.pcap / .pcapng)"] --> INGEST["1. Pre-Decode Dual Hashing & Ingestion<br/>(Stream SHA-256 & SHA3-512 -> WORM Vault POSIX 0400)"]
+    
+    INGEST --> VALIDATE{"2. Format Validation & Boundary Checks<br/>(Magic Bytes, Link Type, Truncation, Snaplen)"}
+    
+    VALIDATE -->|Malformed / Bomb| QUARANTINE["Quarantine File & Emit INGESTION_REJECTED"]
+    VALIDATE -->|Valid Capture| DISPATCH["3. Pluggable Offline Parsing Sandbox<br/>(TShark Dissector + Offline Zeek Batch: zeek -r)"]
+    
+    DISPATCH --> EXTRACT_LOGS["Extract Protocol Telemetry & Logs<br/>(conn.log, dns.log, ssl.log, http.log, notice.log)"]
+    
+    EXTRACT_LOGS --> NORM["4. Common Telemetry Normalisation<br/>(Map to NetworkFlowRecord; Mask Sensitive Payloads)"]
+    
+    NORM --> MODE_SELECT{"5. Operational Analysis Mode"}
+    
+    MODE_SELECT -->|Mode A| WHOLE_CAP["Mode A: Whole-Capture Analysis<br/>(Global Network Graph & Flow Baseline)"]
+    MODE_SELECT -->|Mode B| DEV_SCOPE["Mode B: Target-Device-Centred Analysis<br/>(Resolve IP/MAC/DHCP; Filter Host Sessions)"]
+    
+    WHOLE_CAP --> FEAT["6. Feature Engineering & Profiling<br/>(Packet Length Stats, Inter-Arrival Jitter, Windowing, Graphs)"]
+    DEV_SCOPE --> FEAT
+    
+    FEAT --> DETECT_LAYER["7. Layered Threat Analysis Core"]
+    
+    subgraph DETECT_LAYER["Layered Threat Detection Core"]
+        direction TB
+        RULE_DET["A. Deterministic Rules:<br/>Port Scans, DGA, DNS Tunnels, Periodic Beacons"]
+        ML_DET["B. Statistical & ML Anomaly Models:<br/>Flow Classifiers, Outlier Detection"]
+        CORR_DET["C. Multi-Stage Attack Correlation:<br/>Recon -> Delivery -> C2 -> Exfiltration"]
+        ATTACK_MAP["D. MITRE ATT&CK Tactic & Technique Tagging"]
+    end
+    
+    DETECT_LAYER --> FUSION["Cross-Modal Finding Aggregator & Conflict Resolver"]
+    FUSION --> REPORT["8. Court-Admissible Forensic Dossier<br/>(Section 65B/63 BSA Certified PDF + Archify JSON IR)"]
+```
+
+#### Detailed Execution Steps:
+1. **Intake & Hashing:** Raw captured bytes are streamed through parallel SHA-256 and SHA3-512 accumulators prior to file parsing, committed to WORM immutable storage (`POSIX 0400` / S3 Object Lock), and assigned a unique `evidence_id`.
+2. **Defensive Validation:** Inspects file headers (`0xa1b2c3d4` or `0x0a0d0d0a`), verifies packet link-layer types (Ethernet, Linux Cooked, Raw IP), traps capture drop counts, checks for packet-level truncation, and rejects crafted decompression bombs.
+3. **Pluggable Sandboxed Parsing:** Dispatches the capture through TShark and offline Zeek (`zeek -r capture.pcap`) inside an isolated, unprivileged worker container (`uid 10001`) with strict execution timeouts (300s limit).
+4. **Common Telemetry Normalisation:** Transforms raw dissections and Zeek logs into structured `NetworkFlowRecord`, `DNSActivityRecord`, and `TLSHandshakeRecord` representations. Strips or masks non-essential packet payloads to enforce privacy and data minimization.
+5. **Scoping & Device Attribution:** For Mode B, resolves candidate IP and MAC addresses from DHCP, ARP, and NDP transactions. Assigns a formal attribution confidence score and isolates flows involving the target device.
+6. **Feature Engineering:** Computes bidirectional flow metrics, inter-arrival time (IAT) distributions, FFT-based beacon periodicity scores, TCP flag ratios, and communication graph centrality metrics.
+7. **Multi-Stage Threat Detection:** Evaluates deterministic behavioral rules, statistical anomaly detectors, and supervised flow classifiers; correlates multi-stage event sequences; and maps validated anomalies to MITRE ATT&CK techniques.
+8. **Forensic Reporting:** Assembles findings into an 11-part court-admissible electronic evidence dossier certified under Section 65B IEA / Section 63 BSA, sealed with Ed25519 digital signatures and RFC 3161 timestamps.
+
+---
+
+### 4.18 Network Technologies by Forensic Purpose
+
+The following candidate technologies are evaluated for the ONTF subsystem, categorized by their distinct forensic role:
+
+| Forensic Domain | Candidate Technologies Evaluated | Selection Status | Primary Forensic Responsibility |
+| :--- | :--- | :--- | :--- |
+| **Bitstream Demuxing & Dissection** | Wireshark / TShark 4.x, Scapy (`>=2.5.0`), PyShark | `PLANNED` | Deep multi-protocol dissection, packet header extraction, TCP reassembly, and structured JSON packet export. |
+| **Offline Protocol Logging** | Zeek 6.x (offline batch: `zeek -r`) | `PLANNED` | High-level behavioral extraction generating structured protocol logs (`conn.log`, `dns.log`, `ssl.log`, `notice.log`). |
+| **Flow Feature Generation** | CICFlowMeter, custom NumPy/SciPy flow accumulator | `PLANNED` | Extraction of 80+ bidirectional flow metrics (inter-arrival times, packet length statistics, sub-flow metrics). |
+| **Communication Graph Modeling** | NetworkX, igraph, PyTorch Geometric | `RESEARCH_CANDIDATE` | Bipartite host-to-host interaction graphs, degree centrality, clustering coefficients, and lateral movement paths. |
+| **Rule-Based Threat Detection** | Custom deterministic rule engine, Sigma rules | `PLANNED` | Detection of horizontal/vertical port scans, DNS tunneling, DGA domains, and periodic beaconing ($CV_{	ext{IAT}} < 0.15$). |
+| **Machine Learning Classifiers** | Scikit-learn (Random Forest, Isolation Forest), LightGBM | `PLANNED` | Supervised flow classification against benchmark sets (CIC-IDS2017, UNSW-NB15) and unsupervised outlier detection. |
+| **Threat Taxonomy & Mapping** | MITRE ATT&CK Enterprise Matrix (STIX/TAXII format) | `PLANNED` | Contextual tagging of verified network findings to standard ATT&CK Tactics (TA0001..TA0011) and Techniques (T1046, T1071, etc.). |
+| **Cryptographic Evidence Sealing** | Python `hashlib`, `cryptography` (Ed25519), `canonicaljson` | `PLANNED` | SHA-256 dual-hashing, RFC 8785 canonical manifest generation, and Ed25519 digital signing. |
+| **Legal Dossier & Visualization** | ReportLab, WeasyPrint, Archify JSON IR compiler | `PLANNED` | Section 65B/63 BSA certified PDF generation and interactive SVG communication graph rendering. |
+
+---
+
+### 4.19 Network Forensic Limitations & Device Attribution Principles
+
+All network traffic forensic analysis within ONTF is governed by nine strict evidentiary and scientific principles:
+
+1. **Offline Capture $
+eq$ Complete Device History:** A packet capture represents only the packets that traversed a specific monitored link during the capture window. Packet drops, uncaptured network interfaces (e.g., Bluetooth, cellular data while Wi-Fi is monitored), or local host activity not generating traffic remain invisible.
+2. **IP Address $
+eq$ Physical Device Identity:** An IP address identifies a network interface at a specific instant in time, not a physical human or hardware device. DHCP pool churn, dynamic IP re-assignments, and NAT gateways mean an IP may be shared across multiple devices over time.
+3. **MAC Address Limitations & Volatility:** Layer-2 MAC addresses are stripped by routers at the first gateway hop and are absent in routed captures. Furthermore, modern operating systems (iOS, Android, Windows, macOS) employ MAC randomisation by default on untrusted Wi-Fi networks, and MAC addresses can be easily spoofed.
+4. **Encrypted Payload Opacity & Blind Spots:** Modern internet communications predominantly utilize TLS 1.3, QUIC, DoH (DNS over HTTPS), and SSH. In the absence of legally authorized server private keys or client session key logs (`SSLKEYLOGFILE`), packet payloads cannot be decrypted. Forensic analysis must rely on unencrypted transport metadata, handshake SNI, certificate validation, and flow dynamics.
+5. **Vantage Point Sensitivity:** The evidentiary value of a capture depends heavily on where it was recorded (e.g., local endpoint agent, home Wi-Fi access point, mirrored switch port, corporate core gateway). Gateway captures do not see local broadcast or lateral peer-to-peer traffic.
+6. **User-Reported Context $
+eq$ Verified Evidence:** Information supplied by the investigator (e.g., "This PCAP is from the suspect's iPhone") is strictly categorized as `USER_REPORTED` until corroborated by independent in-capture artifacts (e.g., DHCP Hostname matching IMEI/serial records).
+7. **Correlation $
+eq$ Confirmed Causation or Intent:** Detecting multiple failed connections or unusual ports indicates anomalous traffic; it does not independently prove criminal intent or a confirmed breach. Legitimate software bugs, network misconfigurations, P2P applications, and cloud telemetry often mimic suspicious behavior.
+8. **Forecasted States $
+eq$ Historical Reality:** Where bounded temporal world-models or graph forecasting models project potential attack propagation horizons, these candidate future states are purely probabilistic simulations. They must **NEVER** be cited as historical events that actually took place.
+9. **Legitimate Inconclusive Attribution:** When packet headers lack layer-2 frames, DHCP logs are missing, multiple devices share a single NAT IP, or traffic volume is insufficient, **"Attribution Inconclusive / Insufficient Network Telemetry"** is the mandatory, court-admissible scientific determination.
+
+For deeper technical and implementation details, see:
+- Product requirements and personas: [PRD.md § 6.5](PRD.md)
+- Engineering execution playbook and checkpoints: [PHASES.md § 7 (ONTF-A0..A13)](PHASES.md)
+
+---
+
+### 4.20 AIF-GEO Geospatial Forensics & Evidence Correlation Subsystem Overview
+
+> **Subsystem Identity & Architectural Invariant:** The **AIF-GEO (Geospatial Forensics & Evidence Correlation)** subsystem is a specialized analytical capability embedded within the **AIF (Advanced Image Forensics)** platform. It does NOT replace AIF's manipulation-detection or reverse-engineering capabilities, nor does it operate as an isolated silo. It leverages shared platform services (CEIPL hashing, WORM vault, Celery dispatch, Section 65B/63 BSA reporting) while communicating cross-subsystem with VISTA (video/CCTV timestamps and camera locations) and AURAS (acoustic context).  
+> **Critical Evidence Invariant:** Reading metadata, parsing rational coordinates, or performing spatial analysis must **NEVER** overwrite, re-encode, retag, or modify the original seized evidence file. All analysis executes strictly on derived, cryptographically bound artifacts.
+
+In digital forensics investigations—such as kidnappings, extortion cases, illicit trafficking, violent crimes, and disaster response—location context is critical. However, investigators frequently encounter:
+1. **Metadata Stripping & Forgery:** Social media platforms (WhatsApp, Telegram) strip EXIF metadata entirely, while off-the-shelf EXIF editors allow suspects to inject fabricated coordinates.
+2. **Coordinate & Timezone Fallacies:** Naive parsers fail to distinguish GPS UTC timestamps from camera local clocks, misinterpret hemisphere tags, or divide by zero on corrupted rational fields.
+3. **The Reverse-Geocoding Illusion:** Finding that a coordinate resolves to a specific address does not independently prove that the photograph was physically taken at that building.
+4. **Isolated Evidence Islands:** Photographs, surveillance clips, and suspect device tracking logs are analyzed in disconnected tools without cross-evidence correlation or conflict detection.
+
+The AIF-GEO subsystem transforms seized images into an evidence-linked, map-oriented investigative workspace that rigorously tests location claims against physical, environmental, and visual realities.
+
+---
+
+### 4.21 The 26 AIF-GEO Capability Specifications Matrix
+
+The AIF-GEO subsystem implements twenty-six cohesive forensic capabilities (designated **`GEO-01` through `GEO-26`**), categorized into eight functional domains:
+
+| Domain | Capability ID & Title | Primary Forensic Function | Key Algorithms & Methods | Implementation Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **1. Metadata & Geodesy** | **`GEO-01` Comprehensive GPS Metadata Extraction** | Recovers all EXIF, XMP, IPTC, and MakerNote location tags. | Sandboxed ExifTool array execution, Pillow `_getexif()`, raw value preservation. | `PLANNED` (AIF-GEO-01) |
+| | **`GEO-02` Coordinate Validity & Anomaly Checks** | Validates $-90 \le \phi \le 90$, $-180 \le \lambda \le 180$, detects zero-denominators, conflicting tags. | Rational decoding, hemisphere validation, precision audit. | `PLANNED` (AIF-GEO-01) |
+| | **`GEO-05` Capture-Time & GPS-Time Consistency** | Compares DateTimeOriginal, GPS time stamp, and local clock offsets. | Microsecond epoch normalisation, leap-second offset (18s), drift regression. | `PLANNED` (AIF-GEO-02) |
+| | **`GEO-06` Accuracy & Uncertainty Representation** | Represents horizontal positioning error and dilution of precision (DOP). | Error propagation $\sigma_{\text{diff}} = \sqrt{\sigma_1^2 + \sigma_2^2}$, radial accuracy modeling. | `PLANNED` (AIF-GEO-02) |
+| **2. Geocoding & Mapping** | **`GEO-03` Reverse Geocoding & Place Enrichment** | Resolves coordinates to administrative boundaries, streets, and POIs. | Local offline gazetteer, provider adapter, rate limiting, caching. | `PLANNED` (AIF-GEO-03) |
+| | **`GEO-04` Interactive Geospatial Evidence Map** | Renders candidate markers, uncertainty radii, and timeline-synced tracks. | MapLibre GL JS / Leaflet vector tiles, GeoJSON overlays, offline caching. | `PLANNED` (AIF-GEO-03) |
+| | **`GEO-25` Evidence-Aware Geospatial Search** | Enables bounding box, radial, polygon, and temporal case evidence searches. | PostGIS GiST spatial indexing, spatial joins, bounded queries. | `PLANNED` (AIF-GEO-08) |
+| | **`GEO-26` Offline Geographic Intelligence & Enrichment** | Ensures 100% air-gapped execution with optional controlled online provider. | Local vector tiles, local DEM rasters, privacy-preserving query minimisation. | `PLANNED` (AIF-GEO-03) |
+| **3. Movement & Tracks** | **`GEO-07` Cross-Image Location & Timeline Reconstruction** | Assembles groups of images into geographic travel sequences. | Geodesic distance, velocity check $v = d / \Delta t$, DBSCAN, Kalman filter. | `PLANNED` (AIF-GEO-04) |
+| | **`GEO-08` External Track & Device-Log Correlation** | Ingests authorized GPS tracks (GPX, KML, NMEA, FIT, CSV). | Timestamp alignment, geodesic interpolation $p(t) = p_0 + \alpha(p_1 - p_0)$. | `PLANNED` (AIF-GEO-04) |
+| **4. Visual Geolocation** | **`GEO-09` Visual Location Recovery Without GPS** | Recovers candidate locations from visible signs, roads, landmarks, and terrain. | PaddleOCR text extraction, visual embedding retrieval, GeoCLIP (candidate). | `PLANNED` (AIF-GEO-05) |
+| | **`GEO-10` Direction & Landmark Geometry** | Compares camera compass heading against scene geometry and landmarks. | Circular difference $\Delta\theta$, magnetic declination, projective geometry. | `PLANNED` (AIF-GEO-05) |
+| | **`GEO-21` Map & Satellite-Image Comparison** | Correlates image scene with authorized satellite / orthophoto references. | SIFT/ORB feature matching, RANSAC homography estimation ($\mathbf{x}' \sim \mathbf{H}\mathbf{x}$). | `PLANNED` (AIF-GEO-05) |
+| | **`GEO-22` Landmark & Point-of-Interest Ranking** | Ranks candidate geographic landmarks matching the visual scene. | Top-k candidate accuracy, multi-stage retrieval, calibrated ranking scores. | `PLANNED` (AIF-GEO-05) |
+| **5. Environmental & Terrain**| **`GEO-11` Solar Position & Shadow Consistency** | Computes expected sun angle vs visible shadows. | NOAA solar position algorithm ($\alpha, \Phi_s$), shadow geometry $\tan\alpha \approx h/L$. | `PLANNED` (AIF-GEO-06) |
+| | **`GEO-12` Historical Weather Context** | Compares candidate date/place with historical weather records. | Open-Meteo historical reanalysis, temperature, precipitation, cloud cover. | `PLANNED` (AIF-GEO-06) |
+| | **`GEO-13` Elevation & Terrain Correlation** | Compares GPS altitude with digital elevation models (DEM). | SRTM / Copernicus DEM, ellipsoidal $h$ vs orthometric $H$ ($h = H + N$). | `PLANNED` (AIF-GEO-06) |
+| **6. Manipulation & Integrity**| **`GEO-14` GPS & Location Manipulation Indicators** | Detects coordinate-time incompatibilities and spoofed tags. | Multi-tag cross-referencing, coordinate teleportation detection. | `PLANNED` (AIF-GEO-07) |
+| | **`GEO-15` EXIF-to-Visual Content Consistency** | Verifies whether depicted scene content matches claimed GPS region. | Visual feature extraction vs geographic classification, screen detection. | `PLANNED` (AIF-GEO-07) |
+| | **`GEO-17` Near-Duplicate & Same-Scene Discovery** | Identifies byte-identical, re-compressed, or cropped copies of scene. | SHA-256 hashes, perceptual hashes, deep visual embeddings. | `PLANNED` (AIF-GEO-07) |
+| | **`GEO-18` Camera & Device Consistency Analysis** | Evaluates camera make/model, lens, and serial metadata across case files. | ExifTool MakerNotes, sensor specifications cross-referencing. | `PLANNED` (AIF-GEO-07) |
+| | **`GEO-19` Sensor & Image-Processing Correlation** | Evaluates camera sensor noise compatibility with suspect device. | PRNU wavelet denoising, normalized cross-correlation $\rho(W, K_{\text{ref}})$. | `PLANNED` (AIF-GEO-07) |
+| **7. Cross-Evidence & Graph** | **`GEO-16` Cross-Evidence Geospatial Correlation** | Links image findings to related CCTV, audio, network, and case incident data. | Spatio-temporal matching, explicit evidence relationship links. | `PLANNED` (AIF-GEO-08) |
+| | **`GEO-20` Signed Provenance & Content Credentials** | Validates C2PA / Content Credentials manifests and location claims. | C2PA claim validation, Ed25519/ECDSA signature verification, trust chain audit. | `PLANNED` (AIF-GEO-08) |
+| | **`GEO-23` Multi-Image Geospatial Clustering** | Clusters case images by geographic distance and capture timestamp. | DBSCAN / HDBSCAN on geodesic distance matrices with temporal constraints. | `PLANNED` (AIF-GEO-08) |
+| | **`GEO-24` Location-Claim Conflict Graph** | Relates evidence, coordinates, tracks, and findings in an interactive graph. | Typed node/edge graph (`CLAIMS_LOCATION`, `CONTRADICTS`, `CORROBORATES`). | `PLANNED` (AIF-GEO-08) |
+
+---
+
+### 4.22 End-to-End AIF-GEO 7-Stage Geospatial Processing Workflow
+
+The AIF-GEO engine executes as an auditable, deterministic 7-stage pipeline:
+
+```mermaid
+flowchart TD
+    RAW["📦 Seized Image Exhibit<br/>(JPEG / PNG / TIFF / WebP / HEIC / RAW)"] --> STAGE_A["Stage A: Ingestion & Cryptographic Preservation<br/>(SHA-256 / SHA3-512 Stream -> WORM Vault POSIX 0400)"]
+    
+    STAGE_A --> STAGE_B["Stage B: Sandboxed Metadata Extraction (GEO-01)<br/>(ExifTool Argument Array -> Raw Tag Preservation)"]
+    
+    STAGE_B --> STAGE_C{"Stage C: Coordinate Validation & Anomaly Checks (GEO-02, 05, 06)<br/>(Range Bounds, Hemisphere Reference, Timestamp Normalisation)"}
+    
+    STAGE_C -->|GPS Present & Valid| STAGE_D["Stage D: Geographic Enrichment & Reverse Geocoding (GEO-03, 26)<br/>(Offline Gazetteer / Provider Adapter -> Uncertainty Radius)"]
+    STAGE_C -->|GPS Absent / Malformed| STAGE_E1["Stage E1: Visual Location Recovery (GEO-09, 21, 22)<br/>(OCR Signs, Landmark Retrieval, SIFT/ORB + RANSAC Geometry)"]
+    
+    STAGE_D --> STAGE_E2["Stage E2: Environmental & Physics Verification (GEO-11, 12, 13)<br/>(NOAA Solar & Shadow Azimuth, Historical Weather, DEM Elevation)"]
+    STAGE_E1 --> STAGE_E2
+    
+    STAGE_E2 --> STAGE_F["Stage F: Cross-Evidence Correlation & Conflict Graph (GEO-07, 08, 16, 24)<br/>(External GPS Tracks, DBSCAN Clustering, Multi-Evidence Links)"]
+    
+    STAGE_F --> STAGE_G["Stage G: Examiner Workbench & Legal Reporting (GEO-04, 20)<br/>(Interactive Map, Conflict Graph, Sec 65B/63 BSA Dossier)"]
+```
+
+---
+
+### 4.23 Candidate Geospatial & Vision Technologies Matrix
+
+| Technology / Library | Forensic Purpose | Selection Status | Compatibility & Licensing Rationale |
+| :--- | :--- | :--- | :--- |
+| **`ExifTool` (12.x)** | Deep EXIF/GPS/XMP extraction | `PLANNED` | Industry standard; executed via sandboxed argument arrays without shell interpolation. Artistic/GPL license. |
+| **`pyproj` (>=3.6.0)** | Geodesy, WGS84 ellipsoidal distance, CRS conversion | `PLANNED` | PROJ C-library bindings; exact ellipsoidal geodesic calculations. Permissive MIT license. |
+| **`geopy` (>=2.4.0)** | Geocoding provider adapters & distance utilities | `PLANNED` | Lightweight abstraction over geocoding providers; permissive MIT license. |
+| **`shapely` (>=2.0.0)** | Spatial geometry operations & bounding polygons | `PLANNED` | Fast GEOS-backed geometry engine; permissive BSD license. |
+| **`geopandas` (>=0.14.0)** | Spatial dataframes & spatial joins | `PLANNED` | Tabular geospatial analysis; BSD license. |
+| **`rasterio` (>=1.3.0)** | Digital Elevation Model (DEM) raster access | `PLANNED` | GDAL-backed GeoTIFF reader for terrain elevation lookups. BSD license. |
+| **`PostgreSQL / PostGIS`** | Spatial persistence & GiST spatial indexing | `PLANNED` | Enterprise spatial database; fallback to indexed latitude/longitude columns if PostGIS is not enabled. |
+| **`MapLibre GL JS`** | Interactive vector map visualization | `PLANNED` | Open-source fork of Mapbox GL; supports offline vector tiles and WebGL rendering. 3-Clause BSD. |
+| **`Leaflet`** | Lightweight map interactions & GeoJSON overlays | `PLANNED` | Fast, mobile-friendly map library; permissive BSD-2. |
+| **`PaddleOCR` (>=2.7.0)** | Text extraction from signs, street names, overlays | `PLANNED` | High-accuracy multilingual Indian script & English OCR; Apache 2.0 license. |
+| **`OpenCV SIFT / ORB`** | Local feature matching & homography estimation | `PLANNED` | Deterministic keypoint matching with RANSAC geometric verification. Apache 2.0 license. |
+| **`GeoCLIP` / `StreetCLIP`**| Image-to-location candidate retrieval | `CANDIDATE_NOT_YET_VALIDATED` | Research-grade model; requires benchmark evaluation, geographic coverage audit (Indian regions), and license verification. |
+| **`pvlib-python` / NOAA** | Solar position, elevation, and azimuth calculation | `PLANNED` | Validated astronomical formulas matching NOAA Solar Calculator. BSD 3-Clause. |
+| **`Open-Meteo Historical`**| Historical weather reanalysis context | `PLANNED` | Open-access non-commercial weather data with local caching and offline fallback. |
+
+---
+
+### 4.24 The 10 Geospatial Forensic Limitations & Location Attribution Principles
+
+All geospatial forensic analysis within AIF-GEO is governed by ten strict evidentiary principles:
+
+1. **GPS Metadata $\neq$ Physical Ground Truth:** An embedded EXIF GPS tag indicates what the recording device's software recorded into the file header. Software bugs, fake-GPS mock apps, manual tagging tools, and post-capture editing can inject false coordinates into genuine photos.
+2. **Reverse Geocoding $\neq$ Location Verification:** Resolving a coordinate to a street address confirms that the coordinate maps to that place in a database; it does **not** prove the camera was physically there.
+3. **Missing GPS Metadata $\neq$ Manipulation:** The vast majority of social media platforms (WhatsApp, Telegram, Facebook, X) strip all EXIF metadata by default to protect user privacy. The absence of GPS tags is expected on web-sourced media and must **never** be cited as standalone proof of fraud.
+4. **Device Heading $\neq$ Photographed Subject Bearing:** Camera compass metadata (`GPSImgDirection`) records the orientation of the physical phone/camera at the instant of capture. It does not prove the bearing of the subject depicted in the frame (e.g. telephoto zoom, tilted camera, aerial viewpoint).
+5. **GPS Uncertainty Bounds Are Mandatory:** GPS receivers experience dilution of precision (DOP), urban canyon multipath reflections, and atmospheric delays. Every coordinate finding must state its uncertainty radius; map zoom levels must not imply false pinpoint accuracy.
+6. **Interpolated Positions $\neq$ Measured GPS Fixes:** When correlating images against external GPS tracks (GPX, KML), interpolated points are mathematical estimates. They must be clearly labeled as `MODEL_INFERRED` and never represented as recorded satellite fixes.
+7. **Visual Similarity $\neq$ Geographic Proof:** Architectural similarities (e.g. colonial buildings, standard highway signs, retail chain storefronts) do not establish an exact location without location-specific verification (street names, unique landmarks, geometric homography).
+8. **Solar/Shadow Consistency Is a Compatibility Test:** A solar position check indicates whether the observed shadow angle is *physically consistent* with the claimed time and place. It cannot pinpoint a location uniquely, because identical sun angles occur at many locations and dates globally.
+9. **No Confidential Evidence Transmission:** Uploaded case images and confidential coordinates must **NEVER** be transmitted to unvetted third-party commercial geolocation APIs. External enrichment must use local offline databases or administrator-whitelisted, privacy-preserving adapters.
+10. **Mandatory Inconclusive Verdicts:** When image resolution is inadequate, scene geometry is ambiguous, terrain is flat/featureless, or metadata is stripped without visual clues, **"Location Inconclusive / Insufficient Geospatial Evidence"** is the legally required scientific finding.
+
+For deeper technical and implementation details, see:
+- Product requirements and personas: [PRD.md § 6.6](PRD.md)
+- Technical architecture, geodesy math, schemas, and API contracts: [TRD.md § 10.10](TRD.md)
+- Engineering execution playbook and checkpoints: [PHASES.md § 6 (AIF-GEO-00..AIF-GEO-10)](PHASES.md)
+
+---
+
 ## 5. Implementation Status
 
 The project architecture is finalized; core foundation artifacts and behavioral specifications have been authored, with engine implementations planned across structured engineering phases:
@@ -571,6 +841,13 @@ The project architecture is finalized; core foundation artifacts and behavioral 
 | **AIF: Steganalysis & File Security** | `PLANNED` | Phase 4 / AIF-A12 | LSB Chi-Square, RS, polyglot scanner |
 | **AIF: Evidence Fusion & Reporting** | `PLANNED` | Phase 4 / AIF-A14 | Finding Aggregator, Archify IR, WeasyPrint |
 | **AIF: End-to-End Validation & Release**| `PLANNED` | Phase 4 / AIF-A15 | Pytest, Image benchmark corpus |
+| **AIF-GEO: Metadata & Geodesy Engine** | `PLANNED` | Phase 4 / AIF-GEO-01, 02 | ExifTool, pyproj, WGS84, NumPy |
+| **AIF-GEO: Geocoding & Mapping Engine** | `PLANNED` | Phase 4 / AIF-GEO-03 | Local gazetteers, geopy, MapLibre, PostGIS |
+| **AIF-GEO: Track & Timeline Engine** | `PLANNED` | Phase 4 / AIF-GEO-04 | GPX/KML parsers, Kalman, DBSCAN |
+| **AIF-GEO: Visual Geolocation Engine** | `PLANNED` | Phase 4 / AIF-GEO-05 | PaddleOCR, SIFT/ORB, RANSAC, GeoCLIP |
+| **AIF-GEO: Solar, Weather & Terrain** | `PLANNED` | Phase 4 / AIF-GEO-06 | NOAA solar, Open-Meteo, Rasterio DEM |
+| **AIF-GEO: Manipulation & Conflict Graph**| `PLANNED`| Phase 4 / AIF-GEO-07, 08 | Evidence Graph, C2PA, PRNU, Hashicorp |
+| **AIF-GEO: Workbench & Reporting** | `PLANNED` | Phase 4 / AIF-GEO-09, 10 | WeasyPrint, Archify IR, Test corpus |
 | **AURAS: ARE Engine** | `PLANNED` | Phase 2 / AURAS-A1, A2 | Librosa, SciPy, NumPy, SoundFile |
 | **AURAS: MVSI Engine** | `PLANNED` | Phase 3 / AURAS-A3, A4, A5 | Silero VAD, PyAnnote, SpeechBrain |
 | **AURAS: ADDE Engine** | `PLANNED` | Phase 6 / AURAS-A6, A7, A8 | PyTorch, RawNet2, AASIST, WavLM |
@@ -584,7 +861,14 @@ The project architecture is finalized; core foundation artifacts and behavioral 
 | **VISTA: VDF Deepfake Detection** | `PLANNED` | Phase 5 / VISTA-A9, A10 | Xception, EfficientNet, FTCN, VideoMAE |
 | **VISTA: Cross-Engine Fusion & Report**| `PLANNED` | Phase 5 / VISTA-A11, A12 | Finding Merger, Archify IR, WeasyPrint |
 | **VISTA: End-to-End Video Validation** | `PLANNED` | Phase 5 / VISTA-A13 | Pytest, FaceForensics++, CCTV Corpus |
-| **Platform Legal Reporting & Archify IR** | `PLANNED` | Phase 7 / AURAS-A9 / AIF-A14 / VISTA-A12 | Jinja2, WeasyPrint, Archify |
+| **ONTF: Ingestion & Defensive Parsing** | `PLANNED` | Phase 6 / ONTF-A1, A2 | Python, scapy, libpcap, hashlib |
+| **ONTF: Telemetry Normalisation & Zeek Batch** | `PLANNED` | Phase 6 / ONTF-A3, A4 | TShark, Zeek (offline -r), Pydantic v2 |
+| **ONTF: Feature Engineering & Flow Profiling** | `PLANNED` | Phase 6 / ONTF-A5 | NumPy, SciPy, CICFlowMeter, NetworkX |
+| **ONTF: Device Attribution & Scoping (Mode A/B)** | `PLANNED` | Phase 6 / ONTF-A6 | DHCP/ARP Correlator, Scapy |
+| **ONTF: Threat Detection & ATT&CK Mapping** | `PLANNED` | Phase 6 / ONTF-A7..A10 | Rule Engine, Scikit-learn, LightGBM, ATT&CK |
+| **ONTF: Forensic Dossier & Legal Export** | `PLANNED` | Phase 6 / ONTF-A12 | Archify JSON IR, WeasyPrint, Ed25519 |
+| **ONTF: End-to-End Network Validation** | `PLANNED` | Phase 6 / ONTF-A13 | Pytest, PCAP Corpus, Air-Gap Runner |
+| **Platform Legal Reporting & Archify IR** | `PLANNED` | Phase 7 / AURAS-A9 / AIF-A14 / VISTA-A12 / ONTF-A12 | Jinja2, WeasyPrint, Archify |
 | **Web Dashboard & Workbench** | `PLANNED` | Phase 8 | Next.js, React, TailwindCSS |
 | **Air-Gapped Deployment Package** | `PLANNED` | Phase 9 | Docker, Docker Compose |
 | **Final Platform Demonstration & Release**| `PLANNED` | Phase 10 / AURAS-A10 / AIF-A15 / VISTA-A13 | Pytest, Full Test Corpus, Demo CLI |
@@ -609,6 +893,8 @@ The project architecture is finalized; core foundation artifacts and behavioral 
 - **Deep Learning / AI Runtimes:** PyTorch 2.2+, TorchAudio, torchvision, timm, Hugging Face Transformers, SpeechBrain.
 - **Computer Vision & Tracking Models:** YOLOv8/v10, Grounding DINO, SAM 2, RetinaFace, SCRFD, ByteTrack, BoT-SORT, PaddleOCR, Tesseract OCR.
 - **Audio-Visual & Temporal Models:** SyncNet, FTCN, STIL, TALL, TimeSformer, VideoMAE, SlowFast, YAMNet, PANNs, AST.
+- **Offline Network Traffic Forensics Tools:** Wireshark / TShark (>= 4.0), Scapy (>= 2.5), Zeek 6.x (offline batch), PyShark, CICFlowMeter, NetworkX, igraph.
+- **Geospatial & Geodesy Libraries:** `pyproj` (WGS84 ellipsoidal geodesy), `geopy` (geocoding provider adapters), `shapely` (spatial geometries), `geopandas` (spatial dataframes), `rasterio` (DEM terrain GeoTIFFs), `MapLibre GL JS` / `Leaflet` (vector map interfaces), `pvlib-python` / NOAA (solar positions).
 - **Cryptographic & Provenance Standards:** `cryptography` (Ed25519, SHA-256), `canonicaljson` (RFC 8785), RFC 3161 client, pyc2pa / c2pa-rs, ONVIF Export File Format parser.
 - **Reporting & Legal Export:** Jinja2, WeasyPrint, Archify JSON IR, PyOpenSSL.
 
@@ -674,7 +960,7 @@ uvicorn ps05.api.main:app --host 127.0.0.1 --port 8000 --reload
 
 ## 9. Evidentiary Integrity & Security Invariants
 
-The platform enforces ten strict forensic and security invariants across all media formats:
+The platform enforces eleven strict forensic and security invariants across all media formats:
 1. **Zero Raw Alteration:** Master exhibits are written once and locked with read-only permissions (`0400`). Original files are never modified, renamed, or overwritten.
 2. **Direct Raw Hashing:** Primary SHA-256 hashes are computed directly from seized raw bytes during stream ingestion before any decoding, format conversion, or resizing.
 3. **Artifact Lineage DAG:** All resampled files, crops, frequency maps, extracted video frames, and audio tracks are stored as derived working artifacts linked to parent exhibits via deterministic transformation manifests.
@@ -685,6 +971,7 @@ The platform enforces ten strict forensic and security invariants across all med
 8. **Decoupled Audio Extraction:** Video audio streams are extracted via lossless stream-copy and forwarded to AURAS without duplicating audio algorithms or conflating audio findings with video verdicts.
 9. **No False Certainty:** Machine learning models output calibrated confidence intervals, anomaly heatmaps, and explicit out-of-distribution uncertainty bounds; the system never outputs binary "100% Fake" or "100% Authentic" claims.
 10. **Air-Gap Capability:** The platform does not depend on external cloud APIs; all models, algorithms, and cryptographic verification routines operate locally.
+11. **Offline Network Capture Bitstream Preservation:** Seized PCAP/PCAPNG captures are ingested into WORM storage with POSIX `0400` permissions. All dissections and Zeek extractions run strictly read-only; packet parsers execute in sandboxed unprivileged containers with hard memory caps (<= 4GB) to eliminate network-borne parser exploits.
 
 ---
 
@@ -731,6 +1018,21 @@ Refer to [PHASES.md](PHASES.md) for full phase gates and definitions of done:
   - **VISTA-A11:** Cross-Engine Video Evidence Fusion & Conflict Resolution
   - **VISTA-A12:** Video Reporting, Examiner Review & Section 65B/63 BSA Dossier
   - **VISTA-A13:** End-to-End Video Validation, Security Audit & Release Readiness
+- **ONTF Offline Network Traffic Forensics Workstream:**
+  - **ONTF-A0:** Network Architecture Baseline, Repository Audit & Parser Sandboxing
+  - **ONTF-A1:** Shared Network Evidence Contracts & CEIPL Cryptographic Foundation
+  - **ONTF-A2:** PCAP/PCAPNG Format Validation, Defensive Demuxing & Header Parsing
+  - **ONTF-A3:** Offline Telemetry Extraction (TShark, Scapy & Offline Zeek Logs)
+  - **ONTF-A4:** Common Network Telemetry Schema Normalisation & Data Minimisation
+  - **ONTF-A5:** Flow, Packet & Temporal Feature Engineering Pipeline
+  - **ONTF-A6:** Target-Device Identification, Scoping & Attribution Analytics (Mode A & B)
+  - **ONTF-A7:** Deterministic Threat Detection (Scans, Beacons, DNS Tunnels & DGA)
+  - **ONTF-A8:** Machine Learning Traffic Classification & Statistical Anomaly Baselines
+  - **ONTF-A9:** Temporal Behaviour Modelling & Communication Graph Analytics
+  - **ONTF-A10:** Multi-Stage Attack Correlation & MITRE ATT&CK Mapping
+  - **ONTF-A11:** Threat Forecasting & World-Model Integration (Bounded State Projections)
+  - **ONTF-A12:** Network Forensic Dossier, Archify JSON IR & Sec 65B/63 BSA Certification
+  - **ONTF-A13:** End-to-End Network Validation, Forensic Benchmark Corpus & Release Readiness
 - **Platform Delivery Track:**
   - **Phase 7:** Platform Cross-Engine Reporting (Section 65B/63 BSA Dossier)
   - **Phase 8:** Web Dashboard & Forensic Examiner Workbench
@@ -741,7 +1043,7 @@ Refer to [PHASES.md](PHASES.md) for full phase gates and definitions of done:
 
 ## 11. Canonical Documentation Index
 
-- [PRD.md](PRD.md) — Product Requirements Document (Personas, Requirements AIF-FR, IVE-FR, IRE-FR, AIM-FR, CEIPL-FR, AUD-FR, VISTA-FR, VRE-FR, AFB-FR, AVSC-FR, VDF-FR, VCI-FR, CCTV-FR, NFRs)
+- [PRD.md](PRD.md) — Product Requirements Document (Personas, Requirements AIF-FR, IVE-FR, IRE-FR, AIM-FR, CEIPL-FR, AUD-FR, VISTA-FR, VRE-FR, AFB-FR, AVSC-FR, VDF-FR, VCI-FR, CCTV-FR, ONTF-FR, NFRs)
 - [TRD.md](TRD.md) — Technical Requirements Document (Component boundaries, DB schemas, API contracts, threat model, five-engine VISTA specifications)
 - [PHASES.md](PHASES.md) — Canonical Implementation Roadmap & Milestone Acceptance Gates (Phases 0–10, AURAS-A0..A10, AIF-A0..A15, VISTA-A0..A13)
 - [AI_INSTRUCTIONS.md](AI_INSTRUCTIONS.md) — Highest-authority behavioral specification for AI coding agents
