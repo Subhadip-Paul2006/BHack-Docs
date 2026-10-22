@@ -4935,6 +4935,193 @@ class GeospatialAnalysisResponse(BaseModel):
     completed_at: datetime = Field(default_factory=datetime.utcnow)
 ```
 
+### 12.7 CDVF Contracts & Data Models
+
+The Cross-Modal Deepfake Validation Framework enforces strict Pydantic v2 data models for model provenance, dataset cards, split manifests, benchmark execution records, calibration transforms, OOD gating, and scoped approval records:
+
+```python
+from enum import Enum
+from typing import Optional, List, Dict, Any
+from datetime import datetime
+import uuid
+from pydantic import BaseModel, Field, ConfigDict
+
+class CDVFApprovalState(str, Enum):
+    CANDIDATE = "CANDIDATE"
+    EVALUATION_PENDING = "EVALUATION_PENDING"
+    VALIDATED_FOR_DEFINED_SCOPE = "VALIDATED_FOR_DEFINED_SCOPE"
+    REJECTED = "REJECTED"
+    DEPRECATED = "DEPRECATED"
+    REVALIDATION_REQUIRED = "REVALIDATION_REQUIRED"
+
+class CDVFQualityTier(str, Enum):
+    DIRECT_PHYSICAL = "DIRECT_PHYSICAL"
+    PIPELINE_INFERRED = "PIPELINE_INFERRED"
+    HUMAN_VERIFIED = "HUMAN_VERIFIED"
+    WEAK_DISPUTED = "WEAK_DISPUTED"
+
+class CDVFDecisionStatus(str, Enum):
+    CLASSIFIED_WITHIN_VALIDATED_SCOPE = "CLASSIFIED_WITHIN_VALIDATED_SCOPE"
+    INCONCLUSIVE_OOD = "INCONCLUSIVE_OOD"
+    INCONCLUSIVE_LOW_QUALITY = "INCONCLUSIVE_LOW_QUALITY"
+    INCONCLUSIVE_MODEL_DISAGREEMENT = "INCONCLUSIVE_MODEL_DISAGREEMENT"
+    INSUFFICIENT_EVIDENCE = "INSUFFICIENT_EVIDENCE"
+    UNSUPPORTED_INPUT = "UNSUPPORTED_INPUT"
+    ANALYSIS_FAILED = "ANALYSIS_FAILED"
+
+class ModelRegistryEntry(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    
+    registry_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    model_id: str = Field(..., max_length=100)
+    model_family: str = Field(..., max_length=50) # RAWNET2, AASIST, WAVLM, EFFICIENTNET, XCEPTION, TRUFOR, VIDEOMAE
+    model_version: str = Field(..., max_length=50)
+    checkpoint_sha256: str = Field(..., min_length=64, max_length=64)
+    source_repo: Optional[str] = None
+    source_commit: Optional[str] = Field(None, min_length=40, max_length=40)
+    author_org: Optional[str] = None
+    weights_license: str = Field(..., max_length=100)
+    intended_task: str = Field(..., max_length=100)
+    supported_modality: str = Field(..., pattern="^(IMAGE|AUDIO|VIDEO)$")
+    input_spec: Dict[str, Any] # Tensor shape, sample rate, channels, normalization
+    preprocessing_spec: Dict[str, Any] # Version, resizing, face alignment, windowing
+    class_label_mapping: Dict[str, str] # e.g. {"0": "AUTHENTIC", "1": "MANIPULATED"}
+    approval_state: CDVFApprovalState = CDVFApprovalState.CANDIDATE
+    known_limitations: List[str] = Field(default_factory=list)
+    last_validated_at: Optional[datetime] = None
+    registered_at: datetime = Field(default_factory=datetime.utcnow)
+
+class DatasetCard(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    
+    dataset_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    dataset_name_slug: str = Field(..., max_length=100)
+    official_name: str = Field(..., max_length=150)
+    official_source_url: Optional[str] = None
+    dataset_license: str = Field(..., max_length=100)
+    modality: str = Field(..., pattern="^(IMAGE|AUDIO|VIDEO|MULTIMODAL)$")
+    sample_count: int = Field(..., ge=1)
+    quality_tier: CDVFQualityTier
+    source_grouping_schema: Dict[str, str] # e.g. {"primary_key": "root_video_id", "secondary_key": "actor_id"}
+    provenance_details: Dict[str, Any]
+    registered_at: datetime = Field(default_factory=datetime.utcnow)
+
+class DatasetSplitManifest(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    
+    split_manifest_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    dataset_id: uuid.UUID
+    manifest_version: str = Field(..., max_length=50)
+    split_algorithm: str = Field(..., max_length=100)
+    random_seed: int
+    grouping_key: str = Field(..., max_length=100)
+    partition_counts: Dict[str, int] # {"train": 10000, "calibration": 2000, "val": 2000, "test": 4000}
+    partition_hashes: Dict[str, str] # SHA-256 for each partition file list
+    sample_assignments: Dict[str, str] # sample_id -> "train" | "calibration" | "validation" | "test"
+    leakage_asserted: bool = True
+    manifest_sha256: str = Field(..., min_length=64, max_length=64)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class EvaluationMetric(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    
+    metric_name: str
+    value: float
+    confidence_interval_95: Optional[List[float]] = None # [p025, p975]
+    zero_denominator_handled: bool = False
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+class BenchmarkRun(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    
+    run_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    model_id: uuid.UUID
+    split_manifest_id: uuid.UUID
+    protocol_mode: str = Field(..., pattern="^(IN_DOMAIN|CROSS_DATASET|UNSEEN_GENERATOR|ROBUSTNESS|CCTV_DOMAIN)$")
+    operational_params: Dict[str, Any] # All 19 captured execution parameters
+    raw_aggregate_metrics: Dict[str, float] # AUC, EER, Balanced Accuracy, F1, Brier, ECE
+    per_class_metrics: Dict[str, Dict[str, float]]
+    confidence_intervals: Dict[str, List[float]]
+    subgroup_metrics: Optional[Dict[str, Dict[str, float]]] = None
+    runtime_throughput_ms: float
+    peak_vram_mb: float
+    peak_ram_mb: float
+    run_status: str = Field(..., pattern="^(RUN_COMPLETED|RUN_FAILED|LEAKAGE_DETECTED)$")
+    run_hash: str = Field(..., min_length=64, max_length=64)
+    executed_at: datetime = Field(default_factory=datetime.utcnow)
+
+class CalibrationArtifact(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    
+    calibration_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    model_id: uuid.UUID
+    calibration_split_id: uuid.UUID
+    method: str = Field(..., pattern="^(PLATT_SCALING|TEMPERATURE_SCALING|ISOTONIC_REGRESSION)$")
+    parameters: Dict[str, Any] # e.g. {"temperature": 1.42} or {"a": 1.12, "b": -0.34}
+    binning_strategy: str = "EQUAL_WIDTH_15"
+    pre_calibration_ece: float
+    post_calibration_ece: float
+    pre_calibration_brier: float
+    post_calibration_brier: float
+    artifact_sha256: str = Field(..., min_length=64, max_length=64)
+    calibrated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class OODEvaluationResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    
+    evaluation_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    model_id: uuid.UUID
+    method: str = Field(..., pattern="^(MAHALANOBIS|ENERGY|PREDICTION_ENTROPY)$")
+    in_distribution_dataset_id: uuid.UUID
+    out_of_distribution_dataset_id: uuid.UUID
+    ood_auroc: float
+    fpr_at_95_tpr: float
+    validated_ood_threshold: float
+    feature_dimension: int
+    evaluated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class LocalizationEvaluationResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    
+    evaluation_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    model_id: uuid.UUID
+    modality: str = Field(..., pattern="^(IMAGE|AUDIO|VIDEO)$")
+    mean_iou: Optional[float] = None
+    pixel_f1: Optional[float] = None
+    mean_temporal_iou: Optional[float] = None
+    mean_boundary_error_ms: Optional[float] = None
+    empty_union_handled: bool = True
+    sample_count: int
+
+class ValidationApproval(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    
+    approval_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    model_id: uuid.UUID
+    benchmark_run_id: uuid.UUID
+    calibration_artifact_id: Optional[uuid.UUID] = None
+    approval_state: CDVFApprovalState
+    approved_scope: Dict[str, Any] # Allowed tasks, min quality SNR/JPEG Q, valid codecs, max OOD threshold
+    operating_decision_threshold: float
+    ood_gating_threshold: float
+    examiner_id: str
+    digital_signature_ed25519: str
+    dossier_pdf_sha256: str = Field(..., min_length=64, max_length=64)
+    approved_at: datetime = Field(default_factory=datetime.utcnow)
+
+class RegressionResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    
+    regression_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    candidate_model_id: uuid.UUID
+    baseline_model_id: uuid.UUID
+    metric_deltas: Dict[str, float] # delta_auc, delta_ece, delta_brier
+    regression_detected: bool
+    failing_slices: List[str] = Field(default_factory=list)
+    ci_bounds: Dict[str, List[float]]
+    checked_at: datetime = Field(default_factory=datetime.utcnow)
+```
+
 ---
 
 ## 13. Testing, Benchmark & Validation Architecture
@@ -5079,6 +5266,78 @@ flowchart TD
 
 ---
 
+### 13.5 Unified Cross-Modal Deepfake Validation & Benchmark Architecture (CDVF Evaluation Protocols)
+
+The **CDVF Validation Architecture** enforces end-to-end mathematical rigor, reproducibility, leakage prevention, and model governance across AIF, AURAS, and VISTA deepfake detection engines:
+
+```mermaid
+flowchart TD
+    subgraph CDVF_TEST_HIERARCHY["CDVF Master Automated Validation Hierarchy"]
+        direction TB
+        T1["1. Provenance & Checkpoint Suite\n(test_cdvf_registry_provenance.py)"]
+        T2["2. Source-Group Leakage Prevention Suite\n(test_cdvf_leakage_prevention.py)"]
+        T3["3. 19-Parameter Benchmark Runner\n(test_cdvf_benchmark_runner.py)"]
+        T4["4. Modality-Specific Task Validation\n(test_cdvf_image/audio/video_validation.py)"]
+        T5["5. Cross-Dataset & Unseen-Generator Suite\n(test_cdvf_cross_dataset.py, test_cdvf_unseen_generators.py)"]
+        T6["6. Calibration & ECE Verification Suite\n(test_cdvf_calibration_engine.py)"]
+        T7["7. OOD Gating & Abstention Suite\n(test_cdvf_ood_detection.py, test_cdvf_abstention_policy.py)"]
+        T8["8. Manipulation Localisation Suite\n(test_cdvf_localization_metrics.py)"]
+        T9["9. Cross-Modal Fusion & Anti-Averaging\n(test_cdvf_cross_modal_fusion.py)"]
+        T10["10. Subgroup Fairness & Disparity Suite\n(test_cdvf_subgroup_evaluation.py)"]
+        T11["11. Continuous Regression Test Suite\n(test_cdvf_regression_suite.py)"]
+        T12["12. 12-Gate Scoped Approval & Dossier\n(test_cdvf_model_approval_gates.py)"]
+    end
+
+    subgraph FIXTURES["Curated Multi-Modal Validation Corpora"]
+        F1["FaceForensics++ (Raw, C23, C40)\nFacial Manipulations & Recompression"]
+        F2["DFDC & Celeb-DF v2\nIn-the-Wild Video & Lighting Shifts"]
+        F3["ASVspoof 2021 & CodecFake\nVocoded Speech & Telephony Loss"]
+        F4["Diffusion & Autoregressive Corpus\nUnseen Zero-Day Generative Engines"]
+        F5["CCTV Low-Quality Surveillance Corpus\nIR Night Vision, Analog CIF, OSD Glare"]
+        F6["Cross-Modal Desync Corpus\nTalking-Face Audio-Visual Discontinuities"]
+    end
+
+    FIXTURES --> CDVF_TEST_HIERARCHY
+```
+
+#### Detailed Test Suite Specifications
+1. **Checkpoint Provenance & Integrity Suite (`test_cdvf_registry_provenance.py`):**
+   - Asserts byte-level SHA-256 integrity on all candidate weights before execution; injects single-bit weight mutations and verifies 100% rejection with `CHECKPOINT_INTEGRITY_VIOLATION`.
+   - Validates model card license permissions, input tensor geometry assertions, and immutable Pydantic configuration schemas.
+2. **Source-Group Leakage Prevention Suite (`test_cdvf_leakage_prevention.py`):**
+   - Ingests grouped video and audio corpora; executes hierarchical splitting at root video ID and subject identity levels.
+   - Asserts mathematical disjointness: $\operatorname{Intersection}(G_{\text{train}}, G_{\text{cal}}, G_{\text{val}}, G_{\text{test}}) = \emptyset$. Any group overlap raises a fatal test assertion.
+3. **Deterministic Benchmark Runner Suite (`test_cdvf_benchmark_runner.py`):**
+   - Executes 5 independent benchmark runs across identical random seeds; asserts floating-point parity ($< 10^{-6}$) on all primary metrics.
+   - Validates that all 19 mandatory execution parameters are completely logged and sealed into `BenchmarkRun` records.
+4. **Modality-Specific Detection Validation Suites:**
+   - **Image Forensics (`test_cdvf_image_validation.py`):** Evaluates separate classification heads for AI generation, splicing, and face-swapping across uncompressed and compressed image tiers.
+   - **Audio Forensics (`test_cdvf_audio_validation.py`):** Computes EER, minDCF, and temporal segment localisation on 2.0s sliding windows.
+   - **Video Forensics (`test_cdvf_video_validation.py`):** Validates frame-level vs video-level aggregation (mean, top-k, attention pooling) and CCTV low-quality degradation.
+5. **Cross-Dataset & Unseen-Generator Suites (`test_cdvf_cross_dataset.py`, `test_cdvf_unseen_generators.py`):**
+   - Trains on dataset $D_1$ (e.g. FF++) and evaluates on held-out dataset $D_2$ (e.g. Celeb-DF v2); measures transfer degradation $\Delta\operatorname{AUC}_{\text{transfer}}$.
+   - Holds out 3 generative engines during training (e.g. Diffusion, SimSwap, StyleTTS2); quantifies unseen-generator false-negative rates.
+6. **Confidence Calibration & ECE Suite (`test_cdvf_calibration_engine.py`):**
+   - Fits Platt scaling, temperature scaling, and isotonic regression on the isolated calibration partition.
+   - Asserts post-calibration $\operatorname{ECE} \le 0.05$ across 15 equal-width bins and Brier score $\le 0.10$ on held-out evaluation splits.
+7. **OOD Gating & Abstention Suite (`test_cdvf_ood_detection.py`, `test_cdvf_abstention_policy.py`):**
+   - Evaluates Mahalanobis distance and energy scores on synthetic out-of-domain fixtures; asserts OOD AUROC $\ge 0.85$.
+   - Asserts 100% abstention (`INCONCLUSIVE_OOD`, `INCONCLUSIVE_LOW_QUALITY`) on out-of-domain and severely degraded media; plots risk-coverage trade-off curves.
+8. **Manipulation Localisation Suite (`test_cdvf_localization_metrics.py`):**
+   - Evaluates spatial mask IoU and boundary F1; asserts safe handling of empty ground-truth masks ($\operatorname{IoU}=1.0$ if both empty, $0.0$ if false alarm).
+   - Evaluates audio and video temporal interval intersection ($\operatorname{tIoU}$) and boundary offset accuracy ($\Delta t_{\text{boundary}}$).
+9. **Cross-Modal Fusion & Anti-Averaging Suite (`test_cdvf_cross_modal_fusion.py`):**
+   - Ingests multi-modal video clips with selective audio-only or video-only manipulations; asserts that naive score averaging is blocked.
+   - Asserts that cross-modal disagreements emit explicit contradiction findings (`SELECTIVE_VIDEO_MANIPULATION_WITH_GENUINE_AUDIO`).
+10. **Subgroup Fairness & Regression Suite (`test_cdvf_subgroup_evaluation.py`, `test_cdvf_regression_suite.py`):**
+    - Evaluates performance across demographic, device, and illumination subgroups; asserts maximum disparity ratio $\le 2.0\times$.
+    - Compares candidate model against frozen baseline benchmark manifest; asserts $\Delta\operatorname{AUC} \ge -0.010$ and $\Delta\operatorname{ECE} \le +0.010$.
+11. **Scoped Model Approval Gate Review (`test_cdvf_model_approval_gates.py`):**
+    - Evaluates complete 12-gate release criteria; validates state transitions (`CANDIDATE` $\to$ `VALIDATED_FOR_DEFINED_SCOPE` or `REJECTED`).
+    - Verifies Ed25519 digital signature and generates Section 65B/63 BSA certified evaluation dossier.
+
+---
+
 ## 14. Archify Integration & Visualization Pipeline
 
 Archify (`https://github.com/tt-a1i/archify`) functions as the architectural and evidentiary visualization engine:
@@ -5131,3 +5390,17 @@ All geospatial forensic processing within AIF-GEO is governed by eight immutable
 6. **Non-Destructive Processing Invariant:** Reading, parsing, or normalizing GPS metadata must never modify the original evidence bitstream. Coordinate transformations and normalized values are stored exclusively as derived artifact manifests linked via CEIPL DAG.
 7. **Prohibition of Monolithic "Truth" Verdicts:** Machine-learning models (GeoCLIP, SigLIP) must never output an absolute verdict claiming an image was "proven" to be taken at a specific coordinate. Uncalibrated scores must be explicitly reported as ranking metrics, and candidate areas must state their bounding uncertainty.
 8. **Mandatory Inconclusive Attribution:** When metadata is absent and visual scene clues are insufficient or ambiguous, the platform must report **"Location Inconclusive / Insufficient Geospatial Telemetry"** as the court-admissible finding, rather than speculating.
+
+### 15.4 CDVF Model Governance, Integrity & Evaluation Security Invariants
+
+All deepfake detection model validation, benchmarking, calibration, and governance processes within CDVF are governed by eight immutable security and forensic invariants:
+
+1. **Model Checkpoint Byte-Level Integrity Invariant:** Every deepfake model weights file must have its streaming SHA-256 hash computed and verified against `cdvf_model_registry.checkpoint_sha256` prior to instantiation. In-memory weight mutations or unauthorized replacements immediately abort execution with a fatal `CHECKPOINT_INTEGRITY_VIOLATION`.
+2. **Zero Leakage Invariant:** Training, calibration, validation, and test splits must remain strictly disjoint at the source group key level (root video ID, speaker identity, recording session). If automated set intersection detects any shared group keys between calibration/training and test sets, the entire benchmark run is immediately aborted and quarantined with status `LEAKAGE_DETECTED`.
+3. **Calibration Data Isolation Invariant:** Calibration methods (Platt scaling, temperature scaling, isotonic regression) must NEVER be fitted on the final held-out test partition. Calibration must use independent, dedicated calibration splits to prevent optimistically biased calibration metrics.
+4. **Prohibition of Blind Multi-Modal Score Averaging:** Detection probabilities across Image (AIF), Audio (AURAS), and Video (VISTA) must NEVER be naively averaged into a single monolithic score. Cross-modal findings must state separate modality-specific observations, and the fusion engine must trace shared pixel/audio dependencies in a DAG.
+5. **Mandatory Inconclusive Attribution:** When media exhibits severe degradation (SNR $< 5\text{ dB}$, JPEG $Q < 30$, H.264 $\text{QP} \ge 38$), an OOD score exceeding $\tau_{\text{OOD}}$, or unresolved inter-model conflict, the system is strictly required to issue an **Inconclusive** outcome (`INCONCLUSIVE_OOD`, `INCONCLUSIVE_LOW_QUALITY`, `INCONCLUSIVE_MODEL_DISAGREEMENT`) rather than speculate.
+6. **OOD Score Purpose Limitation:** An Out-of-Distribution score measures mathematical distance from the model's certified training manifold. An OOD score must NEVER be reported, interpreted, or cited in courtroom testimony as affirmative evidence of deepfake tampering.
+7. **Scoped Approval Invariant:** A model marked `VALIDATED_FOR_DEFINED_SCOPE` is legally and forensically certified only for the specific tasks, media formats, quality bounds, and decision thresholds documented in its validation record. Executing the model outside its approved scope automatically generates an uncertified finding watermark.
+8. **Immutability of Historical Evaluation Artefacts:** Benchmark run manifests, split records, calibration transforms, regression logs, and examiner approvals must be stored in the CEIPL WORM vault with POSIX `0400` permissions. Once written, benchmark records can never be overwritten, modified, or deleted.
+
