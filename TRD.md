@@ -2006,6 +2006,34 @@ flowchart TB
     FINDING_MERGER --> ARCHIFY_IR --> LEGAL_PDF
 ```
 
+#### 11.1.1 Video Evidence Intake & Safe Pre-Flight Parsing Sequence Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Officer as Forensic Investigator
+    participant API as FastAPI Ingestion Gateway
+    participant CEIPL as CEIPL Dual Hasher & Custody
+    participant WORM as Immutable Storage (WORM Vault)
+    participant Demux as PyAV / FFprobe Sandbox
+    participant Registry as Evidence & Artifact DB
+    participant Orchestrator as VISTA Orchestration Engine
+
+    Officer->>API: POST /api/v1/evidence/video/register (Raw File Exhibit)
+    API->>CEIPL: Stream raw bytes through parallel SHA-256 & SHA3-512
+    CEIPL-->>API: Hashes computed (Raw SHA-256, SHA3-512)
+    API->>WORM: Write raw bitstream with POSIX 0400 / S3 Object Lock
+    WORM-->>API: Storage URI & Object Version ID confirmed
+    API->>Demux: Submit for defensive container parsing & atom sanity check
+    Demux->>Demux: Check container bombs, infinite atoms, format polyglots
+    Demux->>Demux: Extract container atoms, stream descriptors, timebases, PTS cadence
+    Demux-->>API: ContainerProfile & StreamManifest
+    API->>Registry: Register VideoEvidenceRecord & Initial Ingestion Custody Event
+    Registry-->>API: Evidence UUID (e.g. evid_vid_77182)
+    API->>Orchestrator: Enqueue VISTA analysis jobs (VRE, AFB, CCTV triage)
+    API-->>Officer: Return VideoEvidenceRegistrationResponse (Status: REGISTERED)
+```
+
 ### 11.2 VRE Technical Specification (Video Reverse Engineering Engine)
 
 The Video Reverse Engineering Engine (VRE) operates directly on the container, bitstream, packet cadence, and encoding structures of the video file without requiring full raster frame decoding for initial passes.
@@ -2191,6 +2219,37 @@ flowchart LR
   3. Attributes acoustic dialogue to face $i^*$ satisfying $\max_i S_{\text{sync}, i}(t)$, provided $S_{\text{sync}, i^*} \ge 4.0$.
   4. Non-speaking faces with $S_{\text{sync}} < 2.5$ are formally classified as `BYSTANDER_SILENT`, preventing false-positive re-dubbing findings on passive individuals in the frame.
 
+```mermaid
+sequenceDiagram
+    autonumber
+    participant VISTA as AVSC Orchestrator
+    participant FaceTrack as RetinaFace + ByteTrack
+    participant CropNorm as Canonical Mouth ROI Extractor
+    participant AURAS_MVSI as AURAS-MVSI (Diarization & VAD)
+    participant SyncNet as SyncNet Cross-Modal Evaluator
+    participant Disambig as Speaker Disambiguation Logic
+
+    VISTA->>FaceTrack: detect_and_track_faces(video_stream)
+    FaceTrack-->>VISTA: Return N Active Face Trajectories {track_1, ..., track_N}
+    VISTA->>AURAS_MVSI: get_speech_segments(audio_artifact_id)
+    AURAS_MVSI-->>VISTA: Active speech intervals [t_start, t_end] & speaker labels
+    
+    loop For Each Face Trajectory i in 1..N
+        VISTA->>CropNorm: extract_mouth_roi_sequence(track_i, [t_start, t_end])
+        CropNorm-->>VISTA: Standardized 112x112 Greyscale Lip Sequence V_i(t)
+        VISTA->>SyncNet: compute_cross_correlation(V_i(t), Audio_MFCC(t))
+        SyncNet-->>VISTA: Distance curve D_i(Delta), Sync Score S_sync,i, Optimal Offset Delta*_i
+    end
+
+    VISTA->>Disambig: evaluate_multi_speaker_correspondence({S_sync,i})
+    alt max(S_sync,i) >= 4.0 and unique
+        Disambig-->>VISTA: Attribute dialogue to Face track_i* (Status: ACTIVE_SPEAKER)
+        Disambig-->>VISTA: Mark other tracks as BYSTANDER_SILENT (S_sync < 2.5)
+    else Ambiguous or S_sync < 2.5 for all faces
+        Disambig-->>VISTA: Flag OFF_SCREEN_SPEAKER or VOICE_OVER_DUBBING (Status: UNRESOLVED)
+    end
+```
+
 #### 11.4.6 Sound-to-Visual Event Correspondence (`ps05.engines.vista.avsc.event_corr`)
 - Correlates abrupt acoustic transient events with localized visual phenomena:
   - Acoustic event classifier (YAMNet / AST) detects sound classes: *Gunshot, Explosion, Glass Shatter, Muzzle Blast, Vehicle Screech, Scream*.
@@ -2360,58 +2419,143 @@ To minimize examiner cognitive burden and avoid asking redundant questions, the 
 
 #### 11.7.3 Complete Versioned CCTVContext JSON Schema (`ps05.engines.vista.cctv.context`)
 
+> **Architectural Status:** `PLANNED` — Proposed illustrative schema. All fields and status transitions are subject to validation upon implementation.
+
+To maintain strict evidentiary provenance under Section 65B IEA / Section 63 BSA, all surveillance parameters and recording context are stored in a versioned, provenance-typed data model. The schema explicitly decouples machine-extracted technical observations from subjective user claims using formal status tags:
+
+- `NOT_PROVIDED`: Parameter was not supplied by the investigator and was not discoverable in bitstream metadata.
+- `UNKNOWN`: Inspected but indeterminable from available evidence artifacts.
+- `USER_REPORTED`: Provided by the investigator or custodian; **unverified** until independently corroborated.
+- `MACHINE_EXTRACTED`: Extracted directly by automated parsers (FFprobe, ExifTool, PaddleOCR) from bitstream headers or visual frames.
+- `CORROBORATED`: Cross-verified across two independent sources (e.g., container creation tag corroborated by OSD clock or police seizure memo).
+- `VERIFIED`: Cryptographically authenticated via valid vendor digital signature, ONVIF Media Signing token, or trusted reference hash.
+- `CONFLICTING`: Two or more evidentiary sources yield contradictory values (e.g., OSD clock shows 14:00 while container metadata states 18:00).
+- `NOT_APPLICABLE`: Parameter does not apply to the identified source type.
+
 ```json
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "CCTVContext",
-  "type": "object",
-  "required": ["schema_version", "source_classification", "classification_confidence", "user_context_status"],
-  "properties": {
-    "schema_version": { "type": "string", "enum": ["1.0.0"] },
-    "source_classification": {
-      "type": "string",
-      "enum": ["LIKELY_CCTV", "POSSIBLY_CCTV", "NON_CCTV", "INCONCLUSIVE"]
+  "schema_version": "1.0.0",
+  "evidence_id": null,
+  "evidence_context_id": null,
+  "evidence_type_candidate": {
+    "value": "unknown",
+    "status": "UNKNOWN"
+  },
+  "acquisition": {
+    "source_type": {
+      "value": "unknown",
+      "status": "UNKNOWN"
     },
-    "classification_confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
-    "camera_identifier": { "type": ["string", "null"] },
-    "location_description": { "type": ["string", "null"] },
-    "dvr_make_model": { "type": ["string", "null"] },
-    "export_method": {
-      "type": "string",
-      "enum": ["NATIVE_PROPRIETARY", "USB_EXPORT", "SCREEN_RECORDING", "MOBILE_RECORDING_OF_SCREEN", "OPTICAL_EXPORT", "UNKNOWN"]
+    "camera_recorder": {
+      "manufacturer": null,
+      "model": null,
+      "device_id": null,
+      "camera_channel": null,
+      "status": "NOT_PROVIDED"
     },
-    "operator_name": { "type": ["string", "null"] },
-    "perceived_tampering": { "type": ["string", "null"] },
-    "environmental_notes": { "type": ["string", "null"] },
-    "user_context_status": {
-      "type": "string",
-      "enum": ["NOT_REQUESTED", "REQUESTED", "PROVIDED", "NOT_PROVIDED", "PARTIALLY_PROVIDED"]
+    "export_type": {
+      "value": "unknown",
+      "status": "UNKNOWN"
     },
-    "auto_extracted_metadata": {
-      "type": "object",
-      "properties": {
-        "osd_clock_present": { "type": "boolean" },
-        "osd_clock_sample": { "type": ["string", "null"] },
-        "pts_frame_rate": { "type": "number" },
-        "is_variable_frame_rate": { "type": "boolean" },
-        "detected_dvr_signature": { "type": ["string", "null"] }
-      }
+    "export_software": {
+      "name": null,
+      "version": null,
+      "status": "NOT_PROVIDED"
     }
+  },
+  "time_context": {
+    "timezone": {
+      "value": null,
+      "status": "UNKNOWN"
+    },
+    "recording_window": {
+      "start_time": null,
+      "end_time": null,
+      "timestamp_semantics": "UNKNOWN",
+      "status": "NOT_PROVIDED"
+    },
+    "recorder_clock_offset": {
+      "value_seconds": null,
+      "status": "UNKNOWN"
+    }
+  },
+  "associated_evidence": {
+    "native_export_available": {
+      "value": null,
+      "status": "UNKNOWN"
+    },
+    "sidecar_manifest_available": {
+      "value": null,
+      "status": "UNKNOWN"
+    },
+    "signature_or_seal_available": {
+      "value": null,
+      "status": "UNKNOWN"
+    },
+    "recorder_log_available": {
+      "value": null,
+      "status": "UNKNOWN"
+    },
+    "reference_hash_available": {
+      "value": null,
+      "status": "UNKNOWN"
+    },
+    "related_camera_footage_available": {
+      "value": null,
+      "status": "UNKNOWN"
+    }
+  },
+  "machine_observations": {
+    "metadata_extraction_status": "NOT_RUN",
+    "ocr_timestamp_extraction_status": "NOT_RUN",
+    "cctv_classification_status": "NOT_RUN",
+    "cryptographic_verification_status": "NOT_RUN",
+    "findings": []
+  },
+  "follow_up": {
+    "workflow_status": "PENDING_AUTOMATIC_DISCOVERY",
+    "outstanding_questions": [],
+    "user_responses_are_independently_verified": false
   }
 }
 ```
 
-#### 11.7.4 Adaptive Questionnaire Formulation & Continuation Rules (`ps05.engines.vista.cctv.adaptive_q`)
-- **Conditional Formulation Rules:**
-  - *Question A (Camera Identifier & Physical Location):* Formulated if `camera_identifier` is NOT found in container metadata.
-  - *Question B (DVR/NVR Make & Model):* Formulated only if ExifTool failed to extract manufacturer tag.
-  - *Question C (Export Method):* Always asked if container is MP4/AVI without proprietary DVR headers, to determine if it is a native USB export or secondary screen recording.
-  - *Question D (Suspected Tampering / Timeline Discrepancy):* Open prompt for investigative hypothesis.
-  - *Question E (Environmental / Lighting Conditions):* Prompted if IR cut-filter transitions or extreme low-light noise are detected.
-- **Missing-Context Continuation Invariant:**
-  - The examiner may choose to SKIP answering any or all questions.
-  - If skipped, the pipeline **MUST NEVER BLOCK OR FAIL**. Analysis proceeds immediately under status `user_context_status: NOT_PROVIDED`.
-  - Machine algorithms widen their statistical uncertainty bounds (e.g. relaxing clock drift tolerance if DVR clock synchronizer status is unknown).
+#### 11.7.4 Adaptive Discovery Workflow & Targeted Questionnaire Rules (`ps05.engines.vista.cctv.adaptive_q`)
+
+```mermaid
+flowchart TD
+    INGEST["📥 Video Exhibit Ingested & SHA-256 Hashed"] --> PRE_EXT["1. Pre-Questioning Metadata Extraction<br/>(FFprobe / PyAV / ExifTool / OSD PaddleOCR)"]
+    PRE_EXT --> TRIAGE{"2. CCTV-01: Multi-Signal Source Triage"}
+    
+    TRIAGE -->|Confidence Score| CLASS_RES["Classify Source Type:<br/>LIKELY_CCTV_FOOTAGE | POSSIBLE_CCTV_FOOTAGE |<br/>GENERAL_VIDEO | SCREEN_RECORDING_CANDIDATE | UNKNOWN_SOURCE_TYPE"]
+    
+    CLASS_RES --> POPULATE["3. Populate Initial CCTVContext Record<br/>(Mark Machine Observations as MACHINE_EXTRACTED)"]
+    
+    POPULATE --> EVAL_MISSING{"4. Evaluate Critical Missing Parameters<br/>(Source Type? Native Export? Clock Timezone?)"}
+    
+    EVAL_MISSING -->|All Critical Context Extracted| SKIP_Q["Skip Questionnaire: Zero Redundant Prompts"]
+    EVAL_MISSING -->|Context Missing & Relevant| FORM_Q["5. Formulate Adaptive Questions (A–E)<br/>(Present Auto-Extracted Clues to Examiner for Confirmation)"]
+    
+    FORM_Q --> USER_PROMPT["Present Adaptive Questionnaire to Examiner"]
+    USER_PROMPT -->|User Submits Responses| MERGE_RESP["Merge User Responses<br/>(Tag each field strictly as USER_REPORTED)"]
+    USER_PROMPT -->|User Skips / Timeout| CONTINUE_SKIP["Enforce Continuation Invariant<br/>(Tag missing fields as NOT_PROVIDED; Widen Uncertainty Bounds)"]
+    
+    SKIP_Q --> EXEC_ENGINES["6. Dispatch VISTA Forensic Engines (VRE, AVSC, VDF, VCI, CCTV)"]
+    MERGE_RESP --> EXEC_ENGINES
+    CONTINUE_SKIP --> EXEC_ENGINES
+```
+
+- **Pre-Questioning Principle:** Automated discovery executes *before* any prompt is shown to the investigator. If camera channel labels, recorder manufacturer tags, or OSD clocks are discovered in metadata or frames, they are displayed as extracted clues rather than requested as blank inputs.
+- **Adaptive Question Rules (Questions A–E):**
+  - **Question A (Source of Recording):** Inquires whether footage originated from: (1) Direct camera export, (2) DVR/NVR native export, (3) Vendor export software, (4) Screen recording of monitor, (5) Mobile phone recording of monitor screen, (6) Messaging/social-media platform (WhatsApp, Telegram), or (7) Unknown source. Extracted container clues (`handler_name`, `encoder`) are shown alongside the prompt.
+  - **Question B (Native Export Availability):** If uploaded video is a converted MP4/AVI and proprietary recorder metadata is missing, prompts whether the native DVR backup file (`.dav`, `.h264`, `.sec`) or proprietary verification player is available. If unavailable, analysis proceeds with the current file.
+  - **Question C (Camera / Recorder Details):** Prompts for camera manufacturer, model, channel ID, and export software *strictly* when these could activate supported vendor-specific parser plugins (e.g., Dahua DAV packet parsing or Hikvision watermark verification).
+  - **Question D (Timezone & Incident Window):** Prompts for the recorder's configured hardware timezone and approximate incident window whenever absolute time interpretation or multi-camera cross-correlation is required. *Crucial Rule:* Never assume the investigator's local workstation timezone is identical to the recorder's timezone.
+  - **Question E (Corroborating Evidence):** Prompts for adjacent camera angles, recorder transaction logs, trusted seizure hash memos, or chain-of-custody documentation. *Security Invariant:* Never request device root passwords or unrestricted network access.
+- **Adaptive Continuation Invariant:**
+  - If the investigator skips answering questions or context remains unknown, the pipeline **MUST NEVER BLOCK OR HALT**.
+  - Analysis continues immediately, logging missing context as `NOT_PROVIDED` and expanding confidence intervals on downstream findings (e.g., widening clock drift tolerance when time synchronization status is unknown).
+  - Every user-supplied claim is tagged `USER_REPORTED` and must never be cited as verified forensic ground truth without independent machine corroboration.
 
 #### 11.7.5 Clock Continuity Drift Regression & Anomaly Criteria (`ps05.engines.vista.cctv.clock_drift`)
 - **Regression Formulation:**
@@ -2465,32 +2609,100 @@ sequenceDiagram
 
 ### 11.8 CEIPL Integration for Video Exhibits & Derived Artifacts
 
-The Cryptographic Evidence Integrity & Provenance Layer (CEIPL) provides the cryptographic trust anchor for all video evidence:
+The Cryptographic Evidence Integrity & Provenance Layer (CEIPL) provides the cryptographic trust anchor for all video evidence, enforcing strict bitstream preservation, verifiable derivation tracking, and court-admissible audit logging in compliance with Section 65B of the Indian Evidence Act (IEA) and Section 63 of the Bharatiya Sakshya Adhiniyam (BSA 2023).
 
-1. **Pre-Decode Dual Hashing:**
-   - Raw seized video bytes are streamed through parallel SHA-256 and SHA3-512 accumulators prior to container demuxing or header parsing.
-   - Hash values are permanently recorded in the immutable database record and Section 65B/63 BSA certificate.
-2. **Derived Artifact DAG Lineage:**
-   - Every derivative generated during analysis—extracted audio bitstreams, standardized 16kHz WAVs, normalized face crops, OSD clock crops, optical flow maps, and attention heatmaps—is registered as a node in the cryptographic DAG.
-   - Child nodes store the SHA-256 hash of their contents alongside the parent exhibit UUID and precise transformation parameters.
-3. **Canonical Manifests & Ed25519 Signing:**
-   - Analysis results are serialized into RFC 8785 Canonical JSON Serialization (JCS).
-   - Manifests are sealed with platform Ed25519 digital signatures and RFC 3161 Trusted Timestamp Authority (TSA) tokens.
-4. **Append-Only Merkle Custody Log:**
-   - Every state transition, examiner interaction, questionnaire response, and export event is appended to the SHA-256 Merkle audit chain.
-5. **Standardized Failure Status Vocabulary:**
-   - The platform strictly enforces explicit status classification:
-     - `NO_ANOMALY_DETECTED`: All engines executed successfully; no integrity or synthetic anomalies detected.
-     - `SUSPICIOUS_INDICATORS`: Algorithmic indicators of splicing, lip-sync mismatch, or deepfake manipulation detected above threshold.
-     - `INCONCLUSIVE`: Extreme low resolution, severe compression, or lack of facial/audio track prevents decisive determination.
-     - `VERIFICATION_FAILED`: Bitstream corruption, broken hash chains, or non-monotonic timestamps indicate structural tampering.
-     - `UNSUPPORTED`: Unsupported proprietary format requiring specialized offline reverse engineering.
+#### 11.8.1 Pre-Decode Dual Hashing & Ingestion Record
+- **Raw Bitstream Hashing:** Prior to container demuxing, header inspection, or codec decoding, the raw ingested byte stream passes through parallel SHA-256 and SHA3-512 cryptographic accumulators.
+- **Mandatory Ingestion Record Schema:** The resulting evidence record permanently binds the following eleven parameters into the immutable database store:
+  1. `evidence_id`: UUIDv4 unique primary exhibit identifier.
+  2. `original_sha256`: 64-character lowercase hex digest of raw exhibit bytes.
+  3. `sha3_512`: 128-character lowercase hex digest providing post-quantum security against collision attacks.
+  4. `file_length_bytes`: Exact byte count verified against file system stat.
+  5. `detected_media_type`: True container MIME type determined by magic byte inspection.
+  6. `ingestion_event_id`: UUIDv4 linking the ingestion transaction to the examiner session.
+  7. `ingestion_timestamp_utc`: ISO 8601 UTC timestamp ($1	ext{ ms}$ precision).
+  8. `storage_object_uri`: Immutable WORM storage path (e.g. `s3://evidence-vault-worm/exhibits/2026/04/vid_77182.bin`).
+  9. `storage_version_id`: Cloud object version ID or filesystem inode generation number.
+  10. `reference_hash_match`: Boolean status comparing computed digest against court-supplied seizure memo hash (or `null` if none supplied).
+  11. `verification_status`: Initial integrity verdict (`VERIFIED_MATCH` | `HASH_MISMATCH` | `UNVERIFIED_NO_REFERENCE`).
+- **Immutability Invariant:** Original evidentiary files are marked with POSIX `0400` (read-only) permissions and stored in WORM-compliant object storage with S3 Object Lock in Compliance mode. Files are NEVER overwritten, transcoded, modified, or normalized in place.
+
+#### 11.8.2 Derived Artifact Directed Acyclic Graph (DAG) Lineage
+Every downstream derivative produced during forensic processing is registered as a node in the cryptographic provenance DAG:
+
+```mermaid
+flowchart TD
+    RAW["Raw Seized Video File<br/>(evidence_id, SHA-256, SHA3-512)"]
+    
+    RAW --> ART_AUDIO_RAW["1. EXTRACTED_AUDIO_STREAM<br/>Lossless bitstream (-c:a copy)<br/>SHA-256 Linked"]
+    RAW --> ART_FRAMES["4. DECODED_FRAME_EXTRACT<br/>Lossless PNG at exact PTS<br/>SHA-256 Linked"]
+    RAW --> ART_VRE_PTS["VRE Bitstream & Cadence JSON<br/>Atom & PTS Log"]
+    RAW --> ART_CCTV_OCR["7. OSD_CLOCK_CROP<br/>PaddleOCR Bounding Box Crop"]
+
+    ART_AUDIO_RAW --> ART_AUDIO_16K["2. STANDARDIZED_AUDIO_WAV<br/>16kHz Mono Float32 WAV"]
+    ART_AUDIO_16K --> ART_SEP_AUDIO["3. SEPARATED_SPEAKER_TRACK<br/>SepFormer Isolated Voice Stream"]
+    ART_AUDIO_16K --> AURAS_JOBS["AURAS Forensic Runs<br/>(ARE / MVSI / ADDE)"]
+
+    ART_FRAMES --> ART_FACE_CROP["6. CANONICAL_MOUTH_ROI<br/>112x112 Greyscale Face Sequence"]
+    ART_FRAMES --> ART_HEATMAP["8. DEEPFAKE_SEAM_HEATMAP<br/>EfficientNet-B4 Spatial Map"]
+    ART_FRAMES --> ART_SAM_MASK["11. SAM2_SEGMENTATION_MASK<br/>Prompted Object Boundary Mask"]
+
+    ART_FACE_CROP & ART_AUDIO_16K --> ART_SYNCNET["SyncNet Cross-Correlation<br/>AVSC Distance Curve D(Delta)"]
+    ART_FRAMES --> ART_3D_FFT["10. GENERATIVE_3D_FFT_SPECTRUM<br/>Spatiotemporal Power Spectrum"]
+    ART_FRAMES --> ART_JITTER["9. LANDMARK_JITTER_PLOT<br/>FTCN Temporal Motion Vector"]
+
+    AURAS_JOBS & ART_SYNCNET & ART_HEATMAP & ART_3D_FFT & ART_JITTER & ART_CCTV_OCR --> ART_REPORT["12. CERTIFIED_REPORT_DOSSIER<br/>RFC 8785 Canonical JSON & Section 65B/63 BSA PDF<br/>Sealed with Ed25519 & RFC 3161 TSA"]
+```
+
+- **Catalog of 12 Standardized Derived Artifact Classes:**
+  1. `EXTRACTED_AUDIO_STREAM`: Raw lossless demuxed audio bitstream (`.aac`, `.ac3`, `.mp3`).
+  2. `STANDARDIZED_AUDIO_WAV`: 16 kHz Mono Float32 WAV representation normalized to $-23	ext{ LUFS}$.
+  3. `SEPARATED_SPEAKER_TRACK`: SpeechBrain SepFormer isolated single-speaker audio track.
+  4. `DECODED_FRAME_EXTRACT`: Microsecond-accurate lossless PNG frame extract with container PTS metadata.
+  5. `DOWNSAMPLED_MODEL_TENSOR`: Batched, normalized tensor array formatted for neural network input.
+  6. `CANONICAL_MOUTH_ROI`: $112 	imes 112$ pixel normalized greyscale lip sequences for SyncNet cross-correlation.
+  7. `OSD_CLOCK_CROP`: Bounding box raster crop containing recorder on-screen display timestamp overlay.
+  8. `DEEPFAKE_SEAM_HEATMAP`: Color-mapped spatial prediction heatmap from EfficientNet-B4 / Xception.
+  9. `LANDMARK_JITTER_PLOT`: Temporal sequence landmark trajectory displacement curve from FTCN.
+  10. `GENERATIVE_3D_FFT_SPECTRUM`: Spatio-temporal power spectrum visualization showing diffusion/GAN grid artifacts.
+  11. `SAM2_SEGMENTATION_MASK`: Binary or polygonal object tracking mask generated by SAM 2.
+  12. `CERTIFIED_REPORT_DOSSIER`: RFC 8785 canonical JSON and Section 65B/63 BSA certified PDF.
+- **DAG Node Binding Schema:** Every derived artifact node records:
+  - `artifact_id`: UUIDv4 identifier.
+  - `parent_artifact_id`: UUIDv4 of the immediate ancestor (or raw evidence ID).
+  - `artifact_sha256`: Cryptographic digest of the derived artifact bytes.
+  - `generator_module`: Fully qualified Python module and class name (e.g., `ps05.engines.vista.avsc.mouth_roi`).
+  - `model_or_tool_version`: Git commit hash, tool release version, and model weights hash.
+  - `transformation_parameters`: Complete JSON dictionary of all options passed to the generator.
+  - `time_interval`: Bounded time range $[t_{\text{start}}, t_{\text{end}}]$ in the parent media timebase.
+  - `spatial_coordinates`: Bounding box $[x, y, w, h]$ or affine transformation matrix $M_{3\times 3}$ mapping pixels back to the original raster frame.
+
+#### 11.8.3 Canonical Manifests, Ed25519 Signing & Merkle Custody
+- **RFC 8785 Canonical JSON Serialization (JCS):** All intermediate and final analysis manifests are normalized using RFC 8785 before hashing to guarantee that dictionary key ordering, whitespace variations, and floating-point representations produce bit-identical SHA-256 digests across heterogeneous architectures.
+- **Ed25519 Digital Signatures:** Manifests are sealed using Edwards-curve Digital Signature Algorithm (Ed25519) keys conforming to RFC 8032. Keys are backed by Hardware Security Modules (HSM) or cloud KMS with strict role separation; examiners never possess direct access to raw private keys.
+- **RFC 3161 Trusted Timestamps:** Signed manifests are bound to external RFC 3161 Time-Stamp Authority (TSA) tokens, establishing court-admissible proof of existence prior to a certified UTC time.
+- **Append-Only Merkle Audit Log:** State transitions, examiner questionnaire inputs, and analysis completions are appended to a SHA-256 Merkle tree log. Audit consistency proofs ($O(\log N)$) allow verification that no historical custody records have been altered or deleted.
+
+#### 11.8.4 Standardized Cryptographic Failure Codes (CEIPL-STATUS)
+The CEIPL layer enforces nine strictly typed cryptographic failure statuses. Under Indian evidentiary jurisprudence, cryptographic verification failures must **NEVER** be silently suppressed or converted into an authenticity PASS:
+
+| Failure Status Code | Trigger Condition & Technical Root Cause | Evidentiary Impact | Admissibility Handling |
+| :--- | :--- | :--- | :--- |
+| `HASH_MISMATCH` | Computed raw SHA-256/SHA3-512 digest diverges from seizure memo reference hash or database intake record. | Bitstream has suffered physical corruption, bit rot, or unauthorized byte modification. | Immediate forensic halt; Section 65B certificate refuses execution; exhibit quarantined. |
+| `SIGNATURE_INVALID` | Mathematical verification of Ed25519 signature fails on analysis manifest, report JSON, or container seal. | Data has been tampered with post-signing or signature was forged using invalid private key. | Manifest rejected; reported as signature forgery finding in audit trail. |
+| `SIGNING_KEY_UNTRUSTED`| Certificate or public key used to verify export signature does not chain to an approved root CA. | Unknown or self-signed key; provenance cannot be established to an authorized institution. | Tagged as UNTRUSTED_PROVENANCE; downgrades finding weight; flags follow-up alert. |
+| `SIGNING_KEY_REVOKED`  | Signing certificate appears on Certificate Revocation List (CRL) or returns revoked OCSP status. | Certificate was compromised, decommissioned, or revoked prior to or at signing time. | Finding rejected; alert generated; triggers investigator re-acquisition request. |
+| `TIMESTAMP_INVALID`    | RFC 3161 TSA token signature verification fails, token has expired, or timestamp post-dates custody log. | Temporal sequence cannot be legally corroborated; clock manipulation suspected. | Reverts to internal database server timestamp; notes external proof absence. |
+| `CONTENT_BINDING_MISMATCH` | SHA-256 of child artifact referenced in DAG manifest does not match actual bytes stored on disk. | Derivative was edited, corrupted, or re-generated without updating parent manifest. | Derivative invalidated; DAG branch marked untrusted; forces automated regeneration. |
+| `CUSTODY_CHAIN_BROKEN` | Merkle tree consistency proof fails; audit sequence gap or missing leaf digest detected. | Database tamper event, disk loss, or manual ledger modification occurred. | Full audit incident raised; judicial warning appended to Section 65B dossier. |
+| `VERIFICATION_INCONCLUSIVE`| Incomplete public key bundle, inaccessible external TSA server, or degraded container signature atom. | Mathematical proof cannot be definitively completed due to missing external credentials. | Logged as inconclusive; analysis proceeds on internal algorithmic merits alone. |
+| `PROVENANCE_UNAVAILABLE`| Ingested video lacks digital signature, C2PA manifest, or ONVIF Media Signing seal (legacy format). | Normal baseline for consumer camera and legacy DVR recordings without native crypto. | Recorded as unauthenticated legacy media; downstream engines evaluate visual/bitstream merits. |
 
 ---
 
 ### 11.9 Cross-Engine Video Evidence Fusion & Conflict Resolution
 
-VISTA implements a multi-layer evidence fusion engine to resolve conflicting indicators across its constituent engines:
+VISTA implements a multi-layer evidence fusion engine to resolve conflicting indicators across its constituent engines without obscuring individual analytical origins.
 
 ```mermaid
 flowchart TD
@@ -2517,46 +2729,221 @@ flowchart TD
     FUSION_CORE --> COMPOSITE_REPORT["Unified Traceable Forensic Report & Archify IR"]
 ```
 
-#### Traceable Finding Schema
-Every finding emitted by VISTA follows a strict, court-admissible structure:
-```json
-{
-  "finding_id": "find_vdf_08912",
-  "engine": "VISTA-VDF",
-  "category": "SYNTHETIC_FACE_MANIPULATION",
-  "confidence_score": 0.942,
-  "calibrated_score": 0.918,
-  "time_interval": { "start_seconds": 14.250, "end_seconds": 18.500 },
-  "spatial_coordinates": { "x": 420, "y": 180, "width": 140, "height": 140 },
-  "technical_rationale": "Temporal sequence model (FTCN) detected high-frequency inter-frame landmark jitter (jitter_metric=0.084 > tau=0.025) and boundary seam discontinuity along facial perimeter.",
-  "visual_artifact_uri": "artifacts/heatmaps/find_vdf_08912_seam.png",
-  "evidentiary_weight": "HIGH"
-}
+#### 11.9.1 Principles of Forensic Evidence Fusion
+1. **Preservation of Origin:** Fusion NEVER averages or obscures raw engine outputs. Every finding in the final report explicitly cites the originating engine ID, model version, exact timecodes, and supporting artifact hashes.
+2. **Anti-Averaging Rule:** The platform strictly prohibits collapsing an audio deepfake score, video deepfake score, lip-sync offset, and CCTV provenance rating into a single arbitrary "universal authenticity percentage". Such aggregate numbers are legally misleading and inadmissible in court.
+3. **Cross-Modal Consistency Matrix:** The fusion layer correlates spatial, acoustic, temporal, and metadata signals using explicit evidentiary rules:
+   - *Case 1 (Dubbing vs Deepfake):* If AVSC detects significant lip-sync desynchronization ($S_{\text{sync}} < 2.0$), but VDF detects no facial manipulation (calibrated $P_{\text{fake}} < 0.10$) and AURAS confirms authentic human voice, the anomaly is classified as `EXPLAINABLE_POST_PRODUCTION_DUBBING`, not an AI deepfake.
+   - *Case 2 (AI Talking Head):* If lip-sync is tightly synchronized ($S_{\text{sync}} > 5.0$), but VDF flags boundary blending seams and temporal landmark jitter (calibrated $P_{\text{fake}} > 0.85$), the anomaly is classified as `AI_SYNTHETIC_TALKING_HEAD`.
+   - *Case 3 (Audio Insertion):* If AVSC desynchronization coincides precisely with an AURAS-detected acoustic splice boundary ($\Delta t < 50\text{ ms}$), the anomaly is classified as `INSERTED_AUDIO_SPLICE`.
+   - *Case 4 (Fabricated Surveillance Video):* If PaddleOCR detects a 15-minute jump in the OSD timestamp, but VRE bitstream analysis reveals smooth, uninterrupted PTS timestamps and continuous audio room tone, the segment is flagged as `SPLICED_RECORDING_WITH_RE_ENCODED_TIMELINE`.
+   - *Case 5 (Benign Transmission Glitch):* If VRE detects abrupt PTS frame drops, but the OSD clock increments continuously and no visual scene cuts occur, the anomaly is flagged as `HARDWARE_FRAME_DROP_OR_PACKET_LOSS`, exonerating the exhibit from intentional malicious tampering.
+
+#### 11.9.2 The 11-Part Final Forensic Report Structure
+The VISTA composite report compiles eleven distinct forensic dimensions:
+1. **Video Technical Integrity:** Container structure, atom alignment, PTS/DTS cadence, frame-rate consistency, and macroblock QP variance (VRE).
+2. **Video Manipulation & Deepfake Findings:** Frame-level spatial boundary seams, temporal sequence jitter, and generative 3D FFT spectrum artifacts (VDF).
+3. **Audio Integrity & Deepfake Findings:** Acoustic discontinuities, ENF continuity, voice biometric consistency, and synthetic speech likelihood (AFB / AURAS).
+4. **Lip-Sync & Audiovisual Consistency Findings:** Cross-modal synchronization distance curves, optimal offset frames, and multi-face speaker attribution (AVSC).
+5. **Content Intelligence Findings:** Source scene classification, unique person track counts, localized actions, and OSD timestamp intervals (VCI).
+6. **CCTV-Specific Forensic Findings:** Source triage classification, OSD clock drift regression $\delta(t)$, ONVIF media signing audit, and cross-camera multi-feed corroboration (CCTV Profile).
+7. **Cryptographic Verification:** Pre-decode dual hash verification (SHA-256 & SHA3-512), Merkle custody log audit, and Ed25519 signature checks (CEIPL).
+8. **Corroborating Evidence:** Cross-modal corroboration, multi-camera matches, external reference hashes, and physical acoustic-visual event alignments.
+9. **Conflicting Outputs & Disagreements:** Explicit enumeration of engine disagreements (e.g. model A flags deepfake while model B outputs normal), with forensic rationale for resolution.
+10. **Unverified Assumptions & Missing Context:** Clear listing of user-reported questionnaire claims lacking independent corroboration, unverified timezones, and skipped questions.
+11. **Human-Review Outcome & Certification:** Official certification block including examiner identity, workstation environment hashes, legal caveats, and final Section 65B IEA / Section 63 BSA conclusion.
+
+#### 11.9.3 Standardized Dimension-Specific Verdict Vocabulary
+Every analytical dimension in the report is assigned one of five standardized forensic statuses:
+
+| Verdict Status | Formal Definition & Evidentiary Standard |
+| :--- | :--- |
+| `NO_ANOMALY_DETECTED` | All applicable engines executed successfully without detecting statistical, cryptographic, or algorithmic deviations exceeding established forensic significance thresholds ($lpha = 0.01$). |
+| `SUSPICIOUS_INDICATORS`| One or more engines detected statistically significant indicators of synthetic generation, bitstream splicing, lip-sync mismatch, or timeline manipulation requiring examiner scrutiny. |
+| `INCONCLUSIVE` | Severe compression artifacts, extreme low resolution ($< 240p$), severe motion blur, or lack of facial/acoustic signals prevented reliable algorithmic verification. |
+| `VERIFICATION_FAILED` | Bitstream corruption, broken cryptographic hash chains, invalidated digital signatures, or non-monotonic frame sequences confirm structural compromise or data tampering. |
+| `UNSUPPORTED` | Proprietary, obfuscated, or encrypted bitstream format for which no open parser or validated vendor plugin is currently integrated into the platform. |
+
+#### 11.9.4 VISTA Findings & Evidence Entity-Relationship Diagram
+
+```mermaid
+erDiagram
+    CASE ||--o{ EVIDENCE_RECORD : contains
+    EVIDENCE_RECORD ||--o{ CUSTODY_EVENT : tracks
+    EVIDENCE_RECORD ||--o{ DERIVED_ARTIFACT : generates
+    EVIDENCE_RECORD ||--o{ ANALYSIS_JOB : runs
+    EVIDENCE_RECORD ||--o| CCTV_CONTEXT : describes
+
+    ANALYSIS_JOB ||--o{ FINDING : emits
+    ANALYSIS_JOB ||--o{ ENGINE_RUN : executes
+    DERIVED_ARTIFACT ||--o{ FINDING : supports
+    
+    CCTV_CONTEXT ||--o{ QUESTIONNAIRE_RESPONSE : records
+    ANALYSIS_JOB ||--|| COMPOSITE_REPORT : compiles
+    COMPOSITE_REPORT ||--|| CERTIFICATE_65B : certifies
+
+    EVIDENCE_RECORD {
+        uuid evidence_id PK
+        uuid case_id FK
+        string exhibit_number
+        string original_filename
+        string sha256_hash
+        string sha3_512_hash
+        string storage_uri
+        int file_size_bytes
+        string detected_mime
+        datetime ingested_at
+    }
+
+    DERIVED_ARTIFACT {
+        uuid artifact_id PK
+        uuid parent_artifact_id FK
+        uuid evidence_id FK
+        string artifact_type
+        string artifact_sha256
+        string storage_uri
+        string generator_module
+        json transformation_params
+        float start_time_seconds
+        float end_time_seconds
+    }
+
+    FINDING {
+        uuid finding_id PK
+        uuid job_id FK
+        uuid evidence_id FK
+        string engine_code
+        string finding_type
+        string category
+        float confidence_score
+        float calibrated_score
+        float start_time_seconds
+        float end_time_seconds
+        json spatial_coordinates
+        string technical_rationale
+        string evidentiary_weight
+    }
+
+    CCTV_CONTEXT {
+        uuid context_id PK
+        uuid evidence_id FK
+        string source_type_candidate
+        string camera_channel
+        string recorder_manufacturer
+        string configured_timezone
+        float clock_drift_slope
+        string onvif_seal_status
+        string follow_up_status
+    }
+```
+
+#### 11.9.5 Analysis State Machine & Report Generation Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> INGESTED: Exhibit Uploaded & Pre-Hashed (SHA-256 / SHA3-512)
+    
+    INGESTED --> DEFENSIVE_PARSING: WORM Storage Locked (POSIX 0400)
+    
+    DEFENSIVE_PARSING --> PARSE_FAILED: Bitstream Corrupted / Format Bomb
+    PARSE_FAILED --> [*]: Quarantine Exhibit & Log Failure
+    
+    DEFENSIVE_PARSING --> TRIAGE_EVAL: PyAV / FFprobe Extraction Successful
+    
+    TRIAGE_EVAL --> CCTV_DISCOVERY: Source Class == CCTV_CANDIDATE
+    TRIAGE_EVAL --> PIPELINE_DISPATCH: Source Class == GENERAL_VIDEO
+    
+    CCTV_DISCOVERY --> ADAPTIVE_PROMPT: Context Missing & Meaningful
+    CCTV_DISCOVERY --> PIPELINE_DISPATCH: All Critical Context Extracted
+    
+    ADAPTIVE_PROMPT --> PIPELINE_DISPATCH: Examiner Submits Responses (USER_REPORTED)
+    ADAPTIVE_PROMPT --> PIPELINE_DISPATCH: Examiner Skips (Continuation Invariant)
+    
+    state PIPELINE_DISPATCH {
+        [*] --> VRE_EXEC: Bitstream & Cadence Analysis
+        [*] --> AFB_EXEC: Audio Stream Extraction & AURAS Dispatch
+        [*] --> VDF_EXEC: Deepfake & Generative Video Models
+        [*] --> VCI_EXEC: Taxonomy, Person Tracking & OCR
+        
+        AFB_EXEC --> AVSC_EXEC: Audio Waveform Available for Lip-Sync
+    }
+    
+    PIPELINE_DISPATCH --> EVIDENCE_FUSION: All Dispatched Engine Runs Completed
+    
+    EVIDENCE_FUSION --> DRAFT_REPORT: Cross-Modal Conflict Rules Evaluated
+    
+    DRAFT_REPORT --> EXAMINER_REVIEW: Human Examiner Audits Findings & Heatmaps
+    
+    EXAMINER_REVIEW --> RE_ANALYSIS: Examiner Requests Deep Examination Profile
+    RE_ANALYSIS --> PIPELINE_DISPATCH
+    
+    EXAMINER_REVIEW --> REPORT_SEALED: Examiner Signs Report with Ed25519 Token
+    
+    REPORT_SEALED --> CERTIFIED_DOSSIER: RFC 3161 TSA Attached & Section 65B/63 BSA Generated
+    CERTIFIED_DOSSIER --> [*]
 ```
 
 ---
 
 ### 11.10 Technology & Tool Selection Registry
 
-The following comparative selection matrix details the algorithmic and software foundations selected for the VISTA subsystem:
+The following comparative selection matrices detail the algorithmic, mathematical, and software candidates evaluated for the VISTA subsystem across its six core technical domains. Each table documents the exact forensic responsibility, licensing restrictions, input/output contracts, hardware requirements, failure behaviors, and implementation status.
 
-| Domain / Engine | Candidate Technologies Considered | Selected Technology | Technical Rationale & Forensic Justification |
-| :--- | :--- | :--- | :--- |
-| **Demuxing & Bitstream** | OpenCV VideoCapture, GStreamer, PyAV / FFmpeg | **PyAV / FFmpeg 6.x** | Direct access to raw packet PTS/DTS, packet side-data, macroblock QPs, and zero-copy stream slicing without forced RGB transcoding. |
-| **Scene Transition** | OpenCV diff, PySceneDetect, TransNet V2 | **PySceneDetect (Adaptive)** | Robust adaptive thresholding across lighting changes; exports exact PTS boundary frames without external deep learning overhead. |
-| **Face Detection** | MTCNN, MediaPipe, RetinaFace, SCRFD | **RetinaFace / SCRFD** | Superior recall on tiny surveillance faces ($20 \times 20$ px), extreme yaw/pitch angles, and partial occlusions common in CCTV. |
-| **Face Tracking** | DeepSORT, SORT, ByteTrack, BoT-SORT | **ByteTrack** | Associates low-confidence detection boxes to prevent tracklet fragmentation during transient motion blur and partial occlusions. |
-| **Lip-Sync Alignment** | Wav2Lip Sync, SyncNet, TalkNet | **SyncNet (Modified)** | Established, explainable cross-modal embedding distance with bounded confidence scores; uncoupled from generative synthesis. |
-| **Frame Deepfake** | MesoNet, CapsuleNet, XceptionNet, EfficientNet-B4 | **EfficientNet-B4 Dual-Domain** | Captures both spatial RGB boundary seams and DCT frequency domain residual artifacts with minimal parameter count. |
-| **Temporal Deepfake** | 3D-ResNet, I3D, FTCN, VideoMAE | **FTCN + VideoMAE ViT-B** | FTCN isolates pure temporal flicker without spatial bias; VideoMAE provides rich self-supervised spatio-temporal representations. |
-| **Object Detection** | Faster R-CNN, Mask R-CNN, YOLOv8x / YOLOv10 | **YOLOv8x / YOLOv10** | High-throughput real-time detection across 80 classes with superior small-object recall on CCTV perspectives. |
-| **Evidence Segmentation** | Mask2Former, SAM, SAM 2 | **SAM 2 (Segment Anything 2)** | High-accuracy video object tracking and prompted mask propagation across long sequences without temporal drifting. |
-| **OSD Clock OCR** | EasyOCR, Tesseract 5, PaddleOCR | **PaddleOCR + Tesseract** | PaddleOCR provides superior multi-angle text localization; Tesseract provides deterministic whitelist-constrained digit recognition. |
-| **CCTV Export / Seals** | Custom scripts, LibONVIF | **LibONVIF + Custom Parsers** | Native validation of ONVIF XML Media Signing boxes, X.509 certificate chains, and continuous NAL unit SHA-256 hash chains. |
-| **Cryptographic Storage** | Local Ext4, MinIO Object Lock, Ceph WORM | **POSIX 0400 / S3 Object Lock** | Hardware/kernel-enforced immutability guaranteeing non-rewritable raw evidentiary archives. |
+#### 11.10.1 Media Processing & Bitstream Demuxing Family
 
----
+| Module | Exact Responsibility | Candidate Tool / Model | Official Paper / Repository | License & Restrictions | Input Contract | Output Contract | Supported Task | Hardware | Model Version Strategy | Benchmark / Evaluation Plan | Known Failure Cases | Integration Dependency | Current Status | Alternative Implementation |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `ps05.engines.vista.vre.bitstream` | Low-level packet demuxing, atom parsing, PTS/DTS extraction | **PyAV / FFmpeg 6.x** | `https://github.com/PyAV-Org/PyAV`, `https://ffmpeg.org` | LGPL v2.1+ / GPL v2+ (build-dependent) | File path or memory buffer | Stream packet descriptors, timebases, PTS list | Bitstream parsing, stream demuxing | CPU (x86_64, 2 cores min) | Pinned FFmpeg 6.1.1 shared libs | Synthetic corrupted atom suites, non-monotonic PTS fixtures | Malformed NAL units cause uncatchable C-level segfaults if unbuffered | Libavcodec, Libavformat C libraries | `PLANNED` | GStreamer, OpenCV VideoCapture |
+| `ps05.engines.vista.vre.metadata` | Container and stream deep metadata extraction | **MediaInfo** | `https://mediaarea.net/en/MediaInfo` | BSD-2-Clause | Media file path | Structured JSON/XML technical metadata | Technical tag extraction, encoder profiling | CPU (1 core) | Pinned `libmediainfo` 24.x | Completeness check on 50 container variants | Stripped metadata tags in web-optimized files | `pymediainfo` wrapper | `PLANNED` | FFprobe JSON output |
+| `ps05.engines.vista.vre.metadata` | Forensic EXIF, XMP, MakerNotes audit | **ExifTool** | `https://exiftool.org` by Phil Harvey | Perl Artistic License / GPL | Media file path | Key-value dictionary of metadata tags | Software tag audit, camera serial extraction | CPU (1 core) | Pinned ExifTool 12.76 | Metadata fidelity on raw smartphone exports | Slow process invocation per file if not daemonized | Perl runtime environment | `PLANNED` | Hachoir, native Python Exif parsers |
+| `ps05.engines.vista.vre.scene_cuts` | Content-aware & adaptive scene cut detection | **PySceneDetect (Adaptive)** | `https://github.com/Breakthrough/PySceneDetect` | BSD-3-Clause | Video stream or frame buffer | List of scene cut frame indices & timestamps | Boundary detection, splice candidate isolation | CPU / optional CUDA | PySceneDetect 0.6.x | Precision/Recall on Hollywood2 and surveillance cuts | False cuts triggered by rapid camera pan or strobe lighting | OpenCV Python bindings | `PLANNED` | TransNet V2 deep neural network |
 
+#### 11.10.2 Audio Extraction, Speech & Source Separation Family
+
+| Module | Exact Responsibility | Candidate Tool / Model | Official Paper / Repository | License & Restrictions | Input Contract | Output Contract | Supported Task | Hardware | Model Version Strategy | Benchmark / Evaluation Plan | Known Failure Cases | Integration Dependency | Current Status | Alternative Implementation |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `ps05.engines.vista.afb.extractor` | Lossless audio bitstream extraction | **FFmpeg stream-copy (`-c:a copy`)** | `https://ffmpeg.org` | LGPL v2.1+ | Video container path | Extracted audio file (`.aac`, `.ac3`, `.mp3`) | Stream extraction without transcoding | CPU (1 core) | Standardized CLI invocation | Bit-for-bit parity check against container stream (`cmp -l`) | Multi-channel audio mapping confusion if stream index unpinned | System FFmpeg binary | `PLANNED` | PyAV custom demux loop |
+| `ps05.engines.vista.afb.resampler` | Resampling to standardized forensic audio format | **SoX / FFmpeg (`libswresample`)** | `https://ffmpeg.org` | LGPL v2.1+ | Raw audio stream | 16 kHz Mono Float32 WAV normalized to -23 LUFS | Standardized analysis artifact creation | CPU (1 core) | SoX 14.4.2 / FFmpeg 6.x | Frequency response fidelity; THD+N measurement ($< -90	ext{ dB}$) | Phase distortion on aggressive downmixing from 5.1 surround | SoX / FFmpeg libraries | `PLANNED` | Torchaudio resampler |
+| `ps05.engines.vista.afb.separation` | Multi-speaker conversational source separation | **SpeechBrain SepFormer** | Subakan et al., 2021; `https://github.com/speechbrain/speechbrain` | Apache 2.0 | 16 kHz WAV audio buffer | N isolated single-speaker audio streams | Overlapped speech disentanglement | GPU recommended (4GB VRAM) / CPU fallback | Pretrained `sepformer-wsj02mix` | SI-SDR improvement on WSJ0-2mix and LibriMix ($> 14	ext{ dB}$) | Hallucinates musical noise artifacts at low input SNR ($< 0	ext{ dB}$) | PyTorch, Torchaudio | `RESEARCH_CANDIDATE` | Asteroid Conv-TasNet |
+| `ps05.engines.vista.afb.auras_client`| Dispatching audio artifact to AURAS engine suite | **AURAS Bridge Client Adapter** | Internal Subsystem Contract | Proprietary (Hackathon Core) | Extracted audio UUID + SHA-256 | Celery Task ID & AURAS Job Reference | Audio forensic inspection (ARE, MVSI, ADDE) | Distributed Worker | Pinned AURAS API contract v1.2 | Integration test on synthetic spliced audio samples | Network timeout or Redis queue exhaustion on 100MB+ audio | Redis, Celery, AURAS service | `PLANNED` | Direct in-process Python module call |
+
+#### 11.10.3 Audio-Visual Synchronization & Facial Analysis Family
+
+| Module | Exact Responsibility | Candidate Tool / Model | Official Paper / Repository | License & Restrictions | Input Contract | Output Contract | Supported Task | Hardware | Model Version Strategy | Benchmark / Evaluation Plan | Known Failure Cases | Integration Dependency | Current Status | Alternative Implementation |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `ps05.engines.vista.avsc.face_track` | Surveillance-grade face detection | **RetinaFace / SCRFD** | Deng et al., 2020; `https://github.com/deepinsight/insightface` | MIT License | RGB frame tensor ($H 	imes W 	imes 3$) | Bounding boxes $[x, y, w, h]$, 5 landmarks, confidence | Low-resolution face localization in CCTV | CUDA (2GB VRAM) / ONNX CPU | InsightFace 0.7.3 ResNet50 / SCRFD-10G | Hard-set evaluation on WiderFace (Target AP $> 82\%$ on Hard) | Extreme occlusion ($> 70\%$) or profile angles ($> 85^\circ$ yaw) | ONNX Runtime, OpenCV | `PLANNED` | MediaPipe Face, MTCNN |
+| `ps05.engines.vista.avsc.face_track` | Inter-frame facial trajectory association | **ByteTrack** | Zhang et al., 2022; `https://github.com/ifzhang/ByteTrack` | MIT License | Frame-by-frame bounding box detections | Unique tracklet IDs with temporal spans | Multi-person face trajectory tracking | CPU (1 core) | ByteTrack v1.0.5 release | MOTA / IDF1 metrics on MOT17 and MOT20 benchmarks | Tracklet ID switching during prolonged camera occlusion | NumPy, Cython | `PLANNED` | BoT-SORT, DeepSORT |
+| `ps05.engines.vista.avsc.syncnet` | Cross-modal lip-sync embedding distance | **SyncNet (Modified)** | Chung & Zisserman, 2016; `https://github.com/joonson/syncnet_python` | MIT License | 112x112 greyscale mouth video + 16kHz audio MFCCs | Distance curve $D(\Delta)$, optimal offset $\Delta^*$, sync score $S_{	ext{sync}}$ | Lip-sync verification, re-dubbing detection | GPU (4GB VRAM) / CPU fallback | PyTorch weights checkpoint (Chung 2016 baseline) | Accuracy on LRS2 / LRS3 evaluation sets ($\pm 10$ frame shifts) | Fails on whisper speech, covered mouths, or non-English phonemes | PyTorch, SciPy, Librosa | `PLANNED` | Wav2Lip Sync Discriminator |
+| `ps05.engines.vista.avsc.event_corr` | Acoustic event classification | **YAMNet / AST** | Gemmeke et al., 2017 (AudioSet); Gong et al., 2021 | Apache 2.0 / MIT | 16 kHz audio buffer ($0.96	ext{ s}$ window) | 521 AudioSet class probabilities & timestamps | Gunshot, explosion, siren sound detection | CPU / CUDA | TensorFlow Hub YAMNet / HuggingFace AST | Top-5 accuracy on AudioSet eval set ($> 85\%$) | Background traffic noise masking transient acoustic events | TensorFlow / PyTorch | `RESEARCH_CANDIDATE` | PANNs CNN-14 |
+
+#### 11.10.4 Deepfake, Temporal Modeling & Generative Video Detection Family
+
+| Module | Exact Responsibility | Candidate Tool / Model | Official Paper / Repository | License & Restrictions | Input Contract | Output Contract | Supported Task | Hardware | Model Version Strategy | Benchmark / Evaluation Plan | Known Failure Cases | Integration Dependency | Current Status | Alternative Implementation |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `ps05.engines.vista.vdf.frame_detect` | Spatial facial boundary seam & artifact detection | **EfficientNet-B4 Dual-Domain** | Tan & Le, 2019; Dual-domain forensic adaptation | Apache 2.0 | Aligned face crop ($256 	imes 256 	imes 3$) | Manipulated probability $P_{	ext{fake}} \in [0, 1]$ + seam mask | Face-swap and reenactment detection | CUDA (4GB VRAM) / ONNX CPU | Pretrained on FaceForensics++ c23 | AUC-ROC on FF++ Deepfakes and FaceSwap ($> 0.96$) | Heavy compression (H.264 CRF $> 35$) obscures spatial seams | PyTorch, Timm | `PLANNED` | XceptionNet (Rossler et al.) |
+| `ps05.engines.vista.vdf.temporal` | Spatio-temporal inter-frame coherence modeling | **FTCN (Fully Temporal ConvNet)** | Zheng et al., ECCV 2022; `https://github.com/yinglinzheng/FTCN` | Apache 2.0 | Temporal sequence of face crops ($T 	imes 3 	imes 224 	imes 224$) | Temporal anomaly score + frame suspicion curve | Inter-frame flickering, landmark jitter detection | CUDA (6GB VRAM) | Official checkpoint `ftcn_ffpp_c23.pth` | Cross-dataset AUC-ROC on Celeb-DF v2 ($> 0.88$) | Static frozen video segments produce low temporal variance | PyTorch | `PLANNED` | STIL, TALL, VideoMAE |
+| `ps05.engines.vista.vdf.temporal` | Self-supervised spatio-temporal video representation | **VideoMAE ViT-B (Forensic Head)** | Tong et al., NeurIPS 2022; `https://github.com/MCG-NJU/VideoMAE` | Apache 2.0 | 16-frame video clip ($16 	imes 3 	imes 224 	imes 224$) | Temporal feature embedding + forgery logits | Spatio-temporal anomaly localization | CUDA (8GB VRAM) | HuggingFace `MCG-NJU/videomae-base` | Evaluation on DFDC and FaceForensics++ c40 splits | High compute footprint ($\sim 180	ext{ GFLOPs}$ per 16-frame tube) | PyTorch, Transformers | `RESEARCH_CANDIDATE` | TimeSformer, I3D |
+| `ps05.engines.vista.vdf.generative` | Text-to-Video generative synthesis detection | **Generative 3D FFT & Noise Analyzer** | Corvi et al., 2023; Wang et al., 2020 | Research use | Raw video sequence ($32 	imes 3 	imes 256 	imes 256$) | Frequency grid anomaly score + diffusion residual | Sora, Runway, Pika synthetic video detection | CUDA (4GB VRAM) / CPU | Mathematical FFT accumulator + linear head | Detection accuracy on GenVideo benchmark ($> 90\%$) | Video re-encoded through lossy social media codecs (WhatsApp) | PyTorch, NumPy | `PLANNED` | Spatial DIRE (Diffusion Reconstruction Error) |
+| `ps05.engines.vista.vdf.calibration`| Post-hoc probability calibration & OOD detection | **Platt Scaling + Mahalanobis OOD** | Guo et al., ICML 2017; Lee et al., NeurIPS 2018 | MIT License | Raw model logits + intermediate feature vectors | Calibrated confidence $P_{	ext{cal}} \in [0, 1]$ + OOD distance | Bounded probability estimation, out-of-distribution alert | CPU (1 core) | Pinned calibration parameters per model version | Expected Calibration Error ($ECE < 0.05$) on held-out test splits | Over-confidence on out-of-domain compression profiles | Scikit-learn, SciPy | `PLANNED` | Temperature Scaling, Isotonic Regression |
+
+#### 11.10.5 Video Scene, Object Intelligence & OCR Family
+
+| Module | Exact Responsibility | Candidate Tool / Model | Official Paper / Repository | License & Restrictions | Input Contract | Output Contract | Supported Task | Hardware | Model Version Strategy | Benchmark / Evaluation Plan | Known Failure Cases | Integration Dependency | Current Status | Alternative Implementation |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `ps05.engines.vista.vci.detector` | Real-time surveillance object detection | **YOLOv8x / YOLOv10** | Ultralytics, 2023; Wang et al., 2024 | AGPL-3.0 / Commercial | Downsampled frame ($640 	imes 640 	imes 3$) | Bounding boxes $[x, y, w, h]$, class label, confidence | Person, vehicle, weapon detection in CCTV | CUDA (4GB VRAM) / ONNX CPU | Ultralytics YOLOv8x.pt pinned weights | COCO val2017 mAP50-95 ($> 53.9$) | Tiny objects ($< 16	ext{ px}$) in distant surveillance perspectives | Ultralytics, PyTorch | `PLANNED` | RT-DETR, Faster R-CNN |
+| `ps05.engines.vista.vci.detector` | Promptable video object mask segmentation | **SAM 2 (Segment Anything 2)** | Ravi et al., Meta AI 2024; `https://github.com/facebookresearch/segment-anything-2` | Apache 2.0 | Video frame sequence + point/box prompt | Frame-by-frame binary segmentation masks | Physical object boundary tracking, tamper localization | CUDA (8GB VRAM) | `sam2_hiera_base_plus.pt` | SA-V dataset J&F benchmark ($> 75.0$) | Memory bloat on long video clips ($> 1000$ frames) | PyTorch, TorchVision | `RESEARCH_CANDIDATE` | Mask2Former, Track-Anything |
+| `ps05.engines.vista.vci.ocr_overlay`| OSD timestamp and camera channel OCR extraction | **PaddleOCR v4 + Tesseract 5** | `https://github.com/PaddlePaddle/PaddleOCR` | Apache 2.0 | Cropped OSD clock region ($H 	imes W 	imes 3$) | Extracted string, bounding polygon, confidence | Timestamp string parsing, camera channel identification | CPU / optional CUDA | PP-OCRv4 server model + Tesseract 5.3 | Character-level accuracy on 500 CCTV clock crops ($> 98\%$) | Dot-matrix LCD fonts or low-contrast text over white backgrounds | PaddlePaddle / Tesseract binary | `PLANNED` | EasyOCR, TrOCR |
+| `ps05.engines.vista.vci.actions` | Spatio-temporal human action and anomaly localization | **VideoMAE / SlowFast** | Feichtenhofer et al., ICCV 2019; Tong et al., 2022 | Apache 2.0 | 32-frame video clip ($32 	imes 3 	imes 224 	imes 224$) | Top-k action categories, temporal boundaries | Violence, fall, running, camera tampering detection | CUDA (6GB VRAM) | Pinned PyTorch weights on Kinetics-400 | Top-1 accuracy on UCF101 / Kinetics ($> 80\%$) | High inference latency on long CCTV clips | PyTorch | `RESEARCH_CANDIDATE` | X3D, TimeSformer |
+
+#### 11.10.6 Cryptographic Integrity, Storage & Manifest Signing Family
+
+| Module | Exact Responsibility | Candidate Tool / Model | Official Paper / Repository | License & Restrictions | Input Contract | Output Contract | Supported Task | Hardware | Model Version Strategy | Benchmark / Evaluation Plan | Known Failure Cases | Integration Dependency | Current Status | Alternative Implementation |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `ps05.shared.ceipl.hasher` | Pre-decode dual cryptographic hashing | **OpenSSL / Python `hashlib`** | FIPS PUB 180-4, FIPS PUB 202 | OpenSSL / PSF License | Binary stream in 64KB chunks | Hex-encoded SHA-256 and SHA3-512 digests | Bitstream integrity verification | CPU (Hardware SHA-NI) | Python standard library `hashlib` | Throughput measurement on 10GB video file ($> 500	ext{ MB/s}$) | I/O bus saturation on slow mechanical drives | Native Python C extensions | `PLANNED` | BLAKE3 (where legally permissible) |
+| `ps05.shared.ceipl.signer` | Manifest sealing & digital signature verification | **Ed25519 (`cryptography` / `PyNaCl`)** | RFC 8032; Bernstein et al., 2012 | Apache 2.0 / BSD | Canonical JSON byte buffer (RFC 8785) | 64-byte Ed25519 signature string | Manifest authenticity sealing & tamper evidence | CPU (1 core) | `cryptography` Python package $\ge 42.0$ | Sign/verify latency ($< 1	ext{ ms}$ per manifest) | Signature failure if JSON canonicalization differs by one space | `cryptography` library | `PLANNED` | RSA-PSS 4096, ECDSA P-256 |
+| `ps05.shared.ceipl.canonical`| RFC 8785 JSON canonicalization | **`canonicaljson` / `rfc8785` Python** | RFC 8785 (JCS standard) | Apache 2.0 | Arbitrary JSON-serializable dictionary | Deterministic UTF-8 byte string | Manifest normalization prior to hashing/signing | CPU (1 core) | `canonicaljson` 2.0.x | Cross-platform byte-equality check across Windows/Linux | Non-serializable objects (datetime, UUID) require strict string mapping | Pure Python / C extension | `PLANNED` | Custom recursive key sorter |
+| `ps05.shared.ceipl.tsa` | External RFC 3161 trusted timestamp binding | **`pyRFC3161` client** | RFC 3161 / RFC 5816 | Apache 2.0 | SHA-256 digest of signed manifest | ASN.1 DER-encoded TimeStampToken | Court-admissible proof of temporal existence | Network access to certified TSA | Pinned X.509 TSA root CA certificate | Verification of TSA response signature and chain of trust | TSA endpoint network failure or latency timeout ($> 5	ext{ s}$) | PyOpenSSL, Requests | `PLANNED` | Local hardware TSA appliance |
+| `ps05.shared.ceipl.vault` | Hardware/Kernel-enforced WORM storage | **POSIX `0400` / AWS S3 Object Lock** | POSIX standard / AWS S3 Compliance API | N/A (Infrastructure) | Seized binary media payload | Immutable S3 object URI + Version ID | Non-rewritable evidence vault archiving | Storage Appliance | S3 API v4 / Linux filesystem | Tamper test: attempt PUT/DELETE on locked object returns HTTP 403 | Premature retention expiration if policy configured incorrectly | MinIO / AWS S3 SDK | `PLANNED` | Ceph WORM, optical WORM media |
 ### 11.11 Performance, Resource & Execution Architecture
 
 VISTA is engineered to operate reliably across constrained local forensic workstations as well as GPU-accelerated laboratory servers.

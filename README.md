@@ -347,7 +347,7 @@ All image forensic investigation across PS-05 is governed by nine strict archite
 ### 4.10 Video Integrity, Synchronization & Tampering Analysis Subsystem (VISTA)
 
 > **Subsystem Boundary Definition:**  
-> **VISTA (Video Integrity, Synchronization & Tampering Analysis)** is the specialized video forensics subsystem of the PS-05 platform, operating alongside **AIF** (images) and **AURAS** (audio). VISTA provides research-oriented, mathematically defensible, modular, and implementable forensic verification for digital video files, CCTV/DVR/NVR surveillance exports, dashcam/bodycam footage, and broadcast streams.
+> **VISTA (Video Integrity, Synchronization & Tampering Analysis)** is the specialized video forensics subsystem of the PS-05 platform, operating alongside **AIF** (images) and **AURAS** (audio). VISTA provides research-oriented, mathematically defensible, modular, and implementable forensic verification for digital video files, CCTV/DVR/NVR surveillance exports, dashcam/bodycam footage, and multimedia broadcasts.
 
 Video evidence combines high-volume spatial imagery, temporal motion vectors, compressed multi-stream containers, and interleaved audio tracks. Unlike single images or pure audio signals, video tampering can occur across multiple dimensions simultaneously:
 - **Spatial tampering:** Localized face swaps, inpainting, object removal, or synthetic overlays within individual frames.
@@ -355,14 +355,41 @@ Video evidence combines high-volume spatial imagery, temporal motion vectors, co
 - **Cross-Modal desynchronization:** Re-dubbed or cloned audio tracks laid over authentic video, or authentic audio spliced with AI-synthesized talking heads (lip-sync mismatches).
 - **Surveillance/CCTV tampering:** Altered on-screen display (OSD) clock timestamps, camera switching artifacts, or proprietary export header rewrites.
 
-To resolve these multidimensional challenges without conflating independent forensic observations, **VISTA** is structured into **five decoupled primary engines**, a dedicated **CCTV Forensic Profile**, and deep integration with the shared **CEIPL** cryptographic core and the **AURAS** audio subsystem:
+#### Architectural Boundaries & Fundamental Principles
+1. **Overall Platform Alignment:** VISTA operates within the unified PS-05 architecture, sharing the evidence intake pipeline, immutable storage, audit logging, and legal certification infrastructure.
+2. **Relationship to AURAS (Audio Subsystem):** VISTA does **not** reimplement audio forensics. Through its **Audio Forensic Bridge (AFB)**, VISTA extracts native audio streams with zero transcoding loss and routes them into **AURAS** (ARE for signal/edit analysis, MVSI for speech diarization/VAD/language ID, and ADDE for voice deepfake detection).
+3. **Relationship to AIF (Image Subsystem):** VISTA maintains logical decoupling from AIF while sharing foundational computer vision paradigms (e.g., face detection landmarks, frequency domain transforms, and localized inpainting detection).
+4. **Shared CEIPL Foundation:** The **Cryptographic Evidence Integrity & Provenance Layer (CEIPL)** is a shared platform core service—**not** a sixth VISTA engine. All VISTA exhibits, stream extracts, and derived artifacts are anchored in CEIPL's cryptographic DAG.
+5. **Dedicated CCTV Forensic Profile:** CCTV and surveillance analysis is implemented as an integrated, source-specific forensic profile spanning all five engines—**not** an isolated sixth engine.
+
+#### The Five Primary VISTA Engines
+To resolve these multidimensional challenges without conflating independent forensic observations, **VISTA** is structured into **five decoupled primary engines** and a cross-cutting **CCTV Forensic Profile**:
 
 1. **VRE (Video Reverse Engineering Engine):** Bitstream, container, and timeline reverse engineering. Audits MP4, MKV, AVI, MOV, TS, and raw surveillance streams using FFprobe, MediaInfo, PyAV, and ExifTool. Extracts Presentation Time Stamps (PTS), Decoding Time Stamps (DTS), GOP structures, variable frame rate (VFR) jitter, duplicate/frozen frames, scene transitions (PySceneDetect), and historical re-encoding signatures.
-2. **AFB (Audio Forensic Bridge):** Extracts native audio streams with zero loss using stream-copy FFmpeg extraction. Generates derived audio artifacts bound by cryptographic SHA-256 hashes to the parent video. Routes extracted audio into **AURAS** (ARE for signal/edit analysis, MVSI for speech diarization/VAD/language ID, and ADDE for voice deepfake detection) without duplicating audio algorithms.
-3. **AVSC (Audio-Visual Synchronization & Correspondence Engine):** Investigates whether visible motion and acoustic signals are temporally and semantically consistent. Performs global and local drift time-alignment, extracts face tracks and mouth crops (RetinaFace, SCRFD, ByteTrack), evaluates lip-sync correspondence using visual-speech models (SyncNet), and correlates environmental sound events (YAMNet, PANNs, AST) with visible visual activity (vehicles, impacts, machinery, crowds).
+2. **AFB (Audio Forensic Bridge):** Extracts native audio streams with zero loss using stream-copy FFmpeg extraction. Generates derived audio artifacts bound by cryptographic SHA-256 hashes to the parent video. Routes extracted audio into **AURAS** without duplicating audio algorithms, aligning speaker intervals back to the video timeline.
+3. **AVSC (Audio-Visual Synchronization & Correspondence Engine):** Investigates whether visible motion and acoustic signals are temporally and semantically consistent. Performs global container and local drift time-alignment, extracts face tracks and mouth crops (RetinaFace, SCRFD, ByteTrack), evaluates lip-sync correspondence using visual-speech models (SyncNet), and correlates environmental sound events (YAMNet, PANNs, AST) with visible visual activity (vehicles, impacts, machinery, crowds).
 4. **VDF (Video Deepfake & AI-Generation Detection Engine):** Multi-branch spatial and temporal AI-generation detection. Combines frame-level classifiers (Xception, EfficientNet) with sequence-level temporal models (FTCN, STIL, TALL, TimeSformer, VideoMAE). Features calibrated late-fusion ensembles, Platt scaling, and Mahalanobis out-of-distribution (OOD) uncertainty estimation across diverse manipulation families (face swap, reenactment, facial inpainting, full generative AI).
 5. **VCI (Video Content Intelligence Engine):** Semantic scene and event timeline reconstruction. Implements hierarchical source classification (~15 categories), task-aware object/person detection (YOLOv8/v10, RT-DETR, SAM 2), multi-object tracking (ByteTrack, BoT-SORT) for distinct unique-person counts vs. frame-level counts, action/event localization (VideoMAE, SlowFast), and robust OCR overlay extraction (PaddleOCR, Tesseract) for on-screen surveillance clocks.
-6. **Dedicated CCTV Forensic Profile:** Source-specific forensic workflow integrated across all five engines. Features automated source classification (`LIKELY_CCTV_FOOTAGE`, `GENERAL_VIDEO`, etc.), automatic recording metadata and timestamp extraction *prior* to questioning the investigator, an adaptive follow-up questionnaire (Questions A–E), timeline continuity auditing, multi-camera corroboration, and native export / digital seal verification (ONVIF Export File Format, ONVIF Media Signing, vendor manifests).
+6. **Dedicated CCTV Forensic Profile (Cross-Cutting):** Source-specific forensic workflow integrated across all five engines. Features automated source classification (`LIKELY_CCTV_FOOTAGE`, `POSSIBLE_CCTV_FOOTAGE`, `GENERAL_VIDEO`, `SCREEN_RECORDING_CANDIDATE`, `UNKNOWN_SOURCE_TYPE`), automatic recording metadata and timestamp extraction *prior* to questioning the investigator, an adaptive follow-up questionnaire (Questions A–E), timeline continuity auditing, multi-camera corroboration, and native export / digital seal verification (ONVIF Export File Format, ONVIF Media Signing, vendor manifests).
+
+#### Canonical 16-Step Logical Processing Pipeline
+Every video exhibit submitted to VISTA traverses a rigorous, legally auditable 16-step execution lifecycle:
+1. **Exhibit Reception:** Receive raw video bitstream or supported CCTV/DVR/NVR container export.
+2. **Evidence Identification:** Assign globally unique immutable `evidence_id` (UUIDv4) and case reference.
+3. **Pre-Decode Dual Hashing:** Stream raw incoming bytes through SHA-256 and SHA3-512 accumulators prior to demuxing or decompression.
+4. **WORM Preservation:** Commit unmodified bitstream to WORM immutable vault (POSIX `0400` / S3 Object Lock) and emit an RFC 8785 signed acquisition manifest.
+5. **Container & Codec Identification:** Execute defensive container demuxing (PyAV/FFprobe sandbox) to catalog all video, audio, subtitle, and metadata streams.
+6. **Technical Metadata & Timeline Extraction:** Extract presentation timestamps (PTS), decoding timestamps (DTS), GOP cadence, timebases, and ExifTool container tags.
+7. **Automated CCTV Discovery:** Probe for CCTV characteristics (static perspective, IR night vision, OSD clocks, channel labels) and provisionally classify source type.
+8. **Lossless Audio Extraction:** Demux embedded audio via FFmpeg stream-copy (`-c:a copy`) into a distinct derived artifact with independent SHA-256 DAG binding.
+9. **Traceable Video Artifact Generation:** Generate timestamped working frames, normalized face crops, and analysis clips with parent-mapped coordinates and timecodes.
+10. **Parallel VISTA Engine Execution:** Dispatch decoupled analysis tasks across VRE, AVSC, VDF, and VCI based on detected media properties.
+11. **Asynchronous AURAS Routing:** Forward extracted audio artifact to AURAS (ARE signal analysis, MVSI diarization, ADDE voice deepfake detection).
+12. **Cross-Engine Evidence Correlation:** Correlate visual scene events, speaker turns, lip-sync curves, deepfake probabilities, and OCR clock readings.
+13. **Uncertainty & Calibration Preservation:** Compute empirical Platt-calibrated probabilities, Mahalanobis OOD distances, and record model disagreements.
+14. **Separable Sub-Report Generation:** Compile independent, domain-specific findings for Video Technical Integrity (VRE), Audio Forensics (AURAS), Synchronization (AVSC), and CCTV Audit (CCTV).
+15. **Cross-Engine Evidentiary Fusion:** Synthesize all findings into a unified, evidence-linked master forensic dossier without masking conflicting signals.
+16. **Legal Verification & Custody Audit:** Verify manifest integrity, check Ed25519 digital signatures and RFC 3161 timestamps, and prepare Section 65B IEA / Section 63 BSA certificate for examiner review.
 
 ---
 
@@ -371,10 +398,10 @@ To resolve these multidimensional challenges without conflating independent fore
 | Dimension | VRE (Video Reverse Engineering) | AFB (Audio Forensic Bridge) | AVSC (AV Sync & Correspondence) | VDF (Video Deepfake Detection) | VCI (Video Content Intelligence) | CCTV Forensic Profile (Cross-Cutting) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Primary Responsibility** | Bitstream container, codec, PTS/DTS cadence, VFR/CFR, scene cuts, re-encoding signatures. | Lossless audio extraction, sample-to-frame mapping, routing to AURAS ARE/MVSI/ADDE. | Time alignment, mouth-motion lip-sync (SyncNet), acoustic-to-visual event correspondence. | Frame-level & temporal deepfake detection, face manipulation, AI video generation, OOD bounds. | Scene classification, object detection, ByteTrack person tracking, action localization, OCR. | CCTV source triage, automated OSD extraction, adaptive questioning, native export verification. |
-| **Input Artifacts** | Seized raw video bitstream, container header dump, demuxed packet streams. | Seized video bitstream, selected audio stream index ($a:0$). | Decoded frame sequences, cropped face tracks, extracted 16 kHz mono audio stream. | Standardized face crops (224x224), temporal frame windows (16-32 frames), motion vectors. | Decoded RGB frames (sampled at adaptive cadence: 1 fps for scene, full fps for tracking). | Surveillance container/raw streams, proprietary sidecar files, signed manifests, OSD regions. |
+| **Input Artifacts** | Seized raw video bitstream, container header dump, demuxed packet streams. | Seized video bitstream, selected audio stream index ($a:0$). | Decoded frame sequences, cropped face tracks, extracted 16 kHz mono audio stream. | Standardized face crops ($224\times224$), temporal frame windows (16–32 frames), motion vectors. | Decoded RGB frames (sampled at adaptive cadence: 1 fps for scene, full fps for tracking). | Surveillance container/raw streams, proprietary sidecar files, signed manifests, OSD regions. |
 | **Main Modules** | VRE-01 to VRE-05 (Container/codec, PTS cadence, scene cuts, ExifTool, encoding traces). | AFB-01 to AFB-04 (Stream-copy extraction, AURAS adapter, VAD/diarization, speaker evidence). | AVSC-01 to AVSC-04 (AV alignment, face tracks, SyncNet lip-sync, acoustic event matching). | VDF-01 to VDF-05 (Frame registry, temporal registry, manipulation families, AI ensemble, calibration). | VCI-01 to VCI-05 (Source taxonomy, YOLO/SAM 2, ByteTrack counts, VideoMAE actions, PaddleOCR). | CCTV-01 to CCTV-08 (Source triage, auto-metadata, adaptive questions, clock audit, ONVIF/seals). |
 | **Output Findings** | PTS discontinuity timestamps, GOP cadence, VFR jitter flags, duplicate frame ranges, re-compression traces. | Extracted audio SHA-256, AURAS job references, multi-speaker turn intervals, diarization links. | Global offset ($\Delta t$), localized lip-sync confidence curves, sound-event cross-modal match matrix. | Calibrated deepfake probabilities, suspicious frame ranges, manipulated face bounding boxes, OOD flags. | Video source category, unique person count, object track trajectories, action intervals, OCR clock log. | CCTV classification confidence, recorder model clues, clock drift curve, native seal validation status. |
-| **Candidate Technologies** | FFmpeg, FFprobe, MediaInfo, PyAV, OpenCV, PySceneDetect, ExifTool. | FFmpeg (stream-copy), PyAV, SoundFile, AURAS router (ARE/MVSI/ADDE). | RetinaFace, SCRFD, ByteTrack, SyncNet, YAMNet, PANNs, AST, PyTorch. | Xception, EfficientNet, FTCN, STIL, TALL, TimeSformer, VideoMAE, Scikit-learn (Platt). | YOLOv8/v10, RT-DETR, SAM 2, ByteTrack, BoT-SORT, SlowFast, PaddleOCR, Tesseract. | PyAV, FFprobe, PaddleOCR, ONVIF parser, C2PA verifier, JSON schema validator. |
+| **Candidate Technologies** | FFmpeg, FFprobe, MediaInfo, PyAV, OpenCV, PySceneDetect, ExifTool. | FFmpeg (stream-copy), PyAV, SoundFile, AURAS router (ARE/MVSI/ADDE). | RetinaFace, SCRFD, ByteTrack, SyncNet, YAMNet, PANNs, AST, PyTorch. | Xception, EfficientNet-B4/B7, FTCN, STIL, TALL, TimeSformer, VideoMAE, Scikit-learn (Platt). | YOLOv8/v10, RT-DETR, SAM 2, ByteTrack, BoT-SORT, SlowFast, PaddleOCR, Tesseract. | PyAV, FFprobe, PaddleOCR, ONVIF parser, C2PA verifier, JSON schema validator. |
 | **Validation Standards** | 100% bitstream metadata match, frame timestamp mapping error $< 1\text{ ms}$, scene cut F1 $> 0.90$. | Bit-exact audio stream extraction, zero sample drift against parent video timeline ($< 0.5\text{ ms}$). | Sync offset error $< 40\text{ ms}$ on ground truth, lip-sync AUC $> 0.92$, event match precision $> 85\%$. | ROC-AUC $> 0.95$ on benchmark sets (FaceForensics++, DFDC), ECE $< 0.05$, FPR $@ 95\%$ TPR $< 5\%$. | Source classification Macro-F1 $> 88\%$, MOTA $> 0.70$, People Count MAE $< 1.5$, OCR WER $< 6\%$. | CCTV classification accuracy $> 94\%$, clock anomaly detection recall $> 98\%$, zero false seal passes. |
 | **Implementation Status** | `PLANNED` (Phase VISTA-A3) | `PLANNED` (Phase VISTA-A4) | `PLANNED` (Phase VISTA-A5) | `PLANNED` (Phases VISTA-A9, A10) | `PLANNED` (Phase VISTA-A6) | `PLANNED` (Phases VISTA-A7, A8) |
 
@@ -384,95 +411,120 @@ To resolve these multidimensional challenges without conflating independent fore
 
 ```mermaid
 flowchart TD
-    RAW_VID["📥 Seized Video / CCTV Exhibit (MP4 / MKV / AVI / MOV / TS / Proprietary)"] --> CEIPL_PRE["1. CEIPL Ingestion: Compute SHA-256 directly from raw stream bytes"]
-    CEIPL_PRE --> WORM_STORE["2. Store raw bitstream in WORM Vault (0400 read-only) & Emit Signed Manifest"]
-    
-    WORM_STORE --> SAFE_PROBE["3. Defensive Demux & Probe (FFprobe / MediaInfo / PyAV with resource caps)"]
-    SAFE_PROBE --> VRE_01["4. VRE-01: Container, Codec, PTS/DTS Cadence & Stream Inventory"]
-    
-    VRE_01 --> CCTV_TRIAGE{"5. CCTV-01: Automatic Source Triage"}
-    CCTV_TRIAGE -->|Likely CCTV| CCTV_AUTO["CCTV-02: Auto-Extract OSD Clues, Channel & Recorder Metadata"]
-    CCTV_TRIAGE -->|General Video| VISTA_DISPATCH["6. Task-Aware Engine Dispatcher"]
-    CCTV_AUTO --> CCTV_ADAPTIVE["CCTV-03/05: Formulate Targeted Questions (A-E) if context missing"]
-    CCTV_ADAPTIVE --> VISTA_DISPATCH
-    
-    subgraph VISTA_PARALLEL["Independent Parallel Engine Execution"]
+    subgraph INTAKE["📥 1. Seized Exhibit Intake & Preservation"]
+        RAW_EVID["Seized Video / CCTV Export Exhibit<br/>(MP4 / MKV / AVI / MOV / TS / DAV / Native)"]
+        CEIPL_PRE["CEIPL Stream Ingestion:<br/>Compute SHA-256 & SHA3-512 directly from raw bytes"]
+        WORM_PRE["WORM Vault Preservation:<br/>POSIX 0400 Read-Only Storage & Canonical Manifest"]
+        SAFE_DEMUX["Safe Demuxing & Allocation Bounds:<br/>FFprobe / MediaInfo / PyAV Sandbox (Timeout & RAM limits)"]
+        
+        RAW_EVID --> CEIPL_PRE --> WORM_PRE --> SAFE_DEMUX
+    end
+
+    subgraph TRIAGE["🔍 2. Stream Inventory & CCTV Discovery"]
+        STREAM_INV["VRE-01: Container, Codecs, PTS/DTS Timebases & Stream Layout"]
+        CCTV_CHECK{"CCTV-01: Automated<br/>Source Triage"}
+        CCTV_AUTO["CCTV-02: Auto-Extract OSD Clues, Channel,<br/>Recorder Make & Embedded Timestamps"]
+        CCTV_Q["CCTV-03/05: Adaptive Context Questionnaire (A–E)<br/>(Displays Clues First; Continues if Skipped)"]
+        
+        SAFE_DEMUX --> STREAM_INV --> CCTV_CHECK
+        CCTV_CHECK -->|Likely CCTV| CCTV_AUTO --> CCTV_Q
+        CCTV_CHECK -->|General Video| VISTA_ROUTER["Task-Aware Engine Router"]
+        CCTV_Q --> VISTA_ROUTER
+    end
+
+    subgraph ENGINES["🔬 3. Five Decoupled Forensic Engines & CCTV Profile"]
         direction TB
         
-        subgraph VRE_ENG["VRE: Video Reverse Engineering"]
-            VRE_CAD["VRE-02: Frame Presentation Timestamps & VFR Jitter"]
-            VRE_SCN["VRE-03: Scene Cut vs Malicious Edit Localization"]
-            VRE_META["VRE-04: Deep ExifTool & Container Tag Inspection"]
-            VRE_HIST["VRE-05: Re-encoding & Quantization Trace Audit"]
+        subgraph VRE_BOX["Engine 1: VRE (Video Reverse Engineering)"]
+            VRE_A["VRE-02: Frame PTS/DTS Cadence & VFR Analysis"]
+            VRE_B["VRE-03: Scene Segmentation vs. Splice Cuts"]
+            VRE_C["VRE-04: Deep Metadata, ExifTool & Container Tags"]
+            VRE_D["VRE-05: Re-encoding & Flow Interpolation Clues"]
         end
-        
-        subgraph AFB_BRIDGE["AFB: Audio Forensic Bridge"]
-            AFB_EXT["AFB-01: Stream-Copy Audio Extraction & Hash Binding"]
-            AFB_ROUTE["AFB-02: Route to AURAS Subsystem (ARE / MVSI / ADDE)"]
-            AFB_SPK["AFB-03/04: Multi-Speaker Diarization & Separation Artifacts"]
+
+        subgraph AFB_BOX["Engine 2: AFB (Audio Forensic Bridge)"]
+            AFB_EXT["AFB-01: Lossless Stream-Copy Audio Extraction"]
+            AFB_DAG["AFB-02: Derived Audio Hash & Parent DAG Binding"]
+            AFB_ROUTE["AFB-02: Asynchronous Dispatch to AURAS"]
+            AFB_SPK["AFB-03/04: Diarization Mapping & Voice Separation"]
         end
-        
-        subgraph AVSC_ENG["AVSC: Audio-Visual Synchronization"]
-            AVSC_ALIGN["AVSC-01: Global & Local AV Offset Baseline"]
-            AVSC_FACE["AVSC-02: RetinaFace Tracking & Visual Speech Features"]
-            AVSC_SYNC["AVSC-03: SyncNet Talking-Head Lip-Sync Verification"]
-            AVSC_EVT["AVSC-04: YAMNet/AST Sound vs Visual Event Correlator"]
+
+        subgraph AVSC_BOX["Engine 3: AVSC (Audio-Visual Sync & Correspondence)"]
+            AVSC_AL["AVSC-01: Global/Local AV Alignment Baseline"]
+            AVSC_FC["AVSC-02: RetinaFace Tracking & Mouth Crop Extraction"]
+            AVSC_SYNC["AVSC-03: SyncNet Talking-Head Lip-Sync Scoring"]
+            AVSC_EVT["AVSC-04: Sound Event vs. Visual Event Matching"]
         end
-        
-        subgraph VDF_ENG["VDF: Video Deepfake & AI Detection"]
-            VDF_FRAME["VDF-01: Xception / EfficientNet Frame Classifiers"]
-            VDF_TEMP["VDF-02: FTCN / STIL / VideoMAE Temporal Sequences"]
-            VDF_FAM["VDF-03: Face Swap, Reenactment & Inpainting Heads"]
-            VDF_CALIB["VDF-04/05: Platt Calibration & Mahalanobis OOD Bounds"]
+
+        subgraph VDF_BOX["Engine 4: VDF (Video Deepfake & AI Detection)"]
+            VDF_SP["VDF-01: Spatial Frame Classifiers (Xception/EfficientNet)"]
+            VDF_TM["VDF-02: Temporal Sequence Models (FTCN/VideoMAE)"]
+            VDF_HM["VDF-03: Specialized Heads (Swap, Reenact, Inpaint)"]
+            VDF_CF["VDF-04/05: Platt Calibration, Mahalanobis OOD & Ensemble"]
         end
-        
-        subgraph VCI_ENG["VCI: Video Content Intelligence"]
-            VCI_TAX["VCI-01: Hierarchical Source Classification"]
-            VCI_DET["VCI-02: YOLOv8 / SAM 2 Object & Person Detection"]
-            VCI_TRK["VCI-03: ByteTrack / BoT-SORT Unique Person Counting"]
-            VCI_ACT["VCI-04: VideoMAE Action & Anomaly Localization"]
-            VCI_OCR["VCI-05: PaddleOCR On-Screen Display Clock Extraction"]
+
+        subgraph VCI_BOX["Engine 5: VCI (Video Content Intelligence)"]
+            VCI_TX["VCI-01: Hierarchical 15-Category Source Taxonomy"]
+            VCI_DT["VCI-02: YOLOv8/v10 & SAM 2 Object Detection"]
+            VCI_TK["VCI-03: ByteTrack Trajectories & Unique Person Count"]
+            VCI_AC["VCI-04: VideoMAE Action & Event Localization"]
+            VCI_OC["VCI-05: PaddleOCR / Tesseract OSD Timestamp Extraction"]
         end
-        
-        subgraph CCTV_SPEC["CCTV Dedicated Forensics"]
-            CCTV_CLK["CCTV-06: OSD Clock vs Container PTS Discontinuity Audit"]
-            CCTV_SEAL["CCTV-07: ONVIF Media Signing & Native Seal Verification"]
-            CCTV_MULTI["CCTV-08: Multi-Camera Event Sequence Corroboration"]
+
+        subgraph CCTV_BOX["Cross-Cutting CCTV Forensic Profile"]
+            CCTV_TM["CCTV-06: OSD Clock Continuity & Drift Regression"]
+            CCTV_SG["CCTV-07: ONVIF Media Signing & Native Seal Audit"]
+            CCTV_MC["CCTV-08: Multi-Camera Timeline Corroboration"]
         end
     end
+
+    subgraph AURAS_EXT["🎧 Reused Audio Subsystem (AURAS)"]
+        AURAS_ARE["ARE: Signal & Splicing"]
+        AURAS_MVSI["MVSI: Diarization & Speech"]
+        AURAS_ADDE["ADDE: Voice Deepfakes"]
+        AURAS_ARE & AURAS_MVSI & AURAS_ADDE --> AURAS_REP["AURAS Audio Findings"]
+    end
+
+    subgraph FUSION_PUB["📊 4. Evidence Fusion, Independent Sub-Reports & Dossier"]
+        LINEAGE["Derived Artifact Lineage Factory (SHA-256 DAG)"]
+        FUSION["Cross-Engine Evidence Fusion & Conflict Resolution"]
+        
+        subgraph SUBREPORTS["Separable Forensic Sub-Reports"]
+            REP_VID["Video Technical Report (VRE/VDF/VCI)"]
+            REP_AUD["Audio Forensic Sub-Report (AURAS/AFB)"]
+            REP_SYNC["AV Synchronization Sub-Report (AVSC)"]
+            REP_CCTV["CCTV Source & Clock Sub-Report (CCTV)"]
+        end
+        
+        REVIEW["Human Examiner Adjudication & Workbench"]
+        FINAL_REP["Section 65B IEA / 63 BSA Certified PDF Dossier + Archify JSON IR"]
+    end
+
+    VISTA_ROUTER --> VRE_BOX & AFB_BOX & AVSC_BOX & VDF_BOX & VCI_BOX & CCTV_BOX
+    AFB_ROUTE ==>|Extracted Audio Bitstream| AURAS_EXT
+    AURAS_REP -.->|Speech Turns & Timestamps| AVSC_BOX
+    AURAS_REP -.->|Audio Findings| REP_AUD
     
-    VISTA_DISPATCH --> VRE_ENG
-    VISTA_DISPATCH --> AFB_BRIDGE
-    VISTA_DISPATCH --> AVSC_ENG
-    VISTA_DISPATCH --> VDF_ENG
-    VISTA_DISPATCH --> VCI_ENG
-    VISTA_DISPATCH --> CCTV_SPEC
-    
-    AFB_EXT -.->|Derived Working WAV| AURAS_SUBSYSTEM["🎧 AURAS Subsystem Execution (ARE / MVSI / ADDE)"]
-    AURAS_SUBSYSTEM -.->|Audio Findings| AFB_ROUTE
-    
-    VRE_ENG & AFB_BRIDGE & AVSC_ENG & VDF_ENG & VCI_ENG & CCTV_SPEC --> DERIVE_DAG["7. Derived Artifact Factory: Log Lineage Manifests & Child Hashes"]
-    
-    DERIVE_DAG --> AGG["8. Cross-Engine Finding Aggregator & Conflict Resolver"]
-    AGG --> REVIEW["9. Forensic Examiner Workbench (Calibrated Multi-Track Player)"]
-    REVIEW --> DOSSIER["10. Section 65B/63 BSA Certified PDF Dossier + Archify JSON IR"]
+    VRE_BOX & AFB_BOX & AVSC_BOX & VDF_BOX & VCI_BOX & CCTV_BOX --> LINEAGE --> FUSION
+    FUSION --> REP_VID & REP_SYNC & REP_CCTV
+    REP_VID & REP_AUD & REP_SYNC & REP_CCTV --> REVIEW --> FINAL_REP
 ```
 
 ---
 
 ### 4.13 Video & CCTV Technologies by Purpose
 
-| Category | Actual Implemented Dependencies | Planned Candidate Technologies |
-| :--- | :--- | :--- |
-| **Bitstream & Demuxing** | Standard Library (`hashlib`, `pathlib`, `struct`) | FFmpeg (>= 6.0), FFprobe, PyAV (>= 12.0), MediaInfo, ExifTool (>= 12.0) |
-| **Frame Decoding & Computer Vision** | OpenCV-Python-Headless (`>=4.9.0`), Pillow (`>=10.2.0`) | PySceneDetect (`>=0.6.2`), scikit-video, Decord, Torchvision |
-| **Audio Extraction & Routing** | SoundFile (`>=0.12.1`), Librosa (`>=0.10.1`) | FFmpeg stream-copy, AURAS Adapter (ARE, MVSI, ADDE), Silero VAD v4, pyannote.audio |
-| **Audio-Visual Synchronization** | — | SyncNet, RetinaFace, SCRFD, ByteTrack, MediaPipe Face Mesh, YAMNet, PANNs, AST |
-| **Video Deepfake Detection** | PyTorch (`>=2.2.0`), TorchAudio (`>=2.2.0`) | Xception, EfficientNet-B4/B7, FTCN, STIL, TALL, TimeSformer, VideoMAE, Scikit-learn |
-| **Content Intelligence & OCR** | Pytesseract (`>=0.3.10`) | YOLOv8/v10, RT-DETR, Grounding DINO, SAM 2, ByteTrack, BoT-SORT, PaddleOCR (>= 2.7) |
-| **CCTV & Provenance Verification** | `cryptography` (`>=42.0.0`), `canonicaljson` | ONVIF Export File Format parser, ONVIF Media Signing verifier, pyc2pa / c2pa-rs |
-| **Testing, Benchmarks & Metrics** | Pytest (`>=8.0.0`), Pytest-asyncio | FaceForensics++, DFDC, Celeb-DF v2, WildDeepfake, UCF-Crime, CCTV test corpus |
-| **Legal Reporting & Archify IR** | Jinja2 (`>=3.1.3`), WeasyPrint (`>=61.0`) | Archify JSON IR visualizer, Multi-track SVG Timeline generator |
+| Category | Actual Implemented Dependencies | Planned Candidate Technologies | Primary Forensic Role |
+| :--- | :--- | :--- | :--- |
+| **Bitstream & Demuxing** | Standard Library (`hashlib`, `pathlib`, `struct`) | FFmpeg (>= 6.0), FFprobe, PyAV (>= 12.0), MediaInfo, ExifTool (>= 12.0) | Defensive parsing, container atom traversal, PTS/DTS cadence extraction, and zero-loss stream copy. |
+| **Frame Decoding & Computer Vision** | OpenCV-Python-Headless (`>=4.9.0`), Pillow (`>=10.2.0`) | PySceneDetect (`>=0.6.2`), scikit-video, Decord, Torchvision | Timestamp-preserved frame decoding, adaptive scene cut detection, and optical flow estimation. |
+| **Audio Extraction & Routing** | SoundFile (`>=0.12.1`), Librosa (`>=0.10.1`) | FFmpeg stream-copy, AURAS Adapter (ARE, MVSI, ADDE), Silero VAD v4, pyannote.audio | Lossless audio demuxing, sample-to-frame alignment, speech activity detection, and AURAS dispatch. |
+| **Audio-Visual Synchronization** | — | SyncNet, RetinaFace, SCRFD, ByteTrack, MediaPipe Face Mesh, YAMNet, PANNs, AST | Container AV offset alignment, face tracking, talking-head lip-sync scoring, and sound-event matching. |
+| **Video Deepfake Detection** | PyTorch (`>=2.2.0`), TorchAudio (`>=2.2.0`) | Xception, EfficientNet-B4/B7, FTCN, STIL, TALL, TimeSformer, VideoMAE, Scikit-learn | Multi-branch spatial and temporal deepfake detection, diffusion noise analysis, and Platt calibration. |
+| **Content Intelligence & OCR** | Pytesseract (`>=0.3.10`) | YOLOv8/v10, RT-DETR, Grounding DINO, SAM 2, ByteTrack, BoT-SORT, PaddleOCR (>= 2.7) | Source categorization, object detection, unique person tracking, action localization, and OSD OCR. |
+| **CCTV & Provenance Verification** | `cryptography` (`>=42.0.0`), `canonicaljson` | ONVIF Export File Format parser, ONVIF Media Signing verifier, pyc2pa / c2pa-rs | Digital seal verification, X.509 PKI certificate chain audit, and RFC 8785 canonical manifest signing. |
+| **Testing, Benchmarks & Metrics** | Pytest (`>=8.0.0`), Pytest-asyncio | FaceForensics++, DFDC, Celeb-DF v2, WildDeepfake, UCF-Crime, CCTV test corpus | Algorithmic evaluation, ROC-AUC calibration, MOTA tracking benchmarks, and regression tests. |
+| **Legal Reporting & Archify IR** | Jinja2 (`>=3.1.3`), WeasyPrint (`>=61.0`) | Archify JSON IR visualizer, Multi-track SVG Timeline generator | Section 65B/63 BSA certified PDF generation and interactive examiner timeline rendering. |
 
 ---
 
@@ -488,6 +540,11 @@ All video and CCTV forensic analysis within VISTA is governed by eight strict ev
 6. **Unique Track Count $\neq$ Real-World Headcount:** Computer vision multi-object tracking (ByteTrack) measures track trajectories across visible frames. Occlusions, lighting changes, camera cuts, and entering/exiting the field of view can fragment tracks, resulting in track ID switches. VCI distinguishes *visible track instances* from *biometrically verified individuals*.
 7. **Burned-In OSD Text $\neq$ Ground Truth Clock:** On-screen surveillance clock text extracted via OCR represents visual display data rendered by recorder software. Hardware clock drift, unsynchronized NTP servers, manual operator misconfiguration, or battery depletion frequently cause display offsets without intentional evidence tampering.
 8. **Legitimate Inconclusive Verdicts:** When resolution is below $320\times240$, compression artifacts destroy high-frequency facial textures, frame rates drop below 5 fps, or out-of-distribution distance is elevated, **"Inconclusive / Insufficient Video Evidence"** is the mandatory, legally defensible scientific verdict.
+
+For deeper technical and implementation details, see:
+- Product requirements and personas: [PRD.md § 6.3](PRD.md)
+- Technical architecture, tool registry, schemas, and threat model: [TRD.md § 11](TRD.md)
+- Engineering execution playbook and checkpoints: [PHASES.md § 4 (VISTA-A0..A13)](PHASES.md)
 
 ---
 
@@ -691,7 +748,196 @@ Refer to [PHASES.md](PHASES.md) for full phase gates and definitions of done:
 - [archify.config.json](archify.config.json) — Archify JSON IR and report configuration
 - [pyproject.toml](pyproject.toml) — Project packaging and dependency manifest
 - [.env.example](.env.example) — Documented configuration template
-#   B H a c k - D o c s  
- #   B H a c k - D o c s  
- #   B H a c k - D o c s  
- 
+
+---
+
+## 12. Document & Medical-Report Analysis (PROPOSED)
+
+> **Status:** `PLANNED` — Architecture defined in this document. No source-code implementation exists yet.
+
+The PS-05 platform extends its forensic capability to paper-origin and digital documents submitted as evidence — including prescriptions, doctor consultation reports, laboratory reports, medical certificates, identity documents, scanned contracts, and PDF/image-embedded records. This capability is coordinated by a cross-cutting **Document Intelligence & Authenticity** layer that reuses AIF IVE/IRE/AIM components for image-based analysis and CEIPL for provenance.
+
+### 12.1 Supported document types (subject to actual parser capability)
+
+- Prescription images and scans.
+- Doctor consultation and clinical reports.
+- Laboratory, diagnostic, and discharge summaries.
+- Medical certificates and referrals.
+- Invoices, receipts, and government-issued identity documents.
+- Scanned pages and photographed documents.
+- PDFs containing embedded images, signatures, seals, QR codes, or barcodes.
+
+### 12.2 What it does
+
+| Capability | Description |
+| :--- | :--- |
+| Safe document parsing | Format detection, stream-safe parsing, page extraction via PyMuPDF / pypdf |
+| OCR & layout analysis | PaddleOCR / Tesseract, LayoutLM-family layout detection |
+| Structured field extraction | Names, dates, identifiers, medications, test values |
+| Signature / QR / seal inspection | Detect presence; verify linked cryptographic or QR payloads |
+| Cross-document comparison | Field-level comparison of related documents within the same case |
+| Alteration indicators | Layout breaks, font inconsistencies, pixel-level anomalies via AIF IRE/AIM |
+| Provenance via CEIPL | Every document page hashed, lineage-tracked, signed |
+
+### 12.3 What it does NOT do
+
+- It does not diagnose disease or recommend treatment.
+- It does not verify a doctor's medical judgment.
+- It does not automatically declare a document "fake" because it differs from a template.
+- A consistent prescription text does not prove the prescription is genuine.
+- A missing digital signature does not prove a paper-origin document is fraudulent.
+- A valid digital signature verifies the cryptographic binding but does not prove every medical statement in the document is true.
+
+For complete technical specification, see [TRD.md § 16](TRD.md) and [PRD.md § 7](PRD.md).
+
+---
+
+## 13. Evidence Relationship Graph (PROPOSED)
+
+> **Status:** `PLANNED` — Architecture defined. Not yet implemented.
+
+Each forensic case maintains a structured evidence graph connecting exhibits, extracted facts, timestamps, people references, documents, media segments, and findings.
+
+```mermaid
+graph LR
+    CASE["Case / Project"]
+    EXHIBIT_V["CCTV Video Exhibit"]
+    EXHIBIT_I["Prescription Image"]
+    EXHIBIT_D["Doctor Report PDF"]
+    FINDING_V["VISTA: Clock Anomaly Finding"]
+    FINDING_D1["OCR: Prescription Fields"]
+    FINDING_D2["OCR: Doctor Report Fields"]
+
+    CASE --> EXHIBIT_V
+    CASE --> EXHIBIT_I
+    CASE --> EXHIBIT_D
+    EXHIBIT_V --> FINDING_V
+    EXHIBIT_I --> FINDING_D1
+    EXHIBIT_D --> FINDING_D2
+    FINDING_D1 -. "POSSIBLY_MATCHES (machine, unconfirmed)" .-> FINDING_D2
+```
+
+**Key design rules:**
+
+- Every graph edge records its provenance, method, and whether machine-suggested or reviewer-confirmed.
+- Machine-suggested relations remain distinguishable from confirmed findings.
+- Two documents are never merged solely because their OCR text is similar.
+- No cross-case data is ever combined.
+- The graph is reconstructable from persisted source records.
+- Text similarity is not proof of shared genuine origin.
+
+For schema detail, see [TRD.md § 17](TRD.md).
+
+---
+
+## 14. Guarded Investigator Evidence Assistant (PROPOSED)
+
+> **Status:** `PLANNED` — Architecture defined. No source-code implementation exists yet.
+
+A case-scoped Retrieval-Augmented Generation (RAG) assistant that answers authorized investigators' questions using only the active case's uploaded and indexed evidence and an approved forensic knowledge base.
+
+### 14.1 Example questions it can answer
+
+- *"What evidence files are present in this case?"*
+- *"Summarize the technical findings for this CCTV video."*
+- *"Do any uploaded documents have conflicting dates?"*
+- *"Which findings remain pending human review?"*
+- *"Show the relationship between this prescription and the doctor report."*
+
+### 14.2 Mandatory security boundaries
+
+| Guardrail | Enforcement |
+| :--- | :--- |
+| Case isolation | No cross-case retrieval under any circumstances |
+| Source citations | Every factual claim cites a verified indexed source |
+| No legal / medical conclusions | Explicitly refused; returns uncertainty notice |
+| No credential disclosure | Passwords, keys, tokens, source code never returned |
+| Prompt injection defense | Uploaded document content treated as evidence text, never commands |
+| Audit logging | All queries, authorized sources, and outputs logged |
+
+### 14.3 What the assistant does NOT do
+
+- It cannot alter or delete evidence.
+- It cannot access another case's documents.
+- It does not issue legal verdicts or medical diagnoses.
+- Its responses are not new sources of evidence.
+- A RAG-generated summary does not replace a certified forensic examiner report.
+
+For full technical specification, see [TRD.md § 18](TRD.md) and [PRD.md § 8](PRD.md).
+
+---
+
+## 15. MVP Demonstration Workflow
+
+> **Status:** MVP scope is defined. Implementation is `PLANNED`.
+
+The hackathon demonstration targets a reliable, end-to-end vertical slice using a single representative case.
+
+**Demo scenario:** An investigator opens a case containing one CCTV/video clip, one image or screenshot, and one PDF/prescription-related document.
+
+| Step | What happens | Capability |
+| :--- | :--- | :--- |
+| 1. Evidence intake | Upload exhibits; compute SHA-256 / SHA3-512; store in WORM vault | CEIPL |
+| 2. Metadata extraction | Container, EXIF, page structure, stream inventory | AIF IRE / VISTA VRE |
+| 3. Image / audio / video analysis | Per-exhibit forensic engine results | AIF / AURAS / VISTA |
+| 4. Document OCR | Page extraction, field identification, alteration indicators | DOC-A0/A1 (PROPOSED) |
+| 5. Evidence relationship | Link related exhibits; propose candidate relationships | EGRAPH-A0 (PROPOSED) |
+| 6. Evidence graph view | Interactive visualization of connected exhibits and findings | EGRAPH-A1 (PROPOSED) |
+| 7. RAG question | Ask a case-scoped question; receive cited answer with sources | RAG-A0/A1 (PROPOSED) |
+| 8. Contradiction view | Show conflicting timestamps or fields with source evidence | Cross-engine aggregator |
+| 9. Dossier export | Structured PDF and JSON dossier with hashes and signature | Archify / CEIPL |
+
+**Mocked components must be clearly labeled.** No mocked signature or fabricated model score may appear as a real finding.
+
+---
+
+## 16. Privacy, Security & Legal Boundaries
+
+### 16.1 Health & biometric data
+- Extracted medical document fields are subject to restricted access, role-based redaction, and purpose limitation.
+- Only fields necessary for the documented investigation are extracted.
+- Biometric face embeddings are never extracted or matched by default. A judicial Case Authorization Token is required.
+- Medical records are not used to train models automatically without separate explicit authorization and a defined process.
+
+### 16.2 Legal certificate scope
+The platform can generate a structured certificate containing SHA-256 / SHA3-512 hashes, examiner identity, environment manifest, and Ed25519 signature in a format aligned with **Section 65B of the Indian Evidence Act** and **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023**.
+
+> **Important:** Whether a generated certificate satisfies court admissibility requirements in a specific proceeding depends on the applicable law, facts, process, and qualified legal review. The software does not guarantee court admissibility. Legal templates in this documentation are subject to verification by a qualified legal reviewer.
+
+### 16.3 What the platform cannot guarantee
+- It cannot conclusively prove any document or media artifact is authentic.
+- A valid hash does not prove factual authenticity of the recorded event.
+- A positive deepfake indicator is not a legal verdict.
+- A consistent prescription is not medical proof.
+- Cross-document text similarity is not proof of shared genuine origin.
+- The platform is not a substitute for a qualified forensic examiner.
+
+---
+
+## 17. Implementation Status Summary
+
+| Capability | Status | Phase Reference |
+| :--- | :--- | :--- |
+| Architecture & documentation baseline | `IMPLEMENTED_AND_VERIFIED` | Phase 0 |
+| CEIPL cryptographic foundation | `PLANNED` | Phase 1 / AIF-A1 / VISTA-A1 |
+| AIF image forensics (IVE / IRE / AIM / FPA) | `PLANNED` | AIF-A2..A15 |
+| AURAS audio forensics (ARE / MVSI / ADDE) | `PLANNED` | AURAS-A0..A10 |
+| VISTA video forensics (VRE / AFB / AVSC / VDF / VCI / CCTV) | `PLANNED` | VISTA-A0..A13 |
+| Document & medical-report intelligence | `PLANNED` | DOC-A0..A2 (proposed this release) |
+| Evidence relationship graph | `PLANNED` | EGRAPH-A0..A1 (proposed this release) |
+| Guarded RAG investigator assistant | `PLANNED` | RAG-A0..A2 (proposed this release) |
+| Integrated MVP demonstration | `PLANNED` | INT-A0..A1 (proposed this release) |
+| Web dashboard & examiner workbench | `PLANNED` | Phase 8 |
+| Air-gapped deployment package | `PLANNED` | Phase 9 |
+
+---
+
+## 18. Canonical Documentation Index
+
+- [PRD.md](PRD.md) — Product Requirements: Personas, functional requirements (AIF-FR, IVE-FR, IRE-FR, AIM-FR, CEIPL-FR, AUD-FR, VISTA-FR, VRE-FR, AFB-FR, AVSC-FR, VDF-FR, VCI-FR, CCTV-FR, DOC-FR, EGRAPH-FR, RAG-FR), non-goals, failure cases.
+- [TRD.md](TRD.md) — Technical Requirements: Component boundaries, database schemas, API contracts, document intelligence contracts, evidence graph contracts, RAG contracts, threat model, VISTA specifications.
+- [PHASES.md](PHASES.md) — Canonical roadmap (Phases 0–10, AURAS-A0..A10, AIF-A0..A15, VISTA-A0..A13, DOC-A0..A2, EGRAPH-A0..A1, RAG-A0..A2, INT-A0..A1).
+- [AI_INSTRUCTIONS.md](AI_INSTRUCTIONS.md) — Highest-authority behavioral specification for AI coding agents.
+- [archify.config.json](archify.config.json) — Archify JSON IR and report configuration.
+- [pyproject.toml](pyproject.toml) — Project packaging and dependency manifest.
+- [.env.example](.env.example) — Documented configuration template.

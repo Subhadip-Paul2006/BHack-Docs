@@ -813,582 +813,728 @@ Full test suite passes with zero failures; benchmark dossier compiled; all phase
 
 ## 4. Dedicated Video Forensics Engineering Playbook (VISTA-A0 through VISTA-A13)
 
+The Video Integrity, Synchronization & Tampering Analysis (VISTA) engineering roadmap defines fourteen sequential, research-oriented, and cryptographically grounded implementation phases. Each phase provides an exhaustive engineering specification with verifiable completion criteria and independent 5-column checkpoint tables conforming strictly to Indian evidentiary standards under Section 65B of the Indian Evidence Act (IEA) and Section 63 of the Bharatiya Sakshya Adhiniyam (BSA 2023):
+
+---
+
 ### Phase VISTA-A0: Video Evidence Architecture Baseline & Standards Integration
 
-**Status:** `PLANNED`
-
-**Objective:**  
-Establish the structural, algorithmic, and defensive foundation for the VISTA subsystem. Initialize package hierarchies under `src/ps05/engines/vista/`, configure typing contracts, establish defensive PyAV/FFprobe execution harnesses, enforce memory allocation boundaries, and link VISTA into the shared platform discovery registry.
-
-**Scope:**
-- *Included:* Directory layout creation (`common`, `vre`, `afb`, `avsc`, `vdf`, `vci`, `cctv`), BaseForensicEngine interface implementations, defensive subprocess execution rules, uncompressed memory buffer allocation caps, error hierarchy.
-- *Explicit Exclusions:* Functional forensic signal analysis (deferred to A2–A10), audio cross-correlation (deferred to A5).
-
-**Prerequisites:**  
-Phase 0 architectural baseline completed; `pyproject.toml` dependencies (`pyav`, `opencv-python-headless`, `scenedetect`, `torch`) validated.
-
-**Topics & Subtopics:**
-1. **Directory & Module Scaffold:** Initialize `src/ps05/engines/vista/` sub-packages with proper `__init__.py` exports and type stubs.
-2. **Defensive Demuxing Wrapper:** Implement `safe_demux.py` wrapping PyAV container initialization with strict 10-second I/O timeouts and non-blocking packet iteration.
-3. **Memory Ring Buffer Caps:** Configure memory-bounded ring buffer (`timeline.py`) enforcing maximum 64 uncompressed video frames in RAM ($\le 400\text{ MB}$).
-4. **VISTA Error Hierarchy:** Implement domain exceptions (`VideoDemuxError`, `PTSContinuityError`, `AudioExtractionError`, `LipSyncConvergenceError`, `CCTVContextMismatchError`).
-
-**Expected Files:**
+**1. Phase ID & Title:** `VISTA-A0: Video Evidence Architecture Baseline & Standards Integration`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Establish the structural, algorithmic, defensive, and legal foundation for the VISTA subsystem. Initialize package hierarchies under `src/ps05/engines/vista/`, configure typing contracts, establish defensive PyAV/FFprobe execution harnesses, enforce memory allocation boundaries, trap malformed media bombs, and link VISTA into the shared platform discovery registry.  
+**4. Topics & Subtopics:**
+- Directory & Module Scaffold: Sub-packages (`common`, `vre`, `afb`, `avsc`, `vdf`, `vci`, `cctv`).
+- Defensive Demuxing Wrapper: `safe_demux.py` wrapping PyAV with strict 10-second I/O timeouts.
+- Memory Allocation Ring Buffer: Strict cap of 64 uncompressed video frames in RAM (<= 400 MB).
+- VISTA Domain Exception Hierarchy: Standardized typed error handling.
+- Legal Evidentiary Invariants: Section 65B/63 BSA pre-flight rules.
+**5. Exact Tasks:**
+1. Create directory hierarchy under `src/ps05/engines/vista/` with `__init__.py` files and type exports.
+2. Implement `BaseVideoForensicEngine` abstract base class defining `analyze()`, `health_check()`, and `model_manifest()`.
+3. Build defensive media wrapper `safe_demux.py` trapping infinite atoms, corrupted headers, and recursion loops.
+4. Implement ring buffer `timeline.py` constraining worker process RAM to <= 4 GB with automatic disk-backed memmap spilling.
+5. Formulate VISTA error hierarchy (`VideoDemuxError`, `PTSContinuityError`, `AudioExtractionError`, `LipSyncConvergenceError`, `CCTVContextMismatchError`).
+**6. Detailed Execution Workflow:**
+Exhibit Path Received -> Subprocess Sandbox Initialized -> Magic Byte Magic Inspection -> Allocation Quota Checked -> Defensive Demuxer Invoked with 10s Timeout -> Memory Ring Buffer Bound -> Engine Registry Updated.
+**7. Technologies, Tools & Models:**
+Python 3.12, PyAV (FFmpeg 6.1.1 bindings), OpenCV Headless 4.9.0, Pydantic v2, pytest.
+**8. Prerequisites & Dependencies:**
+Phase 0 architectural baseline completed; system FFmpeg 6.x shared libraries available.
+**9. Expected Files, Artifacts & Contracts:**
 - `src/ps05/engines/vista/__init__.py`
+- `src/ps05/engines/vista/common/base.py`
 - `src/ps05/engines/vista/common/safe_demux.py`
 - `src/ps05/engines/vista/common/timeline.py`
-- `src/ps05/engines/vista/common/schemas.py`
+- `src/ps05/engines/vista/common/exceptions.py`
+- `tests/unit/test_vista_scaffold.py`
+**10. Failure Cases & Risks:**
+- C-level segmentation faults inside Libavformat: Mitigated via isolated worker subprocesses and seccomp filtering.
+- High memory pressure during frame decoding: Mitigated via hard ring-buffer cap of 64 frames.
+**11. Security Considerations:**
+Sandboxed worker execution with unprivileged Linux user (`uid 10001`); no root permissions; read-only mounts for source exhibits.
+**12. Acceptance Criteria:**
+- 100% clean package imports without circular dependency warnings.
+- Defensive demuxer terminates hung or recursive container inputs within 10 seconds.
+- Memory ring buffer never exceeds 500 MB resident memory under 1,000-frame sequential decode.
+**13. Definition of Done (DoD):**
+Scaffold committed, unit test suite passing with 100% exit code 0, typing verified via `mypy --strict`.
+**14. Checkpoint Table:**
 
-**Validation Strategy:**  
-Unit tests in `tests/unit/test_vista_scaffold.py` verifying package imports, defensive timeout traps on artificial hangs, and memory buffer bounds.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-00-01** | Package Architecture | Import all VISTA modules in clean virtualenv | Zero `ImportError` or circular import warnings | `NOT_STARTED` | All 7 sub-packages import cleanly |
-| **VISTA-CP-00-02** | Demuxing Safety | Run defensive demuxer on malformed stream header | `VideoDemuxError` raised within 10 seconds | `NOT_STARTED` | Traps hung inputs safely |
-| **VISTA-CP-00-03** | Memory Allocation Cap | Decode 1,000 frames through ring buffer | Max resident memory $\le 500\text{ MB}$ | `NOT_STARTED` | Zero uncontrolled memory growth |
-| **VISTA-CP-00-04** | Base Contract | Inherit `BaseForensicEngine` across VISTA engines | Type checker reports 100% contract compliance | `NOT_STARTED` | Strict typing parity |
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-00-01** | Package Architecture & Module Imports | Clean import of all 7 VISTA sub-packages in virtualenv | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-00-02** | Defensive Demuxer & Resource Limits | Ingestion of malformed video bomb triggers `VideoDemuxError` within 10s | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-00-03** | Memory Ring Buffer Cap | 1,000 decoded frames processed; max RAM <= 500 MB | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-00-04** | Base Engine Contract & Strict Typing | `mypy --strict` passes across all common VISTA interfaces | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
 ### Phase VISTA-A1: Video Evidence Contracts, Ingestion & Cryptographic Foundation (CEIPL)
 
-**Status:** `PLANNED`
-
-**Objective:**  
-Implement pre-decode dual-hashing, immutable WORM storage ingestion, RFC 8785 canonical manifests, Ed25519 digital signatures, RFC 3161 TSA timestamps, and Merkle audit logging for video exhibits, guaranteeing uncompromised judicial chain of custody under Section 65B/63 BSA.
-
-**Scope:**
-- *Included:* File ingestion, SHA-256 and SHA3-512 dual streaming calculation, POSIX 0400 WORM vault persistence, RFC 8785 Canonical JSON Serialization (JCS), Ed25519 manifest signing, database exhibit registration.
-- *Explicit Exclusions:* Demuxing or frame decoding (deferred to A2).
-
-**Prerequisites:**  
-Phase VISTA-A0 Gate passed; CEIPL shared core modules in `src/ps05/core/crypto/` operational.
-
-**Topics & Subtopics:**
-1. **Pre-Decode Dual Hashing:** Stream raw video bitstream through chunked 64KB accumulators computing SHA-256 and SHA3-512 before container parsing.
-2. **WORM Vault Ingestion:** Store pristine master file in `/data/vault_worm/`; enforce POSIX `0400` read-only permissions; verify immutability.
-3. **Canonical Evidence Manifest:** Serialize exhibit metadata (police FIR, exhibit ID, file size, dual hashes) into RFC 8785 Canonical JSON.
-4. **Digital Signature & TSA:** Sign manifest with platform Ed25519 private key; request RFC 3161 TSA token; commit to Merkle audit chain.
-
-**Expected Files:**
+**1. Phase ID & Title:** `VISTA-A1: Video Evidence Contracts, Ingestion & Cryptographic Foundation (CEIPL)`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement pre-decode dual-hashing, immutable WORM storage ingestion, RFC 8785 canonical manifests, Ed25519 digital signatures, RFC 3161 TSA timestamps, and Merkle audit logging for video exhibits, guaranteeing uncompromised judicial chain of custody under Section 65B/63 BSA.  
+**4. Topics & Subtopics:**
+- Pre-Decode Dual Hashing: Streaming SHA-256 and SHA3-512 calculation prior to parsing.
+- WORM Vault Persistence: POSIX `0400` read-only filesystem permissions and S3 Object Lock.
+- Ingestion Record Binding: 11-field metadata schema stored immutably.
+- RFC 8785 Canonical JSON Serialization (JCS): Deterministic manifest representation.
+- Merkle Custody Log: SHA-256 append-only transaction tree.
+**5. Exact Tasks:**
+1. Implement streaming dual hasher in `src/ps05/core/crypto/direct_hasher.py` handling chunked 64KB reads.
+2. Build storage manager enforcing POSIX `0400` permissions and S3 Compliance Mode retention.
+3. Define `VideoEvidenceRecord` Pydantic v2 schema capturing all 11 required custody parameters.
+4. Implement RFC 8785 canonical manifest serializer and Ed25519 signature generator.
+5. Create Merkle tree audit append handler logging ingestion events with cryptographic inclusion proofs.
+**6. Detailed Execution Workflow:**
+Seized File Streamed -> Parallel SHA-256/SHA3-512 Accumulation -> WORM Storage Write -> POSIX 0400 Permission Lock -> Canonical JSON Manifest Built -> Ed25519 Signed -> Merkle Audit Log Appended -> Evidence Record Committed to PostgreSQL.
+**7. Technologies, Tools & Models:**
+Python standard library `hashlib`, `cryptography` (Ed25519), `canonicaljson`, AWS S3 Object Lock API, PostgreSQL.
+**8. Prerequisites & Dependencies:**
+Phase VISTA-A0 Gate passed; CEIPL cryptographic core modules operational.
+**9. Expected Files, Artifacts & Contracts:**
 - `src/ps05/api/v1/evidence.py` (video upload endpoints)
-- `src/ps05/core/crypto/direct_hasher.py` (video streaming support)
-- `src/ps05/core/storage.py` (WORM POSIX 0400 verification)
+- `src/ps05/core/crypto/direct_hasher.py`
+- `src/ps05/core/storage.py` (WORM POSIX 0400 manager)
+- `src/ps05/core/crypto/canonical.py` (RFC 8785 serializer)
+- `tests/integration/test_vista_ingestion.py`
+**10. Failure Cases & Risks:**
+- Hash mismatch against seizure memo: Halts ingestion immediately; logs `HASH_MISMATCH` failure code; generates quarantine alert.
+- Unauthorized write attempt on vault file: OS traps write with `PermissionError` [Errno 13].
+**11. Security Considerations:**
+Private signing keys loaded strictly from KMS/HSM; zero plaintext key storage; original bytes immutable.
+**12. Acceptance Criteria:**
+- Computed raw hashes match OS `sha256sum` bit-for-bit on 5GB test video.
+- Ingested files cannot be modified or deleted even by the platform worker process.
+- Canonical JSON manifests produce identical SHA-256 digests regardless of key ordering.
+**13. Definition of Done (DoD):**
+Ingestion endpoints operational, dual hashing verified against test vectors, Merkle proof generator functional.
+**14. Checkpoint Table:**
 
-**Validation Strategy:**  
-Test ingestion pipeline with 500MB test video; verify bitstream parity between vault file and original; assert permission bits `0400`.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-01-01** | Dual Streaming Hash | Compare computed hashes against OS sha256sum | Bit-for-bit identical 64-char hex strings | `NOT_STARTED` | Exact hash parity |
-| **VISTA-CP-01-02** | WORM Immutability | Attempt to write or append to ingested vault file | OS raises `PermissionError: [Errno 13]` | `NOT_STARTED` | POSIX 0400 prevents modification |
-| **VISTA-CP-01-03** | Canonical Manifest | Serialize manifest under differing key orderings | RFC 8785 output hash is 100% deterministic | `NOT_STARTED` | Canonical JSON determinism |
-| **VISTA-CP-01-04** | Merkle Audit Trail | Query audit log for ingestion transaction | Valid inclusion proof from Merkle root | `NOT_STARTED` | Tamper-evident log integrity |
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-01-01** | Original-File Hash & Retrieval Verification | Streamed dual hash matches bit-for-bit with reference seizure digest | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-01-02** | Derived-Artifact Hash & Parent Mapping | DAG records child artifact SHA-256 and parent UUID correctly | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-01-03** | Broken Signature & Hash Mismatch Detection | Bit-flipped exhibit raises `HASH_MISMATCH` and halts ingestion | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-01-04** | Custody-Chain Integrity & Merkle Proofs | Merkle tree audit log returns valid inclusion proof for intake event | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
-### Phase VISTA-A2: Defensive Demuxing, Container Parsing & PTS Cadence Foundation (VRE Baseline)
+### Phase VISTA-A2: Video Intake, Container Metadata & Safe Parsing (VRE Baseline)
 
-**Status:** `PLANNED`
-
-**Objective:**  
-Build the baseline Video Reverse Engineering (VRE) capabilities: container atom inspection (MP4/MKV/AVI/TS/DAV), `moov` atom placement audit, Presentation Timestamp (PTS/DTS) continuity regression, instantaneous FPS jitter calculation, and duplicate/frozen frame span detection.
-
-**Scope:**
-- *Included:* PyAV packet demuxing, ISO base media file format box parsing, PTS/DTS timeline extraction, VFR vs CFR classification, frozen frame interval detection.
-- *Explicit Exclusions:* Macroblock QP analysis (deferred to A3), audio extraction (deferred to A4).
-
-**Prerequisites:**  
-Phase VISTA-A1 Gate passed; video exhibits securely registered in database and WORM vault.
-
-**Topics & Subtopics:**
-1. **Container & Codec Introspection:** Parse video streams for codec (H.264, H.265, MPEG-4, VP9, AV1), profile, level, pixel format, and resolution.
-2. **MP4 Atom Layout Audit:** Check `ftyp` brand compatibility and relative offset of `moov` vs `mdat` (`moov` at end vs `faststart` front-placement).
-3. **PTS/DTS Cadence Regression:** Extract packet timestamps; compute $\Delta PTS_k = PTS_k - PTS_{k-1}$; detect non-monotonic reversals ($PTS_k < PTS_{k-1}$).
-4. **VFR Jitter & FPS Modeling:** Model variable frame rate jitter; compute instantaneous FPS distribution and variance $\sigma^2_{\text{vfr}}$.
-5. **Duplicate / Frozen Frame Identification:** Evaluate SSIM and frame hash identicalness; flag frozen scenes lasting $\ge 1.0\text{ s}$ during non-static audio intervals.
-
-**Expected Files:**
+**1. Phase ID & Title:** `VISTA-A2: Video Intake, Container Metadata & Safe Parsing (VRE Baseline)`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Build the baseline Video Reverse Engineering (VRE) capabilities: container atom inspection (MP4/MKV/AVI/TS/DAV), `moov` atom placement audit, Presentation Timestamp (PTS/DTS) continuity regression, instantaneous FPS jitter calculation, and duplicate/frozen frame span detection.  
+**4. Topics & Subtopics:**
+- Container & Codec Introspection: Stream descriptors, codecs (H.264, H.265, AV1, VP9), profiles, pixel formats.
+- ISO Base Media Box Inspection: Relative position of `moov` vs `mdat` (`moov` at end vs `faststart`).
+- PTS/DTS Cadence Regression: Packet timestamp extraction and non-monotonic reversal detection.
+- VFR Jitter & FPS Modeling: Instantaneous frame rate variance and VFR vs CFR classification.
+- Duplicate & Frozen Frame Localization: Consecutive identical frame spans during non-silent audio.
+**5. Exact Tasks:**
+1. Implement PyAV container parser in `src/ps05/engines/vista/vre/bitstream.py` extracting track timebases and codec parameters.
+2. Build MP4 box inspector verifying `ftyp`, `moov`, `mvhd`, `tkhd`, and `stts` consistency.
+3. Implement `cadence.py` computing inter-packet timestamp differences $\Delta PTS_k = PTS_k - PTS_{k-1}$.
+4. Build variable frame rate detector calculating instantaneous FPS variance $\sigma^2_{	ext{vfr}}$.
+5. Develop frozen frame detector flagging identical raster spans ($SSIM > 0.998$) exceeding 1.0 second.
+**6. Detailed Execution Workflow:**
+Raw Exhibit Demuxed -> Box Offsets Scanned -> Stream Descriptors Extracted -> Packet Timestamps Logged -> PTS Continuity Regressed -> VFR Variance Computed -> Frozen Spans Segmented -> `VRERunResult` Emitted.
+**7. Technologies, Tools & Models:**
+PyAV 11.x, FFprobe 6.1.1, MediaInfo, NumPy, SciPy.
+**8. Prerequisites & Dependencies:**
+Phase VISTA-A1 Gate passed; video exhibit registered in WORM storage.
+**9. Expected Files, Artifacts & Contracts:**
 - `src/ps05/engines/vista/vre/bitstream.py`
 - `src/ps05/engines/vista/vre/cadence.py`
+- `src/ps05/engines/vista/vre/schemas.py`
+- `tests/unit/test_vre_bitstream.py`
+**10. Failure Cases & Risks:**
+- Non-monotonic PTS cadences: Flagged as `PTSContinuityError` indicating excised frames or packet tampering.
+- Container truncation: Trapped gracefully, reporting last valid PTS and unreadable trailing bytes.
+**11. Security Considerations:**
+Demuxing executes with isolated PyAV context; zero unsafe C-level buffer pointers exposed.
+**12. Acceptance Criteria:**
+- Correctly identifies `moov` placement (`AT_END_NATIVE` vs `BEGINNING_FASTSTART`) across 100 test clips.
+- Traps non-monotonic PTS reversals with exact frame number localization.
+- Accurately classifies CFR vs VFR streams with mathematical variance thresholding.
+**13. Definition of Done (DoD):**
+Bitstream and cadence modules implemented, test vectors passing, VRE baseline report schema validated.
+**14. Checkpoint Table:**
 
-**Validation Strategy:**  
-Ingest CFR videos, VFR smartphone videos, and synthetic videos with excised frames; verify cadence regression alerts on excised timestamps $\pm 1$ frame.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-02-01** | Container Parsing | Inspect MP4 with `moov` at end vs front | Emits `AT_END_NATIVE` vs `BEGINNING_FASTSTART` | `NOT_STARTED` | Correct atom structure audit |
-| **VISTA-CP-02-02** | Monotonic PTS Audit | Ingest video with swapped packet timestamps | Flags `NON_MONOTONIC_PTS_DETECTED` | `NOT_STARTED` | Cadence reversal trapped |
-| **VISTA-CP-02-03** | VFR vs CFR | Ingest fixed 25fps broadcast vs variable mobile | Correctly classifies CFR vs VFR ($\sigma^2_{\text{vfr}}$) | `NOT_STARTED` | Cadence distribution accurate |
-| **VISTA-CP-02-04** | Freeze Detection | Ingest 5-second video freeze in active scene | Flags interval $[t_1, t_2]$ with `FROZEN_FRAME_SPAN` | `NOT_STARTED` | SSIM $\ge 0.998$ correctly localized |
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-02-01** | FFprobe & Container Atom Analysis | Full extraction of codec profiles, timebases, and box offsets | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-02-02** | Malformed Media & Truncation Handling | Corrupted container header trapped cleanly without worker crash | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-02-03** | VFR Cadence & Time-Base Handling | Correct distinction between CFR broadcast and VFR mobile footage | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-02-04** | Frozen Frame Span Detection | 5-second synthetic freeze localized to exact millisecond bounds | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
-### Phase VISTA-A3: Advanced Video Reverse Engineering & Stream Continuity (VRE Advanced)
+### Phase VISTA-A3: Timestamp-Aware Video Reverse Engineering (VRE Advanced)
 
-**Status:** `PLANNED`
-
-**Objective:**  
-Deepen VRE capabilities to detect subtle re-compression and structural manipulation: macroblock-level Quantization Parameter (QP) variance analysis, PySceneDetect adaptive cut detection vs splice transitions, ExifTool/MediaInfo deep metadata auditing, and RIFE/DAIN optical flow AI interpolation artifact detection.
-
-**Scope:**
-- *Included:* Macroblock QP extraction across H.264/H.265, GOP cadence auditing, scene cut classification (hard cut, dissolve, excised splice), MakerNotes parsing, AI frame interpolation flow residue analysis.
-- *Explicit Exclusions:* Audio processing (handled in A4/A5), facial deepfakes (handled in A9/A10).
-
-**Prerequisites:**  
-Phase VISTA-A2 Gate passed; container bitstream parser operational.
-
-**Topics & Subtopics:**
-1. **Macroblock QP Distribution Analysis:** Extract macroblock QPs; analyze spatial QP variance and periodic GOP re-encoding pulsing.
-2. **Scene Cut vs Splice Transition:** Integrate PySceneDetect adaptive content detector; verify whether hard visual shifts align with I-frames or arbitrary P/B slice cuts.
-3. **ExifTool & MediaInfo Deep Audit:** Extract camera serial numbers, lens IDs, firmware versions; cross-reference encoder software strings with editing tools.
-4. **AI Flow Interpolation Detection:** Compute forward-backward optical flow consistency error ($E_{\text{flow}}$); detect blending halos and occlusion warping from RIFE/DAIN models.
-
-**Expected Files:**
-- `src/ps05/engines/vista/vre/reencode.py`
+**1. Phase ID & Title:** `VISTA-A3: Timestamp-Aware Video Reverse Engineering (VRE Advanced)`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement advanced VRE capabilities: content-aware adaptive scene transition detection, macroblock quantization parameter (QP) distribution auditing, double-compression ghost artifact detection, ExifTool metadata auditing, and optical-flow temporal continuity analysis.  
+**4. Topics & Subtopics:**
+- Adaptive Scene Boundary Detection: PySceneDetect adaptive thresholding isolating cuts vs splices.
+- Macroblock QP Distribution Parsing: Extracting macroblock-level quantization matrices from H.264/H.265 bitstreams.
+- Double-Compression / Re-Encoding Clues: Periodic quantization error peaks indicating prior encoding passes.
+- Deep Metadata Audit: ExifTool and MediaInfo tag verification (software strings, encoder signatures).
+- AI Flow Interpolation Detection: Flagging non-linear optical flow vectors indicative of generative frame interpolation.
+**5. Exact Tasks:**
+1. Implement `scene_cuts.py` utilizing PySceneDetect adaptive content detector to catalog scene boundaries.
+2. Build macroblock QP extractor in `reencode.py` analyzing spatial variance of compression across macroblocks.
+3. Develop double-compression detector computing DCT coefficient histograms and periodicity metrics.
+4. Implement ExifTool forensic parser extracting camera serials, firmware versions, and desktop editor signatures.
+5. Build optical flow continuity checker comparing observed inter-frame motion vectors against natural physical dynamics.
+**6. Detailed Execution Workflow:**
+Demuxed Packets -> Scene Cuts Isolated -> Macroblock QPs Decoded -> Double Compression Evaluated -> ExifTool Audit Executed -> Optical Flow Field Computed -> Splicing/Re-encoding Findings Emitted.
+**7. Technologies, Tools & Models:**
+PySceneDetect 0.6.x, ExifTool 12.76, MediaInfo, PyAV bitstream parser, OpenCV Farneback Optical Flow.
+**8. Prerequisites & Dependencies:**
+Phase VISTA-A2 Gate passed; container bitstream parsed and PTS verified.
+**9. Expected Files, Artifacts & Contracts:**
 - `src/ps05/engines/vista/vre/scene_cuts.py`
+- `src/ps05/engines/vista/vre/reencode.py`
 - `src/ps05/engines/vista/vre/metadata.py`
+- `tests/unit/test_vre_advanced.py`
+**10. Failure Cases & Risks:**
+- False-positive scene cuts caused by strobe lighting or flashlight sweeps: Mitigated via adaptive luminance thresholding.
+- Stripped metadata on exported web videos: Mitigated by falling back to bitstream QP analysis without blocking.
+**11. Security Considerations:**
+ExifTool executed via isolated subprocess with strict argument validation preventing command injection.
+**12. Acceptance Criteria:**
+- Scene cut detection recall >= 95% on benchmark videos with exact PTS boundary logging.
+- Detects re-encoded video clips with macroblock QP variance divergence (> 2.5 sigma).
+- Identifies editing software signatures in container metadata tags.
+**13. Definition of Done (DoD):**
+Advanced VRE modules operational, unit tests passing with synthetic re-encoded fixtures, DAG artifacts registered.
+**14. Checkpoint Table:**
 
-**Validation Strategy:**  
-Evaluate 20 re-encoded videos, 10 spliced clips without keyframes, and 10 RIFE 60fps up-converted videos; assert detection accuracy $\ge 90\%$.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-03-01** | QP Re-encoding | Ingest video re-encoded at different bitrate | Periodic QP GOP modulation variance $> \tau$ | `NOT_STARTED` | Re-compression traces identified |
-| **VISTA-CP-03-02** | Non-I-Frame Splice | Ingest video cut mid-GOP without I-frame | Flags `EXCISED_CUT_WITHOUT_KEYFRAME` | `NOT_STARTED` | Spliced cut boundary trapped |
-| **VISTA-CP-03-03** | Metadata Footprint | Ingest video exported from Adobe Premiere | Software tag identified and flagged as editor | `NOT_STARTED` | Editing footprint detected |
-| **VISTA-CP-03-04** | AI Interpolation | Ingest RIFE up-sampled 30fps-to-60fps clip | High optical flow residual error flagged | `NOT_STARTED` | Synthetic frame synthesis caught |
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-03-01** | Adaptive Scene Cut Localization | Cuts localized to exact PTS frame indices without false strobe alerts | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-03-02** | Macroblock QP Variance & Re-encoding | Re-encoded video splice exhibits measurable QP variance discontinuity | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-03-03** | ExifTool Deep Metadata Audit | Extraction of camera serial numbers and desktop editor tags | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-03-04** | Double Compression Artifact Detection | Periodic DCT histogram peaks detected on re-compressed MP4s | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
 ### Phase VISTA-A4: Audio Extraction, DAG Lineage & AURAS Subsystem Bridge (AFB)
 
-**Status:** `PLANNED`
-
-**Objective:**  
-Build the Audio Forensic Bridge (AFB) to extract audio tracks from video exhibits using lossless FFmpeg stream-copy (`-c:a copy`), register cryptographic DAG lineage linking extracted audio to the parent video, generate standardized 16kHz mono derivatives, and dispatch asynchronous forensic jobs to the AURAS audio subsystem.
-
-**Scope:**
-- *Included:* Multi-track audio scanning, lossless stream-copy demuxing, standardized 16kHz float32 factory, CEIPL DAG child node creation, asynchronous Celery task routing to AURAS (ARE, MVSI, ADDE), diarization alignment.
-- *Explicit Exclusions:* Re-implementing audio forensics in VISTA (strictly delegated to AURAS).
-
-**Prerequisites:**  
-Phase VISTA-A1 Gate passed; AURAS subsystem modules in `src/ps05/engines/audio/` operational.
-
-**Topics & Subtopics:**
-1. **Lossless Stream-Copy Extraction:** Execute `ffmpeg -nostdin -y -i <video> -map 0:a:<idx> -c:a copy <output>` preserving pristine original bitstream bytes.
-2. **Multi-Track Exhibit Handling:** Scan all audio tracks; assign child exhibit UUIDs; record channel layouts.
-3. **Standardized 16 kHz Float32 Factory:** Generate band-limited sinc-resampled 16kHz mono WAV for downstream speech processing.
-4. **Cryptographic DAG Binding:** Link extracted audio SHA-256 to parent video exhibit UUID in CEIPL DAG.
-5. **Asynchronous AURAS Dispatch:** Dispatch Celery tasks to AURAS queue; await or poll findings without blocking video pipeline.
-6. **SpeechBrain SepFormer Integration:** Trigger overlapped speech separation on concurrent talker segments flagged by MVSI.
-
-**Expected Files:**
+**1. Phase ID & Title:** `VISTA-A4: Audio Extraction, DAG Lineage & AURAS Subsystem Bridge (AFB)`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement the Audio Forensic Bridge (AFB): extract audio streams losslessly using stream-copy (`-c:a copy`), normalize a standardized 16kHz mono Float32 analysis derivative, register cryptographic DAG parent-child lineage, dispatch asynchronous analysis to AURAS (ARE, MVSI, ADDE), and handle multi-speaker speech separation.  
+**4. Topics & Subtopics:**
+- Lossless Audio Stream-Copy: Demuxing raw audio bitstreams without re-encoding.
+- Standardized Audio Normalization: Resampling to 16 kHz Mono Float32 normalized to -23 LUFS.
+- Cryptographic DAG Binding: Binding derived audio SHA-256 to parent video exhibit UUID.
+- Asynchronous AURAS Dispatch: Celery task dispatch to AURAS worker queues.
+- Overlapped Speech Separation: Invoking SpeechBrain SepFormer to disentangle concurrent speakers.
+**5. Exact Tasks:**
+1. Implement `extractor.py` using FFmpeg stream-copy (`-c:a copy`) to produce pristine audio bitstreams.
+2. Build `resampler.py` generating standardized 16kHz mono WAV derivatives for acoustic model inference.
+3. Implement `lineage.py` registering extracted audio artifacts in CEIPL DAG with complete transformation metadata.
+4. Build `auras_client.py` dispatching jobs to Celery queue `video_audio_forensics` and polling for results.
+5. Implement `separation.py` integrating SpeechBrain SepFormer for multi-talker separation on overlapped segments.
+**6. Detailed Execution Workflow:**
+Video Exhibit -> Lossless Audio Bitstream Extracted -> SHA-256 Computed -> 16kHz WAV Generated -> DAG Nodes Registered -> Celery Job Dispatched to AURAS -> AURAS Findings Awaited -> Audio Timeline Mapped to Video Timebase.
+**7. Technologies, Tools & Models:**
+FFmpeg 6.x (`libswresample`), SoX, SpeechBrain SepFormer, Celery, Redis, PyTorch.
+**8. Prerequisites & Dependencies:**
+Phase VISTA-A1 Gate passed; AURAS subsystem operational and reachable via Celery broker.
+**9. Expected Files, Artifacts & Contracts:**
 - `src/ps05/engines/vista/afb/extractor.py`
 - `src/ps05/engines/vista/afb/resampler.py`
+- `src/ps05/engines/vista/afb/lineage.py`
 - `src/ps05/engines/vista/afb/auras_client.py`
-- `src/ps05/engines/vista/afb/diarization.py`
 - `src/ps05/engines/vista/afb/separation.py`
+- `tests/integration/test_afb_pipeline.py`
+**10. Failure Cases & Risks:**
+- Video without audio stream: Trapped gracefully, emitting `AUDIO_STREAM_ABSENT` without halting VISTA visual engines.
+- AURAS worker timeout: Trapped with Celery retry policy; falls back to local baseline audio metadata extraction.
+**11. Security Considerations:**
+Audio derivatives stored in read-only WORM partition; isolated Celery worker execution.
+**12. Acceptance Criteria:**
+- Extracted audio bitstream matches container audio channel bit-for-bit (`cmp -l`).
+- DAG manifest accurately links derived audio SHA-256 to parent video exhibit.
+- Asynchronous dispatch returns complete AURAS findings (splicing, diarization, deepfakes).
+**13. Definition of Done (DoD):**
+AFB extraction pipeline complete, AURAS bridge operational, end-to-end integration test passing.
+**14. Checkpoint Table:**
 
-**Validation Strategy:**  
-Extract audio from MP4/MKV test videos; verify byte parity with native audio track; confirm DAG node created in database; verify AURAS job completes successfully.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-04-01** | Zero-Transcode Parity | Compare extracted audio stream against native | `cmp -l` reports 0 byte differences | `NOT_STARTED` | Lossless bitstream extraction |
-| **VISTA-CP-04-02** | DAG Lineage Binding | Query database for extracted audio parent | `parent_evidence_id == video_evidence_id` | `NOT_STARTED` | Cryptographic DAG linked |
-| **VISTA-CP-04-03** | Asynchronous Routing | Dispatch job to AURAS via Celery worker | AURAS job ID returned and completed in DB | `NOT_STARTED` | Clean asynchronous dispatch |
-| **VISTA-CP-04-04** | Multi-Track Scanning | Ingest video with English & Hindi audio tracks | Both tracks extracted into distinct artifacts | `NOT_STARTED` | Multi-track isolation |
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-04-01** | Audio Stream Extraction & Source Mapping | Stream-copy bitstream matches container audio track bit-for-bit | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-04-02** | Derived Audio DAG Lineage & Hashing | Derived WAV SHA-256 registered as child of video exhibit UUID | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-04-03** | Asynchronous AURAS Integration | Successful retrieval of ARE, MVSI, and ADDE findings via Celery | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-04-04** | Multi-Speaker Speech Separation | SepFormer separates overlapped speech into 2 isolated tracks | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
 ### Phase VISTA-A5: Audio-Visual Synchronization & Multi-Face Lip-Sync (AVSC)
 
-**Status:** `PLANNED`
-
-**Objective:**  
-Implement the Audio-Visual Synchronization & Correspondence Engine (AVSC) to evaluate physical and temporal alignment between visual speech and the soundtrack: container AV global offset measurement, RetinaFace/ByteTrack face tracking, MediaPipe mouth crop normalization ($96 \times 96$ @ 25 fps), modified SyncNet lip-sync cross-correlation, multi-face speaker disambiguation, bystander silence classification, and acoustic-to-visual event correspondence.
-
-**Scope:**
-- *Included:* Global AV offset detection, multi-face tracking, 468-point facial landmarking, SyncNet cross-modal embedding distance, primary talker attribution, bystander handling (`BYSTANDER_SILENT`), sound-to-visual event matching (YAMNet/AST vs YOLOv8).
-- *Explicit Exclusions:* Deepfake facial artifact analysis (handled in A9/A10).
-
-**Prerequisites:**  
-Phases VISTA-A3 and VISTA-A4 Gates passed; extracted audio and video decoded streams available.
-
-**Topics & Subtopics:**
-1. **Container AV Global Offset:** Measure $\Delta t_{\text{global}} = PTS_{a, 0} - PTS_{v, 0}$; check total duration discrepancies $\Delta T$.
-2. **RetinaFace Detection & ByteTrack:** Detect multi-scale faces; maintain persistent `face_track_id` trajectories across frames.
-3. **Mouth ROI Normalization:** Extract lips using MediaPipe FaceMesh (landmarks 61, 291, 0, 17); crop canonical $96 \times 96$ RGB visual tube resampled to 25 fps.
-4. **SyncNet Lip-Sync Architecture:** Compute visual embeddings $\mathbf{v}(t)$ and acoustic embeddings $\mathbf{a}(t + \Delta)$; evaluate $L2$ distance curve over $\Delta \in [-15, +15]$ frames; compute confidence $S_{\text{sync}}$.
-5. **Multi-Face Disambiguation:** Compute sync curves for all tracked faces; attribute speech to primary talker ($S_{\text{sync}} \ge 4.0$); tag non-speaking faces as `BYSTANDER_SILENT`.
-6. **Sound-Visual Event Correspondence:** Map acoustic events (gunshots, vehicle screech) against visual events (muzzle flash, car crash); enforce physics constraints ($\Delta t_{\text{event}} \ge 0$).
-
-**Expected Files:**
+**1. Phase ID & Title:** `VISTA-A5: Audio-Visual Synchronization & Multi-Face Lip-Sync (AVSC)`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Build the Audio-Visual Synchronization & Correspondence Engine (AVSC): measure container AV global offset, perform surveillance-grade face detection (RetinaFace/SCRFD), maintain inter-frame face trajectories (ByteTrack), extract normalized mouth crops, execute SyncNet lip-sync cross-correlation, disambiguate multi-face speakers, and correlate acoustic events with visual phenomena.  
+**4. Topics & Subtopics:**
+- Container AV Alignment: Extracting stream start offsets and duration differences.
+- Surveillance Face Detection: RetinaFace / SCRFD high-recall face localization.
+- Trajectory Association: ByteTrack multi-object tracking associating face tracklets across frames.
+- Canonical Mouth ROI Normalization: Standardized 112x112 greyscale lip sequence extraction.
+- SyncNet Lip-Sync Cross-Correlation: Computing embedding distance curve $D(\Delta)$ and sync score $S_{	ext{sync}}$.
+- Multi-Face Speaker Disambiguation: Attributing dialogue to the active talker while classifying bystanders as silent.
+- Acoustic-to-Visual Event Matching: Correlating transient sounds (gunshots, explosions) with visible phenomena (flashes, falls).
+**5. Exact Tasks:**
+1. Implement container offset alignment in `src/ps05/engines/vista/avsc/alignment.py`.
+2. Integrate RetinaFace and ByteTrack in `face_track.py` maintaining consistent face trajectory IDs.
+3. Build mouth crop extractor `mouth_roi.py` producing normalized $112 	imes 112$ tensors aligned via landmark homography.
+4. Implement SyncNet evaluation harness in `syncnet.py` computing offset distance curves and confidence scores.
+5. Build multi-speaker disambiguation logic in `multi_face.py` separating active speakers from bystanders.
+6. Implement cross-modal event matcher in `event_corr.py` verifying light-travel-time physics constraints.
+**6. Detailed Execution Workflow:**
+AV Offset Checked -> Faces Detected & Tracked -> Mouth ROIs Extracted -> Audio MFCCs Computed -> SyncNet Cross-Correlation Evaluated -> Speaker Disambiguated -> Cross-Modal Acoustic Events Matched -> `AVSCSyncResult` Emitted.
+**7. Technologies, Tools & Models:**
+RetinaFace / SCRFD (InsightFace), ByteTrack, SyncNet (PyTorch), OpenCV, Librosa, YAMNet / AST.
+**8. Prerequisites & Dependencies:**
+Phase VISTA-A3 and VISTA-A4 Gates passed; decoded frames and 16kHz audio available.
+**9. Expected Files, Artifacts & Contracts:**
 - `src/ps05/engines/vista/avsc/alignment.py`
 - `src/ps05/engines/vista/avsc/face_track.py`
 - `src/ps05/engines/vista/avsc/mouth_roi.py`
 - `src/ps05/engines/vista/avsc/syncnet.py`
 - `src/ps05/engines/vista/avsc/multi_face.py`
 - `src/ps05/engines/vista/avsc/event_corr.py`
+- `tests/benchmarks/test_avsc_syncnet.py`
+**10. Failure Cases & Risks:**
+- Distant or obscured faces: Classified as `FACE_RESOLUTION_TOO_LOW` without forcing a false desync alert.
+- Legitimate movie dubbing: Classified as `EXPLAINABLE_POST_PRODUCTION_DUBBING` when face is unaltered.
+**11. Security Considerations:**
+Biometric face feature vectors are strictly ephemeral; zero 1:N biometric gallery searching; privacy-preserving crops.
+**12. Acceptance Criteria:**
+- Optimal offset identification accuracy >= 95% on LRS2/LRS3 benchmark clips (+/- 10 frame shifts).
+- Accurately classifies passive bystanders as `BYSTANDER_SILENT` ($S_{	ext{sync}} < 2.5$).
+- Traps temporal physical violations where gunshot sound precedes visible muzzle flash by > 50 ms.
+**13. Definition of Done (DoD):**
+AVSC pipeline fully operational, SyncNet benchmarks passing, multi-face disambiguation unit tests passing.
+**14. Checkpoint Table:**
 
-**Validation Strategy:**  
-Evaluate on LRS2 / LRS3 speech videos and artificially shifted audio offsets; verify SyncNet identifies offset with error $\le \pm 1$ frame; verify bystander faces are not falsely flagged.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-05-01** | Global Offset | Measure offset on audio shifted by +200ms | $\Delta t_{\text{global}} = 200\text{ ms} \pm 10\text{ ms}$ | `NOT_STARTED` | Accurate container time alignment |
-| **VISTA-CP-05-02** | Lip-Sync In-Sync | Evaluate SyncNet on natural talking face | $S_{\text{sync}} \ge 4.0$ and optimal offset $\Delta^* = 0$ | `NOT_STARTED` | Natural speech validated in-sync |
-| **VISTA-CP-05-03** | Re-Dubbing Detection | Ingest video with replaced voice track | $S_{\text{sync}} < 2.5$ across active speech | `NOT_STARTED` | Desynchronization trapped |
-| **VISTA-CP-05-04** | Multi-Face Disambig | Test 2-person video where only 1 talks | Active talker $S \ge 4.0$, bystander $S < 2.5$ | `NOT_STARTED` | Bystander classified without error |
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-05-01** | Container AV Offset Calculation | Detection of global stream start time offset within 1 ms | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-05-02** | Lip-Sync Cross-Correlation & SyncNet | Artificially shifted audio (+5 frames) correctly localized | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-05-03** | Multi-Face Speaker Disambiguation | Correct speech attribution to active speaker vs silent bystander | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-05-04** | Sound-to-Visual Event Physics Alignment | Gunshot audio preceding muzzle flash flagged as splice anomaly | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
 ### Phase VISTA-A6: Video Content Intelligence, Detection & Tracking (VCI)
 
-**Status:** `PLANNED`
-
-**Objective:**  
-Implement the Video Content Intelligence Engine (VCI) to extract semantic scene context: 15-category video source taxonomy classification, YOLOv8x/v10 object and person detection, SAM 2 prompted evidence segmentation, ByteTrack trajectory tracking, distinct unique person counting vs per-frame counts, VideoMAE action localization, and PaddleOCR OSD timestamp extraction.
-
-**Scope:**
-- *Included:* Video taxonomy classifier, 80-class object detection, SAM 2 video segmentation, spatial-temporal trajectory tracking, distinct unique person counting, video action localization, OSD digital clock reading.
-- *Explicit Exclusions:* Deepfake facial analysis (handled in A9/A10), audio analysis (handled in AURAS).
-
-**Prerequisites:**  
-Phase VISTA-A2 Gate passed; decoded frame pipeline operational.
-
-**Topics & Subtopics:**
-1. **15-Category Video Source Taxonomy:** Classify video exhibits into source categories (CCTV, Body-Worn, Drone, Smartphone, Dashcam, etc.).
-2. **Object Detection & SAM 2 Segmentation:** Detect persons, vehicles, firearms, and evidence objects via YOLOv8x/v10; generate pixel-accurate masks using SAM 2.
-3. **ByteTrack Trajectory Persistence:** Track object bounding boxes across frames; maintain unique track IDs across temporary occlusions.
-4. **Distinct Unique Person Counting:** Prevent summing frame detections; report both instantaneous occupancy $N(t)$ and total unique entities $N_{\text{total\_unique}}$.
-5. **VideoMAE Action Localization:** Localize actions (assault, fall, vehicle crash, weapon draw) with millisecond timestamps $[t_1, t_2]$.
-6. **PaddleOCR / Tesseract OSD Extraction:** Detect digital clock bounding boxes; parse timestamps against datetime formats.
-
-**Expected Files:**
+**1. Phase ID & Title:** `VISTA-A6: Video Content Intelligence, Detection & Tracking (VCI)`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Build the Video Content Intelligence Engine (VCI): classify video recordings into a hierarchical 15-category source taxonomy, perform real-time object detection (YOLOv8/v10), promptable video object segmentation (SAM 2), unique person counting via trajectory tracking (ByteTrack), spatio-temporal action understanding (VideoMAE), and OSD timestamp/channel OCR extraction (PaddleOCR / Tesseract).  
+**4. Topics & Subtopics:**
+- 15-Category Video Source Taxonomy: CCTV, dashcam, bodycam, drone, mobile, broadcast, screen-record, etc.
+- Surveillance Object Detection: YOLOv8x / YOLOv10 detecting persons, vehicles, firearms, and backpacks.
+- SAM 2 Prompted Video Segmentation: Spatio-temporal object boundary tracking and mask propagation.
+- Distinct Unique Person Counting: Tracklet association maintaining cumulative unique person counts.
+- Action & Anomaly Localization: VideoMAE / SlowFast classifying physical actions (violence, fall, running).
+- OSD Clock & Channel OCR: PaddleOCR v4 and Tesseract 5 extracting visible recorder timestamps.
+**5. Exact Tasks:**
+1. Implement source taxonomy classifier in `src/ps05/engines/vista/vci/taxonomy.py`.
+2. Build object detector wrapper in `detector.py` executing YOLOv8x on sampled keyframes.
+3. Integrate SAM 2 in `segmenter.py` for interactive or prompted evidence object mask tracking.
+4. Implement trajectory person counter in `tracker.py` distinguishing instantaneous count from unique person count.
+5. Build action localization module in `actions.py` utilizing VideoMAE for event boundary detection.
+6. Implement OSD OCR extractor in `ocr_overlay.py` with custom whitelist regex for CCTV date/time stamps.
+**6. Detailed Execution Workflow:**
+Sampled Frames -> Source Taxonomy Predicted -> Objects Detected -> Trajectories Associated -> Unique Person Count Maintained -> OSD Clock Crops Extracted -> OCR Executed -> `VCITimelineResult` Emitted.
+**7. Technologies, Tools & Models:**
+YOLOv8x / YOLOv10 (Ultralytics), SAM 2 (Meta AI), ByteTrack, VideoMAE (HuggingFace), PaddleOCR v4, Tesseract 5.
+**8. Prerequisites & Dependencies:**
+Phase VISTA-A2 Gate passed; decoded raster frames available.
+**9. Expected Files, Artifacts & Contracts:**
 - `src/ps05/engines/vista/vci/taxonomy.py`
 - `src/ps05/engines/vista/vci/detector.py`
-- `src/ps05/engines/vista/vci/segmentor.py`
 - `src/ps05/engines/vista/vci/tracker.py`
-- `src/ps05/engines/vista/vci/people_count.py`
 - `src/ps05/engines/vista/vci/actions.py`
 - `src/ps05/engines/vista/vci/ocr_overlay.py`
+- `tests/unit/test_vci_pipeline.py`
+**10. Failure Cases & Risks:**
+- Extreme crowd density: Mitigated by reporting peak concurrent occupancy alongside unique track count with confidence bounds.
+- Degraded OSD clock contrast: Mitigated by dual-pass thresholding (Otsu + adaptive Gaussian).
+**11. Security Considerations:**
+Zero face recognition biometric indexing; tracking IDs are strictly local to the individual video exhibit.
+**12. Acceptance Criteria:**
+- Correctly classifies surveillance footage into `CCTV_SURVEILLANCE` taxonomy category.
+- Unique person counting error <= 10% on standard surveillance evaluation sequences.
+- PaddleOCR extracts OSD timestamp strings with character accuracy >= 98%.
+**13. Definition of Done (DoD):**
+VCI engine modules implemented, taxonomy classifier validated, OCR timestamp extractor passing test suite.
+**14. Checkpoint Table:**
 
-**Validation Strategy:**  
-Run test videos with known person counts; verify unique person counting matches ground truth; assert PaddleOCR clock reading accuracy $\ge 98\%$.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-06-01** | Taxonomy Category | Ingest surveillance video vs drone clip | Correctly tags `CCTV_FIXED` vs `DRONE_AERIAL` | `NOT_STARTED` | Source taxonomy classification |
-| **VISTA-CP-06-02** | Unique Counting | Test clip with 3 people walking in and out | $N_{\text{unique}} = 3$ (not cumulative sum) | `NOT_STARTED` | Unique vs frame count invariant |
-| **VISTA-CP-06-03** | SAM 2 Segmentation | Prompt SAM 2 with weapon bounding box | High-precision pixel mask generated | `NOT_STARTED` | Accurate evidence segmentation |
-| **VISTA-CP-06-04** | OSD Clock OCR | Parse burned-in clock over 100 frames | $\ge 98$ frames parsed with valid datetime | `NOT_STARTED` | Digital clock parsed accurately |
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-06-01** | Hierarchical Source Taxonomy Classification | Footage correctly classified into 15-category taxonomy | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-02** | Unique Person Trajectory Counting | Distinguishes 5 unique persons crossing frame from 20 re-entries | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-03** | SAM 2 Object Segmentation Tracking | Precise mask propagation across 300-frame video sequence | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-04** | OSD Timestamp & Channel OCR Extraction | PaddleOCR extracts date/time overlay matching ground truth | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
 ### Phase VISTA-A7: CCTV Source Discovery, Auto-Metadata & Adaptive Questionnaire (CCTV Baseline)
 
-**Status:** `PLANNED`
-
-**Objective:**  
-Build the baseline capabilities of the Dedicated CCTV Forensic Profile: multi-signal automated triage scoring (`LIKELY_CCTV`, `POSSIBLY_CCTV`, `NON_CCTV`), pre-questioning metadata extraction order (machine reads container, ExifTool, and OSD clock before prompting examiner), versioned `CCTVContext` JSON Schema (v1.0.0), adaptive questionnaire formulation (Questions A–E), and missing-context continuation under `NOT_PROVIDED` status.
-
-**Scope:**
-- *Included:* Triage heuristic scoring matrix, automated pre-questioning extraction pipeline, Pydantic v2 `CCTVContextModel`, adaptive questionnaire engine, non-blocking fallback handling.
-- *Explicit Exclusions:* Clock drift regression and ONVIF seal validation (deferred to A8).
-
-**Prerequisites:**  
-Phases VISTA-A2 and VISTA-A6 Gates passed; container parsing and OCR modules available.
-
-**Topics & Subtopics:**
-1. **Automated Triage Matrix:** Calculate multi-signal score $\text{Score}_{\text{cctv}}$ based on container, non-standard VFR, OSD clock presence, and static camera motion.
-2. **Pre-Questioning Extraction Order:** Execute FFprobe, ExifTool, and PaddleOCR clock scan before formulating questionnaires.
-3. **CCTVContext JSON Schema:** Implement versioned Pydantic model (`schema_version: "1.0.0"`) storing classification, camera ID, DVR model, export method, and examiner responses.
-4. **Adaptive Questionnaire Formulation:** Conditionally formulate Questions A–E based on what metadata was missing from automated extraction.
-5. **Missing-Context Continuation:** If examiner skips questions, proceed with `user_context_status: NOT_PROVIDED` and widen algorithmic uncertainty bounds without pipeline failure.
-
-**Expected Files:**
+**1. Phase ID & Title:** `VISTA-A7: CCTV Source Discovery, Auto-Metadata & Adaptive Questionnaire (CCTV Baseline)`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement the Dedicated CCTV Forensic Profile baseline: execute multi-signal automated triage scoring, perform pre-questioning metadata extraction, populate the versioned `CCTVContext` record, formulate targeted adaptive questions (Questions A–E), enforce the non-blocking continuation invariant under missing context, and tag user claims strictly as `USER_REPORTED`.  
+**4. Topics & Subtopics:**
+- Multi-Signal CCTV Triage Scoring: Evaluating OSD clock, fixed angle, IR transitions, low framerate, container tags.
+- Pre-Questioning Metadata Extraction: Automatically discovering camera channels, DVR make/model, and timebase.
+- Versioned `CCTVContext` Schema: Implementing `schema_version: "1.0.0"` with strict status-typed values.
+- Adaptive Questionnaire Formulator: Presenting Questions A–E with pre-extracted clues to investigator.
+- Missing-Context Continuation Invariant: Guaranteeing pipeline never halts if investigator skips questions.
+- Evidentiary Provenance Tagging: Enforcing strict distinction between machine observations and user claims.
+**5. Exact Tasks:**
+1. Implement triage scoring matrix in `src/ps05/engines/vista/cctv/triage.py` outputting 5 provisional source classes.
+2. Build pre-questioning extractor in `auto_meta.py` parsing container handler names and OSD OCR strings.
+3. Implement `CCTVContext` data model in `context.py` conforming to the versioned schema specification.
+4. Build adaptive questionnaire generator in `adaptive_q.py` formulating targeted Questions A–E.
+5. Implement questionnaire response handler tagging user inputs strictly as `USER_REPORTED` and widening uncertainty on skips.
+**6. Detailed Execution Workflow:**
+Exhibit Ingested -> Pre-Questioning Extraction -> Triage Score Computed -> CCTVContext Populated -> Missing Context Evaluated -> Questions A-E Generated -> User Submits or Skips -> Non-Blocking Continuation Enforced -> Downstream Engines Dispatched.
+**7. Technologies, Tools & Models:**
+Pydantic v2, PyAV, PaddleOCR, ExifTool, FastAPI.
+**8. Prerequisites & Dependencies:**
+Phase VISTA-A2 and VISTA-A6 Gates passed; container metadata and OCR extraction available.
+**9. Expected Files, Artifacts & Contracts:**
 - `src/ps05/engines/vista/cctv/triage.py`
 - `src/ps05/engines/vista/cctv/auto_meta.py`
 - `src/ps05/engines/vista/cctv/context.py`
 - `src/ps05/engines/vista/cctv/adaptive_q.py`
+- `tests/unit/test_cctv_triage.py`
+**10. Failure Cases & Risks:**
+- User skips all questionnaire prompts: Pipeline continues smoothly under `user_context_status: NOT_PROVIDED`; downstream algorithms expand confidence intervals.
+- Conflicting user claims: Tagged as `CONFLICTING` without overwriting machine-extracted bitstream observations.
+**11. Security Considerations:**
+Questionnaire responses stored immutably in Merkle audit log; never request DVR device administrative passwords.
+**12. Acceptance Criteria:**
+- Correctly assigns provisional source classification (`LIKELY_CCTV_FOOTAGE` vs `GENERAL_VIDEO`).
+- Pre-extracts camera channel and DVR manufacturer before prompting examiner.
+- Pipeline executes successfully to completion even when zero questions are answered by the user.
+**13. Definition of Done (DoD):**
+CCTV triage operational, context schema implemented, adaptive questionnaire tested with simulated user responses.
+**14. Checkpoint Table:**
 
-**Validation Strategy:**  
-Ingest 10 CCTV exhibits and 10 non-CCTV videos; verify triage classification accuracy; simulate skipped questionnaires and assert pipeline runs to completion.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-07-01** | Triage Classification | Ingest Dahua `.dav` surveillance file | Emits `LIKELY_CCTV` with score $\ge 0.70$ | `NOT_STARTED` | Automated triage functional |
-| **VISTA-CP-07-02** | Pre-Questioning Order | Check questionnaire generated for Hikvision clip | Does NOT ask for DVR make (auto-extracted) | `NOT_STARTED` | Pre-questioning avoids redundancy |
-| **VISTA-CP-07-03** | Schema Validation | Validate `CCTVContext` against JSON Schema | Schema validator passes with zero errors | `NOT_STARTED` | Strict JSON Schema compliance |
-| **VISTA-CP-07-04** | Skipped Question Flow | Submit empty questionnaire response | Pipeline completes with `NOT_PROVIDED` status | `NOT_STARTED` | Non-blocking execution verified |
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-07-01** | CCTV Automated Triage Scoring | Correct source classification score computed across 20 test clips | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-07-02** | Pre-Questioning Metadata Extraction | Camera channel and OSD clock discovered prior to user prompt | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-07-03** | User-Reported vs Verified Provenance | User answers tagged strictly as `USER_REPORTED`; machine data preserved | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-07-04** | Missing-Context Continuation Invariant | Pipeline completes full execution when questionnaire is 100% skipped | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
-### Phase VISTA-A8: CCTV Timeline Integrity, Clock Drift & Native Export Seals (CCTV Advanced)
+### Phase VISTA-A8: CCTV Timeline Integrity, Clock Drift & Native Export Verification (CCTV Advanced)
 
-**Status:** `PLANNED`
-
-**Objective:**  
-Implement advanced CCTV integrity verification: burned-in OSD clock continuity and drift regression $\delta(t) = T_{\text{ocr}}(t) - (T_0 + t_{\text{pts}})$, clock freeze and jump detection, ONVIF Export File Format and Media Signing verification with continuous NAL unit SHA-256 hash chains, and multi-camera cross-feed timeline synchronization and duplicate feed detection.
-
-**Scope:**
-- *Included:* Linear drift regression modeling, jump/freeze anomaly triggering, ONVIF XML/SMIL signature parsing, X.509 certificate validation, continuous NAL hash chains, multi-camera correlation.
-- *Explicit Exclusions:* Facial deepfakes (handled in A9/A10).
-
-**Prerequisites:**  
-Phase VISTA-A7 Gate passed; CCTVContext and OSD OCR data available.
-
-**Topics & Subtopics:**
-1. **Clock Drift Regression Modeling:** Fit linear regression $\delta(t) = \alpha + \beta t + \epsilon(t)$ on frame OCR timestamps vs container PTS.
-2. **Clock Anomaly Triggers:** Detect instantaneous jumps $|\Delta T_{\text{ocr}}| \ge 1.0\text{ s}$ (excised footage), stalls (video freeze attack), and rate drift ($|\beta| > 0.01$).
-3. **ONVIF Media Signing Verification:** Parse XML/SMIL packaging; validate X.509 signing certificates; verify RSA/ECDSA signatures.
-4. **NAL Unit Hash Chain Audit:** Stream raw H.264/H.265 NAL units; compute continuous SHA-256 hash chain and compare against signed media manifest.
-5. **Multi-Camera Corroboration:** Synchronize parallel camera channels via OCR clock alignment; detect duplicate feeds ($SSIM > 0.95$ with constant time lag).
-
-**Expected Files:**
+**1. Phase ID & Title:** `VISTA-A8: CCTV Timeline Integrity, Clock Drift & Native Export Verification (CCTV Advanced)`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement advanced CCTV forensics: model OSD clock continuity and drift regression $\delta(t)$, detect temporal frame excisions and clock freezes, verify native DVR/NVR proprietary exports (`.dav`, `.sec`), validate ONVIF Export File Format and Media Signing digital seals, and corroborate multi-camera multi-channel timelines.  
+**4. Topics & Subtopics:**
+- OSD Clock Continuity Regression: Regressing OCR timestamp against presentation timestamp $\delta(t) = t_{	ext{ocr}} - t_{	ext{pts}}$.
+- Clock Jumps & Non-Monotonic Reversals: Trapping time jumps indicating deleted surveillance footage.
+- Native DVR/NVR Bitstream Verification: Parsing proprietary Dahua DAV and Hikvision packet headers.
+- ONVIF Media Signing Seal Verification: Validating X.509 certificate chains, XML signatures, and NAL unit hash chains.
+- Multi-Camera Feed Corroboration: Aligning cross-camera UTC timelines and detecting duplicate/re-broadcast feeds.
+**5. Exact Tasks:**
+1. Implement clock drift regression in `src/ps05/engines/vista/cctv/clock_drift.py` computing slope and residual variance.
+2. Build clock jump detector flagging excision intervals $\Delta t_{	ext{gap}} \ge 1.0	ext{ s}$.
+3. Implement native export parsers in `native_export.py` extracting proprietary recorder header metadata.
+4. Build ONVIF verifier in `onvif_seals.py` checking XML Media Signing atoms and continuous NAL hash chains.
+5. Implement multi-camera correlator in `multi_cam.py` performing cross-camera SSIM and timeline synchronization.
+**6. Detailed Execution Workflow:**
+Decoded Frames -> OCR Timestamps Extracted -> Drift Regression $\delta(t)$ Computed -> Excision Jumps Flagged -> ONVIF XML Parsed -> X.509 Certificate Validated -> NAL Hash Chain Verified -> Multi-Camera Aligned -> CCTV Report Emitted.
+**7. Technologies, Tools & Models:**
+SciPy (Linear Regression), PaddleOCR, PyAV, `cryptography` (X.509 & RSA/ECDSA verification), LibONVIF.
+**8. Prerequisites & Dependencies:**
+Phase VISTA-A7 Gate passed; OCR timestamp intervals and container packets available.
+**9. Expected Files, Artifacts & Contracts:**
 - `src/ps05/engines/vista/cctv/clock_drift.py`
+- `src/ps05/engines/vista/cctv/native_export.py`
 - `src/ps05/engines/vista/cctv/onvif_seals.py`
 - `src/ps05/engines/vista/cctv/multi_cam.py`
+- `tests/integration/test_cctv_advanced.py`
+**10. Failure Cases & Risks:**
+- Tampered ONVIF NAL units: Mathematical hash mismatch raises `ONVIF_MEDIA_SEAL_VIOLATION` with exact packet offset.
+- Camera hardware clock drift: Separated from intentional cuts by verifying continuous linear drift slope.
+**11. Security Considerations:**
+X.509 root certificate validation strictly against trusted root store; expired or untrusted roots flagged.
+**12. Acceptance Criteria:**
+- Localizes excised surveillance clips (time jumps > 1s) with exact millisecond boundary reporting.
+- Verifies authentic ONVIF Media Signing exports and catches modified NAL units.
+- Detects duplicate time-shifted camera feeds across multi-channel exports ($SSIM > 0.95$).
+**13. Definition of Done (DoD):**
+Clock drift regression verified on synthetic fixtures, ONVIF verifier passing, multi-camera corroborator operational.
+**14. Checkpoint Table:**
 
-**Validation Strategy:**  
-Evaluate on surveillance videos with injected clock jumps, frozen spans, and signed ONVIF export packages; assert detection of all tampering events.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-08-01** | Clock Jump Detection | Ingest video with 10-second gap in OSD clock | Flags `CCTV_CLOCK_JUMP_DETECTED` at jump point | `NOT_STARTED` | Deleted sequence localized |
-| **VISTA-CP-08-02** | Clock Freeze Detection | Ingest video where clock is frozen for 3 seconds | Flags `CCTV_CLOCK_FREEZE_DETECTED` | `NOT_STARTED` | Frozen video loop caught |
-| **VISTA-CP-08-03** | ONVIF Seal Verification| Ingest authentic ONVIF signed export | Status `ONVIF_MEDIA_SEAL_VERIFIED` emitted | `NOT_STARTED` | Digital signature verified |
-| **VISTA-CP-08-04** | Tampered ONVIF NAL | Ingest ONVIF export with 1 modified byte | Status `ONVIF_MEDIA_SEAL_VIOLATION` emitted | `NOT_STARTED` | NAL unit tampering trapped |
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-08-01** | ONVIF Media Signing Verification | Authentic ONVIF export verified with status `ONVIF_MEDIA_SEAL_VERIFIED` | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-08-02** | Tampered NAL Unit Seal Invalidation | Bit-flipped NAL unit raises `ONVIF_MEDIA_SEAL_VIOLATION` | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-08-03** | OSD Clock Drift Regression $\delta(t)$ | Linear clock drift slope accurately quantified within 10 ms/hr | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-08-04** | Multi-Camera Feed Corroboration | Identification of duplicate camera channel re-broadcast | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
 ### Phase VISTA-A9: Video Deepfake Baselines & Spatial Manipulation Heads (VDF Baseline)
 
-**Status:** `PLANNED`
-
-**Objective:**  
-Build baseline deepfake detection capabilities under the Video Deepfake & AI-Generation Detection Engine (VDF): spatial frame-level classifiers (XceptionNet, EfficientNet-B4 Dual-Domain with RGB and DCT frequency residuals), specialized manipulation heads (Face Swap, Face Reenactment, Facial Inpainting), and Platt scaling probability calibration ($ECE < 0.05$).
-
-**Scope:**
-- *Included:* Spatial frame inference, face crop extraction pipeline, DCT frequency residual maps, specialized manipulation heads, Platt scaling parameter fitting.
-- *Explicit Exclusions:* Temporal sequence modeling (deferred to A10), 3D FFT generative analysis (deferred to A10).
-
-**Prerequisites:**  
-Phase VISTA-A5 Gate passed; RetinaFace face tracking pipeline operational.
-
-**Topics & Subtopics:**
-1. **XceptionNet Spatial Baseline:** Ingest normalized $299 \times 299$ face crops; extract spatial manipulation logits.
-2. **EfficientNet-B4 Dual-Domain:** Ingest $380 \times 380$ spatial face crops and parallel 2D DCT high-frequency residual planes; detect boundary blending seams.
-3. **Face Swap Detection Head:** Focus on identity and bone structure discontinuities between face and cranial perimeter.
-4. **Facial Inpainting & Reenactment Heads:** Detect generative fill boundaries around eyes and oral regions.
-5. **Platt Scaling Probability Calibration:** Calibrate raw logits $z_k$ using logistic parameters $(A_k, B_k)$ to guarantee empirical calibration.
-
-**Expected Files:**
+**1. Phase ID & Title:** `VISTA-A9: Video Deepfake Baselines & Spatial Manipulation Heads (VDF Baseline)`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement baseline capabilities of the Video Deepfake & AI-Generation Detection Engine (VDF): construct the frame-level deepfake detector registry, deploy dual-domain spatial classifiers (EfficientNet-B4 / Xception), implement specialized heads for face swapping, facial reenactment, and local inpainting, and evaluate baseline performance on FaceForensics++ (FF++).  
+**4. Topics & Subtopics:**
+- Frame-Level Detector Registry: Standardized model loading and version tracking.
+- Dual-Domain Spatial Detection: Analyzing spatial RGB blending seams and DCT frequency residuals.
+- Specialized Manipulation Heads: Face swap (boundary seams), reenactment (landmark asymmetry), inpainting (fill artifacts).
+- FaceForensics++ Evaluation: Benchmark validation across c23 (light compression) and c40 (heavy compression) splits.
+- Platt Probability Calibration: Mapping raw neural logits to calibrated posterior probabilities.
+**5. Exact Tasks:**
+1. Implement detector registry in `src/ps05/engines/vista/vdf/registry.py` with hash-pinned model weights.
+2. Build dual-domain spatial classifier in `frame_detect.py` combining EfficientNet-B4 with DCT frequency branch.
+3. Implement specialized manipulation heads in `manipulation.py` targeting face swap and generative inpainting.
+4. Develop frame score aggregator calculating windowed rolling maximum suspicion curves.
+5. Implement Platt calibration module fitting sigmoid parameters on held-out validation sets.
+**6. Detailed Execution Workflow:**
+Decoded Face Crops -> Dual-Domain Spatial Network -> Specialized Heads Evaluated -> Raw Logits Calibrated via Platt Scaling -> Frame Suspicion Curve Aggregated -> Spatial Heatmaps Generated -> Findings Registered.
+**7. Technologies, Tools & Models:**
+EfficientNet-B4 (Timm), XceptionNet, PyTorch 2.2, Albumentations, Scikit-learn (Platt calibration).
+**8. Prerequisites & Dependencies:**
+Phase VISTA-A5 Gate passed; aligned face crops and tracking trajectories available.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/vista/vdf/registry.py`
 - `src/ps05/engines/vista/vdf/frame_detect.py`
 - `src/ps05/engines/vista/vdf/manipulation.py`
 - `src/ps05/engines/vista/vdf/calibration.py`
+- `tests/benchmarks/test_vdf_spatial.py`
+**10. Failure Cases & Risks:**
+- Heavy compression (H.264 CRF > 35) destroying spatial seams: Trapped by calibration module, widening uncertainty intervals.
+- Over-confidence on out-of-distribution faces: Mitigated via Platt calibration and temperature scaling.
+**11. Security Considerations:**
+Model weights verified against SHA-256 digests prior to loading into VRAM; zero unauthenticated weight deserialization (`torch.load` with `weights_only=True`).
+**12. Acceptance Criteria:**
+- AUC-ROC >= 0.96 on FaceForensics++ c23 (Deepfakes, FaceSwap, Face2Face).
+- Generates pixel-level spatial heatmap localizing facial blending boundaries.
+- Expected Calibration Error (ECE) < 0.05 on held-out test splits.
+**13. Definition of Done (DoD):**
+Spatial deepfake models integrated, calibration verified, benchmark test suite executing with documented metrics.
+**14. Checkpoint Table:**
 
-**Validation Strategy:**  
-Evaluate on FaceForensics++ (Deepfakes, FaceSwap, Face2Face); assert AUC-ROC $\ge 0.92$ and Expected Calibration Error $ECE < 0.05$.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-09-01** | Face Swap Detection | Evaluate on FaceForensics++ FaceSwap split | Calibrated suspicion score $P(\text{fake}) \ge 0.85$ | `NOT_STARTED` | Spatial face swap identified |
-| **VISTA-CP-09-02** | Frequency Domain Seam | Ingest blended face crop with smoothed border | DCT residual branch flags boundary anomaly | `NOT_STARTED` | Frequency seam detected |
-| **VISTA-CP-09-03** | Probability Calibration| Compute ECE on held-out validation set | $ECE < 0.05$ | `NOT_STARTED` | Well-calibrated probabilities |
-| **VISTA-CP-09-04** | Authentic Facial Video | Evaluate on authentic judicial interview clip | $P(\text{fake}) \le 0.15$ with no false alarms | `NOT_STARTED` | Low false positive rate |
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-09-01** | Spatial Deepfake Benchmark (FF++ c23) | AUC-ROC >= 0.96 across Deepfakes and FaceSwap splits | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-09-02** | Face Swap Blending Seam Localization | Heatmap accurately localizes synthetic boundary perimeter | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-09-03** | Platt Probability Calibration | Bounded calibrated probability with ECE < 0.05 | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-09-04** | Weight Hash Verification Security | `torch.load` rejects modified or corrupted model weights | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
 ### Phase VISTA-A10: Temporal Deepfake, 3D FFT Generative & Model Robustness (VDF Advanced)
 
-**Status:** `PLANNED`
-
-**Objective:**  
-Expand VDF with advanced temporal sequence models, foundation video representations, text-to-video generative detection, and out-of-distribution uncertainty estimation: FTCN 16-frame temporal sequence convolutions, VideoMAE foundation representations, 3D spatio-temporal FFT spectrum inspection, Mahalanobis feature space OOD distance metric, and quality-weighted late fusion.
-
-**Scope:**
-- *Included:* 16-frame sliding window temporal convolutions, VideoMAE sequence representations, 3D FFT generative video analysis, Mahalanobis OOD distance, quality-weighted late fusion.
-- *Explicit Exclusions:* Reporting and UI export (deferred to A11/A12).
-
-**Prerequisites:**  
-Phase VISTA-A9 Gate passed; baseline spatial deepfake heads operational.
-
-**Topics & Subtopics:**
-1. **FTCN Temporal Sequence Model:** Ingest sliding 16-frame face sequences; evaluate inter-frame pixel flicker, landmark jitter, and unnatural blink cadences.
-2. **VideoMAE Foundation SSL Head:** Extract 768-d sequence feature tokens across 16-frame windows with 8-frame temporal stride.
-3. **3D Spatio-Temporal FFT Generative Detection:** Compute 3D FFT over volume $V(x, y, t)$; detect abnormal temporal power spectrum decay from text-to-video diffusion engines (Sora, Runway, Pika).
-4. **Mahalanobis Feature Space OOD Metric:** Measure distance $D_M(\mathbf{e})$ against reference distribution; emit `OOD_UNCERTAINTY: HIGH` on rare codecs or extreme compression.
-5. **Quality-Weighted Late Fusion:** Aggregate spatial and temporal probabilities; dynamically weight temporal models higher on low-resolution or heavily compressed clips.
-
-**Expected Files:**
+**1. Phase ID & Title:** `VISTA-A10: Temporal Deepfake, 3D FFT Generative & Model Robustness (VDF Advanced)`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement advanced VDF capabilities: deploy temporal sequence models (FTCN / VideoMAE), analyze inter-frame landmark trajectory jitter and facial flickering, develop 3D FFT spatio-temporal power spectrum detectors for text-to-video generative synthesis (Sora, Runway, Pika), implement Mahalanobis out-of-distribution (OOD) distance estimation, and evaluate cross-dataset generalization.  
+**4. Topics & Subtopics:**
+- Temporal Coherence Modeling: Fully Temporal ConvNet (FTCN) isolating temporal flicker without spatial bias.
+- Self-Supervised Spatio-Temporal Representations: VideoMAE ViT-B with forensic fine-tuned classification head.
+- Generative Text-to-Video Detection: 3D FFT spatio-temporal power spectrum and diffusion residual analysis.
+- Out-of-Distribution (OOD) Detection: Mahalanobis distance in latent feature space flagging unseen generators.
+- Cross-Dataset Robustness Evaluation: Benchmarking on Celeb-DF v2, DFDC, and WildDeepfake.
+**5. Exact Tasks:**
+1. Implement FTCN temporal architecture in `src/ps05/engines/vista/vdf/temporal.py` processing $T$-frame sequences.
+2. Build VideoMAE spatio-temporal tube classifier processing 16-frame video clips.
+3. Develop generative video 3D FFT detector in `generative.py` computing inter-frame frequency phase coherence.
+4. Implement Mahalanobis OOD distance estimator in `ood.py` computing covariance-normalized latent distances.
+5. Build late-fusion model aggregator combining spatial, temporal, generative, and OOD scores into calibrated verdicts.
+**6. Detailed Execution Workflow:**
+Video Sequences -> FTCN Temporal Network -> VideoMAE Spatio-Temporal Head -> 3D FFT Spectrum Accumulator -> Mahalanobis OOD Computed -> Late Fusion Aggregation -> Cross-Model Disagreement Checked -> `VDFInferenceResult` Emitted.
+**7. Technologies, Tools & Models:**
+FTCN (ECCV 2022), VideoMAE ViT-B (NeurIPS 2022), PyTorch, SciPy (3D FFT), Scikit-learn.
+**8. Prerequisites & Dependencies:**
+Phase VISTA-A9 Gate passed; temporal face crop sequences and GPU acceleration available.
+**9. Expected Files, Artifacts & Contracts:**
 - `src/ps05/engines/vista/vdf/temporal.py`
 - `src/ps05/engines/vista/vdf/generative.py`
-- `src/ps05/engines/vista/vdf/ensemble.py`
-- `src/ps05/engines/vista/vdf/ood_distance.py`
+- `src/ps05/engines/vista/vdf/ood.py`
+- `tests/benchmarks/test_vdf_advanced.py`
+**10. Failure Cases & Risks:**
+- Video re-encoded through WhatsApp or aggressive social media codecs: Trapped as `HIGH_OOD`, warning examiner.
+- Model disagreement (spatial says fake, temporal says real): Flagged explicitly as `detector_disagreement: true`.
+**11. Security Considerations:**
+Inference operates strictly in memory with GPU cgroups; zero temporary frame raster leaks on shared storage.
+**12. Acceptance Criteria:**
+- Cross-dataset AUC-ROC >= 0.88 on Celeb-DF v2 without retraining.
+- Generative 3D FFT detector classifies text-to-video clips (Runway, Pika) with accuracy >= 90%.
+- Mahalanobis OOD flags synthetic diffusion video with distance $d_{	ext{mah}} > 3.0$.
+**13. Definition of Done (DoD):**
+Temporal models and 3D FFT detector operational, OOD metric validated, cross-dataset benchmark passing.
+**14. Checkpoint Table:**
 
-**Validation Strategy:**  
-Evaluate on Celeb-DF v2, DFDC, and generative text-to-video clips; assert AUC-ROC $\ge 0.88$; verify OOD distance flags extreme noise.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-10-01** | Temporal Consistency | Ingest deepfake with frame flicker but clean faces | FTCN flags temporal anomaly ($P \ge 0.85$) | `NOT_STARTED` | Temporal flicker trapped |
-| **VISTA-CP-10-02** | 3D FFT Generative | Ingest Sora / Runway text-to-video clip | 3D FFT spectrum flags generative synthesis | `NOT_STARTED` | Generative video detected |
-| **VISTA-CP-10-03** | Mahalanobis OOD | Ingest extreme low-bitrate heavily blurred video | Emits `OOD_UNCERTAINTY: HIGH` | `NOT_STARTED` | Out-of-distribution trapped |
-| **VISTA-CP-10-04** | Late Fusion Generalization | Evaluate late fusion vs single spatial detector | Ensemble achieves higher AUC-ROC across sets | `NOT_STARTED` | Fusion improves generalization |
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-10-01** | Temporal Sequence Deepfake Model (FTCN) | Cross-dataset AUC-ROC >= 0.88 on Celeb-DF v2 benchmark | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-10-02** | Generative Video 3D FFT Detection | Accuracy >= 90% on Sora/Runway/Pika synthetic video clips | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-10-03** | Mahalanobis Out-of-Distribution Flag | Unseen generative technique correctly flagged as `HIGH_OOD` | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-10-04** | Multi-Model Disagreement Handling | Conflicting spatial/temporal outputs logged without silent overwrite | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
 ### Phase VISTA-A11: Cross-Engine Video Evidence Fusion & Conflict Resolution
 
-**Status:** `PLANNED`
+**1. Phase ID & Title:** `VISTA-A11: Cross-Engine Video Evidence Fusion & Conflict Resolution`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement the VISTA cross-engine evidence fusion layer: aggregate findings across VRE, AFB/AURAS, AVSC, VDF, VCI, and the CCTV Profile onto a unified multi-modal timeline, execute deterministic forensic conflict resolution rules (distinguishing dubbing from deepfakes, and hardware drops from splicing), preserve raw engine outputs without lossy averaging, and assign dimension-specific verdicts.  
+**4. Topics & Subtopics:**
+- Multi-Modal Timeline Synchronization: Aligning video frames, audio samples, OSD timestamps, and findings on unified UTC axis.
+- Forensic Conflict Resolution Matrix: Explicit rules resolving cross-modal discrepancies.
+- Anti-Averaging Enforcement: Strict prohibition against collapsed "universal authenticity percentage".
+- Dimension-Specific Verdict Assignment: Formal evaluation across all 5 standardized forensic statuses.
+- Archify JSON IR Compilation: Compiling findings into canonical `archify.report.json` schema.
+**5. Exact Tasks:**
+1. Implement multi-modal timeline merger in `src/ps05/engines/vista/fusion/timeline_merge.py`.
+2. Build conflict resolution engine in `conflict_resolver.py` implementing Rules 1 through 5.
+3. Implement traceable finding aggregator binding evidence UUIDs, time intervals, bounding boxes, and artifact hashes.
+4. Develop dimension-specific verdict evaluator outputting formal statuses for technical, visual, acoustic, and CCTV domains.
+5. Build Archify JSON IR generator producing visual graphs of the multi-modal evidence tree.
+**6. Detailed Execution Workflow:**
+Engine Results Received -> Timelines Aligned -> Conflict Resolution Rules Evaluated -> Individual Engine Outputs Preserved -> Dimension Verdicts Computed -> Archify JSON IR Compiled -> Composite Finding Dossier Emitted.
+**7. Technologies, Tools & Models:**
+Python 3.12, Pydantic v2, NumPy, Archify JSON IR compiler.
+**8. Prerequisites & Dependencies:**
+Phases VISTA-A3, A5, A6, A8, and A10 Gates passed; all engine run results available.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/vista/fusion/timeline_merge.py`
+- `src/ps05/engines/vista/fusion/conflict_resolver.py`
+- `src/ps05/engines/vista/fusion/schemas.py`
+- `tests/integration/test_vista_fusion.py`
+**10. Failure Cases & Risks:**
+- Conflicting indicators between engines: Formally documented in report Section 9 (`Conflicting Outputs`) with forensic justification.
+- Missing engine run: Handled gracefully, marking that specific dimension as `UNSUPPORTED` or `INCONCLUSIVE`.
+**11. Security Considerations:**
+Fusion logic executes deterministically; zero stochastic sampling; 100% reproducible outcomes across identical inputs.
+**12. Acceptance Criteria:**
+- Correctly resolves lip-sync mismatch on authentic audio as `EXPLAINABLE_POST_PRODUCTION_DUBBING`.
+- Zero universal authenticity percentages emitted; all verdicts dimension-specific.
+- Archify JSON IR passes schema validation against `archify.config.json`.
+**13. Definition of Done (DoD):**
+Fusion engine operational, conflict matrix verified on synthetic multi-modal test cases, Archify IR validated.
+**14. Checkpoint Table:**
 
-**Objective:**  
-Implement the cross-engine evidence fusion engine to unify findings from VRE, AFB/AURAS, AVSC, VDF, VCI, and CCTV Profile onto a millisecond timeline grid, resolve conflicting forensic indicators (e.g. dubbing vs deepfake, hardware drops vs splicing), and format the consolidated result into Archify JSON IR.
-
-**Scope:**
-- *Included:* Multi-track timeline alignment, conflict resolution logic, traceable finding aggregation, overall verdict synthesis (`NO_ANOMALY_DETECTED`, `SUSPICIOUS_INDICATORS`, `INCONCLUSIVE`, `VERIFICATION_FAILED`), Archify JSON IR generation.
-- *Explicit Exclusions:* PDF rendering and signing (handled in A12).
-
-**Prerequisites:**  
-Phases VISTA-A5, VISTA-A8, and VISTA-A10 Gates passed; all five engines and CCTV profile operational.
-
-**Topics & Subtopics:**
-1. **Multi-Track Timeline Alignment Grid:** Synchronize PTS cadence, audio speech turns, lip-sync confidence curves, deepfake suspicion scores, object tracklets, and OSD clocks onto a unified millisecond time grid.
-2. **Conflict Resolution Matrix:**
-   - Case A: Lip-sync desynchronization + authentic audio + unaltered face $\implies$ *Voice-Over / Dubbing (Not Deepfake)*.
-   - Case B: Lip-sync desynchronization + audio splice boundary $\implies$ *Inserted Audio Splice*.
-   - Case C: Lip-sync in-sync + high VDF deepfake score $\implies$ *AI Talking Head / Facial Reenactment*.
-   - Case D: Clock jump + smooth PTS cadence $\implies$ *Spliced Video Clip with Fabricated Timestamps*.
-   - Case E: Clock monotonic + broken PTS cadence $\implies$ *Hardware Frame Drop / Packet Loss (Not Malice)*.
-3. **Traceable Finding Schema:** Emit structured findings containing engine ID, category, confidence, calibrated score, millisecond interval, spatial coordinates, and technical rationale.
-4. **Archify JSON IR Generation:** Serialize unified evidence graph into canonical Archify IR (`archify.report.json`).
-
-**Expected Files:**
-- `src/ps05/reporting/compiler.py` (VISTA fusion support)
-- `src/ps05/reporting/archify_adapter.py` (Video tracklet and timeline IR)
-
-**Validation Strategy:**  
-Execute end-to-end fusion test on 5 complex multi-modal exhibits; verify conflict resolution correctly distinguishes dubbing from deepfake; validate Archify JSON IR schema.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-11-01** | Dubbing vs Deepfake | Test re-dubbed authentic video exhibit | Classified as `VOICE_OVER_DUBBING`, not deepfake | `NOT_STARTED` | Conflict resolved accurately |
-| **VISTA-CP-11-02** | Timeline Alignment | Align PTS cut, audio splice, and deepfake interval | All three events align within $\pm 50\text{ ms}$ | `NOT_STARTED` | Unified timeline synchrony |
-| **VISTA-CP-11-03** | Archify JSON IR | Validate generated `archify.report.json` | Passes Archify JSON schema validation | `NOT_STARTED` | Compliant visual IR |
-| **VISTA-CP-11-04** | Overall Verdict Logic | Test exhibit with broken hash chain | Emits `VERIFICATION_FAILED` | `NOT_STARTED` | Correct top-level verdict |
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-11-01** | Multi-Modal Timeline Alignment Grid | Millisecond-accurate alignment across video, audio, and OCR clock | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-11-02** | Conflict Resolution (Dubbing vs Deepfake) | Rule 1 correctly classifies desync audio as voice-over dubbing | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-11-03** | Conflict Resolution (Spliced Video Clip) | Rule 4 flags clock jump with smooth PTS as spliced footage | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-11-04** | Archify JSON IR Schema Validation | `archify.report.json` passes schema validation without errors | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
 ### Phase VISTA-A12: Video Legal Reporting, Examiner Review & Sec 65B/63 BSA Dossier
 
-**Status:** `PLANNED`
+**1. Phase ID & Title:** `VISTA-A12: Video Legal Reporting, Examiner Review & Sec 65B/63 BSA Dossier`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Implement the judicial reporting and examiner review architecture: generate the complete 11-part court-admissible forensic dossier in machine-readable RFC 8785 canonical JSON and human-readable PDF formats, embed mandatory Section 65B IEA and Section 63 BSA legal certificates, provide an interactive examiner workbench review flow, seal reports with Ed25519 digital signatures, and attach RFC 3161 TSA tokens.  
+**4. Topics & Subtopics:**
+- 11-Part Legal Dossier Structure: Compiling technical, visual, acoustic, sync, CCTV, and cryptographic sections.
+- Section 65B IEA / Section 63 BSA Certification: Generating statutory legal certificate with hardware environment hashes.
+- Examiner Review & Override Workflow: Capturing forensic examiner review notes, status overrides, and signatures.
+- Dual Cryptographic Sealing: Sealing reports with Ed25519 private key and RFC 3161 TSA timestamp tokens.
+- Interactive Archify Visualization: Embedding self-contained SVG/HTML evidence graphs.
+**5. Exact Tasks:**
+1. Implement report compiler in `src/ps05/reporting/video_report.py` assembling all 11 required report sections.
+2. Build PDF generator in `pdf_generator.py` formatting Section 65B/63 BSA statutory certificates with embedded heatmaps.
+3. Implement examiner review API endpoints capturing human investigator notes and signed approvals.
+4. Build report signer sealing canonical JSON and PDF with Ed25519 digital signature and RFC 3161 TSA.
+5. Create report verification endpoint verifying digital signatures, hash chains, and artifact integrity.
+**6. Detailed Execution Workflow:**
+Fused Findings -> 11-Part Report Compiled -> Examiner Audits on Workbench -> Examiner Enters Notes & Signs -> Ed25519 Signature Generated -> RFC 3161 TSA Bound -> Certified PDF & JSON Dossier Published.
+**7. Technologies, Tools & Models:**
+ReportLab / WeasyPrint, Pydantic v2, `canonicaljson`, `cryptography` (Ed25519), `pyRFC3161`.
+**8. Prerequisites & Dependencies:**
+Phase VISTA-A11 Gate passed; fused findings and Archify JSON IR available.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/reporting/video_report.py`
+- `src/ps05/reporting/pdf_generator.py`
+- `src/ps05/reporting/sec65b_certificate.py`
+- `src/ps05/reporting/signer.py`
+- `tests/integration/test_vista_reporting.py`
+**10. Failure Cases & Risks:**
+- Incomplete engine execution: Report explicitly flags missing sections under Section 10 (`Unverified Assumptions`).
+- Signature verification failure on report: Rejects certificate; logs audit incident.
+**11. Security Considerations:**
+Private signing keys never exposed to frontend; examiner authentication via mTLS / JWT; audit logs immutable.
+**12. Acceptance Criteria:**
+- Generates 11-part PDF report containing all required technical, visual, acoustic, and legal fields.
+- Section 65B / Section 63 BSA certificate cites correct device serials, server MAC, and SHA-256 digests.
+- Report verification tool mathematically verifies Ed25519 signature and RFC 3161 timestamp.
+**13. Definition of Done (DoD):**
+Reporting pipeline complete, PDF generation verified, digital signature and TSA verification passing.
+**14. Checkpoint Table:**
 
-**Objective:**  
-Build the court-admissible legal reporting and examiner review workflow: interactive examiner review annotations, Section 65B Indian Evidence Act and Section 63 Bharatiya Sakshya Adhiniyam certified PDF compilation using Jinja2 and WeasyPrint, digital signature sealing (Ed25519 / PKCS#7), and append-only Merkle custody log certification.
-
-**Scope:**
-- *Included:* Examiner review endpoints, annotation data model, Jinja2 legal template logic, WeasyPrint PDF compiler, digital signature sealing, Section 65B/63 BSA certificate fields.
-- *Explicit Exclusions:* Web UI dashboard implementation (handled in Phase 8).
-
-**Prerequisites:**  
-Phase VISTA-A11 Gate passed; consolidated finding model and Archify IR operational.
-
-**Topics & Subtopics:**
-1. **Examiner Review Workbench Logic:** Provide API endpoints for certified forensic examiners to inspect flagged intervals, annotate findings, and record formal opinions.
-2. **Mandatory Legal Fields (Sec 65B / 63 BSA):** Automatically embed device hash, OS kernel version, engine commit hashes, dual cryptographic hashes (SHA-256 and SHA3-512), hardware serial numbers, and officer identification.
-3. **Visual Evidentiary Plates:** Embed synchronized waveform/spectrogram, OSD clock drift regression plot, face crop comparisons, and deepfake suspicion heatmaps directly in the PDF.
-4. **Digital Signature Sealing:** Sign PDF report and canonical manifest with platform Ed25519 private key; request RFC 3161 TSA timestamp token.
-5. **Merkle Custody Chain Audit:** Record report generation event and final signature hash in append-only Merkle tree.
-
-**Expected Files:**
-- `src/ps05/reporting/cert_65b.py`
-- `src/ps05/reporting/templates/video_forensic_report.html`
-- `src/ps05/api/v1/reports.py`
-
-**Validation Strategy:**  
-Compile complete forensic PDF dossier for test video exhibit; verify PDF renders with valid print layout; assert all Section 65B/63 BSA legal fields are present and hashes match exhibit.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-12-01** | Legal Certificate Fields| Inspect generated PDF for Section 65B/63 BSA tags | Contains dual hashes, device ID, officer ID | `NOT_STARTED` | Mandatory legal fields present |
-| **VISTA-CP-12-02** | Visual Evidentiary Plate| Inspect PDF page for clock drift plot | Vector plot embedded cleanly without distortion | `NOT_STARTED` | Evidentiary visuals rendered |
-| **VISTA-CP-12-03** | Digital Signature Seal | Validate Ed25519 signature on compiled PDF | Signature verifies with platform public key | `NOT_STARTED` | Valid cryptographic seal |
-| **VISTA-CP-12-04** | Merkle Audit Update | Verify audit log after report generation | New Merkle root recorded with report hash | `NOT_STARTED` | Custody log updated |
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-12-01** | Report & Manifest Integrity Verification | Report verification tool confirms 100% Ed25519 signature validity | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-12-02** | Statutory Section 65B / 63 BSA Dossier | PDF certificate generated containing all mandatory Indian legal fields | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-12-03** | Custody-Chain Integrity in Final Dossier | Full Merkle inclusion proof embedded in generated report JSON | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-12-04** | Examiner Review Note & Override Audit | Examiner notes and overrides immutably recorded in report metadata | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
-### Phase VISTA-A13: End-to-End Video Validation, Benchmark Corpus & Release Readiness
+### Phase VISTA-A13: End-to-End Video Validation, Security Audit & Release Readiness
 
-**Status:** `PLANNED`
-
-**Objective:**  
-Execute comprehensive regression testing, benchmark the complete video subsystem against curated standard corpora (FaceForensics++, Celeb-DF, DFDC, CCTV synthetic tampering set), audit dependency licensing and air-gap integrity, and establish release readiness for the hackathon demonstration.
-
-**Scope:**
-- *Included:* Regression test suite execution, 5-run bit-for-bit reproducibility audit, air-gap isolation validation (zero outbound network packets), model license compliance audit, hackathon demo scenario preparation.
-- *Explicit Exclusions:* None (covers full VISTA subsystem).
-
-**Prerequisites:**  
-Phase VISTA-A12 Gate passed; full VISTA video pipeline operational end-to-end.
-
-**Topics & Subtopics:**
-1. **Curated Video Test Corpus:** Assemble diverse evaluation set: authentic CCTV footage, smartphone recordings, drone footage, FaceForensics++ deepfakes, re-dubbed lip-sync clips, spliced surveillance videos with clock jumps, and ONVIF signed exports.
-2. **Reproducibility Audit:** Re-run complete video forensic pipeline on identical exhibit hashes 5 times; assert bit-for-bit identical findings, scores, and JSON manifests.
-3. **Air-Gap Network Isolation Verification:** Execute complete test suite on network-isolated test runner with outbound connections disabled; assert zero HTTP requests.
-4. **Performance & VRAM Profiling:** Benchmark throughput across CPU and GPU configurations; assert worker RAM stays under $4\text{ GB}$.
-5. **Model License & Checkpoint Audit:** Verify that all pre-trained models (RetinaFace, ByteTrack, SyncNet, Xception, VideoMAE, YOLOv8, SAM 2, PaddleOCR) comply with open-source licenses.
-6. **Documentation Parity Check:** Verify that `README.md`, `PRD.md`, `TRD.md`, and `PHASES.md` maintain 100% consistent terminology, requirements, and status markers.
-
-**Expected Files:**
+**1. Phase ID & Title:** `VISTA-A13: End-to-End Video Validation, Security Audit & Release Readiness`  
+**2. Current Status:** `PLANNED`  
+**3. Purpose:** Execute the final end-to-end forensic validation, security hardening, and release readiness audit for the VISTA subsystem: evaluate pipeline on a comprehensive evaluation corpus (FF++, Celeb-DF, DFDC, CCTV synthetic vectors, ONVIF exports), perform 5-run deterministic reproducibility audits, verify 100% air-gapped offline operation, audit dependency licenses, and enforce strict release criteria.  
+**4. Topics & Subtopics:**
+- Standardized Forensic Evaluation Corpus: Ingesting 100+ multi-modal video exhibits across all supported formats.
+- 5-Run Deterministic Reproducibility Audit: Verifying bit-identical findings across repeated runs on identical media.
+- Air-Gap Offline Execution: Enforcing complete zero-network isolation without DNS or HTTP egress calls.
+- Security Hardening & Penetration Testing: Testing container allocation limits, polyglots, and seccomp profiles.
+- Dependency & License Compliance Audit: Verifying commercial and hackathon-permissive software licenses.
+**5. Exact Tasks:**
+1. Curate standardized evaluation corpus containing authentic CCTV, spliced videos, face-swaps, and text-to-video clips.
+2. Build automated regression runner executing the entire 5-engine VISTA pipeline against the test corpus.
+3. Implement reproducibility verifier computing SHA-256 hashes of canonical report JSON across 5 sequential runs.
+4. Execute network isolation test disabling all virtual network adapters; assert zero network timeouts or crashes.
+5. Run license compliance scanner verifying that zero GPL-incompatible or non-commercial licenses are bundled.
+**6. Detailed Execution Workflow:**
+Test Corpus Loaded -> Full Pipeline Executed Offline -> 5-Run Reproducibility Verified -> Security Penetration Suite Run -> License Audit Executed -> Forensic Benchmark Dossier Generated -> VISTA Subsystem Released.
+**7. Technologies, Tools & Models:**
+pytest, pytest-xdist, Docker (air-gapped container), `pip-licenses`, Python standard library.
+**8. Prerequisites & Dependencies:**
+Phases VISTA-A0 through VISTA-A12 completed and verified.
+**9. Expected Files, Artifacts & Contracts:**
 - `tests/benchmarks/test_vdf_benchmarks.py`
 - `tests/integration/test_cctv_pipeline.py`
-- `tests/integration/test_video_pipeline.py`
-- `scripts/run_video_demo.py`
+- `tests/integration/test_end_to_end_vista.py`
+- `benchmarks/reports/vista_benchmark_dossier.json`
+**10. Failure Cases & Risks:**
+- Non-deterministic score variance across runs: Trapped by seeding all random generators (`torch.manual_seed(42)`, `numpy.random.seed(42)`).
+- Dependency attempting external telemetry call: Trapped and failed by network firewall sandbox.
+**11. Security Considerations:**
+Full deployment container verified as read-only root filesystem with non-root user and seccomp isolation.
+**12. Acceptance Criteria:**
+- 100% of end-to-end integration test suite passes with exit code 0.
+- Five consecutive runs on identical media produce bit-identical canonical JSON reports.
+- Full pipeline executes successfully with zero external internet connectivity.
+- Zero license conflicts identified across all direct and transitive dependencies.
+**13. Definition of Done (DoD):**
+Complete VISTA test suite passing, benchmark dossier committed, security audit signed, phase gate approved.
+**14. Checkpoint Table:**
 
-**Validation Strategy:**  
-Execute `pytest tests/` covering all video unit, integration, and benchmark tests; assert 100% green pass rate (exit code 0); verify zero outbound network calls via packet monitor.
-
-**Checkpoint Table:**
-
-| Checkpoint ID | Topic / Subtopic | Verification action | Expected evidence | Status | Pass criteria |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **VISTA-CP-13-01** | Full Video Suite Pass | Run complete video test suite | `pytest` exits with code 0 (100% passing) | `NOT_STARTED` | All tests pass |
-| **VISTA-CP-13-02** | 5-Run Reproducibility | Compare output hashes across 5 identical runs | 100% identical JSON outputs and scores | `NOT_STARTED` | Zero non-deterministic variance |
-| **VISTA-CP-13-03** | Air-Gap Isolation | Run full suite with network adapters disabled | Suite runs completely offline without errors | `NOT_STARTED` | Zero external network calls |
-| **VISTA-CP-13-04** | License Compliance | Audit all PyPI dependencies and model licenses | All licenses verified as commercial/hackathon permissive | `NOT_STARTED` | Zero GPL/proprietary conflicts |
-
----
-
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CP-13-01** | Full Video Suite Pass & CI/CD Gate | `pytest tests/` exits with code 0 across all VISTA test suites | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-13-02** | 5-Run Deterministic Reproducibility | 100% bit-identical canonical JSON report hashes across 5 runs | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-13-03** | Air-Gap Offline Operation Verification | Pipeline executes with network interface disabled; zero egress calls | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-13-04** | Dependency License Compliance Audit | Zero GPL or restrictive commercial license conflicts identified | `NOT_STARTED` | Awaits phase activation |
 ## 5. Dedicated Image Forensics Engineering Playbook (AIF-A0 through AIF-A15)
 
 The Advanced Image Forensics (AIF) engineering roadmap defines sixteen sequential, research-oriented, and cryptographically grounded implementation phases. Each phase provides an exhaustive engineering specification with verifiable completion criteria and independent checkpoint tables:
@@ -1966,7 +2112,8 @@ AIF-A8 classical vision operational; reference flat photos available for PRNU.
 `src/ps05/engines/image/ire/cmfd.py`, `src/ps05/engines/image/ire/prnu_sensor.py`, `tests/benchmarks/test_ire_cmfd.py`.
 
 **9. Validation Plan:**  
-Evaluate CMFD on CoMoFoD benchmark; assert detection recall $\ge 90\%$; test PRNU correlation on native camera stills ($ho > 0.15$).
+Evaluate CMFD on CoMoFoD benchmark; assert detection recall $\ge 90\%$; test PRNU correlation on native camera stills ($
+ho > 0.15$).
 
 **10. Failure Cases & Risks:**  
 PRNU false matches on images with shared ISP scene processing; mitigated by high significance threshold ($p < 0.001$).
