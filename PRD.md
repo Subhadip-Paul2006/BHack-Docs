@@ -1287,6 +1287,21 @@ All geospatial forensic analysis within AIF-GEO is governed by ten strict eviden
 9. **No Confidential Evidence Transmission:** Uploaded case images and confidential coordinates must **NEVER** be transmitted to unvetted third-party commercial geolocation APIs. External enrichment must use local offline databases or administrator-whitelisted, privacy-preserving adapters.
 10. **Mandatory Inconclusive Verdicts:** When image resolution is inadequate, scene geometry is ambiguous, terrain is flat/featureless, or metadata is stripped without visual clues, **"Location Inconclusive / Insufficient Geospatial Evidence"** is the legally required scientific finding.
 
+### 9.5 Forensic Limitations for Cross-Modal Deepfake Validation, Calibration, OOD & Inconclusive Claims
+
+All cross-modal deepfake detection and validation capabilities governed by CDVF are bounded by ten foundational forensic limitations:
+
+1. **Benchmark Scores Do Not Guarantee Universal Reliability:** High performance on curated academic datasets (e.g. $98\%$ AUC on FaceForensics++) does **not** establish universal reliability on questioned evidence captured under unknown real-world conditions or novel generative models.
+2. **Calibration Does Not Correct Faulty Models:** Confidence calibration aligns predicted probabilities with observed empirical accuracy on a specific evaluation distribution; it does **not** turn an inaccurate model into an accurate one, nor does it guarantee calibrated probabilities on out-of-distribution media.
+3. **Out-of-Distribution (OOD) Is Not Proof of Manipulation:** An elevated OOD score indicates that the questioned exhibit differs from the data distribution used during detector validation (e.g. unusual camera sensor, rare lighting, novel compression). It must **never** be cited in court as positive evidence of deepfake manipulation.
+4. **Prohibition of Blind Cross-Modal Score Averaging:** Image, audio, and video detection scores must **never** be naively averaged into a single monolithic "authenticity percentage." Each modality operates on distinct physical signals, sampling cadences, and error distributions. Cross-modal findings must state modality-specific conclusions and explicit evidence dependencies.
+5. **Frame-Level Predictions Do Not Prove Full Video Manipulation:** Detecting an artifact in a single video frame does not establish that the entire video is synthetic. Forensic conclusions require temporal consistency evaluation, scene context analysis, and documented video-level aggregation.
+6. **Localisation Mask Uncertainty:** Predicted spatial manipulation heatmaps and temporal bounding segments represent probabilistic anomaly regions, not exact ground-truth incision lines. Boundary errors are expected, particularly around blending margins and compressed edges.
+7. **Inconclusive Determinations Are Legally Mandatory:** When media signal-to-noise ratio is severely degraded, resolution is below minimum feature thresholds, OOD score exceeds validation bounds, or independent detectors register unresolved conflict, the system is scientifically mandated to issue an **Inconclusive** outcome rather than speculate.
+8. **Subgroup Performance May Vary:** Detectors may exhibit disparate error rates across demographic groups, regional dialects, or capture device tiers. Performance on the overall population must not be presumed uniform across all subgroups without empirical validation.
+9. **No Guarantees on Unseen Zero-Day Generators:** Deepfake detectors learn specific artifact signatures (e.g. blending boundaries, spectral frequency peaks, vocoder phase anomalies). Novel generative foundation models that eliminate these specific artifacts may completely evade detection until re-validated.
+10. **Model Approvals Are Strictly Scoped:** A model marked `VALIDATED_FOR_DEFINED_SCOPE` is certified only for the specific tasks, compression ranges, and operational thresholds documented in its validation dossier. Applying the model outside its approved scope invalidates the certification.
+
 ---
 
 ## 10. Assumptions, Dependencies & Risks
@@ -1303,6 +1318,7 @@ All geospatial forensic analysis within AIF-GEO is governed by ten strict eviden
 - **Image & CV Libraries:** Pillow (>= 10.0), OpenCV (Headless >= 4.8), scikit-image (>= 0.22), PySceneDetect (>= 0.6.2), NumPy, SciPy.
 - **Computer Vision & Tracking:** YOLOv8/v10, Grounding DINO, SAM 2, RetinaFace, SCRFD, ByteTrack, BoT-SORT, SyncNet.
 - **Cryptographic Tools:** `cryptography` (>= 42.0), `canonicaljson` (>= 2.0), RFC 3161 client, `pyc2pa` / `c2pa-rs`.
+- **CDVF Validation & Calibration:** Scikit-learn (>= 1.4), SciPy (>= 1.12), NumPy (>= 1.26), Matplotlib (>= 3.8), WeasyPrint (>= 61.0), DeepfakeBench (benchmark protocols).
 - **Data & Cache:** PostgreSQL (>= 15), Redis (>= 7.0), MinIO / S3.
 
 ### 10.3 Risks & Mitigations
@@ -1321,6 +1337,8 @@ All geospatial forensic analysis within AIF-GEO is governed by ten strict eviden
 | **RSK-10** | High-compression H.264 macroblocking in low-light CCTV triggering false deepfake facial seam alerts. | High | High | Enforce compression degradation safeguard (VDF-08); adjust classifier thresholds based on QP and bit-rate; require temporal consistency. |
 | **RSK-11** | Multiple simultaneous speakers in noisy surveillance video causing SyncNet lip-sync misattribution. | Medium | Medium | Execute multi-face disambiguation (AVSC-05); compute per-face confidence curves; report attribution uncertainty whenever confidence $< 0.65$. |
 | **RSK-12** | OSD clock text obscured by sunlight glare, night reflection, or low resolution in CCTV footage. | Medium | Medium | Apply adaptive contrast enhancement and morphological filtering before OCR; fallback to container PTS when OCR confidence $< 0.50$. |
+| **RSK-13** | Overconfident, uncalibrated deepfake model outputs creating misleading courtroom certainty. | High | High | Mandatory CDVF confidence calibration (Platt/temperature scaling); ECE audit $\le 0.05$; reliability diagrams; prominent warnings on uncalibrated outputs. |
+| **RSK-14** | Novel, unseen generative foundation models (Zero-Day deepfakes) evading detector features. | High | High | Mandatory CDVF unseen-generator benchmarking; out-of-distribution (OOD) Mahalanobis gating; mandatory first-class `INCONCLUSIVE_OOD` outcome. |
 
 ---
 

@@ -1059,6 +1059,130 @@ CREATE TABLE IF NOT EXISTS geospatial_conflict_graphs (
 );
 
 CREATE INDEX IF NOT EXISTS idx_geo_conflict_case ON geospatial_conflict_graphs(case_id);
+
+-- ============================================================================
+-- 4.5 CDVF Master Relational DDL: Model Registry, Datasets, Benchmarks & Governance
+-- ============================================================================
+
+-- 1. Model Registry Table (Tracks all deepfake detection models, checkpoints & licenses)
+CREATE TABLE IF NOT EXISTS cdvf_model_registry (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    model_id VARCHAR(100) UNIQUE NOT NULL,
+    model_family VARCHAR(50) NOT NULL,            -- RAWNET2, AASIST, WAVLM, EFFICIENTNET, XCEPTION, TRUFOR, VIDEOMAE
+    model_version VARCHAR(50) NOT NULL,
+    checkpoint_sha256 CHAR(64) NOT NULL,           -- Immutable byte-level SHA-256
+    source_repo VARCHAR(255),
+    source_commit CHAR(40),
+    author_org VARCHAR(150),
+    weights_license VARCHAR(100) NOT NULL,         -- Apache-2.0, MIT, Research-Only, CC-BY-NC
+    intended_task VARCHAR(100) NOT NULL,          -- SPEECH_SYNTHESIS, IMAGE_INPAINTING, VIDEO_DEEPFAKE, FACE_SWAP
+    supported_modality VARCHAR(20) NOT NULL,       -- IMAGE, AUDIO, VIDEO
+    input_spec JSONB NOT NULL,                     -- Tensor shape, sample rate, channels, normalization
+    preprocessing_spec JSONB NOT NULL,             -- Preprocessor version, transforms, cropping policy
+    class_label_mapping JSONB NOT NULL,            -- e.g. {"0": "AUTHENTIC", "1": "MANIPULATED"}
+    approval_state VARCHAR(50) NOT NULL DEFAULT 'CANDIDATE', -- CANDIDATE, EVALUATION_PENDING, VALIDATED_FOR_DEFINED_SCOPE, REJECTED, DEPRECATED, REVALIDATION_REQUIRED
+    known_limitations TEXT[] DEFAULT ARRAY[]::TEXT[],
+    last_validated_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_cdvf_models_modality ON cdvf_model_registry(supported_modality);
+CREATE INDEX IF NOT EXISTS idx_cdvf_models_state ON cdvf_model_registry(approval_state);
+CREATE INDEX IF NOT EXISTS idx_cdvf_models_hash ON cdvf_model_registry(checkpoint_sha256);
+
+-- 2. Dataset Cards Table (Official provenance, quality tiers & acquisition metadata)
+CREATE TABLE IF NOT EXISTS cdvf_datasets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    dataset_id VARCHAR(100) UNIQUE NOT NULL,
+    official_name VARCHAR(150) NOT NULL,
+    official_source_url TEXT,
+    dataset_license VARCHAR(100) NOT NULL,
+    modality VARCHAR(20) NOT NULL,                -- IMAGE, AUDIO, VIDEO, MULTIMODAL
+    sample_count INTEGER NOT NULL,
+    quality_tier VARCHAR(50) NOT NULL,            -- DIRECT_PHYSICAL, PIPELINE_INFERRED, HUMAN_VERIFIED, WEAK_DISPUTED
+    source_group_schema JSONB NOT NULL,           -- Hierarchy keys (root_video_id, subject_id, session_id)
+    dataset_card_json JSONB NOT NULL,             -- Complete standardized dataset card manifest
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_cdvf_datasets_modality ON cdvf_datasets(modality);
+CREATE INDEX IF NOT EXISTS idx_cdvf_datasets_tier ON cdvf_datasets(quality_tier);
+
+-- 3. Dataset Split Manifests Table (Leakage-resistant source-group partition isolation)
+CREATE TABLE IF NOT EXISTS cdvf_split_manifests (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    dataset_id UUID NOT NULL REFERENCES cdvf_datasets(id) ON DELETE RESTRICT,
+    manifest_version VARCHAR(50) NOT NULL,
+    split_algorithm VARCHAR(100) NOT NULL,         -- GROUPED_STRATIFIED_K_FOLD, LEAVE_ONE_GROUP_OUT
+    random_seed INTEGER NOT NULL,
+    grouping_key VARCHAR(100) NOT NULL,           -- e.g. root_video_id, speaker_identity
+    partition_hashes JSONB NOT NULL,              -- {"train_sha256": "...", "cal_sha256": "...", "val_sha256": "...", "test_sha256": "..."}
+    sample_counts JSONB NOT NULL,                 -- {"train": 10000, "calibration": 2000, "validation": 2000, "test": 4000}
+    leakage_asserted BOOLEAN NOT NULL DEFAULT TRUE,
+    manifest_sha256 CHAR(64) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_cdvf_splits_dataset ON cdvf_split_manifests(dataset_id);
+CREATE INDEX IF NOT EXISTS idx_cdvf_splits_hash ON cdvf_split_manifests(manifest_sha256);
+
+-- 4. Benchmark Execution Runs Table (Captures 19 operational parameters & raw results)
+CREATE TABLE IF NOT EXISTS cdvf_benchmark_runs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    model_id UUID NOT NULL REFERENCES cdvf_model_registry(id) ON DELETE RESTRICT,
+    split_manifest_id UUID NOT NULL REFERENCES cdvf_split_manifests(id) ON DELETE RESTRICT,
+    protocol_mode VARCHAR(50) NOT NULL,           -- IN_DOMAIN, CROSS_DATASET, UNSEEN_GENERATOR, ROBUSTNESS, CCTV_DOMAIN
+    operational_params JSONB NOT NULL,            -- Complete 19-parameter execution capture
+    raw_aggregate_metrics JSONB NOT NULL,         -- ROC_AUC, PR_AUC, Balanced_Accuracy, EER, Brier, ECE
+    per_class_metrics JSONB NOT NULL,
+    confidence_intervals JSONB NOT NULL,          -- Stratified bootstrap bounds [p025, p975]
+    subgroup_metrics JSONB,                       -- Disaggregated metrics by demographic, device, illumination
+    runtime_stats JSONB NOT NULL,                 -- Mean latency per item, peak VRAM MB, peak RAM MB
+    run_status VARCHAR(50) NOT NULL,              -- RUN_COMPLETED, RUN_FAILED, LEAKAGE_DETECTED
+    run_hash CHAR(64) NOT NULL,                   -- RFC 8785 hash of complete run manifest
+    executed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_cdvf_runs_model ON cdvf_benchmark_runs(model_id);
+CREATE INDEX IF NOT EXISTS idx_cdvf_runs_protocol ON cdvf_benchmark_runs(protocol_mode);
+CREATE INDEX IF NOT EXISTS idx_cdvf_runs_status ON cdvf_benchmark_runs(run_status);
+
+-- 5. Calibration Artifacts Table (Platt / Temperature scaling / Isotonic transforms)
+CREATE TABLE IF NOT EXISTS cdvf_calibration_artifacts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    model_id UUID NOT NULL REFERENCES cdvf_model_registry(id) ON DELETE RESTRICT,
+    calibration_split_id UUID NOT NULL REFERENCES cdvf_split_manifests(id) ON DELETE RESTRICT,
+    method VARCHAR(50) NOT NULL,                  -- PLATT_SCALING, TEMPERATURE_SCALING, ISOTONIC_REGRESSION
+    parameters JSONB NOT NULL,                    -- {"temperature": 1.42} or {"slope": 1.12, "intercept": -0.34}
+    binning_strategy VARCHAR(50) NOT NULL,        -- EQUAL_WIDTH_15, EQUAL_FREQUENCY_15
+    pre_calibration_ece DOUBLE PRECISION NOT NULL,
+    post_calibration_ece DOUBLE PRECISION NOT NULL,
+    pre_calibration_brier DOUBLE PRECISION NOT NULL,
+    post_calibration_brier DOUBLE PRECISION NOT NULL,
+    artifact_sha256 CHAR(64) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_cdvf_cal_model ON cdvf_calibration_artifacts(model_id);
+
+-- 6. Model Validation Approvals Table (12-gate release governance & signed scope bounds)
+CREATE TABLE IF NOT EXISTS cdvf_validation_approvals (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    model_id UUID NOT NULL REFERENCES cdvf_model_registry(id) ON DELETE RESTRICT,
+    benchmark_run_id UUID NOT NULL REFERENCES cdvf_benchmark_runs(id) ON DELETE RESTRICT,
+    calibration_artifact_id UUID REFERENCES cdvf_calibration_artifacts(id) ON DELETE RESTRICT,
+    approval_state VARCHAR(50) NOT NULL,          -- VALIDATED_FOR_DEFINED_SCOPE, REJECTED, REVALIDATION_REQUIRED
+    approved_scope JSONB NOT NULL,                -- Allowed tasks, min quality SNR/JPEG Q, valid codecs, max OOD threshold
+    operating_decision_threshold DOUBLE PRECISION NOT NULL,
+    ood_gating_threshold DOUBLE PRECISION NOT NULL,
+    examiner_id VARCHAR(100) NOT NULL,
+    digital_signature_ed25519 TEXT NOT NULL,      -- Cryptographically sealed by approving examiner
+    dossier_pdf_sha256 CHAR(64) NOT NULL,
+    signed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_cdvf_approvals_model ON cdvf_validation_approvals(model_id);
+CREATE INDEX IF NOT EXISTS idx_cdvf_approvals_state ON cdvf_validation_approvals(approval_state);
 ```
 
 ---
@@ -3755,6 +3879,609 @@ To prevent computational bottlenecks on long surveillance exhibits (e.g. 24-hour
   - Ingestion does not read entire files into memory; it streams directly from disk via chunked 64KB I/O.
   - Long recordings are segmented into contiguous 5-minute logical analysis chunks along keyframe (I-frame) boundaries.
   - Chunks are dispatched as independent, parallel Celery tasks across worker queues and re-assembled by the timeline merger upon completion.
+
+---
+
+## 11.B Cross-Modal Deepfake Validation Framework (CDVF) Technical Specification
+
+### 11.B.1 Framework Boundaries & Shared Architecture
+The **Cross-Modal Deepfake Validation Framework (CDVF)** is a centralized evaluation, calibration, and model-governance capability within PS-05. It serves as the common scientific validation backbone across the **AIF (Image)**, **AURAS (Audio)**, and **VISTA (Video/CCTV)** forensic detection engines. 
+
+CDVF does **NOT** act as a fourth standalone media-detection engine. It does not ingest questioned evidence files directly or perform primary forensic extraction; rather, it governs, benchmarks, stress-tests, calibrates, and certifies the detection models operating inside AIF, AURAS, and VISTA.
+
+```mermaid
+flowchart TB
+    subgraph PLATFORM["🧱 Shared Platform Services"]
+        CEIPL["CEIPL Cryptographic Layer\n(SHA-256 Checksums, Merkle Tree, WORM Vault)"]
+        CELERY["Celery / Redis Distributed Task Queue"]
+        REPORT["Section 65B/63 BSA Dossier Compiler"]
+    end
+
+    subgraph CDVF_CORE["🔬 CDVF: Shared Validation & Governance Capability"]
+        direction TB
+        REGISTRY["1. Model Registry & Checkpoint Provenance"]
+        DATA_GOV["2. Dataset Cards & Leakage-Resistant Splitting"]
+        BENCHMARK["3. Unified Benchmark Runner (19 Parameters)"]
+        CALIBRATION["4. Calibration Engine (Platt / Temp / Isotonic)"]
+        OOD_ENGINE["5. Out-of-Distribution (OOD) Gating Engine"]
+        ABSTENTION["6. Abstention & Selective Classification Engine"]
+        CROSS_MODAL["7. Cross-Modal Evidence DAG & Dependency Tracker"]
+        APPROVAL["8. Scoped Model Approval Gate Review"]
+    end
+
+    subgraph ENGINES["🎯 Detection Subsystems (Consumers of CDVF)"]
+        AIF["AIF (Image Forensics)\nAIM / TruFor / Face X-Ray"]
+        AURAS["AURAS (Audio Forensics)\nADDE: RawNet2 / AASIST / WavLM"]
+        VISTA["VISTA (Video & CCTV Forensics)\nVDF: Xception / FTCN / VideoMAE"]
+    end
+
+    AIF & AURAS & VISTA -.->|Register Checkpoints & Contracts| REGISTRY
+    DATA_GOV -->|Provide Isolated Partitions| BENCHMARK
+    REGISTRY -->|Provide Frozen Checkpoints| BENCHMARK
+    BENCHMARK -->|Emit Raw Logits & Activations| CALIBRATION & OOD_ENGINE
+    CALIBRATION & OOD_ENGINE -->|Calibrated Probabilities & Distance| ABSTENTION
+    ABSTENTION -->|Modality-Specific Findings| CROSS_MODAL
+    CROSS_MODAL -->|Synthesized Multi-Modal Profile| APPROVAL
+    APPROVAL -->|Certify Deployment Scope| AIF & AURAS & VISTA
+    CDVF_CORE --- CEIPL
+    CDVF_CORE --- CELERY
+    APPROVAL --> REPORT
+```
+
+#### Shared Platform Service Reuse
+1. **CEIPL Integration:** Checkpoint files, dataset split manifests, benchmark run records, and calibration parameters are treated as immutable digital artifacts. Each record receives a streaming SHA-256 digest, an RFC 8785 canonical JSON representation, an Ed25519 digital signature, and an entry in the append-only Merkle tree audit log.
+2. **Celery Worker Orchestration:** High-compute evaluation runs (e.g. cross-dataset video matrix evaluation across 10,000 clips) are chunked into asynchronous worker tasks with GPU memory cgroup isolation and priority queues.
+3. **Finding Schemas & Dossier Integration:** CDVF evaluation outcomes map directly to the platform's standardized forensic finding contracts, ensuring that examiner interpretation guidelines and scope restrictions are embedded into court-admissible Section 65B/63 BSA certificates.
+
+---
+
+### 11.B.2 Model Registry Architecture & Checkpoint Provenance
+Every machine learning model evaluated or deployed within PS-05 must be registered in the immutable `cdvf_model_registry`. Unregistered or modified checkpoints are strictly rejected by the execution runtime.
+
+```mermaid
+flowchart TD
+    SUBMIT["1. Submit Candidate Checkpoint (.pt / .onnx / .safetensors)"] --> HASH["2. Compute Streaming SHA-256 Checksum"]
+    HASH --> CARD["3. Validate Model Card & Permitted License (Apache/MIT/CC)"]
+    CARD --> SPEC["4. Verify Fixed Input Tensor Geometry & Preprocessing Version"]
+    SPEC --> REG_DB["5. Insert ModelRegistryEntry (State: CANDIDATE)"]
+    REG_DB --> LOCK["6. Store in POSIX 0400 WORM Vault (Read-Only)"]
+    LOCK --> BENCH["7. Trigger Automated CDVF Benchmark Suite"]
+```
+
+#### Model Registry Entity Schema
+Each registry entry records:
+- **`model_id`:** Unique deterministic identifier (e.g., `cdvf-audio-aasist-v1`, `cdvf-video-ftcn-v2`).
+- **`model_family` & `architecture`:** Documented base architecture (`RawNet2`, `AASIST`, `WavLM`, `EfficientNet-B4`, `Xception`, `TruFor`, `VideoMAE`).
+- **`checkpoint_sha256`:** Byte-level SHA-256 digest computed from the frozen weights file.
+- **`source_repo` & `source_commit`:** Upstream repository URL and exact 40-character Git commit SHA.
+- **`author_org`:** Research lab or author institution (e.g. ASVspoof Consortium, NAVER AI, Meta AI).
+- **`weights_license`:** Explicit license string (`Apache-2.0`, `MIT`, `CC-BY-NC-4.0`, `Research-Only`).
+- **`intended_task`:** Narrow forensic task (`AUDIO_SYNTHESIS_DETECTION`, `IMAGE_INPAINTING_LOCALIZATION`, `VIDEO_FACE_SWAP_DETECTION`, `VIDEO_TEMPORAL_TAMPERING`).
+- **`supported_modality`:** Logical modality (`IMAGE`, `AUDIO`, `VIDEO`).
+- **`input_spec`:** Immutable tensor dimensions, data type, channels, sampling rate, window size, and normalization constraints.
+- **`preprocessing_spec`:** Explicit preprocessor code version, resizing algorithms, cropping bounding boxes, and color space transformations.
+- **`class_label_mapping`:** JSON dictionary mapping raw model outputs to canonical forensic labels.
+- **`approval_state`:** Formal state machine state:
+  - `CANDIDATE`: Registered, pending benchmark evaluation.
+  - `EVALUATION_PENDING`: Benchmark and calibration jobs currently running.
+  - `VALIDATED_FOR_DEFINED_SCOPE`: Fully passed approval gates for a documented operational domain.
+  - `REJECTED`: Failed one or more mandatory approval gates.
+  - `DEPRECATED`: Replaced by an updated model version or invalidated by architectural shifts.
+  - `REVALIDATION_REQUIRED`: Triggered when dependencies, preprocessing, or hardware change.
+- **`known_limitations`:** Array of documented conditions under which the model is known to fail.
+
+#### Explicit Revalidation Triggers
+A model version's approval is immediately transitioned to `REVALIDATION_REQUIRED` whenever any of the following 12 operational changes occur:
+1. **Checkpoint File Replacement:** Any modification to the underlying weights file or SHA-256 digest.
+2. **Preprocessing Pipeline Updates:** Changes to OpenCV/Pillow image resizing filters (e.g. Bilinear to Bicubic), face crop margins, or audio windowing parameters.
+3. **Feature Extractor Changes:** Modifications to upstream feature extraction backbones (e.g. WavLM layer selection or STFT hop size).
+4. **Class Label Semantics:** Alteration of threshold mappings or target class indices.
+5. **Calibration Artifact Expiration:** Replacement or re-fitting of Platt scaling or temperature scaling parameters.
+6. **Numeric Precision Shift:** Moving between FP32, FP16, and INT8 quantization modes that alter floating-point outputs.
+7. **Inference Framework Upgrades:** Major version upgrades to PyTorch, TorchAudio, ONNX Runtime, or TensorRT.
+8. **OOD Detector Re-thresholding:** Modifying distance metrics or rejection thresholds on the OOD gating layer.
+9. **Decision Threshold Tuning:** Altering the operational classification threshold $t$.
+10. **Late-Fusion Aggregation Updates:** Changing weighting or ensemble logic across multi-branch detectors.
+11. **Benchmark Protocol Revisions:** Introduction of updated ground-truth criteria or new evaluation metrics.
+12. **Operational Scope Expansion:** Attempting to deploy the detector in a previously unvalidated domain (e.g. deploying an image model on CCTV video frames).
+
+---
+
+### 11.B.3 Dataset Governance, Quality Tiers & Leakage Prevention
+
+#### Dataset Registry & Dataset Cards
+Every benchmark corpus used for training, calibration, or evaluation must be cataloged in `cdvf_datasets` with an immutable `DatasetCard` containing:
+- Acquisition source URL, publication date, and data collection protocol.
+- Dataset license and permitted legal use for criminal forensics and law enforcement.
+- Media modalities, file format profiles, codec distributions, and duration/frame counts.
+- Ground truth provenance and generation pipelines (e.g. StyleGAN2, Diff-SVC, FaceSwap, DeepFaceLab).
+- Sensor metadata: capture camera models, microphone types, environmental acoustics, and lighting.
+
+#### Ground-Truth Quality Tiers
+Ground-truth annotations are classified into four distinct evidentiary tiers:
+1. **`DIRECT_PHYSICAL`:** Ground truth established through controlled physical recording with known camera hardware, uncompressed bitstreams, and documented timestamps.
+2. **`PIPELINE_GENERATED`:** Manipulations generated programmatically with exact software parameters, seed logs, and algorithmic bounding masks.
+3. **`HUMAN_VERIFIED`:** Media inspected and independently confirmed by two or more certified forensic examiners with documented inter-annotator agreement ($\kappa \ge 0.85$).
+4. **`WEAK_DISPUTED`:** Web-scraped media, crowd-sourced annotations, or heuristic labels. Weak labels are strictly segregated and prohibited from primary validation test sets.
+
+#### Evaluated Research Corpora Reconciliation
+CDVF establishes formal adapters and verification protocols for public research corpora:
+- **FaceForensics++ (FF++):** Validated for facial manipulation (Deepfakes, Face2Face, FaceSwap, NeuralTextures) across Raw, C23 (high quality), and C40 (low quality) H.264 compression tiers.
+- **DFDC (Deepfake Detection Challenge) & Celeb-DF v2:** Validated for in-the-wild facial swaps and complex lighting conditions.
+- **DeepfakeBench:** Reconciled as the standard protocol runner for spatial and temporal video manipulation baselines.
+- **ASVspoof 2021 (Logical Access & Deepfake Tracks):** Validated for synthetic speech and voice conversion across lossy telephony and VoIP codecs.
+- **CodecFake:** Reconciled for lossy recompression stress-testing of audio deepfake classifiers.
+- **Omni-Fake & FVBench:** Evaluated as candidates for emerging cross-modal and multimodal deepfake benchmark protocols.
+
+#### Strict Source-Group Leakage Prevention
+To eliminate data contamination, all dataset splits (Train, Calibration, Validation, Test) must be partitioned at the root source grouping key:
+- **Root Video ID:** All sub-clips, frame extracts, and face crops from a source video belong strictly to one partition.
+- **Subject Identity:** In facial and voice cloning benchmarks, a person's authentic and synthetic speech/faces must never cross between Train and Test sets.
+- **Recording Session & Hardware:** Audio recorded in the same acoustic session or camera sensor must not span partitions.
+- **Derivative Family:** All edits, compressions, crops, and warps derived from an exhibit share the parent's partition assignment.
+
+```mermaid
+flowchart TD
+    CORPUS["Raw Media Corpus"] --> GROUP_KEYS["Extract Root Grouping Keys\n(Root Video ID, Actor Identity, Session ID)"]
+    GROUP_KEYS --> HIERARCHY["Hierarchical Group Stratification Engine"]
+    HIERARCHY --> SPLIT_GEN["Grouped Stratified Partitioning\n(Train 60% / Calibration 10% / Val 10% / Test 20%)"]
+    
+    SPLIT_GEN --> T_SET["Train Partition (Frozen)"]
+    SPLIT_GEN --> C_SET["Calibration Partition (Isolated)"]
+    SPLIT_GEN --> V_SET["Validation Partition (Tuning)"]
+    SPLIT_GEN --> TE_SET["Test Partition (Strictly Held Out)"]
+
+    C_SET & TE_SET --> ASSERT_LEAK{"Automated Disjoint Set Assertion\nIntersect(GroupKeys) == Empty?"}
+    ASSERT_LEAK -->|Yes: Disjoint| MANIFEST["Generate Signed DatasetSplitManifest\n(Compute SHA-256 for Each Partition)"]
+    ASSERT_LEAK -->|No: Overlap Detected| FAIL["FATAL: DATASET_LEAKAGE_DETECTED\nAbort Run & Quarantine Manifest"]
+```
+
+The split manifest contains an explicit Boolean invariant: `leakage_asserted = True`, backed by automated set intersection tests asserted on every execution.
+
+---
+
+### 11.B.4 Unified Benchmark Run Execution Protocol
+Every benchmark run produces a deterministic, self-contained record capturing **19 mandatory operational parameters**:
+1. **`evaluation_run_id`:** Unique UUIDv4 identifying the run.
+2. **`model_id` & `checkpoint_sha256`:** Exact model identifier and byte-level checkpoint digest.
+3. **`dataset_id` & `split_manifest_id`:** Versioned dataset and split manifest hashes.
+4. **`task_definition`:** Formally evaluated task (e.g., `BINARY_CLASSIFICATION_SYNTHETIC_SPEECH`).
+5. **`preprocessing_version`:** Preprocessing code commit and parameter dictionary.
+6. **`threshold_policy`:** Operating decision threshold $t$ and optimization criterion (e.g. EER, fixed FPR $\le 1\%$).
+7. **`metric_implementation_version`:** Pinned library versions computing statistics (e.g. `scikit-learn==1.4.1`).
+8. **`runtime_environment`:** OS kernel, Python version, container digest, and environment variable snapshot.
+9. **`hardware_spec`:** CPU model, GPU architecture (e.g. NVIDIA A10G), VRAM allocation, and driver versions.
+10. **`execution_precision`:** Numeric precision mode (`FP32`, `FP16`, `BF16`, `INT8`).
+11. **`random_seed`:** Global pseudo-random number generator seed (`torch.manual_seed`, `np.random.seed`).
+12. **`dataset_exclusions`:** Explicit list of excluded sample IDs and programmatic rejection reasons.
+13. **`corrupt_sample_handling`:** Policy applied to corrupt media (e.g. skipped, flagged, or zero-imputed).
+14. **`runtime_throughput`:** Average inference latency per sample (ms) and throughput (samples/sec).
+15. **`peak_memory_footprint`:** Maximum recorded VRAM (MB) and system RAM (MB) during benchmark execution.
+16. **`output_schema_version`:** Schema specification version for the emitted JSON artifact.
+17. **`raw_aggregate_metrics`:** Complete scalar metric dictionary (AUC, EER, F1, Balanced Accuracy, ECE, Brier).
+18. **`per_class_breakdown`:** Class-conditional True Positive, False Positive, Precision, and Recall figures.
+19. **`statistical_uncertainty`:** 95% bootstrap confidence intervals $[p_{0.025}, p_{0.975}]$ for all primary metrics.
+
+```mermaid
+flowchart LR
+    RUN_CFG["1. Run Configuration\n(19 Parameters)"] --> WORKER["2. Celery Worker Execution\n(Seeded PRNG, GPU cgroup)"]
+    WORKER --> INFERENCE["3. Model Forward Pass\n(Extract Logits & Embeddings)"]
+    INFERENCE --> METRICS["4. Metric Computation Engine\n(SciPy / Scikit-learn)"]
+    METRICS --> BOOTSTRAP["5. Grouped Stratified Bootstrap\n(1,000 Iterations -> 95% CIs)"]
+    BOOTSTRAP --> MANIFEST["6. Emit Signed BenchmarkRun Manifest\n(WORM Vault Archive)"]
+```
+
+---
+
+### 11.B.5 Modality-Specific Validation Protocols
+
+#### 1. Image Deepfake & Manipulation Protocol (AIF Suite)
+- **Discrete Tasks:**
+  - Task IMG-1: Authentic vs. Fully AI-Generated (Diffusion, GAN, Autoregressive).
+  - Task IMG-2: Authentic vs. Locally Manipulated (Splicing, Inpainting, Generative Fill).
+  - Task IMG-3: Facial Tampering (FaceSwap, Morphing, Expression Reenactment).
+  - Task IMG-4: Spatial Manipulation Localisation (Pixel-level binary segmentation mask).
+- **Evaluation Requirements:** Classification performance is evaluated separately from localisation performance. Non-face images submitted to facial models emit `TASK_PRECONDITION_FAILED` rather than false manipulation scores.
+- **Robustness Tests:** Evaluates performance degradation across 10 systematic image perturbations:
+  - JPEG compression at quality factors $Q \in \{95, 85, 75, 65, 50, 35, 20\}$.
+  - Bilinear, Bicubic, and Lanczos downsampling ($0.25\times, 0.5\times, 0.75\times$).
+  - Gaussian blur ($\sigma \in [0.5, 3.0]$) and additive Gaussian noise ($\sigma \in [5, 30]$).
+  - Gamma adjustment, contrast stretching, and histogram equalization.
+  - Social-media recompression simulation (WhatsApp / Telegram image pipelines).
+  - Screenshots and physical print-and-scan re-captures.
+
+#### 2. Audio Deepfake & Speech Manipulation Protocol (AURAS Suite)
+- **Discrete Tasks:**
+  - Task AUD-1: Bona Fide vs. Fully Synthetic Speech (Text-to-Speech vocoders, Tacotron, VITS, StyleTTS2).
+  - Task AUD-2: Voice Conversion (VC) and Voice Cloning (identity preservation attacks).
+  - Task AUD-3: Partial Audio Splicing & Edit Insertion (spliced words or phonemes).
+  - Task AUD-4: Temporal Manipulation Localisation (start and end timestamps in milliseconds).
+- **Evaluation Requirements:** Audio is evaluated across standardized 2.0-second sliding windows (0.5s hop) and aggregated to recording-level verdicts. Signal-level splicing checks (ARE) are decoupled from deep neural speech vocoder detection (ADDE).
+- **Robustness Tests:** Evaluates degradation across 8 audio transmission perturbations:
+  - Lossy re-encoding: MP3 ($\{32, 64, 128, 192\}\text{ kbps}$), AAC ($\{32, 64, 128\}\text{ kbps}$), AMR-NB ($12.2\text{ kbps}$), AMR-WB ($23.85\text{ kbps}$), Opus ($\{16, 32, 64\}\text{ kbps}$).
+  - Sample-rate mismatch: Upsampling and downsampling across $8\text{ kHz}, 16\text{ kHz}, 44.1\text{ kHz}, 48\text{ kHz}$.
+  - Background noise injection: Street noise, cafeteria babble, air conditioning hum (SNRs from $+20\text{ dB}$ down to $0\text{ dB}$).
+  - Room impulse response (RIR) reverberation convolution ($T_{60} \in [0.2, 0.8]\text{ s}$).
+  - Dynamic range compression and peak clipping (up to $10\%$ clipped samples).
+  - Short-duration evaluation ($0.5\text{ s}, 1.0\text{ s}, 2.0\text{ s}, 5.0\text{ s}$).
+
+#### 3. Video Deepfake Detection Protocol (VISTA Suite)
+- **Discrete Tasks:**
+  - Task VID-1: Frame-Level Suspicious Content Detection.
+  - Task VID-2: Video-Level Manipulated Content Detection (Temporal sequence aggregation).
+  - Task VID-3: Synthetic Video Generation Detection (Sora, Runway Gen-2, Pika, Kling, Wan2.1).
+  - Task VID-4: Audio-Visual Synchronization & Lip-Sync Inconsistency (SyncNet $\Delta t$).
+  - Task VID-5: Spatio-Temporal Manipulation Localisation (Frame intervals and bounding boxes).
+- **Sampling & Aggregation Policy:**
+  - Face-crop policy: RetinaFace alignment with fixed $1.3\times$ bounding box margin.
+  - Frame sampling: Uniform sampling at $5\text{ fps}$ or strided sampling over 16-frame sliding windows.
+  - Video-level aggregation methods: Mean pooling, Top-$k$ pooling ($k=\max(3, 0.1 \times N_{\text{frames}})$), and learned temporal attention. The aggregation strategy must be explicitly documented in the benchmark configuration.
+- **Robustness Tests:**
+  - Video codec trans手游: H.264 (CRF 18, 23, 28, 35) and H.265 (CRF 23, 28, 35).
+  - Variable Frame Rate (VFR) jitter and dropped frame simulation ($5\%$ to $30\%$ dropped frames).
+  - Downscaling: $1080\text{p} \to 720\text{p} \to 480\text{p} \to 360\text{p}$.
+  - Motion blur and low-light sensor noise.
+  - Multiple simultaneous faces and extreme profile head poses ($> 45^\circ$ yaw/pitch).
+
+#### 4. CCTV-Specific Evaluation Domain
+Surveillance footage represents a hostile operational domain that differs fundamentally from high-quality internet video. CDVF establishes a dedicated CCTV benchmark track:
+- **Optical & Environmental Degeneracies:** Evaluates models on monochrome night-vision (Infrared 850nm/940nm), extreme low resolution ($320 \times 240$ analog CIF captures), severe motion blur, and glare from headlights.
+- **Surveillance Bitstream Artifacts:** High compression macroblocking (H.264 Baseline Profile with QP $\ge 38$), low frame rates ($5\text{ fps}$ to $12\text{ fps}$), dropped RTSP network packets, and missing keyframes.
+- **Hardware & Container Peculiarities:** Proprietary DVR/NVR container formats, burned-in On-Screen Display (OSD) digital clock overlays, and absence of audio tracks.
+- **Forensic Invariant:** A model validated solely on Celeb-DF or FaceForensics++ is **strictly prohibited** from deployment on CCTV evidence until it achieves passing scores on the dedicated CCTV evaluation suite.
+
+---
+
+### 11.B.6 Cross-Dataset & Unseen-Generator Protocols
+To prevent overoptimistic in-domain performance claims, CDVF defines **seven mandatory validation modes (A through G)**:
+
+| Mode | Evaluation Mode | Training Data Domain | Evaluation Data Domain | Operational Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| **A** | **In-Domain Validation** | Dataset $D_1$, Partition $P_{\text{train}}$ | Dataset $D_1$, Disjoint Partition $P_{\text{test}}$ | Establishes theoretical upper-bound performance on familiar data distribution. |
+| **B** | **Cross-Dataset Validation** | Dataset $D_1$ (e.g. FaceForensics++) | Dataset $D_2$ (e.g. Celeb-DF v2, DFDC) | Measures generalisation gap ($\Delta\text{AUC}_{\text{transfer}}$) across independent collection setups. |
+| **C** | **Unseen-Generator Validation** | Generators $\{G_1, G_2, G_3\}$ (e.g. DeepFaceLab, Face2Face) | Held-Out Generators $\{G_4, G_5\}$ (e.g. Diffusion, SimSwap) | Quantifies vulnerability to zero-day and novel generative architectures. |
+| **D** | **Cross-Compression Validation** | Uncompressed / Raw Video ($C_0$) | Lossy Compressed Video ($C_{23}, C_{40}$, WhatsApp) | Maps degradation curves across lossy transmission pipelines. |
+| **E** | **Cross-Source / Device Validation** | Studio Cameras / Mobile Flagships | Legacy Webcams, Budget Phones, Body-Worn Cameras | Evaluates sensor noise robustness across disparate hardware tiers. |
+| **F** | **Realistic Degraded Evidence** | Clean Laboratory Data | Multi-Generation Forwarded Media (Social Media Hops) | Tests detection under realistic cyber-investigation exhibit conditions. |
+| **G** | **Temporal Sequence Validation** | Clips from Timestamp Range $[T_1, T_2]$ | Clips from Timestamp Range $[T_3, T_4]$ (Held-out sessions) | Eliminates temporal correlation leakage in video surveillance models. |
+
+---
+
+### 11.B.7 Mathematical Formulations of All Evaluation Metrics
+
+#### 1. Binary Classification Metrics
+For a decision threshold $t \in [0, 1]$, define the confusion matrix counts:
+- $TP(t) = \sum_{i=1}^N \mathbb{I}(\hat{y}_i(t) = 1 \land y_i = 1)$
+- $TN(t) = \sum_{i=1}^N \mathbb{I}(\hat{y}_i(t) = 0 \land y_i = 0)$
+- $FP(t) = \sum_{i=1}^N \mathbb{I}(\hat{y}_i(t) = 1 \land y_i = 0)$
+- $FN(t) = \sum_{i=1}^N \mathbb{I}(\hat{y}_i(t) = 0 \land y_i = 1)$
+
+$$\operatorname{Precision}(t) = \begin{cases} \frac{TP(t)}{TP(t) + FP(t)}, & \text{if } TP(t) + FP(t) > 0 \\ 0.0, & \text{otherwise (documented zero-handling)} \end{cases}$$
+
+$$\operatorname{Recall}(t) = \begin{cases} \frac{TP(t)}{TP(t) + FN(t)}, & \text{if } TP(t) + FN(t) > 0 \\ 0.0, & \text{otherwise} \end{cases}$$
+
+$$\operatorname{Specificity}(t) = \begin{cases} \frac{TN(t)}{TN(t) + FP(t)}, & \text{if } TN(t) + FP(t) > 0 \\ 0.0, & \text{otherwise} \end{cases}$$
+
+$$F_1(t) = \begin{cases} 2 \cdot \frac{\operatorname{Precision}(t) \cdot \operatorname{Recall}(t)}{\operatorname{Precision}(t) + \operatorname{Recall}(t)}, & \text{if } \operatorname{Precision}(t) + \operatorname{Recall}(t) > 0 \\ 0.0, & \text{otherwise} \end{cases}$$
+
+$$\operatorname{BalancedAccuracy}(t) = \frac{\operatorname{Recall}(t) + \operatorname{Specificity}(t)}{2}$$
+
+$$\operatorname{FPR}(t) = \frac{FP(t)}{FP(t) + TN(t)}, \quad \operatorname{FNR}(t) = \frac{FN(t)}{TP(t) + FN(t)}$$
+
+Equal Error Rate (EER) is the operating point where false positive rate equals false negative rate:
+$$\operatorname{EER} = \operatorname{FPR}(t^*) = \operatorname{FNR}(t^*) \quad \text{where } t^* = \arg\min_t |\operatorname{FPR}(t) - \operatorname{FNR}(t)|$$
+
+Area Under the ROC Curve (ROC-AUC) is calculated via trapezoidal integration of the true positive rate against the false positive rate across all thresholds:
+$$\operatorname{ROC-AUC} = \int_0^1 \operatorname{TPR}(\operatorname{FPR}^{-1}(u)) \, du$$
+
+#### 2. Statistical Uncertainty & Grouped Bootstrap
+To quantify sampling error without violating sample independence assumptions, confidence intervals are computed using **Grouped Stratified Bootstrap** with $B = 1,000$ iterations:
+- Let $G = \{g_1, g_2, \dots, g_K\}$ be the set of unique source groups (e.g. source video IDs or speaker identities).
+- On each bootstrap iteration $b \in \{1, \dots, B\}$:
+  1. Resample $K$ groups with replacement: $G^{(b)} \sim \operatorname{Multinomial}(G, K)$.
+  2. Aggregate all evaluation samples belonging to groups in $G^{(b)}$.
+  3. Recompute metric $\theta^{(b)} = \operatorname{Metric}(G^{(b)})$.
+- The two-sided $95\%$ empirical confidence interval is:
+  $$\operatorname{CI}_{0.95}(\theta) = \left[ \theta_{\lfloor 0.025 \cdot B \rfloor}, \; \theta_{\lceil 0.975 \cdot B \rceil} \right]$$
+
+#### 3. Calibration Metrics
+Let $p_i \in [0, 1]$ be the predicted probability of manipulation and $y_i \in \{0, 1\}$ be the ground-truth label for sample $i \in \{1, \dots, N\}$.
+
+**Brier Score:**
+$$\operatorname{Brier} = \frac{1}{N} \sum_{i=1}^N (p_i - y_i)^2, \quad \operatorname{Brier} \in [0, 1]$$
+
+**Expected Calibration Error (ECE):**
+Partition the probability interval $[0, 1]$ into $M = 15$ equal-width bins $B_m = \left( \frac{m-1}{M}, \frac{m}{M} \right]$ for $m \in \{1, \dots, M\}$.
+Define:
+- $\operatorname{acc}(B_m) = \frac{1}{|B_m|} \sum_{i \in B_m} y_i$ (empirical fraction of positives in bin $m$)
+- $\operatorname{conf}(B_m) = \frac{1}{|B_m|} \sum_{i \in B_m} p_i$ (mean predicted confidence in bin $m$)
+
+$$\operatorname{ECE} = \sum_{m=1}^M \frac{|B_m|}{N} \left| \operatorname{acc}(B_m) - \operatorname{conf}(B_m) \right|$$
+*Empty bin rule:* If $|B_m| = 0$, its contribution $\frac{0}{N}|0 - 0| = 0$. ECE is strictly reported alongside the bin count $M=15$ and binning strategy.
+
+#### 4. Manipulation Localisation Metrics
+**Spatial Mask Intersection-over-Union (IoU):**
+For predicted binary mask $M_p \in \{0, 1\}^{H \times W}$ (thresholded at $t_{\text{mask}}$) and ground-truth mask $M_g \in \{0, 1\}^{H \times W}$:
+$$\operatorname{IoU}(M_p, M_g) = \begin{cases} \frac{|M_p \cap M_g|}{|M_p \cup M_g|}, & \text{if } |M_p \cup M_g| > 0 \\ 1.0, & \text{if } |M_p| = 0 \land |M_g| = 0 \text{ (correctly predicted clean image)} \\ 0.0, & \text{if } |M_p| > 0 \land |M_g| = 0 \text{ (false positive mask on clean image)} \end{cases}$$
+
+**Temporal Interval Intersection (Audio / Video Localisation):**
+Let $I_g = [t_{g,\text{start}}, t_{g,\text{end}}]$ be the ground-truth manipulated interval and $I_p = [t_{p,\text{start}}, t_{p,\text{end}}]$ be the predicted interval.
+$$\operatorname{tIoU}(I_p, I_g) = \frac{\max\left(0, \; \min(t_{p,\text{end}}, t_{g,\text{end}}) - \max(t_{p,\text{start}}, t_{g,\text{start}})\right)}{\max(t_{p,\text{end}}, t_{g,\text{end}}) - \min(t_{p,\text{start}}, t_{g,\text{start}})}$$
+Boundary error is defined as the temporal offset between predicted and true transition points:
+$$\Delta t_{\text{boundary}} = \frac{|t_{p,\text{start}} - t_{g,\text{start}}| + |t_{p,\text{end}} - t_{g,\text{end}}|}{2}$$
+
+#### 5. Out-of-Distribution (OOD) Metrics
+- **OOD AUROC:** Area under the ROC curve when treating in-distribution samples as class 0 and out-of-distribution samples as class 1 based on an OOD score $S_{\text{OOD}}(x)$.
+- **FPR@95%TPR:** False Positive Rate on in-distribution data when the OOD detector's threshold is set to capture $95\%$ of out-of-distribution inputs:
+  $$\operatorname{FPR@95} = \operatorname{FPR}(t_{\text{OOD}}) \quad \text{where } \operatorname{TPR}(t_{\text{OOD}}) = 0.95$$
+
+---
+
+### 11.B.8 Detection Calibration Pipeline & Lifecycle
+Raw neural network logits $z(x)$ from deepfake detectors frequently suffer from extreme overconfidence due to over-parameterization and cross-entropy training. CDVF enforces a **9-step calibration lifecycle**:
+
+```mermaid
+flowchart TD
+    S1["1. Obtain Raw Logits z(x) under Frozen Preprocessing Contract"] --> S2["2. Freeze Selected Checkpoint (Verify Checkpoint SHA-256)"]
+    S2 --> S3["3. Reserve Isolated Calibration Data Partition (Zero Test-Set Overlap)"]
+    S3 --> S4["4. Fit Calibration Method (Platt / Temperature / Isotonic)"]
+    S4 --> S5["5. Evaluate Calibration on Held-Out Calibration-Val Split (Assert ECE <= 0.05)"]
+    S5 --> S6["6. Freeze Calibration Parameters & Decision Threshold t*"]
+    S6 --> S7["7. Evaluate Final Calibrated Metrics on Protected Held-Out Test Set"]
+    S7 --> S8["8. Seal Model & Calibration Parameters Together in Signed CalibrationArtifact"]
+    S8 --> S9["9. Deploy: Runtime Maps Logits to Verified Posterior Probabilities"]
+```
+
+#### Calibration Methods Specification
+1. **Temperature Scaling (Logit Scaling):**
+   $$p(y=1 \mid x) = \sigma\left(\frac{z(x)}{T}\right) = \frac{1}{1 + \exp\left(-\frac{z(x)}{T}\right)}$$
+   Fitted via negative log-likelihood (NLL) optimization on the isolated calibration partition with $T > 0$.
+2. **Platt Scaling (Affine Transform):**
+   $$p(y=1 \mid x) = \sigma(a \cdot z(x) + b) = \frac{1}{1 + \exp(-(a \cdot z(x) + b))}$$
+   Fitted via logistic regression over calibration logits.
+3. **Isotonic Regression:** Non-parametric monotonic step function fitted via Pool Adjacent Violators Algorithm (PAVA). Permitted only when the calibration dataset has $N_{\text{cal}} \ge 2,000$ independent samples to prevent step-overfitting.
+
+---
+
+### 11.B.9 Out-of-Distribution (OOD) Detection & Domain Shift Gating
+An out-of-distribution input is one that differs materially from the training manifold (e.g. rare camera sensors, unusual codecs, synthetic diffusion artifacts not seen during training). CDVF establishes an OOD gating engine:
+
+```mermaid
+flowchart TD
+    INPUT["Questioned Exhibit (Image / Audio / Video)"] --> FEATURE["Extract Latent Embedding Vectors: z = f_backbone(x)"]
+    FEATURE --> OOD_SCORE["Compute OOD Score S_OOD(x)\n(Mahalanobis Distance / Energy Score)"]
+    OOD_SCORE --> GATING{"S_OOD(x) <= tau_OOD\n(Within Validated Manifold?)"}
+    
+    GATING -->|Yes: In-Distribution| CALIB["Apply Calibration Scaling\nOutput Calibrated P(Manipulated)"]
+    GATING -->|No: Domain Shift| ABSTAIN["ABSTAIN FROM VERDICT\nStatus: INCONCLUSIVE_OOD\nExplain: Distribution Shift Detected"]
+```
+
+#### Supported OOD Methods
+1. **Feature-Space Mahalanobis Distance:**
+   For penultimate layer embedding vector $\mathbf{z}(x) \in \mathbb{R}^D$ and class-conditional training mean $\boldsymbol{\mu}_c$ and shared covariance matrix $\boldsymbol{\Sigma}$:
+   $$D_M^2(x) = \min_{c \in \{0, 1\}} (\mathbf{z}(x) - \boldsymbol{\mu}_c)^T \boldsymbol{\Sigma}^{-1} (\mathbf{z}(x) - \boldsymbol{\mu}_c)$$
+   Threshold $\tau_{\text{OOD}}$ is fixed to accept $95\%$ of in-distribution validation samples ($\operatorname{FPR} = 5\%$).
+2. **Free Energy-Based OOD Score:**
+   $$E(x; T) = -T \cdot \log \sum_{c=1}^C \exp\left(\frac{z_c(x)}{T}\right)$$
+3. **Prediction Entropy:**
+   $$H(p) = -\sum_{c=1}^C p_c \log p_c$$
+
+#### OOD Forensic Invariant
+An OOD flag indicates that the model's calibration and statistical predictions **cannot be verified** for the given media. **An OOD score must NEVER be reported as evidence of deepfake manipulation.** High OOD triggers mandatory abstention.
+
+---
+
+### 11.B.10 Formal Inconclusive Taxonomy & Selective Classification
+CDVF formalizes abstention as a first-class forensic outcome. The platform declines categorical classification when operational preconditions are violated.
+
+#### Canonical Decision States
+```mermaid
+stateDiagram-v2
+    [*] --> Intake
+    Intake --> QualityCheck
+    QualityCheck --> INCONCLUSIVE_LOW_QUALITY: Signal SNR / Resolution Below Minimum
+    QualityCheck --> OODCheck: Quality Passed
+    OODCheck --> INCONCLUSIVE_OOD: Mahalanobis Distance > tau_OOD
+    OODCheck --> Inference: In-Distribution
+    Inference --> MultiModelDisagreementCheck
+    MultiModelDisagreementCheck --> INCONCLUSIVE_MODEL_DISAGREEMENT: Detectors Contradict with High Confidence
+    MultiModelDisagreementCheck --> CLASSIFIED_WITHIN_VALIDATED_SCOPE: Consensus Reached
+```
+
+1. **`CLASSIFIED_WITHIN_VALIDATED_SCOPE`:** Input satisfies quality, format, and in-distribution gating; detector issues calibrated posterior probability within certified scope.
+2. **`INCONCLUSIVE_OOD`:** Input exhibits significant domain shift relative to training data; detector cannot guarantee calibrated accuracy.
+3. **`INCONCLUSIVE_LOW_QUALITY`:** Extreme compression (JPEG $Q < 30$, H.264 $\text{bitrate} < 200\text{ kbps}$), severe noise, or low resolution precludes reliable signal analysis.
+4. **`INCONCLUSIVE_MODEL_DISAGREEMENT`:** Independent, calibrated detectors issue statistically incompatible predictions (e.g. Detector A outputs $p=0.92$, Detector B outputs $p=0.11$).
+5. **`INSUFFICIENT_EVIDENCE`:** Media duration too short ($< 0.5\text{ s}$ audio), faces unidentifiable or heavily occluded, or critical metadata stripped.
+6. **`UNSUPPORTED_INPUT`:** Format, codec, or resolution violates engine contract (e.g. multi-channel Ambisonics audio).
+7. **`ANALYSIS_FAILED`:** Preprocessor or worker process threw a trapped exception during execution.
+
+#### Selective Classification Mathematics
+Let $S \subseteq \{1, \dots, N\}$ be the subset of samples on which the system does not abstain.
+**Coverage:**
+$$\operatorname{Coverage} = \frac{|S|}{N} = \frac{N_{\text{classified}}}{N_{\text{total}}}$$
+
+**Selective Risk (Empirical Error on Accepted Samples):**
+For loss function $\ell(\hat{y}_i, y_i) = \mathbb{I}(\hat{y}_i \neq y_i)$:
+$$\operatorname{SelectiveRisk} = \frac{1}{|S|} \sum_{i \in S} \ell(\hat{y}_i, y_i)$$
+
+The validation report includes Risk-Coverage trade-off curves, verifying that as the system abstains on higher-uncertainty cases, Selective Risk decreases monotonically.
+
+---
+
+### 11.B.11 Cross-Modal Evidence Fusion & Dependency Tracking
+When examining multi-modal exhibits (e.g. video files with audio tracks or synchronized CCTV clusters), CDVF governs how findings from AIF, AURAS, and VISTA are cross-validated.
+
+#### Core Anti-Averaging Invariant
+**Image, audio, and video deepfake scores must NEVER be blindly averaged into a single monolithic authenticity percentage.**
+$$\text{Authenticity} \neq \frac{\text{Score}_{\text{Image}} + \text{Score}_{\text{Audio}} + \text{Score}_{\text{Video}}}{3} \quad \text{[STRICTLY FORBIDDEN]}$$
+*Rationale:* An adversary may manipulate solely the audio track (voice clone) while preserving genuine camera video, or splice video frames while leaving background environmental audio untouched. Averaging dilutes isolated positive findings and manufactures deceptive certainty.
+
+```mermaid
+flowchart TB
+    EXHIBIT["Seized Multi-Modal Video Exhibit (MP4)"] --> DEMUX["Lossless Demuxer (PyAV / FFmpeg)"]
+    
+    DEMUX --> VIDEO_STREAM["Extracted Video Frames (YUV420p)"]
+    DEMUX --> AUDIO_STREAM["Extracted Audio Track (WAV 16kHz)"]
+    
+    VIDEO_STREAM --> VDF["VISTA: VDF Video Deepfake Detector\n(Spatial Xception + Temporal FTCN)"]
+    AUDIO_STREAM --> ADDE["AURAS: ADDE Audio Deepfake Detector\n(AASIST + WavLM SSL)"]
+    
+    VIDEO_STREAM & AUDIO_STREAM --> AVSC["VISTA: AVSC SyncNet Engine\n(Lip-Sync Offset Delta t & Acoustic Match)"]
+    
+    VDF --> F_V["Finding: Video Face Spliced\n(Frame 120-180, p=0.96)"]
+    ADDE --> F_A["Finding: Speech Bona Fide\n(Natural Vocoder Phase, p=0.08)"]
+    AVSC --> F_SYNC["Finding: Lip-Sync Desynchronized\n(Delta t = +380ms Discontinuity)"]
+    
+    F_V & F_A & F_SYNC --> DAG["Cross-Modal Evidence DAG\n(Tracks Shared Stream Dependencies)"]
+    DAG --> FUSION_SUMMARY["Cross-Modal Forensic Finding\n'Selective Video Manipulation Detected with Intact Original Audio'\n(Zero Naive Score Averaging)"]
+```
+
+#### Fusion Rules & Dependency Tracking
+1. **DAG Dependency Mapping:** If a video frame detection and an image inpainting detection share the same decoded pixel buffer, the system marks them as **statistically dependent observations**.
+2. **Modality Absence Handling:** When an exhibit lacks an audio track (e.g. silent CCTV), the audio modality is recorded as `MODALITY_ABSENT`. Missing modalities never penalize or inflate authenticity scores.
+3. **Disagreement Transparency:** If the video engine indicates face tampering ($p=0.95$) but the audio engine verifies authentic voice ($p=0.05$), the system emits an explicit multi-modal contradiction finding: `"SELECTIVE_VIDEO_MANIPULATION_WITH_GENUINE_AUDIO"`.
+
+---
+
+### 11.B.12 Demographic & Subgroup Robustness Analysis
+CDVF mandates disaggregated subgroup benchmarking to ensure that detection models do not exhibit bias or catastrophic performance degradation across demographic or operational categories.
+
+#### Subgroup Categories
+- **Image Subgroups:** Face vs. non-face media, skin tone (Fitzpatrick scale I–VI where labeled in research corpora), illumination ($< 20\text{ lux}$ vs $> 200\text{ lux}$), capture device tiers (Flagship, Mid-tier, Low-cost mobile).
+- **Audio Subgroups:** Scheduled Indian Languages and regional dialects (Hindi, Bhojpuri, Maithili, Magahi, Bengali, Tamil), speaker gender/age categories, low-bandwidth telephony ($8\text{ kHz}$) vs high-fidelity recordings ($44.1\text{ kHz}$).
+- **Video Subgroups:** Low-resolution surveillance ($< 720\text{p}$) vs HD/4K video, extreme head pose ($> 45^\circ$ yaw), motion blur, camera distance (close-up portrait vs wide-angle crowd).
+
+#### Subgroup Metric Evaluation
+For each subgroup $k$ with sample size $N_k \ge 50$:
+$$\operatorname{Disparity}_{\text{metric}} = \max_{k} \operatorname{Metric}_k - \min_{k} \operatorname{Metric}_k$$
+If any subgroup exhibits an error rate exceeding $2.0\times$ the overall benchmark average, CDVF annotates the model's approval record with an explicit operational restriction.
+
+---
+
+### 11.B.13 Scoped Model Approval & Release Gates
+CDVF implements a formal **12-Gate Release Governance Framework**. A model is certified only when all 12 gates are satisfied or formally scoped:
+
+```mermaid
+flowchart TD
+    G1["Gate 1: Checkpoint SHA-256 Verified"] --> G2["Gate 2: License Permits Forensic / Law Enforcement Use"]
+    G2 --> G3["Gate 3: Split Manifest Zero Leakage Asserted"]
+    G3 --> G4["Gate 4: In-Domain ROC-AUC >= 0.95"]
+    G4 --> G5["Gate 5: Cross-Dataset AUC Drop <= 15%"]
+    G5 --> G6["Gate 6: Unseen-Generator Accuracy >= 70%"]
+    G6 --> G7["Gate 7: Compression Robustness Threshold Mapped"]
+    G7 --> G8["Gate 8: Post-Calibration ECE <= 0.05 & Brier <= 0.10"]
+    G8 --> G9["Gate 9: OOD AUROC >= 0.85 & Gating Calibrated"]
+    G9 --> G10["Gate 10: Localisation Mask IoU >= 0.65 (Where Supported)"]
+    G10 --> G11["Gate 11: Subgroup Disparity Ratio <= 2.0x"]
+    G11 --> G12["Gate 12: Inference Latency & Peak VRAM <= 8GB Certified"]
+    
+    G12 --> DECISION{"All 12 Gates Passed?"}
+    DECISION -->|Yes| APPROVE["Sign ValidationApproval\nState: VALIDATED_FOR_DEFINED_SCOPE"]
+    DECISION -->|Partial / Scope Restricted| SCOPE_APPROVE["Approve with Explicit Scope Boundaries\n(e.g. Valid only for JPEG Q >= 75)"]
+    DECISION -->|Critical Failure| REJECT["State: REJECTED\nEmit Rejection Cause in Audit Log"]
+```
+
+#### Criteria Policy: `THRESHOLD_REQUIRES_VALIDATION`
+Where historical empirical baselines do not yet exist in the repository to substantiate universal numerical thresholds (e.g. novel CCTV models), CDVF records the criteria as `THRESHOLD_REQUIRES_VALIDATION`. This status requires the engineering team to execute a formal pilot study before fixing deployment thresholds.
+
+---
+
+### 11.B.14 Continuous Regression Testing & Baseline Stability
+To protect forensic integrity against regressions caused by framework, dependency, or weights updates, CDVF defines an automated regression pipeline:
+- Frozen reference test manifests are executed against candidate model revisions.
+- Regression limits are enforced:
+  $$\Delta\operatorname{AUC} = \operatorname{AUC}_{\text{candidate}} - \operatorname{AUC}_{\text{baseline}} \ge -0.010$$
+  $$\Delta\operatorname{ECE} = \operatorname{ECE}_{\text{candidate}} - \operatorname{ECE}_{\text{baseline}} \le +0.010$$
+- Any degradation exceeding these statistical limits automatically aborts the CI/CD deployment pipeline and prevents model promotion.
+
+---
+
+### 11.B.15 Standard Evaluation Artefact Bundle
+Every benchmark or approval run produces an immutable **24-item artifact bundle** archived in the CEIPL WORM vault:
+1. `benchmark_run_manifest.json`: Full 19-parameter execution record.
+2. `model_registry_snapshot.json`: Pinned model metadata, checkpoint SHA-256, and license.
+3. `dataset_card.json`: Provenance, sensor specs, and quality tiers of evaluated corpora.
+4. `dataset_split_manifest.json`: Grouping keys, sample assignments, and partition hashes.
+5. `preprocessing_spec.json`: Preprocessor version and image/audio normalization parameters.
+6. `threshold_calibration_config.json`: Operating decision threshold $t^*$ and calibration scaling parameters.
+7. `metric_library_versions.json`: Pinned mathematical evaluation dependencies.
+8. `per_class_confusion_matrices.json`: TP, TN, FP, FN counts across operating thresholds.
+9. `aggregate_metrics_summary.json`: ROC-AUC, PR-AUC, EER, Balanced Accuracy, F1.
+10. `bootstrap_confidence_intervals.json`: 95% empirical bootstrap intervals for all metrics.
+11. `cross_dataset_transfer_matrix.json`: Generalization scores across out-of-domain datasets.
+12. `unseen_generator_breakdown.json`: Per-architecture detection rates for held-out engines.
+13. `robustness_perturbation_curves.json`: Metric decay curves across compression, blur, and noise.
+14. `calibration_reliability_diagram.json`: Binned empirical accuracy vs predicted confidence ($M=15$).
+15. `brier_score_decomposition.json`: Reliability, resolution, and uncertainty decomposition.
+16. `ood_evaluation_report.json`: AUROC, FPR@95%TPR, and threshold $\tau_{\text{OOD}}$ parameters.
+17. `localization_evaluation_report.json`: Spatial mask IoU, temporal tIoU, and boundary offsets.
+18. `abstention_coverage_risk_curve.json`: Selective risk vs coverage coordinates.
+19. `subgroup_disparity_analysis.json`: Disaggregated metrics across demographic and device groups.
+20. `runtime_resource_telemetry.json`: Latency per item, peak VRAM, and system RAM telemetry.
+21. `rejection_and_exclusion_inventory.json`: Itemized log of excluded samples and reasons.
+22. `dependency_license_attestation.json`: Audit log of open-source license permissions.
+23. `reproducibility_instructions.sh`: Complete CLI command sequence to replicate run from raw bits.
+24. `final_validation_approval_record.json`: Signed examiner approval decision and scope bounds.
+
+---
+
+### 11.B.16 Proposed File & Package Structure for CDVF
+CDVF components are designed to reside within the `ps05.cdvf` package hierarchy upon implementation:
+```
+src/ps05/cdvf/
+├── __init__.py
+├── registry/
+│   ├── __init__.py
+│   ├── model_registry.py          # ModelRegistryEntry CRUD & SHA-256 verification
+│   ├── checkpoint_verifier.py     # Checkpoint integrity & format sanity checks
+│   └── license_validator.py       # Open-source license compatibility audit
+├── datasets/
+│   ├── __init__.py
+│   ├── dataset_card.py            # DatasetCard schemas and metadata extraction
+│   ├── quality_tiers.py           # Label tier taxonomy (Direct, Inferred, Human, Weak)
+│   ├── split_engine.py            # Hierarchical source-group splitting (GroupKFold)
+│   └── leakage_checker.py         # Automated disjoint-set intersection assertions
+├── benchmarks/
+│   ├── __init__.py
+│   ├── runner.py                  # 19-parameter benchmark execution harness
+│   ├── baseline_manager.py        # Frozen baseline management & diff tracking
+│   ├── cross_dataset.py           # Modes A-G cross-domain protocol runner
+│   └── perturbations.py           # Robustness stress-testing (compression, noise, blur)
+├── evaluation/
+│   ├── __init__.py
+│   ├── metrics_binary.py          # AUC, EER, Balanced Accuracy, F1 with safe division
+│   ├── metrics_calibration.py     # Brier score, ECE (15-bin), reliability diagrams
+│   ├── metrics_localization.py    # Spatial IoU, temporal tIoU, boundary offset
+│   ├── metrics_ood.py             # OOD AUROC, FPR@95%TPR, Mahalanobis distance
+│   └── bootstrap.py               # Grouped stratified bootstrap confidence intervals
+├── calibration/
+│   ├── __init__.py
+│   ├── platt_scaling.py           # Logistic regression calibration transform
+│   ├── temperature_scaling.py     # Logit temperature scaling with NLL optimization
+│   └── isotonic_regression.py     # PAVA isotonic regression calibration transform
+├── ood/
+│   ├── __init__.py
+│   ├── mahalanobis.py             # Feature covariance & class mean distance estimator
+│   ├── energy.py                  # Free energy score calculator
+│   └── entropy.py                 # Softmax prediction entropy gating
+├── abstention/
+│   ├── __init__.py
+│   ├── policy.py                  # 7-state canonical decision router
+│   └── selective_prediction.py    # Risk-coverage trade-off curve generator
+├── cross_modal/
+│   ├── __init__.py
+│   ├── dependency_graph.py        # DAG evidence dependency tracker (shared pixels/audio)
+│   └── consistency_checker.py     # Cross-modal contradiction & anti-averaging logic
+├── governance/
+│   ├── __init__.py
+│   ├── approval_gates.py          # 12-gate release governance evaluator
+│   ├── regression_engine.py       # Automated regression test harness
+│   └── report_generator.py        # Section 65B/63 BSA Dossier & PDF compiler
+└── schemas/
+    ├── __init__.py
+    └── contracts.py               # Pydantic v2 data models for all CDVF entities
+```
 
 ---
 
