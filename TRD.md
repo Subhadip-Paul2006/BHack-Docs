@@ -57,6 +57,7 @@ flowchart TB
             IRE["IRE: Image Reverse Engineering Engine"]
             AIM["AIM: AI, Manipulation & Steganography Engine"]
             FPA["FPA: Face, Portrait & Biometric Analysis Module"]
+            GEO["GEO: Geospatial Forensics & Evidence Correlation"]
         end
         subgraph VISTA["📹 VISTA Video Forensics Subsystem"]
             VRE["VRE: Video Reverse Engineering Engine"]
@@ -108,6 +109,7 @@ flowchart TB
 | **AIF - IRE** | `ps05.engines.image.ire` | Deep EXIF/XMP/IPTC/ICC audit (IRE-01), 2D FFT/DCT signal analysis (IRE-02), classical CV/RANSAC (IRE-03), CMFD (IRE-04), PRNU camera noise (IRE-05), transfer history (IRE-06). | Raw image bitstream, colour-space planes, reference photos. | Metadata anomaly flags, 2D FFT spectra, cloned polygon pairs, PRNU correlation coefficients. |
 | **AIF - AIM** | `ps05.engines.image.aim` | Multi-branch AI image detection (AIM-01), inpainting localization (AIM-02), face swap/morph forensics (AIM-03), LSB/RS steganalysis (AIM-04), file vulnerability defense (AIM-05). | Normalized RGB patches, canonical face crops, raw container. | Calibrated synthetic score $P(\text{AI})$, inpainting heatmaps, facial manipulation scores, steganalysis alerts. |
 | **AIF - FPA Module** | `ps05.engines.image.fpa` | RetinaFace/SCRFD face detection, 468 MediaPipe landmarks, pose/blur/occlusion scoring, authorized 1:1 ArcFace/MagFace comparison. | Face crops, reference mugshot, Case Authorization Token. | Landmark coordinates, pose angles, quality score, cosine similarity with legal disclaimer. |
+| **AIF - GEO** | `ps05.engines.image.geo` | Deep EXIF/XMP/IPTC GPS extraction, coordinate range/rational validation, reverse geocoding & place enrichment, geodesic calculations, GPS track log correlation, visual location recovery, camera heading & landmark geometry, NOAA solar/shadow validation, historical weather reanalysis, DEM terrain elevation correlation, location spoofing/teleportation detection, multi-image spatio-temporal clustering, and location conflict graphs. | Questioned image exhibits (JPEG/TIFF/HEIC/PNG/RAW), authorized GPS tracks (GPX/KML/NMEA/FIT/CSV), offline gazetteer/DEM rasters, local weather cache. | Extracted GPS coordinates, normalized WGS84 point/bounding polygon, reverse geocode candidates, movement velocity anomalies, solar shadow consistency metrics, cross-evidence conflict graph. |
 | **VISTA - VRE Engine** | `ps05.engines.vista.vre` | Container, codec, GOP cadence, PTS/DTS continuity, VFR jitter, scene cuts, macroblock QP re-encoding traces. | Master video exhibit (MP4/MKV/AVI/TS/DAV). | PTS continuity curve, instantaneous FPS, duplicate frame intervals, scene cut list. |
 | **VISTA - AFB Bridge** | `ps05.engines.vista.afb` | Lossless stream-copy audio extraction, SHA-256 DAG binding, asynchronous AURAS routing (ARE/MVSI/ADDE), multi-speaker tracking. | Seized video bitstream, audio track index. | Extracted audio artifact, AURAS job references, video-aligned speaker intervals. |
 | **VISTA - AVSC Engine** | `ps05.engines.vista.avsc`| Global container AV time alignment, RetinaFace/ByteTrack face tracking, SyncNet lip-sync verification, sound-to-visual event matching. | Decoded frames, extracted 16kHz audio. | Global offset $\Delta t$, localized lip-sync confidence curves, sound-event match matrix. |
@@ -237,12 +239,28 @@ d:/NextHackathon/
 │       │   │   │   ├── prnu_sensor.py # IRE-05: Sensor pattern noise extraction & correlation
 │       │   │   │   └── transfer.py    # IRE-06: Container re-compression & history clues
 │       │   │   │
-│       │   │   └── aim/               # AIM: AI, Manipulation & Steganography Engine
-│       │   │       ├── ai_detect.py   # AIM-01: Multi-branch synthetic image detector
-│       │   │       ├── inpaint_loc.py # AIM-02: Generative fill & inpainting localization
-│       │   │       ├── face_tamper.py # AIM-03: Face swap, morphing & blend boundary check
-│       │   │       ├── steganalysis.py# AIM-04: LSB / RS / Chi-square hidden data analyzer
-│       │   │       └── file_defense.py# AIM-05: Polyglot & malformed payload quarantine
+│       │   │   ├── aim/               # AIM: AI, Manipulation & Steganography Engine
+│       │   │   │   ├── ai_detect.py   # AIM-01: Multi-branch synthetic image detector
+│       │   │   │   ├── inpaint_loc.py # AIM-02: Generative fill & inpainting localization
+│       │   │   │   ├── face_tamper.py # AIM-03: Face swap, morphing & blend boundary check
+│       │   │   │   ├── steganalysis.py# AIM-04: LSB / RS / Chi-square hidden data analyzer
+│       │   │   │   └── file_defense.py# AIM-05: Polyglot & malformed payload quarantine
+│       │   │   │
+│       │   │   └── geo/                   # GEO: Geospatial Forensics & Evidence Correlation (AIF-GEO)
+│       │   │       ├── __init__.py
+│       │   │       ├── metadata_parser.py # GEO-01: ExifTool / XMP / IPTC comprehensive GPS extraction
+│       │   │       ├── validator.py       # GEO-02: Coordinate bounds, hemisphere, rational validation
+│       │   │       ├── geocoder.py        # GEO-03 / GEO-26: Offline gazetteer & rate-limited provider adapter
+│       │   │       ├── map_interface.py   # GEO-04: MapLibre / Leaflet GeoJSON layer generation
+│       │   │       ├── geodesy.py         # GEO-05 / GEO-06: Haversine, WGS84 Karney geodesic & uncertainty
+│       │   │       ├── track_correlator.py# GEO-07 / GEO-08: GPX/KML/NMEA parser, timeline & track interpolation
+│       │   │       ├── visual_locator.py  # GEO-09 / GEO-22: Visual OCR, scene clue retrieval & landmark ranker
+│       │   │       ├── orientation.py     # GEO-10 / GEO-21: Camera heading, solar azimuth & satellite homography
+│       │   │       ├── environment.py     # GEO-11 / GEO-12 / GEO-13: NOAA solar/shadow, weather & DEM terrain
+│       │   │       ├── manipulation.py    # GEO-14 / GEO-15: EXIF-to-visual consistency & location spoof flags
+│       │   │       ├── clustering.py      # GEO-17 / GEO-23: Near-duplicate scenes & multi-image DBSCAN
+│       │   │       ├── conflict_graph.py  # GEO-16 / GEO-24 / GEO-25: Cross-evidence graph & PostGIS spatial search
+│       │   │       └── provenance.py      # GEO-18 / GEO-19 / GEO-20: Camera hardware, PRNU & C2PA credentials
 │       │   │
 │       │   └── vista/                 # VISTA: Video Integrity, Synchronization & Tampering Analysis
 │       │       ├── __init__.py
@@ -349,6 +367,10 @@ erDiagram
     EVIDENCE ||--o| IMAGE_EXHIBITS : details
     EVIDENCE ||--o{ IMAGE_TAXONOMY_TAGS : classified_under
     EVIDENCE ||--o{ FACE_BIOMETRIC_REGIONS : contains_faces
+EVIDENCE ||--o{ GEOSPATIAL_OBSERVATIONS : contains_geo_obs
+EVIDENCE ||--o{ GEOSPATIAL_CANDIDATES : localized_by
+EVIDENCE ||--o{ GEOSPATIAL_TRACKS : associates_track
+CASES ||--o{ GEOSPATIAL_CONFLICT_GRAPHS : maps_conflicts
     ARTIFACTS ||--o{ DERIVED_ARTIFACT_DAG : lineage_of
     EVIDENCE ||--o{ CUSTODY_EVENTS : tracks_custody
     CASES ||--o{ MERKLE_CHECKPOINTS : anchors
@@ -924,6 +946,119 @@ CREATE INDEX idx_face_biometric_evidence ON face_biometric_regions(evidence_id);
 CREATE INDEX idx_artifact_lineage_child ON derived_artifact_lineage(child_artifact_id);
 CREATE INDEX idx_custody_events_evidence ON custody_events(evidence_id, event_sequence_num);
 CREATE INDEX idx_merkle_checkpoints_case ON merkle_batch_checkpoints(case_id);
+```
+
+---
+
+### 4.4 Relational DDL for AIF-GEO Geospatial Observations, Tracks & Conflict Graphs
+
+```sql
+-- Enable PostGIS extension if available in the PostgreSQL environment
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+-- 1. Geospatial Observations Table
+CREATE TABLE IF NOT EXISTS geospatial_observations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    case_id UUID NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    evidence_id UUID NOT NULL REFERENCES evidence(id) ON DELETE CASCADE,
+    artifact_id UUID REFERENCES artifacts(id) ON DELETE SET NULL,
+    analysis_id UUID,
+    observation_type VARCHAR(64) NOT NULL, -- 'EXIF_GPS', 'XMP_LOCATION', 'TRACK_LOG', 'OCR_SIGN', 'MODEL_INFERRED'
+    source_type VARCHAR(64) NOT NULL,      -- 'USER_REPORTED', 'MACHINE_EXTRACTED', 'EXTERNALLY_ENRICHED', 'MODEL_INFERRED'
+    source_field VARCHAR(128) NOT NULL,    -- 'GPS:GPSLatitude', 'XMP:Location', 'GPX:trkpt'
+    raw_value TEXT,                        -- Exact string / rational value as extracted from bitstream
+    normalized_value JSONB,                -- Canonical structured representation
+    latitude DOUBLE PRECISION,             -- Signed WGS84 decimal degrees [-90.0, 90.0]
+    longitude DOUBLE PRECISION,            -- Signed WGS84 decimal degrees [-180.0, 180.0]
+    altitude DOUBLE PRECISION,             -- Altitude value in meters
+    coordinate_reference_system VARCHAR(32) DEFAULT 'EPSG:4326',
+    altitude_reference VARCHAR(32),        -- 'ABOVE_SEA_LEVEL', 'BELOW_SEA_LEVEL', 'ELLIPSOIDAL'
+    observed_at TIMESTAMPTZ,               -- Original recorded timestamp
+    observed_at_utc TIMESTAMPTZ,           -- Normalized UTC instant
+    timezone_status VARCHAR(32),           -- 'EXPLICIT_OFFSET', 'UTC_GPS', 'AMBIGUOUS_LOCAL', 'UNKNOWN'
+    uncertainty_value DOUBLE PRECISION,    -- Estimated horizontal positioning error
+    uncertainty_unit VARCHAR(16) DEFAULT 'METERS',
+    uncertainty_semantics VARCHAR(64),     -- 'MEASURED_HPE', 'HDOP_DERIVED', 'BOUNDING_RADIUS'
+    validation_status VARCHAR(64) NOT NULL,-- 'VALID', 'INVALID_OR_MALFORMED', 'CONFLICTING', 'UNVERIFIED'
+    provenance_status VARCHAR(64) NOT NULL,-- 'CORROBORATED', 'INDEPENDENTLY_VERIFIED', 'UNVERIFIED'
+    source_provider VARCHAR(128),          -- 'ExifTool 12.70', 'Nominatim-OSM', 'Copernicus-DEM'
+    source_record_id VARCHAR(128),
+    extractor_version VARCHAR(64) NOT NULL,
+    limitations TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Conditional PostGIS Geometry column and spatial GiST index
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'postgis') THEN
+        ALTER TABLE geospatial_observations ADD COLUMN IF NOT EXISTS geom GEOMETRY(Point, 4326);
+        CREATE INDEX IF NOT EXISTS idx_geo_obs_geom ON geospatial_observations USING GIST(geom);
+    END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_geo_obs_case_id ON geospatial_observations(case_id);
+CREATE INDEX IF NOT EXISTS idx_geo_obs_evidence_id ON geospatial_observations(evidence_id);
+CREATE INDEX IF NOT EXISTS idx_geo_obs_coords ON geospatial_observations(latitude, longitude);
+CREATE INDEX IF NOT EXISTS idx_geo_obs_utc_time ON geospatial_observations(observed_at_utc);
+
+-- 2. Geospatial Candidate Locations Table
+CREATE TABLE IF NOT EXISTS geospatial_candidates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    case_id UUID NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    evidence_id UUID NOT NULL REFERENCES evidence(id) ON DELETE CASCADE,
+    candidate_region_name VARCHAR(255) NOT NULL,
+    granularity VARCHAR(32) NOT NULL,      -- 'COUNTRY', 'STATE', 'DISTRICT', 'CITY', 'LOCALITY', 'LANDMARK'
+    latitude DOUBLE PRECISION,             -- Representative centroid coordinate
+    longitude DOUBLE PRECISION,
+    uncertainty_radius_meters DOUBLE PRECISION,
+    bounding_box JSONB,                    -- [min_lon, min_lat, max_lon, max_lat]
+    generation_method VARCHAR(64) NOT NULL,-- 'OCR_GAZETTEER', 'SIGLIP_RETRIEVAL', 'HOMOGRAPHY_MATCH'
+    ranking_score DOUBLE PRECISION,        -- Uncalibrated raw rank score
+    calibrated_probability DOUBLE PRECISION,-- Platt-calibrated probability (if benchmarked)
+    calibration_status VARCHAR(32) NOT NULL,-- 'CALIBRATED', 'UNCALIBRATED_RANK_ONLY'
+    supporting_clues JSONB,                -- List of visual/text clues supporting candidate
+    contradictory_clues JSONB,             -- List of conflicting clues
+    reference_dataset VARCHAR(128) NOT NULL,
+    review_disposition VARCHAR(32) NOT NULL DEFAULT 'PENDING_REVIEW', -- 'ACCEPTED', 'REJECTED', 'INCONCLUSIVE'
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_geo_cand_evidence_id ON geospatial_candidates(evidence_id);
+CREATE INDEX IF NOT EXISTS idx_geo_cand_score ON geospatial_candidates(ranking_score DESC);
+
+-- 3. Geospatial Track Logs Table
+CREATE TABLE IF NOT EXISTS geospatial_tracks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    case_id UUID NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    evidence_id UUID NOT NULL REFERENCES evidence(id) ON DELETE CASCADE,
+    track_format VARCHAR(16) NOT NULL,     -- 'GPX', 'KML', 'NMEA', 'FIT', 'CSV'
+    device_model VARCHAR(128),
+    point_count INTEGER NOT NULL,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
+    bounding_box JSONB NOT NULL,
+    track_points JSONB NOT NULL,           -- Array of [lat, lon, ele, time_utc, hpe]
+    lineage_manifest_id UUID,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_geo_tracks_case_id ON geospatial_tracks(case_id);
+CREATE INDEX IF NOT EXISTS idx_geo_tracks_times ON geospatial_tracks(start_time, end_time);
+
+-- 4. Geospatial Conflict Graphs Table
+CREATE TABLE IF NOT EXISTS geospatial_conflict_graphs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    case_id UUID NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    graph_nodes JSONB NOT NULL,            -- Typed evidentiary nodes
+    graph_edges JSONB NOT NULL,            -- Typed evidentiary relationships (CLAIMS, CONTRADICTS)
+    contradiction_count INTEGER NOT NULL DEFAULT 0,
+    corroboration_count INTEGER NOT NULL DEFAULT 0,
+    graph_summary JSONB,
+    generated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_geo_conflict_case ON geospatial_conflict_graphs(case_id);
 ```
 
 ---
@@ -1717,6 +1852,651 @@ flowchart TD
   3. Execution Sandboxing: All external decoders (libjpeg-turbo, libvips, OpenCV) run inside memory-capped, isolated worker processes.
 - **Outputs:** `FileSecurityAudit(trailing_bytes_detected, trailing_bytes_length, polyglot_risk_level, quarantine_status)`.
 - **Implementation Status:** `PLANNED` (Phase AIF-A12).
+
+---
+
+### 10.10 AIF-GEO Technical Specification (Geospatial Forensics & Evidence Correlation Engine)
+
+The **AIF-GEO** subsystem provides deep geospatial evidence extraction, geographic coordinate normalization, track-to-image correlation, visual location recovery, solar/shadow verification, environmental consistency auditing, multi-image clustering, and cross-evidence conflict graphing within the PS-05 platform. It integrates natively with CEIPL for cryptographic provenance and reuses core AIF visual processing infrastructure.
+
+```mermaid
+flowchart TD
+    subgraph INTAKE["1. Exhibit Intake & Safe Parsing"]
+        IMG["Questioned Image Exhibit"] --> CEIPL_PRE["CEIPL Pre-Decode Dual Hashing\n(SHA-256 / SHA3-512)"]
+        CEIPL_PRE --> SAFE_DEC["Safe Parser & Sandboxed Decoder\n(Decompression Bomb Defense)"]
+        SAFE_DEC --> DERIV["Analysis Derivative Generation\n(Linear Warp, Canonical RGB)"]
+    end
+
+    subgraph EXTRACTION["2. Metadata Extraction & Validation (GEO-01, GEO-02)"]
+        DERIV --> EXIF_EXT["ExifTool / XMP / IPTC Deep Parser\n(Array Invocation, Zero Shell Interpolation)"]
+        EXIF_EXT --> RAW_STORE["Preserve Raw Tag Observations\n(Exact Bytes & Namespaces)"]
+        RAW_STORE --> NORM_CONV["DMS-to-Decimal Normalization\n(Hemisphere Sign, Boundary Check)"]
+        NORM_CONV --> ANOM_CHECK["Anomaly Engine: Null Island, Rounding,\nContradictory Tag Groups, Cloned Coords"]
+    end
+
+    subgraph ENRICHMENT["3. Controlled Geographic Enrichment (GEO-03, GEO-04, GEO-26)"]
+        NORM_CONV --> ADAPTER{"Enrichment Mode\n(Offline-First Policy)"}
+        ADAPTER -->|Air-Gapped / Offline| LOCAL_GAZ["Local SQLite Gazetteer & Admin Boundaries\n(GeoNames / OSM Offline Vector MBTiles)"]
+        ADAPTER -->|Authorized Online| EXT_GEO["Rate-Limited Nominatim / Pelias Adapter\n(Strict Query Minimization, Audit Log)"]
+        LOCAL_GAZ --> MAP_PREP["MapLibre GL / Leaflet Layer Generator\n(Confidence-Coded Markers, GeoJSON)"]
+        EXT_GEO --> MAP_PREP
+    end
+
+    subgraph TRACK_RECON["4. Track & Timeline Reconstruction (GEO-05, GEO-07, GEO-08)"]
+        TRACK_FILES["Authorized Track Logs\n(GPX / KML / NMEA / FIT / CSV)"] --> TRACK_PARSE["Defensive Track Parser & CRS Transformer"]
+        TRACK_PARSE --> TIME_ALIGN["Temporal Sync & Clock Drift Regression\n(Delta t(t) = a * t + b)"]
+        NORM_CONV --> TIME_ALIGN
+        TIME_ALIGN --> INTERP["Linear Geodesic Interpolation\n(Bounded Interval, Non-Extrapolating)"]
+        INTERP --> KINEMATICS["Kinematic Outlier Filter\n(v_avg = d / Delta t, Max Speed Gates)"]
+    end
+
+    subgraph VISUAL_LOC["5. Visual Location Recovery & Geometry (GEO-09, GEO-10, GEO-21, GEO-22)"]
+        DERIV --> OCR_SIGNS["PaddleOCR Signboard & Highway Marker Extraction"]
+        DERIV --> SCENE_EMB["SigLIP Scene Context & Landcover Feature Extractor"]
+        DERIV --> CAND_RANK["Candidate Landmark & Regional Retrieval\n(Hierarchical Administrative Candidate Shortlist)"]
+        OCR_SIGNS --> CAND_RANK
+        SCENE_EMB --> CAND_RANK
+        CAND_RANK --> HOMOGRAPHY["SIFT/ORB Keypoints + RANSAC Verification\n(x' ~ H x, Inlier Ratio & Reprojection Error)"]
+    end
+
+    subgraph ENVIRONMENT["6. Environmental & Terrain Verification (GEO-11, GEO-12, GEO-13)"]
+        NORM_CONV --> SOLAR["NOAA Solar Elevation (alpha) & Azimuth (gamma_s)\nShadow Geometry: tan(alpha) approx h / L"]
+        NORM_CONV --> WEATHER["Open-Meteo Historical Reanalysis Cache\n(Precipitation, Cloud Cover, Visibility Grid)"]
+        NORM_CONV --> TERRAIN["Copernicus / SRTM DEM Raster Extraction\n(Geoid Undulation: h = H + N via pyproj)"]
+        DERIV --> SOLAR
+        DERIV --> WEATHER
+        DERIV --> TERRAIN
+    end
+
+    subgraph FUSION["7. Cross-Evidence Correlation & Findings (GEO-14 to GEO-25)"]
+        ANOM_CHECK --> CONFLICT_ENG["Location Conflict Graph Engine\n(Typed Nodes: Evidence, Coord, Track, Region)\n(Typed Edges: CLAIMS, CONTRADICTS, CORROBORATES)"]
+        KINEMATICS --> CONFLICT_ENG
+        HOMOGRAPHY --> CONFLICT_ENG
+        SOLAR --> CONFLICT_ENG
+        WEATHER --> CONFLICT_ENG
+        TERRAIN --> CONFLICT_ENG
+        EXT_EVID["AURAS Audio Timestamps / VISTA CCTV Positions / ONTF Geo-IP"] --> CONFLICT_ENG
+        CONFLICT_ENG --> DUAL_REPORT["Dual Legal Artifacts:\n1. Archify Geospatial JSON IR Manifest\n2. Section 65B IEA / Sec 63 BSA Certified PDF"]
+    end
+```
+
+---
+
+#### 10.10.1 Comprehensive Capability Specifications (GEO-01 through GEO-26)
+
+##### GEO-01: Comprehensive GPS Metadata Extraction
+- **Investigative Purpose:** Extracts every available geospatial, temporal, and hardware attribute embedded in image file headers across all standardized metadata formats (EXIF, XMP, IPTC, MakerNotes) without destructive alterations.
+- **Functional Requirements:**
+  1. Parse standard EXIF GPS IFD tags: `GPSVersionID`, `GPSLatitudeRef`, `GPSLatitude`, `GPSLongitudeRef`, `GPSLongitude`, `GPSAltitudeRef`, `GPSAltitude`, `GPSTimeStamp`, `GPSSatellites`, `GPSStatus`, `GPSMeasureMode`, `GPSDOP`, `GPSSpeedRef`, `GPSSpeed`, `GPSTrackRef`, `GPSTrack`, `GPSImgDirectionRef`, `GPSImgDirection`, `GPSMapDatum`, `GPSDestLatitude`, `GPSDestLongitude`, `GPSDateStamp`, `GPSDifferential`, `GPSHPositioningError`.
+  2. Parse XMP geospatial properties under namespaces: `http://ns.adobe.com/exif/1.0/`, `http://ns.adobe.com/photoshop/1.0/`, `http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/` (`Iptc4xmpCore:Location`, `photoshop:City`, `photoshop:State`, `photoshop:Country`).
+  3. Extract hardware-specific MakerNotes (Apple iOS scene/heading tags, Samsung, Sony, Canon, Nikon proprietary coordinate tags) and subsecond timestamps (`SubSecTimeOriginal`, `OffsetTimeOriginal`).
+  4. Preserve the raw byte offset, raw tag name, tag group/namespace, raw decoded value, and normalized value in an immutable observation manifest.
+- **Inputs & Supported Formats:** Master image binary stream (`JPEG`, `TIFF`, `HEIC`, `PNG`, `WebP`, `DNG`, `CR2`, `NEF`, `ARW`).
+- **Required Preprocessing:** Pre-decode dual streaming hash (SHA-256 / SHA3-512) via CEIPL; read-only memory-mapped stream inspection.
+- **Algorithm & Method:** Isolated worker process invokes `exiftool -json -G -a -u -s -c "%.8f"` over pipe arrays (avoiding shell execution). Output JSON parsed into typed observation records.
+- **Data Contract & Outputs:** `GeospatialObservationList` containing typed `GeospatialObservation` records.
+- **Error Cases & Failure Modes:** Corrupted IFD header returns `PARSER_HEADER_CORRUPT`; stripped metadata returns valid record with status `NOT_AVAILABLE`; malformed EXIF tables quarantined via memory bounds.
+- **Scientific Limitations:** Extraction confirms only that the file container contained these bytes; does not prove the device was physically at the coordinates.
+- **Security & Privacy:** Sandboxed execution under strict CPU/memory rlimits (`RLIMIT_AS=512MB`); unvetted filenames sanitized; zero outbound network activity.
+- **Test Fixtures & Acceptance:** Validated on ExifTool test suite, synthetic multi-group EXIF/XMP samples, and real-world mobile captures (`test_geo_exif_deep.py`). 100% field extraction recall on standard EXIF 2.32 GPS tags.
+
+##### GEO-02: Coordinate Validity and Anomaly Checks
+- **Investigative Purpose:** Validates the structural, mathematical, and geographic plausibility of extracted coordinates to detect parser-induced errors, default hardware states, and deliberate coordinate manipulation.
+- **Functional Requirements:**
+  1. Boundary Validation: Enforce strict geodetic bounds: $-90.0 \le \phi \le 90.0$ and $-180.0 \le \lambda \le 180.0$.
+  2. Rational Number Integrity: Decode rational pairs $(N, D)$; reject division by zero ($D = 0$); flag non-standard floating approximations.
+  3. Default / Null Island Detection: Flag exact $(0.0, 0.0)$ coordinates; distinguish uninitialized GPS chip default from genuine Gulf of Guinea maritime locations using land/sea boundary polygons.
+  4. Integer Truncation & Rounding Audit: Detect coordinate truncation (e.g. $\phi = 25.000000^\circ, \lambda = 85.000000^\circ$), indicating low-resolution mock apps or coarse manual tagging.
+  5. Contradictory Tag Detection: Cross-check EXIF GPS vs XMP GPS coordinates; flag discrepancies exceeding $1.0\text{ meter}$.
+  6. Cloned Coordinate Audit: Detect identical coordinates across distinct exhibits captured at disparate times within the same case.
+- **Inputs:** `GeospatialObservationList` from GEO-01.
+- **Mathematical Basis:** DMS rational normalization with sign inversion; bounding box polygon inclusion checks.
+- **Data Contract:** `CoordinateValidationResult(is_valid, anomaly_flags, normalized_lat, normalized_lon, normalized_alt)`.
+- **Error Cases:** Malformed rational generates `MALFORMED_RATIONAL_DENOMINATOR_ZERO`; latitude $> 90^\circ$ generates `COORDINATE_OUT_OF_BOUNDS_ERROR`.
+- **Scientific Limitations:** Legitimate photos can be captured at integer boundaries or $(0,0)$ maritime zones; flags represent evidentiary anomalies, not proof of fraud.
+- **Acceptance Criteria:** Detects 100% of synthetic out-of-bounds, zero-denominator, truncated, and contradictory coordinates in test suite.
+
+##### GEO-03: Reverse Geocoding and Place Enrichment
+- **Investigative Purpose:** Resolves verified numeric coordinates into structured, human-understandable administrative hierarchies (Country, State, District, Taluk, Police Station Jurisdiction, Locality, Road) to support forensic investigation and courtroom testimony.
+- **Functional Requirements:**
+  1. Hierarchical Administrative Resolution: Resolve WGS84 point to Country, State/Province, District, Sub-district (Tehsil/Taluk), City/Village, Postal Code, and Street Level.
+  2. Special Jurisdiction Mapping: For Indian jurisdictions, map coordinates against Bihar Police Station boundary Shapefiles/GeoJSON layers.
+  3. Offline-First Operation: Default resolution against locally indexed SQLite gazetteer (derived from GeoNames and OpenStreetMap administrative extracts).
+  4. Controlled Online Enrichment: Opt-in, rate-limited query adapter for Nominatim / Pelias with caching, strict query minimization, and audit logging.
+  5. Attribution & Provenance: Record data provider name, database release date, license URI, and feature identifier in every enriched record.
+- **Data Contract:** `ReverseGeocodeEnrichment(country_code, administrative_area_level_1, administrative_area_level_2, locality, police_jurisdiction, formatted_address, provider_source, license_notice)`.
+- **Security & Privacy:** Uploaded image pixels are **never** transmitted; only truncated coordinate pairs are resolved; local cache eliminates external query leakage.
+- **Scientific Limitations:** Reverse geocoding describes what exists at a coordinate; it does **not** authenticate that the photo was captured at that location.
+
+##### GEO-04: Interactive Geospatial Evidence Map
+- **Investigative Purpose:** Provides an interactive, cartographic workspace for investigators to visualize evidence distribution, route trajectories, candidate areas, and evidentiary conflicts across spatial and temporal dimensions.
+- **Functional Requirements:**
+  1. Map Visualization Engine: Integration with MapLibre GL JS / Leaflet supporting vector tiles and offline raster MBTiles.
+  2. Distinct Marker Taxonomy: Render visually distinct, accessible marker symbols and colors for:
+     - Verified Metadata Coordinates (`MACHINE_EXTRACTED` - Blue Solid Pin).
+     - External Device Track Points (`CORROBORATED` - Green Dot).
+     - Interpolated Track Positions (`MODEL_INFERRED` - Green Hollow Pin).
+     - Model Candidate Locations (`MODEL_INFERRED` - Amber Ring Marker).
+     - Contradictory / Disputed Locations (`CONFLICTING` - Red Exclamation Pin).
+  3. Uncertainty Visualization: Render semi-transparent confidence error circles based on 95% horizontal positioning error ($\text{HPE}$).
+  4. Synchronized Spatio-Temporal Timeline: Interactive time-slider filtering visible exhibits by capture timestamp.
+  5. Evidence Drill-Down: Clicking any marker opens side-by-side evidence preview, cryptographic hash, and lineage details.
+- **Data Contract:** GeoJSON FeatureCollection with standardized properties (`evidence_id`, `marker_type`, `uncertainty_radius_m`, `timestamp_utc`, `conflict_flag`).
+- **Offline Invariant:** Operates fully without active internet connectivity using pre-bundled local vector tile packages (`bihar_offline_tiles.mbtiles`).
+
+##### GEO-05: Capture-Time and GPS-Time Consistency
+- **Investigative Purpose:** Evaluates temporal consistency between camera clock timestamps and atomic satellite GPS clocks to detect post-capture date edits, clock drift, and timezone anomalies.
+- **Functional Requirements:**
+  1. Multi-Field Timestamp Extraction: Extract `EXIF:DateTimeOriginal`, `EXIF:CreateDate`, `EXIF:ModifyDate`, `GPS:GPSDateStamp`, `GPS:GPSTimeStamp`, and file system `mtime`/`ctime`.
+  2. UTC Normalization: Parse explicit timezone offsets (`EXIF:OffsetTimeOriginal`); when offset is absent, flag timezone ambiguity.
+  3. Discrepancy Calculation: Compute delta $\Delta t = |t_{\text{camera}} - t_{\text{GPS\_UTC}} - \Delta t_{\text{tz}}|$.
+  4. Drift Regression: Across multiple photos from the same device, perform linear regression $\Delta t(t) = a \cdot t + b$ to quantify clock drift vs discrete timestamp jumps.
+  5. Anomaly Flagging: Flag $\Delta t > 120\text{ seconds}$ as `TIMESTAMP_GPS_DESYNCHRONIZATION`; flag impossible capture dates (future dates or dates prior to GPS epoch).
+- **Mathematical Basis:** Linear least-squares regression for clock drift rate $a$ and baseline offset $b$.
+- **Data Contract:** `TemporalConsistencyFinding(camera_time_utc, gps_time_utc, clock_offset_seconds, drift_rate_ppm, anomaly_severity)`.
+- **Scientific Limitations:** Camera clocks are frequently set manually and drift by several seconds per week; minor drift is normal and does not prove tampering.
+
+##### GEO-06: Accuracy and Uncertainty Representation
+- **Investigative Purpose:** Quantifies, standardizes, and propagates spatial uncertainty bounds for every geographic observation to prevent misleading pinpoint claims in forensic reports.
+- **Functional Requirements:**
+  1. Uncertainty Source Taxonomy: Explicitly categorize uncertainty origin:
+     - `MEASURED_HPE`: Extracted directly from `GPSHPositioningError` tag.
+     - `DOP_DERIVED`: Estimated from Dilution of Precision tags (`GPSDOP`, `GPSHDOP`) assuming baseline User Equivalent Range Error ($\text{UERE} = 3.5\text{m}$).
+     - `MODEL_BOUNDED`: Regional bounding box or radius output by visual geolocation models.
+     - `UNKNOWN_DEFAULT`: Unspecified uncertainty (default conservative radius assigned with explicit disclaimer).
+  2. Geodesic Uncertainty Propagation: In distance comparisons between two uncertain points, compute propagated standard error $\sigma_{\text{diff}} = \sqrt{\sigma_1^2 + \sigma_2^2}$.
+  3. Visual Presentation Guard: Enforce UI zoom constraints preventing investigators from zooming past the coordinate's physical uncertainty radius.
+- **Data Contract:** `LocationUncertaintyModel(hpe_meters, confidence_interval_pct, derivation_method, bounds_geometry)`.
+- **Acceptance Criteria:** Every exported coordinate finding includes an explicit, quantified uncertainty statement in meters.
+
+##### GEO-07: Cross-Image Location and Timeline Reconstruction
+- **Investigative Purpose:** Assembles chronologically ordered photograph sequences from a single case or device into a coherent movement trajectory, identifying impossible physical movements and spatial gaps.
+- **Functional Requirements:**
+  1. Chronological Assembly: Sort candidate photos by validated capture timestamp $t_1 < t_2 < \dots < t_N$.
+  2. Geodesic Path Trajectory: Calculate pairwise Karney geodesic distances $d(p_i, p_{i+1})$.
+  3. Average Kinematic Velocity: Compute $v_{\text{avg}} = d / (t_{i+1} - t_i)$.
+  4. Movement Plausibility Screening: Apply multi-tier velocity gating thresholds:
+     - $v_{\text{avg}} > 6.0\text{ m/s}$ ($21.6\text{ km/h}$): Exceeds normal pedestrian speed.
+     - $v_{\text{avg}} > 35.0\text{ m/s}$ ($126\text{ km/h}$): Exceeds normal urban vehicular speed.
+     - $v_{\text{avg}} > 260.0\text{ m/s}$ ($936\text{ km/h}$): Exceeds commercial flight cruising speed (triggers `IMPOSSIBLE_PHYSICAL_TELEPORTATION_FLAG`).
+  5. Kalman Filter Smoothing: Apply discrete-time linear Kalman filter state estimation for noisy track sequences to separate measurement jitter from true trajectory changes.
+- **Data Contract:** `ReconstructedTimeline(segments, total_distance_m, total_duration_s, velocity_anomalies, interpolated_positions)`.
+- **Scientific Limitations:** Trajectory connects discrete points; the actual path taken between points is unobserved unless continuous track logs exist.
+
+##### GEO-08: External Track and Device-Log Correlation
+- **Investigative Purpose:** Ingests independently seized external GPS tracks and telemetry logs (suspect mobile phones, vehicle DVRs, police radios, drones) and correlates them with questioned photographs.
+- **Functional Requirements:**
+  1. Multi-Format Parser: Safely parse `GPX` (XML schema), `KML` (Keyhole Markup), `NMEA` 0183 (`$GPGGA`, `$GPRMC`), `FIT` (Garmin Flexible and Interoperable Data Transfer), and structured `CSV` telemetry.
+  2. Coordinate System Normalization: Reproject non-WGS84 datums to EPSG:4326.
+  3. Temporal Window Association: For an image captured at timestamp $t_{\text{img}}$, locate track sample points $p_0(t_0)$ and $p_1(t_1)$ such that $t_0 \le t_{\text{img}} \le t_1$.
+  4. Geodesic Linear Interpolation: Compute interpolated position $p(t_{\text{img}})$ along the shortest geodesic segment with parameter $\alpha = (t_{\text{img}} - t_0) / (t_1 - t_0)$.
+  5. Strict Non-Extrapolation Invariant: If $t_{\text{img}}$ falls outside track boundaries $[t_{\text{start}}, t_{\text{end}}]$, return `TRACK_OUT_OF_BOUNDS_NO_INTERPOLATION`; **never** extrapolate coordinates into unobserved time intervals.
+- **Data Contract:** `TrackCorrelationResult(track_id, interpolated_point, nearest_samples, temporal_offset_s, correlation_confidence)`.
+- **Acceptance Criteria:** Interpolated points reference exact source track sample IDs, algorithm name, and boundary bounds in lineage manifests.
+
+##### GEO-09: Visual Location Recovery Without GPS
+- **Investigative Purpose:** Estimates geographic candidate regions and plausible locations for questioned images where GPS metadata is missing, stripped, or suspected of being falsified.
+- **Functional Requirements:**
+  1. Multi-Clue Feature Extraction:
+     - OCR Signboards: Extract visible text (road numbers, town names, milestones, shop hoardings, PIN codes) via PaddleOCR Indian-language models (Hindi, English, Bengali, Urdu).
+     - Natural Landmark & Landcover: Detect environmental features (rivers, coastal shorelines, agricultural field patterns, mountain silhouettes).
+     - Built Environment: Classify architectural typologies, religious structures, and infrastructure.
+  2. Hierarchical Retrieval Cascade:
+     - Query local gazetteer for OCR text tokens with spatial ambiguity resolution.
+     - Extract SigLIP / visual embeddings and match against candidate regional image index.
+     - Evaluate GeoCLIP / regional retrieval candidate models (marked `CANDIDATE_NOT_YET_VALIDATED` until benchmarked).
+  3. Multi-Granularity Ranking: Return candidates classified strictly by spatial granularity (`COUNTRY`, `STATE`, `DISTRICT`, `LOCALITY`, `APPROXIMATE_BOUNDS`).
+  4. Top-$k$ Candidate Reporting: Return Top-5 candidate regions with explicit median geodesic error bounds and visual clue justifications.
+- **Data Contract:** `VisualLocationCandidateList(candidates=[GeospatialCandidate(region_name, granularity, bounding_box, confidence_score, supporting_clues)])`.
+- **Scientific Limitations:** Visual similarity does not equal geographic proof; widespread generic architecture and franchise retail storefronts produce false candidate matches without local textual confirmation.
+
+##### GEO-10: Direction and Landmark Geometry
+- **Investigative Purpose:** Compares camera compass orientation metadata with observable scene geometry and landmark positions to verify physical line-of-sight plausibility.
+- **Functional Requirements:**
+  1. Compass Heading Extraction: Extract `GPS:GPSImgDirection` and `GPS:GPSImgDirectionRef` (`T` for True North, `M` for Magnetic North).
+  2. Magnetic Declination Correction: If magnetic reference is indicated, apply World Magnetic Model (WMM) / IGRF declination offset $\delta(\phi, \lambda, t)$ to compute True Azimuth $\theta_{\text{true}} = \theta_{\text{mag}} + \delta$.
+  3. Circular Difference Computation: When comparing camera direction $\theta_1$ against observed landmark bearing $\theta_2$, compute circular angular delta $\Delta\theta = \min(|\theta_1 - \theta_2|, 360^\circ - |\theta_1 - \theta_2|)$.
+  4. Line-of-Sight Geometry: Verify whether the claimed subject (e.g. river bank, road axis, building facade) falls within camera field of view ($\text{FoV}$) calculated from focal length and sensor dimensions.
+- **Data Contract:** `OrientationVerificationResult(camera_heading_true, calculated_subject_bearing, angular_delta_deg, is_line_of_sight_plausible)`.
+- **Scientific Limitations:** Camera heading records phone orientation; wide-angle lenses or off-center subjects can deviate significantly from device boresight direction.
+
+##### GEO-11: Solar Position and Shadow Consistency
+- **Investigative Purpose:** Verifies whether observed physical shadows in the image are geometrically and astrometrically consistent with the astronomical position of the sun for the claimed coordinate and capture time.
+- **Functional Requirements:**
+  1. High-Precision Solar Vector Computation: Implement astronomical solar position algorithm (NOAA Solar Geometry / Reda & Andreas PSA) to calculate Solar Elevation Angle $\alpha \in [-90^\circ, 90^\circ]$ and Solar Azimuth Angle $\gamma_s \in [0^\circ, 360^\circ]$ for given $(\phi, \lambda, t_{\text{UTC}})$.
+  2. Shadow Gnomon Geometry: For detected vertical objects of height $h$ casting horizontal shadows of length $L$ on planar ground, verify:
+     $$\tan(\alpha) \approx \frac{h}{L}$$
+  3. Shadow Direction Check: Verify that observed shadow projection points along shadow azimuth $\gamma_{\text{shadow}} = (\gamma_s + 180^\circ) \bmod 360^\circ$.
+  4. Inconclusive Condition Taxonomy: Automatically classify analysis as `SOLAR_ANALYSIS_INCONCLUSIVE` under:
+     - Night / twilight captures ($\alpha < 0^\circ$).
+     - Overcast / diffuse sky conditions (no distinct shadow cast).
+     - Multiple artificial light sources (streetlights, sports stadium floodlights).
+     - Non-planar ground slope, elevated bridges, or severe camera perspective tilt.
+- **Data Contract:** `SolarConsistencyFinding(astronomical_elevation_deg, astronomical_azimuth_deg, observed_shadow_azimuth_deg, angular_delta_deg, consistency_verdict)`.
+- **Scientific Limitations:** Identical solar angles occur at multiple geographic locations and dates; consistency proves physical plausibility, not unique location identity.
+
+##### GEO-12: Historical Weather Context
+- **Investigative Purpose:** Corroborates claimed capture time and coordinates against historical atmospheric reanalysis datasets to verify whether depicted weather conditions (rain, clear sky, snow, dense fog) are consistent with recorded meteorology.
+- **Functional Requirements:**
+  1. Historical Reanalysis Interface: Integration with Open-Meteo Historical Weather API and ECMWF ERA5 reanalysis local cache.
+  2. Query Parameters: Retrieve historical hourly parameters: `temperature_2m`, `precipitation`, `rain`, `snowfall`, `cloud_cover`, `visibility`, `surface_pressure`, `wind_speed_10m`.
+  3. Visual Weather Semantic Check: Cross-check against AIF-IVE scene classification tags (`fog`, `heavy_rain`, `clear_sky`, `snow_covered`).
+  4. Spatial & Temporal Discretization Awareness: Document ERA5 spatial resolution ($\approx 0.25^\circ \times 0.25^\circ \approx 28\text{ km} \times 28\text{ km}$) and 1-hour temporal binning; avoid asserting mismatches for highly localized micro-weather events (e.g. brief convective showers).
+- **Data Contract:** `HistoricalWeatherContext(queried_time_utc, temperature_c, precipitation_mm, cloud_cover_pct, visibility_m, dataset_source, semantic_match_flag)`.
+- **Privacy Safeguard:** Cached gridded datasets prevent outbound requests; opt-in external calls omit all case/evidence identifiers.
+
+##### GEO-13: Elevation and Terrain Correlation
+- **Investigative Purpose:** Compares GPS altitude metadata with authoritative digital elevation models (DEM) and topographic rasters to detect anomalous vertical displacements.
+- **Functional Requirements:**
+  1. Vertical Datum Harmonization: Distinguish GPS WGS84 Ellipsoidal Height $h$ from Orthometric Height $H$ (Mean Sea Level). Convert using Earth Gravitational Model 2008 (EGM2008) geoid undulation $N$:
+     $$h = H + N$$
+  2. DEM Raster Sampling: Sample ground elevation from local Copernicus GLO-30 / SRTM 30m GeoTIFF rasters using bilinear interpolation via `rasterio`.
+  3. Elevation Delta Calculation: Compute $\Delta z = |h_{\text{orthometric}} - H_{\text{DEM}}(\phi, \lambda)|$.
+  4. Height Anomaly Flagging: Flag $\Delta z > 100\text{ meters}$ as `ELEVATION_TOPOGRAPHY_ANOMALY` unless image visual tags identify high-rise buildings, bridges, aircraft, or drones.
+- **Data Contract:** `TerrainElevationResult(gps_raw_alt, gps_vertical_datum, dem_ground_elevation_m, delta_elevation_m, terrain_slope_deg, anomaly_flag)`.
+- **Scientific Limitations:** Topographic rasters represent bare-earth ground elevation; photos taken from upper floors of multi-story structures or aerial platforms legitimately exceed terrain elevation.
+
+##### GEO-14: GPS and Location-Metadata Manipulation Indicators
+- **Investigative Purpose:** Synthesizes metadata-level, format-level, and forensic signal anomalies to detect deliberate GPS spoofing, metadata injection, and fake-GPS application traces.
+- **Functional Requirements:**
+  1. Tag Group Contradiction: Flag differences between `EXIF:GPSLatitude` and `XMP-exif:GPSLatitude` $> 0.0001^\circ$.
+  2. Software Footprint Inspection: Flag presence of photo editing, mock-location, or metadata manipulation tools in `EXIF:Software` (e.g. "ExifTool", "FakeGPS", "Adobe Photoshop", "GIMP").
+  3. Impossible Teleportation Detection: Cross-check sequence of photos for velocity $v > 260\text{ m/s}$ without intermediate transport records.
+  4. C2PA Provenance Manifest Conflict: Compare embedded GPS coordinates against signed C2PA assertion claims; flag unverified coordinate edits.
+  5. Typed Finding Generation: Output structured, forensic findings classified as `MANIPULATION_INDICATOR` with detailed rationales.
+- **Data Contract:** `LocationManipulationFindingList(findings=[ForensicFinding(rule_id, severity, observed_condition, evidentiary_basis, confidence)])`.
+- **Scientific Limitations:** Anomaly flags indicate conflicting or suspicious data structures; they do not automatically establish malicious intent or identify the perpetrator.
+
+##### GEO-15: EXIF-to-Visual Content Consistency
+- **Investigative Purpose:** Compares the claimed geographical location against the semantic, environmental, and cultural content visible in the photograph to detect geographic impossibility (e.g. desert scenery claimed in coastal Kerala).
+- **Functional Requirements:**
+  1. Multi-Modal Consistency Evaluation:
+     - Biome / Landcover Consistency: Cross-check extracted coordinates against global landcover maps (Copernicus Global Land Cover); flag marine coordinates where image depicts terrestrial cities, or inland coordinates where image depicts ocean surf.
+     - Infrastructure & Drive-Side Check: Cross-check road traffic driving side (left-hand drive vs right-hand drive) against claimed country jurisdiction (e.g. India = Left-Hand Drive).
+     - Display Screen / Poster Detection: Execute AIF-AIM screen recapture and moiré pattern detector to ensure image is not a photo of a computer monitor or printed travel poster depicting a remote destination.
+  2. Bounding Region Association: Highlight specific image regions supporting or contradicting the location claim.
+- **Data Contract:** `ExifVisualConsistencyReport(claimed_coordinates, expected_biome, observed_visual_semantics, drive_side_match, screen_recapture_detected, consistency_score)`.
+- **Acceptance Criteria:** Successfully flags synthetic test images combining inland coordinates with marine vessel scenes.
+
+##### GEO-16: Cross-Evidence Geospatial Correlation
+- **Investigative Purpose:** Connects and correlates geospatial findings from image exhibits with other evidence items within the same authorized case (CCTV footage, intercepted audio recordings, mobile network dumps).
+- **Functional Requirements:**
+  1. Inter-Subsystem Evidence Bridges:
+     - VISTA CCTV Bridge: Link photo coordinates with stationary surveillance camera field-of-view polygons and timestamps within radius $r \le 150\text{m}$ and $|\Delta t| \le 30\text{ minutes}$.
+     - AURAS Audio Bridge: Link audio exhibits with common temporal intervals and ENF grid regions.
+     - Case Incident Markers: Compute geodesic distance and heading from verified crime scene / incident coordinates.
+  2. Explicit Association Records: Every link between evidence items must specify the exact mathematical matching rule, temporal tolerance, spatial distance, and uncertainty.
+- **Data Contract:** `CrossEvidenceLink(source_evidence_id, target_evidence_id, association_type, spatial_distance_m, temporal_delta_s, confidence)`.
+- **Evidentiary Invariant:** Correlating two items does not prove causal association; records state mathematical proximity, not investigative collusion.
+
+##### GEO-17: Near-Duplicate and Same-Scene Discovery
+- **Investigative Purpose:** Discovers other photographs in the case or evidence repository that depict the same geographical scene, identical physical objects, or recompressed/cropped variants.
+- **Functional Requirements:**
+  1. Multi-Tier Similarity Pipeline:
+     - Tier 1 (Byte Identity): Pre-computed SHA-256 / SHA3-512 hashes for exact duplicate detection.
+     - Tier 2 (Perceptual Hashing): 64-bit difference hash (dHash) and discrete cosine transform hash (pHash) for fast candidate screening (Hamming distance $\le 10$).
+     - Tier 3 (Neural Feature Embeddings): SigLIP visual embeddings for semantic same-scene retrieval.
+     - Tier 4 (Geometric Verification): SIFT / ORB keypoint extraction and RANSAC homography estimation ($\ge 25$ inliers) to verify shared physical structures despite cropping or viewpoint change.
+  2. Distinct Signal Isolation: Keep visual similarity scores strictly separate from GPS coordinate distances; prevent weak coordinates from artificially inflating visual match confidence.
+- **Data Contract:** `NearDuplicateMatchList(matches=[NearDuplicateMatch(target_evidence_id, similarity_tier, hamming_distance, ransac_inlier_count, shared_bounding_box)])`.
+- **Acceptance Criteria:** Correctly matches 100% of cropped and recompressed duplicate scenes in benchmark suite.
+
+##### GEO-18: Camera and Device Consistency Analysis
+- **Investigative Purpose:** Audits hardware-specific metadata, color filter array signatures, and compression table fingerprints across multiple exhibits to verify whether they originated from the same physical camera device.
+- **Functional Requirements:**
+  1. Hardware Signature Extraction: Audit camera make, model, lens serial number, internal firmware build, and proprietary MakerNotes tags across exhibits.
+  2. Quantization Table Clustering: Compare 64-element JPEG luminance and chrominance quantization tables ($Q_Y, Q_C$) against known mobile device signatures.
+  3. CFA Sensor Pattern Consistency: Verify Bayer color filter array pattern, dead-pixel coordinates, and sensor resolution dimensions.
+  4. Device Cluster Output: Group exhibits into candidate physical camera clusters with confidence scores and identified discrepancies.
+- **Data Contract:** `DeviceConsistencyReport(cluster_id, evidence_ids, matched_device_model, serial_hash, quantization_table_hash, consistency_verdict)`.
+- **Scientific Limitations:** Editable EXIF serial numbers can be cloned or stripped; hardware clustering indicates compatible device profiles, not legal ownership.
+
+##### GEO-19: Sensor and Image-Processing Correlation
+- **Investigative Purpose:** Evaluates Photo-Response Non-Uniformity (PRNU) sensor noise residuals to verify whether an image was captured by a specific, seized physical camera sensor.
+- **Operational Classification:** `RESEARCH_CANDIDATE` (Phase AIF-GEO-07 / AIF-A9).
+- **Functional Requirements:**
+  1. Denoising Residual Extraction: Apply 4-level discrete 2D Daubechies-8 wavelet filter to separate high-frequency sensor pattern noise residual $W$ from scene content $I$:
+     $$W = I - F(I)$$
+  2. Reference Fingerprint Correlation: Compute Peak-to-Correlation Energy (PCE) and normalized cross-correlation $\rho$ against a reference camera fingerprint $K$ obtained from 25 flat-field test captures.
+  3. Transformation Sensitivity Guard: Flag and adjust for digital cropping, geometric resizing, and social-media recompression (WhatsApp/Facebook), which destroy or misalign sensor noise residuals.
+- **Data Contract:** `PRNUCorrelationFinding(correlation_coefficient, pce_value, false_alarm_probability, match_verdict)`.
+- **Scientific Limitations:** Requires physical access to suspect camera for reference flat-field captures; social-media recompression severely suppresses PRNU signals.
+
+##### GEO-20: Signed Provenance and Content-Credential Verification
+- **Investigative Purpose:** Inspects, cryptographically validates, and extracts location assertions from C2PA Content Credentials and Coalition for Content Provenance and Authenticity manifests embedded in compliant media.
+- **Functional Requirements:**
+  1. JUMBF Container Extraction: Parse JPEGs/PNGs for C2PA JUMBF (`c2pa`) superboxes; extract manifest store, claims, and assertion packages.
+  2. Signature & Trust Chain Audit: Validate COSE digital signatures using public X.509 certificates; verify trust chain against Adobe/C2PA root trust lists.
+  3. Evidentiary Assertion Inspection: Extract embedded assertions: `c2pa.actions`, `c2pa.thumbnail`, and `c2pa.metadata.exif` (including location and capture time claims).
+  4. Manifest Tamper Detection: Verify content binding hash against actual image pixel bitstream; flag binding mismatches as `PROVENANCE_MANIFEST_TAMPERED`.
+  5. Cross-Check Against Metadata: Cross-check signed C2PA location claims against standard EXIF tags; report discrepancies.
+- **Data Contract:** `C2PAProvenanceReport(manifest_present, signature_valid, signer_identity, trust_chain_status, signed_location_claims, content_hash_matched)`.
+- **Scientific Limitations:** A cryptographically valid signature proves only that the signing entity asserted those claims; it does not prove the signer's claims represent physical truth.
+
+##### GEO-21: Map and Satellite-Image Comparison
+- **Investigative Purpose:** Matches questioned scene features against high-resolution satellite orthophotos and cadastral map footprints to verify viewpoint, building configurations, and road geometry.
+- **Functional Requirements:**
+  1. Reference Tile Acquisition: Retrieve local, offline satellite/orthophoto rasters or cached OpenStreetMap building footprint polygons for candidate coordinates.
+  2. Feature Matching & Homography: Detect distinctive planar structures (rooflines, road intersections, boundary walls); compute 2D-to-2D projective homography $H$ using SIFT keypoints.
+  3. Temporal / Seasonal Variance Guard: Account for seasonal foliage changes, construction activity, and sun angle differences between historical satellite imagery and questioned photo.
+  4. Geometric Verification Metrics: Report RANSAC inlier count, inlier ratio, and average reprojection error $\epsilon_{\text{reproj}}$ in pixels.
+- **Data Contract:** `SatelliteComparisonResult(reference_dataset, reference_date, matched_structures, inlier_ratio, reprojection_error_px, alignment_verified)`.
+- **Security & Privacy:** Uses local cached map imagery; **never** scrapes commercial satellite services in violation of terms of service.
+
+##### GEO-22: Landmark and Point-of-Interest Ranking
+- **Investigative Purpose:** Produces a ranked, probabilistic candidate shortlist of recognizable physical landmarks, monuments, and institutional sites consistent with the questioned image.
+- **Functional Requirements:**
+  1. Multi-Stage Candidate Generation:
+     - Stage 1: OCR text extraction of signboard names, milestone markers, and town identifiers.
+     - Stage 2: Visual feature embedding retrieval against known landmark database (e.g. Bihar heritage sites, government buildings, railway stations).
+     - Stage 3: Geometric verification against canonical reference photos of top candidates.
+  2. Calibrated Ranking Score: Compute composite score $S = w_1 \cdot s_{\text{ocr}} + w_2 \cdot s_{\text{embed}} + w_3 \cdot s_{\text{geom}}$; calibrate via Platt scaling on validation benchmark.
+  3. Granularity Enforcement: Report candidate results with explicit administrative hierarchy; never output a specific street number when evidence only supports a city-level match.
+- **Data Contract:** `RankedLandmarkList(candidates=[LandmarkCandidate(name, location_coords, confidence_score, ranking_tier, matching_features)])`.
+- **Acceptance Criteria:** True landmark appears in Top-5 candidates for $\ge 80\%$ of benchmark images where landmark is visually recognizable.
+
+##### GEO-23: Multi-Image Geospatial Clustering
+- **Investigative Purpose:** Groups large collections of seized photographs into distinct geographic stops, journey legs, and spatial clusters using density-based spatio-temporal clustering.
+- **Functional Requirements:**
+  1. Density-Based Clustering: Implement DBSCAN using Karney geodesic distance matrix as spatial metric, configured with maximum spatial radius $\epsilon_{\text{dist}} = 500\text{ meters}$ and minimum samples $N_{\text{min}} = 2$.
+  2. Temporal Window Filtering: Enforce maximum temporal divergence threshold $\Delta t_{\text{max}} = 2\text{ hours}$ between consecutive cluster members.
+  3. Noise Point Isolation: Label isolated exhibits that fail spatial density criteria as `NOISE_OUTLIERS` for dedicated single-exhibit inspection.
+  4. Missing Coordinate Handling: Strictly exclude exhibits lacking valid coordinates from spatial clusters; place them in a dedicated `UNLOCATED_EXHIBITS` pool (never cluster by missingness).
+  5. Cluster Characterization: Compute convex hull polygon, center of mass (spatial centroid), time span, and representative thumbnail for each cluster.
+- **Data Contract:** `GeospatialClusterList(clusters=[SpatialCluster(cluster_id, centroid_lat, centroid_lon, bounding_polygon, member_count, time_interval, member_evidence_ids)])`.
+- **Acceptance Criteria:** Accurately groups multi-camera case photos into distinct incident locations with zero synthetic grouping of missing-coordinate items.
+
+##### GEO-24: Location-Claim Conflict Graph
+- **Investigative Purpose:** Constructs a formal, directed evidence graph mapping relationships, corroborations, and contradictions among all geospatial, temporal, and visual claims in a case.
+- **Functional Requirements:**
+  1. Typed Node Graph Model:
+     - `EvidenceNode`: Master questioned exhibit (image, audio, video).
+     - `ObservationNode`: Specific parsed tag or measurement (EXIF GPS, track point, OCR sign).
+     - `CoordinateNode`: Proposed latitude/longitude point or bounding region.
+     - `ContextNode`: Weather reanalysis record, solar calculation, DEM elevation.
+     - `FindingNode`: Subsystem analytical determination.
+  2. Typed Directed Edges:
+     - `EXTRACTED_FROM`: Observation extracted from Evidence.
+     - `CLAIMS_LOCATION`: Observation asserts Coordinate.
+     - `CORROBORATES`: Observation supports another Observation or Finding.
+     - `CONTRADICTS`: Observation mathematically or physically conflicts with another Observation.
+     - `INFERRED_FROM`: Model Candidate derived from Observation.
+  3. Contradiction Cycle Detection: Execute cycle and path-based graph traversal to locate conflicting evidence chains (e.g. Photo A claims Patna at 10:00 AM, but CCTV B depicts Suspect in Gaya at 10:15 AM).
+  4. Archify IR Export: Serialize graph into Archify-compliant JSON IR for visualization in interactive investigator graph explorer.
+- **Data Contract:** `LocationConflictGraph(nodes, edges, contradiction_count, corroboration_count, graph_cycles)`.
+- **Evidentiary Invariant:** Graph edges represent documented mathematical and evidentiary links; causal assertions are forbidden.
+
+##### GEO-25: Evidence-Aware Geospatial Search
+- **Investigative Purpose:** Enables investigators to execute multi-criteria spatial, temporal, and metadata queries across the authorized case evidence repository.
+- **Functional Requirements:**
+  1. Multi-Criteria Query Support:
+     - Bounding Box / Geographic Polygon: Filter exhibits within user-drawn geographic boundaries (PostGIS `ST_Within` / `ST_Intersects`).
+     - Radial Proximity: Query exhibits within radius $r$ of target coordinate (PostGIS `ST_DWithin`).
+     - Temporal Windows: Filter by capture date/time interval $[t_{\text{start}}, t_{\text{end}}]$.
+     - Evidentiary Status: Filter by verification status (`CORROBORATED`, `CONFLICTING`, `MODEL_INFERRED`, `VALIDATED`).
+     - Semantic & Sign Text: Full-text search over OCR-extracted road signs and reverse-geocoded place names.
+  2. Case-Level Authorization Isolation: Enforce PostgreSQL row-level security (RLS) ensuring searches cannot leak exhibits across unauthorized case boundaries.
+  3. Sub-Second Query Execution: Maintain PostGIS GiST spatial index on `geom` column to execute bounding queries over 50,000 evidence items in $< 200\text{ ms}$.
+- **Data Contract:** `SpatialSearchResponse(total_matched, page, page_size, results=[SpatialSearchResult(evidence_id, coordinate, distance_m, capture_time, status)])`.
+- **Security Invariant:** Cross-case spatial queries return zero results unless explicitly authorized by Master Case Association Token.
+
+##### GEO-26: Offline Geographic Intelligence and Controlled Enrichment
+- **Investigative Purpose:** Enforces complete air-gapped forensic operation while providing an auditable, privacy-preserving gateway for controlled external enrichment when authorized.
+- **Functional Requirements:**
+  1. Air-Gap Mode Guarantee: System operates 100% locally using bundled SQLite gazetteers, offline DEM GeoTIFFs, and local vector map tiles (`.mbtiles`). Outbound socket connections strictly blocked at OS/container level.
+  2. Configurable Enrichment Adapters: For connected installations, administrators configure provider adapters:
+     - Geocoding: Local SQLite / Nominatim / Pelias.
+     - Weather: Local ERA5 NetCDF / Open-Meteo Historical API.
+     - Elevation: Local SRTM GeoTIFF / Open-Elevation.
+  3. Privacy & Minimization Policy: External requests strip all case IDs, file names, investigator metadata, and image pixels; coordinate precision truncated to 4 decimal places ($\approx 11\text{m}$) where sufficient.
+  4. Immutable External Query Audit Log: Every outbound query logs timestamp, destination IP/URL, truncated request payload, response status, and authorizing investigator ID in append-only audit trail.
+- **Data Contract:** `EnrichmentPolicyStatus(airgap_enforced, active_adapters, cached_features_count, audit_log_reference)`.
+- **Acceptance Criteria:** Verifies zero external network traffic during standard evidence ingestion and analysis using automated packet capture auditor (`test_geo_airgap_isolation.py`).
+
+---
+
+#### 10.10.2 Geodetic, Mathematical & Astrometric Foundations
+
+This section provides the rigorous mathematical formulation for all geodetic, kinematic, geometric, and astrometric computations executed within AIF-GEO. Every formula documents its parameter definitions, units, physical assumptions, numerical edge cases, and interpretation.
+
+##### 1. Coordinate Conversion: DMS to Decimal Degrees
+- **Physical Purpose:** Converts sexagesimal GPS coordinates (Degrees, Minutes, Seconds) stored as rational triples in EXIF IFD into signed floating-point decimal degrees on the WGS84 datum.
+- **Formula:**
+  $$\phi_{\text{dec}} = \operatorname{sgn}(\text{Ref}) \cdot \left( d + \frac{m}{60} + \frac{s}{3600} \right)$$
+- **Parameter Definitions:**
+  - $d \in \mathbb{N}_0$: Integer degrees.
+  - $m \in [0, 60)$: Floating-point arcminutes, decoded from rational $N_m / D_m$.
+  - $s \in [0, 60)$: Floating-point arcseconds, decoded from rational $N_s / D_s$.
+  - $\operatorname{sgn}(\text{Ref}) \in \{+1, -1\}$: Hemisphere reference sign:
+    $$\operatorname{sgn}(\text{LatitudeRef}) = \begin{cases} +1 & \text{if } \text{Ref} = \text{'N'} \\ -1 & \text{if } \text{Ref} = \text{'S'} \end{cases}, \quad \operatorname{sgn}(\text{LongitudeRef}) = \begin{cases} +1 & \text{if } \text{Ref} = \text{'E'} \\ -1 & \text{if } \text{Ref} = \text{'W'} \end{cases}$$
+- **Numerical Edge Cases & Stability:**
+  - Division by zero: If $D_m = 0$ or $D_s = 0$, parser aborts rational evaluation and records `MALFORMED_RATIONAL_DENOMINATOR_ZERO`.
+  - Precision: Floating-point conversion executes in IEEE 754 double precision (`float64`, 53-bit significand) to maintain sub-millimeter positional precision ($\approx 10^{-8}$ degrees $\approx 1.1\text{ mm}$).
+- **Boundary Validation:** Enforce $-90.0 \le \phi_{\text{dec}} \le 90.0$ and $-180.0 \le \lambda_{\text{dec}} \le 180.0$. Values outside this range generate `COORDINATE_OUT_OF_BOUNDS_ERROR`.
+
+##### 2. Geographic Distance: Spherical Haversine vs WGS84 Karney Geodesic
+- **Physical Purpose:** Calculates the shortest distance over the Earth's surface between two geographic points $(\phi_1, \lambda_1)$ and $(\phi_2, \lambda_2)$.
+- **Method 1: Spherical Haversine Screening:**
+  Used for fast preliminary spatial indexing, candidate bounding, and clustering where computational efficiency is prioritized over sub-meter geodetic precision.
+  $$a = \sin^2\left(\frac{\Delta\phi}{2}\right) + \cos\phi_1 \cos\phi_2 \sin^2\left(\frac{\Delta\lambda}{2}\right)$$
+  $$c = 2 \operatorname{atan2}\left(\sqrt{a}, \sqrt{1 - a}\right)$$
+  $$d_{\text{haversine}} = R_E \cdot c$$
+  Where:
+  - $\phi_1, \phi_2, \lambda_1, \lambda_2$ are latitudes and longitudes in radians.
+  - $\Delta\phi = \phi_2 - \phi_1$, $\Delta\lambda = \lambda_2 - \lambda_1$.
+  - $R_E = 6,371,008.8\text{ meters}$ (Mean Volumetric Earth Radius, IUGG).
+  - Assumptions: Assumes a perfectly spherical Earth; introduces up to $0.5\%$ error ($\approx 5\text{ m/km}$) depending on latitude due to Earth oblateness.
+- **Method 2: WGS84 Ellipsoidal Geodesic (Karney's Algorithm):**
+  Used for all evidentiary distance determinations, velocity calculations, and court-admissible findings via `pyproj.Geod(ellps='WGS84')`.
+  - Solves the inverse geodesic problem on the WGS84 oblate ellipsoid of revolution:
+    - Semi-major axis $a = 6,378,137.0\text{ meters}$.
+    - Reciprocal flattening $1/f = 298.257223563$.
+    - Semi-minor axis $b = a(1 - f) \approx 6,356,752.3142\text{ meters}$.
+  - Computes exact geodesic distance $s_{12}$ and forward/reverse azimuths $\alpha_1, \alpha_2$ with nanometer accuracy using elliptic integrals and Newton-Raphson iteration.
+  - **Forensic Rule:** Raw coordinate differences $\sqrt{\Delta\phi^2 + \Delta\lambda^2}$ must **NEVER** be used as metric distances.
+
+##### 3. Accuracy and Uncertainty Propagation
+- **Physical Purpose:** Calculates the combined positional uncertainty between two independent measurements to evaluate whether two observed positions could represent the same physical location.
+- **Formula:**
+  $$\sigma_{\text{diff}} = \sqrt{\sigma_1^2 + \sigma_2^2}$$
+- **Parameter Definitions:**
+  - $\sigma_1$: 1-sigma horizontal positioning error of Point 1 in meters.
+  - $\sigma_2$: 1-sigma horizontal positioning error of Point 2 in meters.
+  - $\sigma_{\text{diff}}$: Standard error of the geodesic distance difference.
+- **Statistical Assumptions:**
+  - Assumes errors in the two coordinate measurements are mutually independent and follow a bivariate zero-mean Gaussian distribution.
+  - If two photographs were taken by the same phone seconds apart, GPS multipath and ionospheric errors are correlated; in such cases, independence assumption fails, and $\sigma_{\text{diff}}$ represents a conservative upper bound.
+- **DOP Clarification:** Dilution of Precision tags (`GPSDOP`, `GPSHDOP`) are unitless geometric multipliers reflecting satellite constellation geometry. They cannot be converted directly into meters without multiplying by the estimated User Equivalent Range Error ($\text{UERE}$):
+  $$\text{HPE}_{1\sigma} \approx \text{HDOP} \cdot \text{UERE}_{\text{estimated}}$$
+  Where nominal open-sky $\text{UERE} \approx 3.5\text{ meters}$. If HDOP is present without HPE, the calculation must explicitly cite the assumed UERE value.
+
+##### 4. Kinematics, Velocity Gating & Kalman State Estimation
+- **Physical Purpose:** Evaluates movement plausibility across chronologically ordered exhibits to detect impossible teleportation anomalies and filter noisy trajectory measurements.
+- **Average Velocity Calculation:**
+  $$v_{\text{avg}} = \frac{d_{\text{geodesic}}(p_1, p_2)}{|t_2 - t_1|}$$
+  - $d_{\text{geodesic}}$ in meters (Karney WGS84).
+  - $|t_2 - t_1|$ in seconds.
+  - $v_{\text{avg}}$ in meters per second ($\text{m/s}$).
+- **Kinematic Gating Thresholds:**
+  $$\text{Anomalous if } v_{\text{avg}} > v_{\text{max\_allowed}}$$
+  - Pedestrian Mode: $v_{\text{max}} = 6.0\text{ m/s}$ ($21.6\text{ km/h}$).
+  - Urban Vehicle Mode: $v_{\text{max}} = 35.0\text{ m/s}$ ($126\text{ km/h}$).
+  - Commercial Flight Mode: $v_{\text{max}} = 260.0\text{ m/s}$ ($936\text{ km/h}$).
+  - Supersonic / Teleportation Flag: $v_{\text{max}} > 343.0\text{ m/s}$ ($1,235\text{ km/h}$).
+- **Kalman Filter Trajectory State Estimator:**
+  For dense GPS tracks, state vector $\mathbf{x}_k = [x_k, y_k, \dot{x}_k, \dot{y}_k]^T$ in local projected UTM plane:
+  $$\mathbf{x}_k = \mathbf{F} \mathbf{x}_{k-1} + \mathbf{w}_{k-1}, \quad \mathbf{z}_k = \mathbf{H} \mathbf{x}_k + \mathbf{v}_k$$
+  $$\mathbf{F} = \begin{bmatrix} 1 & 0 & \Delta t & 0 \\ 0 & 1 & 0 & \Delta t \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}, \quad \mathbf{H} = \begin{bmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \end{bmatrix}$$
+  Where process noise covariance $\mathbf{Q} = \sigma_a^2 \mathbf{G} \mathbf{G}^T$ models random acceleration, and measurement noise covariance $\mathbf{R} = \operatorname{diag}(\sigma_x^2, \sigma_y^2)$ reflects GPS horizontal positioning error.
+
+##### 5. Timestamp Normalization & Camera Clock Drift Regression
+- **Physical Purpose:** Models linear clock drift between camera internal real-time clocks (RTC) and atomic satellite GPS clocks across multiple photos from the same device.
+- **Model:**
+  $$\Delta t_i = t_{\text{camera}, i} - t_{\text{GPS\_UTC}, i} = a \cdot t_{\text{GPS\_UTC}, i} + b + \epsilon_i$$
+- **Parameter Definitions:**
+  - $a$: Clock drift rate (dimensionless, typically expressed in parts-per-million, $\text{ppm} = a \times 10^6$).
+  - $b$: Initial baseline clock offset at reference epoch (seconds).
+  - $\epsilon_i$: Random timing jitter / subsecond discretization error ($\sim \mathcal{N}(0, \sigma_t^2)$).
+- **Least-Squares Solution:**
+  $$\hat{a} = \frac{\sum (t_i - \bar{t})(\Delta t_i - \bar{\Delta t})}{\sum (t_i - \bar{t})^2}, \quad \hat{b} = \bar{\Delta t} - \hat{a} \bar{t}$$
+- **Interpretation:** Constant drift rate $\hat{a} \in [-50, +50]\text{ ppm}$ indicates normal uncompensated quartz oscillator drift. Discrete step discontinuities ($\Delta t$ jumps by exactly $3600\text{s}$ or arbitrary minutes) indicate manual clock adjustments or timezone shifts.
+
+##### 6. Track-to-Image Geodesic Interpolation
+- **Physical Purpose:** Estimates the geographic position of an image captured at timestamp $t_{\text{img}}$ falling between two validated GPS track points $p_0(t_0)$ and $p_1(t_1)$.
+- **Formula:**
+  $$\alpha = \frac{t_{\text{img}} - t_0}{t_1 - t_0}, \quad \alpha \in [0, 1]$$
+- **Geodesic Intermediate Point Calculation:**
+  Using pyproj / Karney direct geodesic solver from $p_0$ along initial geodesic azimuth $\alpha_1$ with distance $s(\alpha) = \alpha \cdot s_{12}$, where $s_{12}$ is total geodesic length between $p_0$ and $p_1$.
+- **Boundary Invariant:** Interpolation is strictly confined to intervals where $t_1 - t_0 \le \Delta t_{\text{max\_gap}} = 300\text{ seconds}$ and $d(p_0, p_1) \le 1000\text{ meters}$. If track gap exceeds these limits, interpolation is refused to avoid ungrounded trajectory speculation.
+
+##### 7. Direction and Circular Angular Difference
+- **Physical Purpose:** Compares device compass heading metadata against observable scene geometry, landmark bearings, or road azimuths.
+- **Formula:**
+  $$\Delta\theta = \min\left( |\theta_1 - \theta_2|, \, 360^\circ - |\theta_1 - \theta_2| \right)$$
+- **Parameter Definitions:**
+  - $\theta_1, \theta_2 \in [0^\circ, 360^\circ)$: Angles measured clockwise from True North.
+  - $\Delta\theta \in [0^\circ, 180^\circ]$: Smallest circular angular separation.
+- **Magnetic Declination Offset:**
+  If compass metadata uses Magnetic North reference (`GPSImgDirectionRef = 'M'`), True Heading is computed via the World Magnetic Model (WMM2025):
+  $$\theta_{\text{true}} = (\theta_{\text{mag}} + \delta(\phi, \lambda, h, t)) \bmod 360^\circ$$
+  Where $\delta$ is magnetic declination in degrees (+ East, - West).
+
+##### 8. Image Geometry & Projective Homography Verification
+- **Physical Purpose:** Verifies whether a candidate reference image or satellite orthophoto matches planar structures in the questioned photograph under projective perspective transformation.
+- **Homography Formulation:**
+  $$\mathbf{x}' \sim H \mathbf{x} \implies \begin{bmatrix} x' \\ y' \\ 1 \end{bmatrix} \sim \begin{bmatrix} h_{11} & h_{12} & h_{13} \\ h_{21} & h_{22} & h_{23} \\ h_{31} & h_{32} & h_{33} \end{bmatrix} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}$$
+- **RANSAC Robust Estimation:**
+  - Randomly sample 4 correspondence pairs to compute candidate $H$ via Direct Linear Transformation (DLT).
+  - Symmetric Transfer Error metric for correspondence pair $(\mathbf{x}_i, \mathbf{x}_i')$:
+    $$d_{\text{transfer}}^2(\mathbf{x}_i, \mathbf{x}_i') = d^2(\mathbf{x}_i', H \mathbf{x}_i) + d^2(\mathbf{x}_i, H^{-1} \mathbf{x}_i')$$
+  - Inlier Condition: $d_{\text{transfer}} \le \tau_{\text{thresh}} = 3.0\text{ pixels}$.
+  - Verification Criteria: Candidate match verified if inlier count $N_{\text{inliers}} \ge 25$, inlier ratio $N_{\text{inliers}} / N_{\text{total}} \ge 0.40$, and inlier keypoints span at least $30\%$ of image bounding area.
+
+##### 9. Spatio-Temporal DBSCAN Clustering
+- **Physical Purpose:** Groups collections of photographs into distinct geographic stops and incident scenes without pre-specifying the number of clusters.
+- **Distance Metric:**
+  $$D((p_i, t_i), (p_j, t_j)) = \begin{cases} d_{\text{geodesic}}(p_i, p_j) & \text{if } |t_i - t_j| \le \Delta t_{\text{max}} \\ \infty & \text{if } |t_i - t_j| > \Delta t_{\text{max}} \end{cases}$$
+- **Parameters:**
+  - $\epsilon_{\text{dist}} = 500\text{ meters}$: Spatial reachability threshold.
+  - $\Delta t_{\text{max}} = 7200\text{ seconds}$ (2 hours): Temporal clustering window.
+  - $\text{MinPts} = 2$: Minimum samples to form a dense core cluster.
+- **Outlier Handling:** Exhibits failing density reachability are classified as `NOISE_OUTLIERS`; exhibits lacking coordinates are placed in `UNLOCATED_EXHIBITS` pool.
+
+##### 10. Solar Position and Shadow Geometry
+- **Physical Purpose:** Determines expected solar azimuth and elevation to compare against observed cast shadows in questioned photographs.
+- **NOAA Solar Azimuth and Elevation Formulation:**
+  - Fractional year $\gamma = \frac{2\pi}{365} \left( \text{day\_of\_year} - 1 + \frac{\text{hour} - 12}{24} \right)$.
+  - Equation of Time (EoT in minutes):
+    $$\text{eqtime} = 229.18 \left( 0.000075 + 0.001868 \cos\gamma - 0.032077 \sin\gamma - 0.014615 \cos(2\gamma) - 0.040849 \sin(2\gamma) \right)$$
+  - Solar Declination angle $\delta$ in radians:
+    $$\delta = 0.006918 - 0.399912 \cos\gamma + 0.070257 \sin\gamma - 0.006758 \cos(2\gamma) + 0.000907 \sin(2\gamma) - 0.002697 \cos(3\gamma) + 0.00148 \sin(3\gamma)$$
+  - True Solar Time: $\text{TST} = (\text{hour} \cdot 60 + \text{min} + \text{sec}/60 + \text{eqtime} + 4 \cdot \lambda_{\text{deg}}) \pmod{1440}$.
+  - Solar Hour Angle: $H = \left(\frac{\text{TST}}{4} - 180\right) \cdot \frac{\pi}{180}$.
+  - Solar Zenith Angle $\theta_z$:
+    $$\cos\theta_z = \sin\phi \sin\delta + \cos\phi \cos\delta \cos H$$
+  - Solar Elevation Angle: $\alpha = 90^\circ - \theta_z \cdot \frac{180}{\pi}$.
+  - Solar Azimuth Angle $\gamma_s$ (from North):
+    $$\cos(180^\circ - \gamma_s) = -\frac{\sin\phi \cos\theta_z - \sin\delta}{\cos\phi \sin\theta_z}$$
+- **Shadow Length Relationship:**
+  For vertical object (height $h$) on flat planar ground:
+  $$\tan(\alpha) \approx \frac{h}{L} \implies L \approx \frac{h}{\tan(\alpha)}$$
+  Where $L$ is horizontal shadow length. Expected shadow bearing:
+  $$\theta_{\text{shadow}} = (\gamma_s + 180^\circ) \bmod 360^\circ$$
+
+##### 11. Elevation Datums & Geoid Undulation
+- **Physical Purpose:** Resolves vertical height discrepancies between GPS ellipsoidal elevation and topographic terrain models.
+- **Formula:**
+  $$h = H + N$$
+- **Parameter Definitions:**
+  - $h$: Geodetic (Ellipsoidal) height above the WGS84 reference ellipsoid (meters), recorded by GPS receivers.
+  - $H$: Orthometric height above Mean Sea Level (MSL) or geoid (meters), recorded in topographic maps and DEM rasters.
+  - $N$: Geoid undulation / separation (meters), obtained from EGM2008 / EGM96 geoid grids. Across Bihar, $N \approx -45\text{ to } -55\text{ meters}$.
+- **Forensic Invariant:** Comparing raw GPS altitude $h$ directly to DEM orthometric height $H$ without subtracting geoid separation $N$ introduces a systematic error of $\approx 50\text{ meters}$ in the Gangetic plains.
+
+##### 12. Calibrated Model Probabilities vs Uncalibrated Similarity Scores
+- **Physical Purpose:** Prevents arbitrary embedding similarity scores from being cited as true posterior probabilities in court testimony.
+- **Platt Scaling Calibration Formulation:**
+  For uncalibrated model similarity or classifier logit $s \in \mathbb{R}$:
+  $$P(\text{Match} = 1 \mid s) = \frac{1}{1 + \exp(A \cdot s + B)}$$
+  Where parameters $A, B \in \mathbb{R}$ are optimized via maximum likelihood on a held-out, cross-validated calibration benchmark:
+  $$\arg\min_{A, B} -\sum_{i=1}^N \left( y_i \log p_i + (1 - y_i) \log(1 - p_i) \right)$$
+- **Evidentiary Rule:** If a model output has not undergone calibration on a verified dataset matching the target geographical domain, its output must be reported strictly as a rank score (e.g. "Cosine Score: 0.82"), never as a percentage probability (e.g. "82% probable match").
+
+---
+
+#### 10.10.3 Technology Decision Matrix for AIF-GEO
+
+| Forensic Capability | Primary Candidate | Evaluated Alternative | Selection Rationale & Evidence Required | Known Limitations & Operational Constraints |
+| :--- | :--- | :--- | :--- | :--- |
+| **Deep Metadata Extraction (GEO-01)** | **ExifTool (CLI array wrapper)** | `piexif` / `exifread` | Primary: Reads 2,500+ metadata formats, MakerNotes, XMP, IPTC, and video sidecars. Executed via argument arrays with memory caps. | Process spawning overhead ($\approx 40\text{ ms}$ per file); requires persistent sandboxed worker daemon. |
+| **Geodesy & Geodetic Conversions (GEO-02, 06)** | **`pyproj` (PROJ / Karney Geod)** | `geopy` spherical distance | Primary: Exact ellipsoidal geodesic distance with nanometer accuracy; handles geoid grids and CRS transformations. | Native C library dependency (`libproj`); requires pre-compiled wheels. |
+| **Map Visualization Interface (GEO-04)** | **MapLibre GL JS** | Leaflet | Primary: WebGL hardware-accelerated vector tile rendering; smooth camera rotation, 3D terrain pitch, and GeoJSON clustering. | Requires WebGL support in investigator browser; Leaflet kept as low-spec fallback. |
+| **Visual Feature Matching (GEO-10, 21)** | **OpenCV SIFT + RANSAC** | ORB + RANSAC | Primary: Scale-Invariant Feature Transform (SIFT) is patent-free since 2020; superior affine invariance and keypoint repeatability. | Higher CPU cost than ORB; requires minimum image resolution $\ge 640 \times 480$. |
+| **Visual Geolocation Retrieval (GEO-09, 22)** | **SigLIP Embeddings + Local Gazetteer** | GeoCLIP | Primary: SigLIP provides robust visual-text joint embeddings; gazetteer enforces grounded administrative boundaries. GeoCLIP marked `CANDIDATE_NOT_YET_VALIDATED`. | Open-source GeoCLIP checkpoints lack dense training data for rural Indian districts; requires empirical Indian benchmark validation. |
+| **Sensor PRNU Fingerprinting (GEO-19)** | **Wavelet Denoising + PCE Correlation** | Spatial high-pass filter | Primary: Daubechies-8 wavelet decomposition separates sensor pattern noise from high-contrast scene edges effectively. | Classified as `RESEARCH_CANDIDATE`. Requires $\ge 25$ flat-field images; fails on social-media recompressed media. |
+| **Solar & Astronomical Calculations (GEO-11)** | **NOAA Solar Calculations (`pvlib-python`)** | Ephem / PySolar | Primary: Validated against NOAA ESRL solar position tables; exact zenith, azimuth, and elevation with refraction correction. | Assumes vertical gnomon and horizontal planar ground; inconclusive on sloped terrain. |
+| **Spatial Database & Indexing (GEO-24, 25)** | **PostgreSQL + PostGIS Extension** | Relational Float `(lat, lon)` with B-tree | Primary: R-tree GiST spatial indexing (`geom`), native `ST_DWithin`, `ST_Intersects`, and spatial clustering functions. | Requires PostGIS extension; system implements graceful fallback to float B-tree indexes if PostGIS is unavailable. |
+| **Terrain & DEM Raster Sampling (GEO-13)** | **`rasterio` (GDAL C-Core)** | `xarray` + `netcdf4` | Primary: High-performance memory-mapped reading of GeoTIFF elevation tiles (Copernicus GLO-30 / SRTM). | Disk storage requirements ($\approx 5\text{ GB}$ for complete Bihar 30m DEM raster coverage). |
+| **Signed Provenance & C2PA (GEO-20)** | **`c2pa-python` (Rust C2PA Core)** | Custom JUMBF parser | Primary: Official Coalition for Content Provenance and Authenticity library; full COSE signature, claim, and Merkle validation. | Requires Rust FFI bindings; media files lacking C2PA manifests must not be flagged as tampered. |
+
+---
+
+#### 10.10.4 Offline Geographic Intelligence & Controlled Provider Enrichment Architecture
+
+AIF-GEO enforces a strict **offline-first security architecture**, ensuring the entire platform can be deployed in a physically air-gapped forensic laboratory without external network dependencies.
+
+```mermaid
+flowchart LR
+    subgraph QUERY["Forensic Request"]
+        REQ["Query Coordinate (lat, lon)"]
+    end
+
+    subgraph ROUTER["Enrichment Gateway & Policy Enforcer"]
+        GATEWAY{"Enrichment Mode Policy"}
+    end
+
+    subgraph OFFLINE_TIER["Tier 1: Local Air-Gapped Store (Default)"]
+        SQLITE_GAZ["SQLite Gazetteer Database\n(GeoNames + OSM Bihar Extract)"]
+        OFFLINE_TILES["Local Vector Tile Server\n(bihar_offline_tiles.mbtiles)"]
+        DEM_STORE["Copernicus 30m DEM GeoTIFFs\n(Local Storage)"]
+        WEATHER_CACHE["ERA5 Historical Weather NetCDF\n(Local Historical Archive)"]
+    end
+
+    subgraph ONLINE_TIER["Tier 2: Controlled External Adapter (Opt-In Only)"]
+        RATE_LIMIT["Rate Limiter & Policy Enforcer\n(Max 1 req/sec, Query Truncation)"]
+        NOMINATIM["Nominatim / Pelias Reverse Geocoder"]
+        OPEN_METEO["Open-Meteo Historical Weather API"]
+        AUDIT_LOG["Immutable Query Audit Logger\n(Timestamp, Truncated Payload, Investigator ID)"]
+    end
+
+    QUERY --> GATEWAY
+    GATEWAY -->|Offline Mode (Default)| OFFLINE_TIER
+    GATEWAY -->|Online Mode (Explicit Admin Token)| RATE_LIMIT
+    RATE_LIMIT --> NOMINATIM
+    RATE_LIMIT --> OPEN_METEO
+    RATE_LIMIT --> AUDIT_LOG
+```
+
+1. **Air-Gap Verification:** When `AIRGAP_ENFORCEMENT_ENABLED = true`, outbound socket calls outside `localhost` and configured local database IPs are blocked by kernel-level routing and verified by test suite `test_geo_airgap_isolation.py`.
+2. **Query Minimization:** When online enrichment is explicitly authorized, coordinate precision sent to external APIs is rounded to 4 decimal places ($\approx 11\text{ meters}$). File hashes, case IDs, investigator credentials, and image pixels are **never** transmitted.
+3. **Local Tile & Feature Caching:** Map visualization operates using pre-seeded MBTiles containing OpenStreetMap vector tiles for Bihar state down to zoom level 16.
+
+---
+
+#### 10.10.5 AIF-GEO Phased Implementation Mapping (AIF-GEO-00 through AIF-GEO-10)
+
+The AIF-GEO subsystem is implemented across eleven sequential engineering phases defined in PHASES.md:
+- **AIF-GEO-00 (Architecture Baseline & Audit):** Package scaffold (`ps05.engines.image.geo`), Pydantic v2 schemas (`GeospatialObservationSchema`, `GeospatialCandidateSchema`), database DDL, and air-gap boundary definition.
+- **AIF-GEO-01 (GPS Extraction & Validation):** ExifTool safe wrapper, DMS rational decoder, coordinate boundary checks, and anomaly detection rules (GEO-01, GEO-02).
+- **AIF-GEO-02 (Geodesy & Uncertainty):** Karney WGS84 geodesic calculations, spatial error propagation ($\sigma_{	ext{diff}}$), and camera clock drift regression $\Delta t(t) = a \cdot t + b$ (GEO-05, GEO-06).
+- **AIF-GEO-03 (Geographic Enrichment & Map):** Local SQLite gazetteer, rate-limited Nominatim adapter, GeoJSON layer generator, and air-gap network isolation (GEO-03, GEO-04, GEO-26).
+- **AIF-GEO-04 (Track Correlation & Movement):** GPX/KML/NMEA parser, linear geodesic interpolator, kinematic velocity gating, and Kalman filter trajectory smoother (GEO-07, GEO-08).
+- **AIF-GEO-05 (Visual Geolocation & Landmarks):** PaddleOCR signboard pipeline, hierarchical candidate ranker, SIFT/RANSAC homography, and WMM camera heading correction (GEO-09, GEO-10, GEO-21, GEO-22).
+- **AIF-GEO-06 (Environmental & Terrain):** NOAA solar elevation/azimuth calculations, cast shadow checks, ERA5 historical weather cache, and Copernicus 30m DEM geoid undulation $h = H + N$ (GEO-11, GEO-12, GEO-13).
+- **AIF-GEO-07 (Manipulation & Hardware Clues):** Location spoofing flags, EXIF-to-visual semantic checks, near-duplicate scene finder, and PRNU sensor noise profiling (GEO-14, GEO-15, GEO-17, GEO-18, GEO-19).
+- **AIF-GEO-08 (Cross-Evidence Conflict Graph):** C2PA Content Credentials verifier, spatio-temporal DBSCAN clusterer, directed conflict graph, and PostGIS spatial search (GEO-16, GEO-20, GEO-23, GEO-24, GEO-25).
+- **AIF-GEO-09 (Investigator Workbench & Reports):** FastAPI REST endpoints, Archify JSON IR adapter, Section 65B/63 BSA certified PDF compiler, and reviewer disposition workflow.
+- **AIF-GEO-10 (Benchmarks, Privacy & Release):** Full regression test suite, 200-sample multi-device corpus, air-gap packet audit, and release readiness verification.
 
 ---
 
@@ -3298,6 +4078,138 @@ class VideoForensicReportManifest(BaseModel):
 
 ---
 
+### 12.6 AIF-GEO Geospatial Analysis, Observations & Candidate Contracts
+
+```python
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+import uuid
+
+class ObservationTypeEnum(str, Enum):
+    EXIF_GPS = "EXIF_GPS"
+    XMP_LOCATION = "XMP_LOCATION"
+    TRACK_LOG = "TRACK_LOG"
+    OCR_SIGN = "OCR_SIGN"
+    MODEL_INFERRED = "MODEL_INFERRED"
+    C2PA_ASSERTION = "C2PA_ASSERTION"
+
+class SourceTypeEnum(str, Enum):
+    USER_REPORTED = "USER_REPORTED"
+    MACHINE_EXTRACTED = "MACHINE_EXTRACTED"
+    EXTERNALLY_ENRICHED = "EXTERNALLY_ENRICHED"
+    MODEL_INFERRED = "MODEL_INFERRED"
+
+class ValidationStatusEnum(str, Enum):
+    VALID = "VALID"
+    INVALID_OR_MALFORMED = "INVALID_OR_MALFORMED"
+    CONFLICTING = "CONFLICTING"
+    UNVERIFIED = "UNVERIFIED"
+
+class ProvenanceStatusEnum(str, Enum):
+    CORROBORATED = "CORROBORATED"
+    INDEPENDENTLY_VERIFIED = "INDEPENDENTLY_VERIFIED"
+    UNVERIFIED = "UNVERIFIED"
+
+class GranularityEnum(str, Enum):
+    COUNTRY = "COUNTRY"
+    STATE = "STATE"
+    DISTRICT = "DISTRICT"
+    CITY = "CITY"
+    LOCALITY = "LOCALITY"
+    LANDMARK = "LANDMARK"
+    APPROXIMATE_BOUNDS = "APPROXIMATE_BOUNDS"
+
+class GeospatialObservationSchema(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    
+    observation_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    case_id: uuid.UUID
+    evidence_id: uuid.UUID
+    artifact_id: Optional[uuid.UUID] = None
+    observation_type: ObservationTypeEnum
+    source_type: SourceTypeEnum
+    source_field: str = Field(..., max_length=128)
+    raw_value: Optional[str] = None
+    normalized_value: Optional[Dict[str, Any]] = None
+    latitude: Optional[float] = Field(None, ge=-90.0, le=90.0)
+    longitude: Optional[float] = Field(None, ge=-180.0, le=180.0)
+    altitude: Optional[float] = None
+    coordinate_reference_system: str = "EPSG:4326"
+    altitude_reference: Optional[str] = None
+    observed_at: Optional[datetime] = None
+    observed_at_utc: Optional[datetime] = None
+    timezone_status: str = "UNKNOWN"
+    uncertainty_value: Optional[float] = Field(None, ge=0.0)
+    uncertainty_unit: str = "METERS"
+    uncertainty_semantics: str = "UNKNOWN_DEFAULT"
+    validation_status: ValidationStatusEnum
+    provenance_status: ProvenanceStatusEnum
+    source_provider: str = Field(..., max_length=128)
+    extractor_version: str = Field(..., max_length=64)
+    limitations: Optional[str] = None
+
+class GeospatialCandidateSchema(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    
+    candidate_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    case_id: uuid.UUID
+    evidence_id: uuid.UUID
+    candidate_region_name: str
+    granularity: GranularityEnum
+    latitude: Optional[float] = Field(None, ge=-90.0, le=90.0)
+    longitude: Optional[float] = Field(None, ge=-180.0, le=180.0)
+    uncertainty_radius_meters: Optional[float] = None
+    bounding_box: Optional[List[float]] = None # [min_lon, min_lat, max_lon, max_lat]
+    generation_method: str
+    ranking_score: float
+    calibrated_probability: Optional[float] = Field(None, ge=0.0, le=1.0)
+    calibration_status: str = "UNCALIBRATED_RANK_ONLY"
+    supporting_clues: List[Dict[str, Any]] = Field(default_factory=list)
+    contradictory_clues: List[Dict[str, Any]] = Field(default_factory=list)
+    reference_dataset: str
+    review_disposition: str = "PENDING_REVIEW"
+
+class GeospatialTrackImportRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    
+    case_id: uuid.UUID
+    evidence_id: uuid.UUID
+    track_format: str = Field(..., pattern="^(GPX|KML|NMEA|FIT|CSV)$")
+    track_raw_bytes_base64: str
+    device_model: Optional[str] = None
+
+class GeospatialAnalysisRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    
+    case_id: uuid.UUID
+    evidence_id: uuid.UUID
+    enable_visual_recovery: bool = True
+    enable_solar_shadow: bool = True
+    enable_weather_correlation: bool = True
+    enable_terrain_elevation: bool = True
+    allow_external_enrichment: bool = False # Air-gap safe default
+
+class GeospatialAnalysisResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    
+    analysis_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    case_id: uuid.UUID
+    evidence_id: uuid.UUID
+    extracted_observations: List[GeospatialObservationSchema]
+    candidate_locations: List[GeospatialCandidateSchema]
+    velocity_anomalies: List[Dict[str, Any]]
+    solar_consistency: Optional[Dict[str, Any]] = None
+    weather_context: Optional[Dict[str, Any]] = None
+    elevation_result: Optional[Dict[str, Any]] = None
+    conflict_graph_summary: Dict[str, Any]
+    airgap_enforced: bool
+    completed_at: datetime = Field(default_factory=datetime.utcnow)
+```
+
+---
+
 ## 13. Testing, Benchmark & Validation Architecture
 
 The PS-05 testing framework enforces strict separation between software reliability, mathematical correctness, and machine learning generalization across both audio and video forensic domains:
@@ -3389,6 +4301,57 @@ flowchart TD
 
 ---
 
+### 13.4 Geospatial Forensics Testing & Benchmark Framework
+
+The **AIF-GEO** subsystem is validated against an exhaustive testing framework spanning geodetic accuracy, metadata anomaly detection, astrometric solar calculations, track interpolation, and air-gapped network isolation:
+
+```mermaid
+flowchart TD
+    subgraph TEST_SUITES["AIF-GEO Automated Test Hierarchy"]
+        T1["1. Metadata Parsing Suite\n(test_geo_exif_deep.py)"]
+        T2["2. Geodesy & Boundary Suite\n(test_geo_geodesy.py)"]
+        T3["3. Track Correlation Suite\n(test_geo_tracks.py)"]
+        T4["4. Visual Geolocation Suite\n(test_geo_visual_loc.py)"]
+        T5["5. Solar & Shadow Suite\n(test_geo_solar_shadow.py)"]
+        T6["6. Terrain & DEM Suite\n(test_geo_terrain_elevation.py)"]
+        T7["7. Air-Gap Isolation Suite\n(test_geo_airgap_isolation.py)"]
+    end
+
+    subgraph FIXTURES["Forensic Test Fixtures & Corpora"]
+        F1["ExifTool GPS Golden Samples\n(200 Multi-Device Captures)"]
+        F2["Geodetic Edge Cases\n(Poles, Dateline, Null Island)"]
+        F3["Controlled Spoofed Dataset\n(Injected Teleportations & Edits)"]
+        F4["Regional Bihar Landmark Benchmark\n(150 Curated Sites with Reference GPS)"]
+        F5["Solar Gnomon Dataset\n(Known Height, Flat Ground, Precision Timestamp)"]
+    end
+
+    FIXTURES --> TEST_SUITES
+```
+
+1. **Synthetic GPS & Metadata Anomaly Test Corpus (`test_geo_exif_deep.py`, `test_geo_anomalies.py`):**
+   - Validates extraction across 200 real-world camera and mobile device exhibits (Apple iPhone 12–15, Samsung Galaxy S21–S24, Google Pixel 6–8, Canon EOS, Nikon D850, Sony A7IV).
+   - Injects corrupt rational denominators ($D=0$), out-of-bound coordinates ($\phi = 95.0^\circ$), hemisphere mismatches (`Ref=N` with negative latitude), and contradictory EXIF/XMP tags.
+   - Acceptance Criteria: 100% detection of malformed tags; zero unhandled parser exceptions.
+2. **Geodesy & Datum Edge-Case Benchmark (`test_geo_geodesy.py`):**
+   - Tests Karney WGS84 geodesic calculations against National Geodetic Survey (NGS) reference baselines.
+   - Evaluates dateline crossing ($\lambda_1 = 179.9^\circ, \lambda_2 = -179.9^\circ$), polar convergence ($\phi = 89.9^\circ$), and sub-meter distance comparisons.
+   - Acceptance Criteria: Geodesic calculation error $< 10^{-6}\text{ meters}$ relative to NGS standards.
+3. **Track Correlation & Kinematic Gating Suite (`test_geo_tracks.py`):**
+   - Ingests test tracks with known clock offsets, variable sampling cadences, and synthetic teleportations ($v = 1,200\text{ m/s}$).
+   - Validates that non-extrapolation boundary checks correctly reject points falling outside track duration $[t_{\text{start}}, t_{\text{end}}]$.
+4. **Visual Geolocation & Landmark Retrieval Benchmark (`test_geo_visual_loc.py`):**
+   - Benchmark corpus of 150 curated photographs of prominent Bihar infrastructure, heritage sites, and administrative offices.
+   - Evaluates Top-$k$ candidate accuracy ($k \in \{1, 3, 5\}$) and Median Geodesic Error ($\text{MGE}$).
+   - Acceptance Criteria: True landmark location contained in Top-5 candidates for $\ge 80\%$ of images where scene is recognizable.
+5. **Solar Position & Shadow Validation Suite (`test_geo_solar_shadow.py`):**
+   - Evaluates NOAA solar position implementation against US Naval Observatory (USNO) reference tables across 500 global coordinate-time coordinates.
+   - Acceptance Criteria: Solar elevation and azimuth calculation error $< 0.05^\circ$.
+6. **Air-Gap Network Isolation Verification (`test_geo_airgap_isolation.py`):**
+   - Executes complete evidence intake, metadata parsing, candidate localization, and report compilation inside an isolated network namespace with an active packet capture auditor (`tcpdump`).
+   - Acceptance Criteria: Zero outbound packets emitted to IP addresses outside loopback (`127.0.0.1/8`).
+
+---
+
 ## 14. Archify Integration & Visualization Pipeline
 
 Archify (`https://github.com/tt-a1i/archify`) functions as the architectural and evidentiary visualization engine:
@@ -3427,3 +4390,17 @@ To guarantee court admissibility across Indian jurisdictions, the platform autom
 2. **Uninterrupted Custody Certification:** Formal declaration certifying that the computing device was operating properly and at all material times without corruptive interference.
 3. **Dual Cryptographic Checksum:** Explicit citation of SHA-256 and SHA3-512 hashes verifying identical bitstream parity between original seized exhibit and analyzed copy.
 4. **Hardware Serial & Examiner Identification:** Verified identification details of the officer operating the platform.
+
+
+### 15.3 Geospatial Privacy, Location Confidentiality & Air-Gap Security Invariants
+
+All geospatial forensic processing within AIF-GEO is governed by eight immutable security and privacy invariants:
+
+1. **Air-Gap Default Invariant:** Core metadata parsing, coordinate validation, trajectory analysis, visual clue extraction, and report compilation must execute 100% locally without outbound internet connectivity. Disabling network access must not degrade core forensic findings.
+2. **Zero Image Transmission Invariant:** Uploaded evidence pixel bytes, compressed bitstreams, and face/object crops must **NEVER** be transmitted across the network to external third-party geolocation services or cloud AI APIs under any circumstance.
+3. **Controlled Query Minimization:** Where an administrator explicitly authorizes external reverse-geocoding (e.g. public Nominatim adapter), queries must transmit solely coordinate pairs truncated to 4 decimal places ($\approx 11\text{m}$). Evidence IDs, case numbers, filenames, and investigator identities are strictly stripped.
+4. **Immutable External Request Audit Trail:** Every outbound query emitted by an enrichment adapter must be recorded in the append-only CEIPL audit log, capturing UTC timestamp, destination endpoint, truncated query coordinates, HTTP status, and the authorizing investigator's cryptographic identity.
+5. **Multi-Tenant Row-Level Security (RLS):** Geospatial database tables (`geospatial_observations`, `geospatial_candidates`, `geospatial_tracks`) enforce strict PostgreSQL Row-Level Security. Investigators can query only coordinates belonging to cases for which their session holds an active cryptographic Case Authorization Token.
+6. **Non-Destructive Processing Invariant:** Reading, parsing, or normalizing GPS metadata must never modify the original evidence bitstream. Coordinate transformations and normalized values are stored exclusively as derived artifact manifests linked via CEIPL DAG.
+7. **Prohibition of Monolithic "Truth" Verdicts:** Machine-learning models (GeoCLIP, SigLIP) must never output an absolute verdict claiming an image was "proven" to be taken at a specific coordinate. Uncalibrated scores must be explicitly reported as ranking metrics, and candidate areas must state their bounding uncertainty.
+8. **Mandatory Inconclusive Attribution:** When metadata is absent and visual scene clues are insufficient or ambiguous, the platform must report **"Location Inconclusive / Insufficient Geospatial Telemetry"** as the court-admissible finding, rather than speculating.

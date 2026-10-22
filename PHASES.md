@@ -15,6 +15,7 @@ The PS-05 development lifecycle is structured into eleven platform-level phases 
 - **AURAS Audio Forensics Subsystem:** Eleven engineering phases (**AURAS-A0 through AURAS-A10**).
 - **VISTA Video Forensics Subsystem:** Fourteen engineering phases (**VISTA-A0 through VISTA-A13**).
 - **AIF Image Forensics Subsystem:** Retained as Phase 4 with its multi-branch visual examination modules (**AIF-A0 through AIF-A15**).
+- **AIF-GEO Geospatial Forensics Subsystem:** Eleven engineering phases (**AIF-GEO-00 through AIF-GEO-10**).
 - **ONTF Network Traffic Forensics Subsystem:** Fourteen engineering phases (**ONTF-A0 through ONTF-A13**).
 - **Shared Platform Layer:** Common pre-decode dual-hashing, WORM vault persistence, Celery worker orchestration, and Section 65B/63 BSA legal reporting infrastructure.
 
@@ -84,6 +85,20 @@ flowchart TD
         IA14 --> IA15["AIF-A15: End-to-End Image Validation & Release"]
     end
 
+    subgraph GEOSPATIAL_WORKSTREAM["🗺️ AIF-GEO Geospatial Forensics Playbook"]
+        direction TB
+        GA0["AIF-GEO-00: Audit & Architecture Baseline"] --> GA1["AIF-GEO-01: GPS Extraction & Validation"]
+        GA0 --> GA2["AIF-GEO-02: Geodesy & Uncertainty Models"]
+        GA1 & GA2 --> GA3["AIF-GEO-03: Geographic Enrichment & Map Interface"]
+        GA1 & GA2 --> GA4["AIF-GEO-04: Track Correlation & Timeline Reconstruction"]
+        GA0 --> GA5["AIF-GEO-05: Visual Geolocation & Landmark Matching"]
+        GA1 & GA2 --> GA6["AIF-GEO-06: Environmental & Terrain Consistency"]
+        GA1 & GA5 --> GA7["AIF-GEO-07: Location Manipulation & Hardware Clues"]
+        GA3 & GA4 & GA7 --> GA8["AIF-GEO-08: Cross-Evidence Spatio-Temporal Graph"]
+        GA8 --> GA9["AIF-GEO-09: Investigator Workbench & Reports"]
+        GA9 --> GA10["AIF-GEO-10: Benchmarking, Privacy & Release"]
+    end
+
     subgraph NETWORK_WORKSTREAM["🌐 ONTF Network Traffic Forensics Playbook"]
         direction TB
         NA0["ONTF-A0: Network Architecture & Sandbox Baseline"] --> NA1["ONTF-A1: Intake, Dual Hashing & WORM Vault"]
@@ -102,7 +117,7 @@ flowchart TD
     end
 
     subgraph PLATFORM_DELIVERY["🚀 Platform Delivery & Legal Certification"]
-        A10 & VA13 & IA15 & NA13 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
+        A10 & VA13 & IA15 & NA13 & GA10 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
         P7 --> P8["Phase 8: Web Dashboard & Examiner Workbench"]
         P8 --> P9["Phase 9: Security Hardening & Air-Gapped Packaging"]
         P9 --> P10["Phase 10: Final Hackathon Demonstration & Release"]
@@ -157,6 +172,17 @@ flowchart TD
 | **AIF-A13** | CEIPL Provenance & Custody Hardening | CEIPL Hardening | `PLANNED` | AIF-A1, A10 Gates| Ed25519 signer, RFC 3161 TSA, hash-chained log, Merkle inclusion proofs |
 | **AIF-A14** | Evidence Fusion & Legal Reporting | Reporting / AIF | `PLANNED` | AIF-A10..A13 Gates| Cross-engine finding merger, Archify JSON IR, Section 65B/63 BSA PDF |
 | **AIF-A15** | End-to-End Image Validation & Release | Validation / Release | `PLANNED` | AIF-A14 Gate | Benchmark suite, CoMoFoD, TruFor eval, 5-run determinism, air-gap |
+| **AIF-GEO-00** | Geospatial Architecture Baseline & Audit | AIF-GEO Core / Docs | `PLANNED` | Phase 0 Gate, AIF-A0 | Package scaffold, Pydantic contracts, PostGIS DDL, air-gap boundary |
+| **AIF-GEO-01** | GPS Metadata & Coordinate Validation | AIF-GEO Baseline | `PLANNED` | AIF-GEO-00 Gate | ExifTool wrapper, DMS rational decoder, bounds & anomaly engine |
+| **AIF-GEO-02** | Geodesy, Uncertainty & Time Semantics | AIF-GEO Geodesy | `PLANNED` | AIF-GEO-01 Gate | WGS84 Karney geodesic, error propagation, UTC clock drift regressor |
+| **AIF-GEO-03** | Geographic Enrichment & Offline Map | AIF-GEO Cartography | `PLANNED` | AIF-GEO-01, 02 Gates| Local SQLite gazetteer, online adapter, GeoJSON map generator, air-gap audit |
+| **AIF-GEO-04** | Track Correlation & Movement Consistency | AIF-GEO Telemetry | `PLANNED` | AIF-GEO-01, 02 Gates| GPX/KML parser, geodesic interpolator, velocity gating, Kalman smoother |
+| **AIF-GEO-05** | Visual Geolocation & Landmark Matching | AIF-GEO Vision | `PLANNED` | AIF-GEO-00, AIF-A6, A8| PaddleOCR signboard pipeline, candidate ranker, SIFT/RANSAC homography |
+| **AIF-GEO-06** | Environmental & Terrain Consistency | AIF-GEO Environment | `PLANNED` | AIF-GEO-01, 02 Gates| NOAA solar vector, cast shadow check, ERA5 weather, DEM geoid undulation |
+| **AIF-GEO-07** | Location Manipulation & Hardware Clues | AIF-GEO Integrity | `PLANNED` | AIF-GEO-01, 05 Gates| Spoofing findings, semantic consistency, duplicate finder, PRNU profiler |
+| **AIF-GEO-08** | Cross-Evidence Spatio-Temporal Graph | AIF-GEO Graph | `PLANNED` | AIF-GEO-03, 04, 07 | C2PA verifier, DBSCAN clusterer, conflict graph, PostGIS spatial search |
+| **AIF-GEO-09** | Investigator Workbench & Legal Reports | AIF-GEO Reporting | `PLANNED` | AIF-GEO-08 Gate | FastAPI endpoints, Archify JSON IR adapter, Sec 65B/63 BSA PDF compiler |
+| **AIF-GEO-10** | Benchmarking, Privacy Audit & Release | Validation / Release | `PLANNED` | AIF-GEO-09 Gate | Full regression suite, air-gap packet audit, 5-run determinism benchmark |
 | **ONTF-A0** | Network Architecture & Sandbox Baseline | ONTF Core / Shared | `PLANNED` | Phase 0 Gate | Directory scaffold, defensive sandbox harness, typing contracts, exceptions |
 | **ONTF-A1** | Intake, Dual Hashing & WORM Vault | CEIPL / ONTF Core | `PLANNED` | ONTF-A0 Gate | Pre-parse dual-hasher, WORM vault, metadata registry, RFC 8785 receipt |
 | **ONTF-A2** | Defensive Packet Parsing (TShark & Scapy) | ONTF Ingestion | `PLANNED` | ONTF-A1 Gate | Magic bytes, snaplen validation, sandboxed TShark/Scapy deep packet dissection |
@@ -2532,7 +2558,415 @@ All 16 AIF phases validated; benchmark report compiled; all 64 checkpoints initi
 
 ---
 
-## 6. Dedicated Offline Network Traffic Forensics Engineering Playbook (ONTF-A0 through ONTF-A13)
+## 6. Dedicated Geospatial Forensics Engineering Playbook (AIF-GEO-00 through AIF-GEO-10)
+
+The **AIF-GEO** workstream delivers end-to-end geospatial evidence extraction, geographic coordinate normalization, track-to-image correlation, visual location recovery, solar/shadow verification, environmental consistency auditing, multi-image clustering, and cross-evidence conflict graphing within the PS-05 platform. It integrates natively with CEIPL for cryptographic provenance and reuses core AIF visual processing infrastructure.
+
+```mermaid
+flowchart TD
+    G0["AIF-GEO-00: Audit & Architecture"] --> G1["AIF-GEO-01: GPS Extraction & Validation (GEO-01, 02)"]
+    G0 --> G2["AIF-GEO-02: Geodesy & Uncertainty (GEO-05, 06)"]
+    G1 & G2 --> G3["AIF-GEO-03: Geographic Enrichment & Map (GEO-03, 04, 26)"]
+    G1 & G2 --> G4["AIF-GEO-04: Track Correlation & Timeline (GEO-07, 08)"]
+    G0 --> G5["AIF-GEO-05: Visual Geolocation & Landmarks (GEO-09, 10, 21, 22)"]
+    G1 & G2 --> G6["AIF-GEO-06: Environmental & Terrain (GEO-11, 12, 13)"]
+    G1 & G5 --> G7["AIF-GEO-07: Location Manipulation & Hardware (GEO-14, 15, 17, 18, 19)"]
+    G3 & G4 & G7 --> G8["AIF-GEO-08: Cross-Evidence Conflict Graph (GEO-16, 20, 23, 24, 25)"]
+    G8 --> G9["AIF-GEO-09: Investigator Workbench & Reports"]
+    G9 --> G10["AIF-GEO-10: Benchmarks, Privacy & Release"]
+```
+
+---
+
+### Phase AIF-GEO-00: Repository Audit, Schemas & Geospatial Architecture Baseline
+- **Phase Objective:** Audit existing AIF image parsers, CEIPL cryptographic pipelines, and PostgreSQL database schemas; establish the module boundary for `ps05.engines.image.geo`; create canonical Pydantic v2 contracts and define the dependency graph.
+- **Topics & Subtopics:**
+  - Audit of ExifTool execution wrappers and safe sandboxing (`safe_decode.py`).
+  - Spatial database evaluation (PostgreSQL + PostGIS vs relational float fallback).
+  - Pydantic v2 contracts for geospatial observations, candidates, and conflict graphs.
+  - Air-gap isolation boundary and local-first data store scoping.
+- **Exact Engineering Tasks:**
+  1. Audit `ps05.engines.image.common` to ensure safe decoding hooks prevent decompression bombs.
+  2. Implement `ps05/engines/image/geo/__init__.py` and establish module package architecture.
+  3. Define initial Pydantic contracts in `ps05/engines/image/geo/schemas.py`.
+  4. Write architectural decision records (ADR) for PostGIS spatial indexing and local SQLite gazetteer caches.
+- **Dependencies:** Phase 0 (Architecture Baseline & Standards), AIF-A0 (AIF Architecture Baseline).
+- **Recommended Technologies:** Python 3.11/3.12, Pydantic v2, PostgreSQL 15+ / PostGIS 3.3+.
+- **Expected Artefacts:** `ps05/engines/image/geo/schemas.py`, `tests/unit/test_geo_schemas.py`.
+- **Validation & Testing:** Schema serialization/deserialization tests; PostGIS connection tests (`test_geo_schemas.py`).
+- **Failure Modes:** Malformed schemas causing serialization errors; PostGIS extension unavailable on target system (triggers relational float fallback).
+- **Security & Privacy:** Enforce extra-field forbidding on Pydantic models; ensure no telemetry or external DNS resolution occurs.
+- **Acceptance Criteria:** 100% test pass on Pydantic v2 schema validation; zero cyclic dependencies across `ps05.engines.image`.
+- **Definition of Done:** Module scaffold created, contracts validated, ADR documented, and unit test suite passing.
+- **Current Status:** `PLANNED` (Architecture and contracts formally specified in TRD Section 10.10 & 12.6).
+
+| Checkpoint ID | Name | Description | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-GEO-00-C1** | Package Scaffold & Directory Tree | Creates `ps05.engines.image.geo` package structure. | Directory inspection & import test | `NOT_STARTED` |
+| **AIF-GEO-00-C2** | Pydantic v2 Contract Suite | Implements `GeospatialObservationSchema`, `GeospatialCandidateSchema`. | `pytest tests/unit/test_geo_schemas.py` | `NOT_STARTED` |
+| **AIF-GEO-00-C3** | PostGIS & Relational Fallback DDL | Validates DDL migration script with spatial and fallback columns. | Database migration dry-run test | `NOT_STARTED` |
+| **AIF-GEO-00-C4** | Air-Gap Environment Audit | Confirms isolation boundary and local SQLite cache directories. | Filesystem & sandbox audit | `NOT_STARTED` |
+
+---
+
+### Phase AIF-GEO-01: Comprehensive GPS Metadata Extraction & Coordinate Validation
+- **Phase Objective:** Implement deep metadata extraction across EXIF, XMP, IPTC, and MakerNotes; execute mathematical validation of coordinates, hemisphere signs, rational values, and anomaly detection.
+- **Primary Requirements Covered:** GEO-01, GEO-02.
+- **Topics & Subtopics:**
+  - ExifTool CLI argument array execution under memory caps (`RLIMIT_AS=512MB`).
+  - Sexagesimal DMS rational decoding with zero-denominator protection.
+  - Coordinate boundary checks ($-90 \le \phi \le 90$, $-180 \le \lambda \le 180$).
+  - Anomaly detection: Null Island $(0,0)$, integer truncation, contradictory EXIF vs XMP coordinates, cloned coordinates across exhibits.
+- **Exact Engineering Tasks:**
+  1. Implement `ps05/engines/image/geo/metadata_parser.py` invoking ExifTool via safe subprocess pipes.
+  2. Implement `ps05/engines/image/geo/validator.py` decoding rational triples and hemisphere references.
+  3. Implement anomaly detection rules flagging out-of-bounds, default, truncated, and contradictory tags.
+  4. Integrate CEIPL raw-byte observation preservation (exact tag names, raw bytes, normalized values).
+- **Dependencies:** AIF-GEO-00, AIF-A1 (CEIPL Foundation), AIF-A7 (Metadata Audit Baseline).
+- **Recommended Technologies:** ExifTool 12.70+, Python `subprocess`, Pydantic v2.
+- **Expected Artefacts:** `ps05/engines/image/geo/metadata_parser.py`, `ps05/engines/image/geo/validator.py`, `tests/unit/test_geo_exif_deep.py`.
+- **Validation & Testing:** 200 multi-device sample images with synthetic anomalies (`test_geo_exif_deep.py`, `test_geo_anomalies.py`).
+- **Failure Modes:** Corrupt IFD headers; division-by-zero rationals; process timeouts on pathological image headers.
+- **Security & Privacy:** Command array execution prevents shell injection; memory limits prevent decompression exploits; input files treated as read-only.
+- **Acceptance Criteria:** 100% field extraction recall on standard EXIF 2.32 GPS tags; 100% detection of synthetic coordinate anomalies.
+- **Definition of Done:** Metadata extraction and validation engine passing all unit tests with zero unhandled exceptions.
+- **Current Status:** `PLANNED` (Technical specification detailed in TRD Section 10.10.1 GEO-01 & GEO-02).
+
+| Checkpoint ID | Name | Description | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-GEO-01-C1** | ExifTool Array Wrapper Harness | Implements sandboxed ExifTool execution with timeout & memory caps. | Process isolation & error test | `NOT_STARTED` |
+| **AIF-GEO-01-C2** | DMS-to-Decimal Rational Decoder | Decodes sexagesimal rationals with zero-denominator guards. | Unit tests on rational triples | `NOT_STARTED` |
+| **AIF-GEO-01-C3** | Boundary & Hemisphere Validation | Validates geodetic bounds and hemisphere sign inversion. | Edge case tests (Poles, Equator) | `NOT_STARTED` |
+| **AIF-GEO-01-C4** | Anomaly & Contradiction Engine | Flags Null Island, integer truncation, and EXIF/XMP tag deltas. | Anomaly detection benchmark | `NOT_STARTED` |
+
+---
+
+### Phase AIF-GEO-02: Geodesy, Uncertainty Propagation & Temporal Semantics
+- **Phase Objective:** Implement high-precision geodetic calculations on the WGS84 ellipsoid; establish spatial uncertainty models and propagate error bounds; execute temporal normalization and camera clock drift regression.
+- **Primary Requirements Covered:** GEO-05, GEO-06 (and foundations for GEO-07, GEO-08).
+- **Topics & Subtopics:**
+  - Spherical Haversine screening vs WGS84 Karney ellipsoidal geodesic distance (`pyproj.Geod`).
+  - Positional uncertainty propagation ($\sigma_{\text{diff}} = \sqrt{\sigma_1^2 + \sigma_2^2}$) and DOP semantic handling.
+  - Multi-field timestamp alignment (`DateTimeOriginal`, `GPSTimeStamp`, `OffsetTimeOriginal`).
+  - Linear clock drift regression ($\Delta t(t) = a \cdot t + b$) across multi-image device sequences.
+- **Exact Engineering Tasks:**
+  1. Implement `ps05/engines/image/geo/geodesy.py` wrapping `pyproj.Geod(ellps='WGS84')` for inverse and direct geodesic problems.
+  2. Implement uncertainty modeling extracting `GPSHPositioningError` and estimating HDOP user equivalent range error ($\text{UERE} = 3.5\text{m}$).
+  3. Implement temporal normalization engine resolving timezones, UTC conversions, and clock drift.
+- **Dependencies:** AIF-GEO-00, AIF-GEO-01.
+- **Recommended Technologies:** `pyproj` 3.6+, NumPy, SciPy.
+- **Expected Artefacts:** `ps05/engines/image/geo/geodesy.py`, `tests/unit/test_geo_geodesy.py`.
+- **Validation & Testing:** National Geodetic Survey (NGS) reference baselines; synthetic clock drift regression fixtures (`test_geo_geodesy.py`, `test_geo_temporal.py`).
+- **Failure Modes:** Numerical instability on near-antipodal coordinates; ambiguous local timezones without offset tags.
+- **Security & Privacy:** Mathematical operations execute in deterministic memory; no external network calls.
+- **Acceptance Criteria:** Geodesic distance calculation error $< 10^{-6}\text{ meters}$ relative to NGS benchmarks; linear clock drift regression recovers synthetic drift rates with $R^2 > 0.98$.
+- **Definition of Done:** Geodesy, uncertainty, and temporal alignment algorithms implemented and benchmarked.
+- **Current Status:** `PLANNED` (Mathematical formulations detailed in TRD Section 10.10.2).
+
+| Checkpoint ID | Name | Description | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-GEO-02-C1** | Karney WGS84 Geodesic Engine | Implements ellipsoidal geodesic distance & forward/reverse azimuths. | NGS benchmark comparison tests | `NOT_STARTED` |
+| **AIF-GEO-02-C2** | Spatial Uncertainty Propagation | Models HPE and propagates standard errors ($\sigma_{\text{diff}}$). | Uncertainty propagation tests | `NOT_STARTED` |
+| **AIF-GEO-02-C3** | Multi-Source Timestamp Parser | Normalizes UTC instants and resolves timezone offsets. | Timezone ambiguity test suite | `NOT_STARTED` |
+| **AIF-GEO-02-C4** | Camera Clock Drift Regressor | Computes linear clock drift rate $a$ and baseline offset $b$. | Regression tests on multi-photo logs | `NOT_STARTED` |
+
+---
+
+### Phase AIF-GEO-03: Geographic Place Enrichment & Offline Map Interface
+- **Phase Objective:** Build local gazetteer and administrative boundary resolution; provide controlled, rate-limited online reverse-geocoding adapters; generate interactive MapLibre GL JS / Leaflet vector layers and enforce air-gapped isolation.
+- **Primary Requirements Covered:** GEO-03, GEO-04, GEO-26.
+- **Topics & Subtopics:**
+  - Local SQLite gazetteer resolution (GeoNames + Bihar Police administrative boundaries).
+  - Controlled online enrichment adapter (Nominatim / Pelias) with strict query minimization.
+  - GeoJSON FeatureCollection generation with distinct marker taxonomy.
+  - Offline vector tile bundling (`.mbtiles`) and kernel-level network isolation verification.
+- **Exact Engineering Tasks:**
+  1. Implement `ps05/engines/image/geo/geocoder.py` supporting SQLite local store and rate-limited HTTP adapter.
+  2. Implement `ps05/engines/image/geo/map_interface.py` transforming findings into standardized GeoJSON layers.
+  3. Pre-seed local database with Bihar administrative boundaries and police station jurisdictions.
+  4. Write network isolation test suite verifying zero socket emissions in air-gap mode.
+- **Dependencies:** AIF-GEO-01, AIF-GEO-02.
+- **Recommended Technologies:** SQLite, `shapely`, `geopandas`, MapLibre GL JS, Leaflet.
+- **Expected Artefacts:** `ps05/engines/image/geo/geocoder.py`, `ps05/engines/image/geo/map_interface.py`, `tests/integration/test_geo_airgap_isolation.py`.
+- **Validation & Testing:** Offline reverse geocoding accuracy tests; packet capture network isolation verification (`test_geo_airgap_isolation.py`).
+- **Failure Modes:** Local gazetteer missing rural village names; external API rate limit exhaustion (gracefully caught with offline fallback).
+- **Security & Privacy:** Strictly prohibit transmission of image pixels; query coordinates truncated to 4 decimal places; append-only audit logging for external queries.
+- **Acceptance Criteria:** Local reverse geocoding resolves $> 95\%$ of Bihar district/taluk headquarters in offline mode; zero outbound packets emitted during air-gap test.
+- **Definition of Done:** Geocoding engine and map generation layer functioning offline with audited fallback paths.
+- **Current Status:** `PLANNED` (Architecture specified in TRD Section 10.10.1 & 10.10.4).
+
+| Checkpoint ID | Name | Description | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-GEO-03-C1** | Local SQLite Gazetteer Engine | Resolves coordinates to Bihar administrative hierarchy offline. | Offline address resolution test | `NOT_STARTED` |
+| **AIF-GEO-03-C2** | Controlled Online Provider Adapter | Rate-limited Nominatim adapter with query minimization & audit. | Mock HTTP provider & audit test | `NOT_STARTED` |
+| **AIF-GEO-03-C3** | GeoJSON Map Layer Generator | Generates styled GeoJSON FeatureCollections for MapLibre/Leaflet. | GeoJSON schema validation test | `NOT_STARTED` |
+| **AIF-GEO-03-C4** | Air-Gap Network Isolation Audit | Verifies zero outbound network packets emitted in offline mode. | Automated `tcpdump` socket auditor | `NOT_STARTED` |
+
+---
+
+### Phase AIF-GEO-04: GPS Track Correlation, Telemetry & Movement Plausibility
+- **Phase Objective:** Ingest independently seized GPS tracks (GPX, KML, NMEA, FIT, CSV); perform temporal synchronization and geodesic linear interpolation; execute kinematic velocity gating and Kalman filter trajectory smoothing.
+- **Primary Requirements Covered:** GEO-07, GEO-08.
+- **Topics & Subtopics:**
+  - Multi-format track parsing (GPX XML, KML, NMEA 0183 sentences, FIT binary, CSV).
+  - Geodesic linear interpolation with strict non-extrapolation boundary enforcement.
+  - Multi-tier velocity gating ($v_{\text{avg}} = d / \Delta t$) for pedestrian, vehicular, and flight speeds.
+  - Linear Kalman filter trajectory smoothing for noisy multi-point tracks.
+- **Exact Engineering Tasks:**
+  1. Implement `ps05/engines/image/geo/track_correlator.py` parsing GPX, KML, NMEA, FIT, and CSV telemetry logs.
+  2. Implement temporal interpolation locating track bounding samples and computing intermediate coordinates.
+  3. Implement kinematic gating flagging teleportation anomalies ($v > 260\text{ m/s}$).
+  4. Implement discrete linear Kalman filter state estimation for track sequences.
+- **Dependencies:** AIF-GEO-01, AIF-GEO-02.
+- **Recommended Technologies:** `gpxpy`, `pyproj`, NumPy, SciPy.
+- **Expected Artefacts:** `ps05/engines/image/geo/track_correlator.py`, `tests/unit/test_geo_tracks.py`.
+- **Validation & Testing:** Track correlation test suite with known offsets, sparse points, and synthetic teleportations (`test_geo_tracks.py`).
+- **Failure Modes:** Malformed XML in GPX; non-monotonic track timestamps; tracks with temporal gaps exceeding interpolation limits.
+- **Security & Privacy:** Track files parsed in isolated memory; never extrapolate beyond track bounds.
+- **Acceptance Criteria:** 100% detection of synthetic teleportation anomalies; non-extrapolation invariant verified when photo timestamp is outside track duration.
+- **Definition of Done:** Track correlation engine tested and integrated with case exhibit management.
+- **Current Status:** `PLANNED` (Mathematical derivations in TRD Section 10.10.2).
+
+| Checkpoint ID | Name | Description | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-GEO-04-C1** | Multi-Format Track Parser | Parses GPX, KML, NMEA 0183, FIT, and CSV track files safely. | Multi-format parser test suite | `NOT_STARTED` |
+| **AIF-GEO-04-C2** | Geodesic Linear Interpolator | Interpolates image coordinates along track with boundary checks. | Interpolation accuracy tests | `NOT_STARTED` |
+| **AIF-GEO-04-C3** | Kinematic Velocity Gating | Flags implausible velocities across chronologically ordered exhibits. | Teleportation detection suite | `NOT_STARTED` |
+| **AIF-GEO-04-C4** | Kalman Filter Track Smoother | Applies discrete linear Kalman filter to filter GPS measurement noise. | Noise reduction evaluation | `NOT_STARTED` |
+
+---
+
+### Phase AIF-GEO-05: Visual Geolocation, Landmark Matching & Geometric Homography
+- **Phase Objective:** Extract visual location clues (OCR road signs, town names, milestones) when GPS metadata is missing; compute visual embeddings and rank regional candidate locations; execute SIFT/ORB feature matching and RANSAC homography against reference orthophotos.
+- **Primary Requirements Covered:** GEO-09, GEO-10, GEO-21, GEO-22.
+- **Topics & Subtopics:**
+  - Multilingual PaddleOCR extraction of signboards, highway markers, and milestone text (Hindi, English, Bengali, Urdu).
+  - Scene classification and SigLIP feature embedding retrieval.
+  - Multi-granularity candidate ranking (`COUNTRY`, `STATE`, `DISTRICT`, `CITY`, `LOCALITY`).
+  - Projective homography ($\mathbf{x}' \sim H \mathbf{x}$) and RANSAC geometric verification against reference photos/satellite imagery.
+  - Camera compass heading validation with World Magnetic Model (WMM) declination correction.
+- **Exact Engineering Tasks:**
+  1. Implement `ps05/engines/image/geo/visual_locator.py` integrating OCR clues with local gazetteer retrieval.
+  2. Implement candidate ranking cascade producing Top-5 candidate regions with explicit uncertainty bounds.
+  3. Implement `ps05/engines/image/geo/orientation.py` computing circular angular differences and SIFT/RANSAC homographies.
+  4. Benchmark GeoCLIP / regional models (classified as `CANDIDATE_NOT_YET_VALIDATED` pending Indian regional evaluation).
+- **Dependencies:** AIF-GEO-00, AIF-A4 (Object Detection), AIF-A6 (PaddleOCR Baseline), AIF-A8 (SIFT/RANSAC Baseline).
+- **Recommended Technologies:** OpenCV 4.9+, PaddleOCR, SigLIP / CLIP, `pyproj`.
+- **Expected Artefacts:** `ps05/engines/image/geo/visual_locator.py`, `ps05/engines/image/geo/orientation.py`, `tests/benchmarks/test_geo_visual_loc.py`.
+- **Validation & Testing:** 150-sample curated Bihar landmark benchmark; synthetic affine homography test set (`test_geo_visual_loc.py`, `test_geo_homography.py`).
+- **Failure Modes:** Low-resolution unreadable signboards; visually repetitive architectural styles (e.g. generic retail storefronts); severe perspective distortion.
+- **Security & Privacy:** Local offline inference; no raw images sent to cloud vision APIs; candidate scores reported as uncalibrated ranks unless benchmark-calibrated.
+- **Acceptance Criteria:** True landmark contained in Top-5 candidates for $\ge 80\%$ of recognizable landmark test images; RANSAC homography detects valid planar alignment with $\ge 25$ inliers.
+- **Definition of Done:** Visual clue extraction, candidate ranking, and geometric verification operational and benchmarked.
+- **Current Status:** `PLANNED` (Methodology specified in TRD Section 10.10.1 & 10.10.2).
+
+| Checkpoint ID | Name | Description | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-GEO-05-C1** | Multilingual Signboard OCR Pipeline | Extracts text from road signs and milestones via PaddleOCR. | OCR text extraction benchmark | `NOT_STARTED` |
+| **AIF-GEO-05-C2** | Hierarchical Candidate Ranker | Generates ranked candidate regions from OCR tokens and embeddings. | Top-$k$ candidate accuracy eval | `NOT_STARTED` |
+| **AIF-GEO-05-C3** | SIFT/ORB + RANSAC Homography | Computes 2D projective homography against reference orthophotos. | Homography alignment test suite | `NOT_STARTED` |
+| **AIF-GEO-05-C4** | Camera Heading & WMM Declination | Compares compass heading to landmark bearing with WMM correction. | Circular angular separation test | `NOT_STARTED` |
+
+---
+
+### Phase AIF-GEO-06: Environmental, Astrometric & Topographic Consistency
+- **Phase Objective:** Validate physical consistency between candidate location/time and environmental evidence: compute astronomical solar position and cast shadow geometry; retrieve historical weather reanalysis; correlate GPS altitude with DEM terrain rasters.
+- **Primary Requirements Covered:** GEO-11, GEO-12, GEO-13.
+- **Topics & Subtopics:**
+  - NOAA astronomical solar elevation ($\alpha$) and azimuth ($\gamma_s$) calculation.
+  - Gnomon cast shadow geometry ($\tan\alpha \approx h / L$) and inconclusive condition taxonomy.
+  - Historical weather reanalysis interface (Open-Meteo Historical API & local ERA5 NetCDF cache).
+  - Digital Elevation Model (DEM) sampling via `rasterio` and EGM2008 geoid undulation ($h = H + N$).
+- **Exact Engineering Tasks:**
+  1. Implement `ps05/engines/image/geo/environment.py` executing NOAA solar vector calculations and shadow checks.
+  2. Implement weather reanalysis query adapter with local ERA5 cache and cloud-cover cross-checks.
+  3. Implement DEM raster sampling extracting Copernicus GLO-30 ground elevations and computing geoid undulation offsets.
+  4. Implement classification logic for inconclusive solar/weather conditions (night, diffuse lighting, elevated bridges).
+- **Dependencies:** AIF-GEO-01, AIF-GEO-02, AIF-A3 (Scene Triage).
+- **Recommended Technologies:** `pvlib-python`, `rasterio` (GDAL), `xarray` / `netcdf4`, `pyproj`.
+- **Expected Artefacts:** `ps05/engines/image/geo/environment.py`, `tests/unit/test_geo_solar_shadow.py`, `tests/unit/test_geo_terrain_elevation.py`.
+- **Validation & Testing:** USNO solar table comparison across 500 coordinates; SRTM/Copernicus elevation ground-truth tests (`test_geo_solar_shadow.py`, `test_geo_terrain_elevation.py`).
+- **Failure Modes:** Night captures or diffuse overcast lighting (correctly tagged `SOLAR_ANALYSIS_INCONCLUSIVE`); photos taken inside high-rise buildings exceeding DEM terrain height.
+- **Security & Privacy:** Solar and elevation calculations operate 100% offline; weather reanalysis uses local historical cache by default.
+- **Acceptance Criteria:** Solar angle error $< 0.05^\circ$ relative to NOAA reference tables; elevation engine applies $h = H + N$ geoid correction with sub-meter accuracy.
+- **Definition of Done:** Astrometric solar, historical weather, and topographic terrain modules validated against ground-truth datasets.
+- **Current Status:** `PLANNED` (Formulas and parameters detailed in TRD Section 10.10.2).
+
+| Checkpoint ID | Name | Description | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-GEO-06-C1** | NOAA Solar Vector & Elevation Engine | Calculates astronomical solar elevation and azimuth for coordinates/time. | NOAA reference comparison test | `NOT_STARTED` |
+| **AIF-GEO-06-C2** | Cast Shadow Consistency Verifier | Verifies $\tan\alpha \approx h/L$ and shadow azimuth with inconclusive handling. | Shadow geometry test suite | `NOT_STARTED` |
+| **AIF-GEO-06-C3** | Historical Weather Reanalysis Adapter | Retrieves temperature, precipitation, and cloud cover from ERA5 cache. | Weather consistency unit tests | `NOT_STARTED` |
+| **AIF-GEO-06-C4** | DEM Raster & Geoid Undulation Engine | Samples Copernicus 30m DEM and computes $h = H + N$ geoid corrections. | Topographic elevation test suite | `NOT_STARTED` |
+
+---
+
+### Phase AIF-GEO-07: Location Manipulation, Duplicate Discovery & Hardware Consistency
+- **Phase Objective:** Synthesize metadata anomalies and physical contradictions into typed manipulation findings; detect near-duplicate scenes across transformations; audit camera hardware consistency and evaluate PRNU sensor noise.
+- **Primary Requirements Covered:** GEO-14, GEO-15, GEO-17, GEO-18, GEO-19.
+- **Topics & Subtopics:**
+  - EXIF-to-visual semantic consistency (e.g. marine ocean image with inland GPS coordinates).
+  - Screen recapture and poster detection (preventing photos of display monitors from being localized).
+  - Multi-tier near-duplicate discovery (SHA-256 byte identity, pHash, SigLIP embeddings, RANSAC homography).
+  - Camera hardware consistency (MakerNotes, lens model, serial number hashes, quantization matrix clustering).
+  - PRNU sensor pattern noise correlation (classified as `RESEARCH_CANDIDATE`).
+- **Exact Engineering Tasks:**
+  1. Implement `ps05/engines/image/geo/manipulation.py` synthesizing metadata, timing, and environmental contradictions into forensic findings.
+  2. Implement semantic sanity checks cross-referencing extracted coordinates against global landcover maps.
+  3. Implement `ps05/engines/image/geo/clustering.py` for near-duplicate scene retrieval across crops and recompression.
+  4. Implement `ps05/engines/image/geo/provenance.py` auditing camera serials and executing PRNU wavelet denoising.
+- **Dependencies:** AIF-GEO-01, AIF-GEO-02, AIF-GEO-05, AIF-A7 (Metadata Audit), AIF-A9 (CMFD & PRNU Baseline).
+- **Recommended Technologies:** OpenCV 4.9+, `imagehash`, PyTorch, SciPy.
+- **Expected Artefacts:** `ps05/engines/image/geo/manipulation.py`, `ps05/engines/image/geo/clustering.py`, `ps05/engines/image/geo/provenance.py`.
+- **Validation & Testing:** Curated location-spoofed test corpus; duplicate discovery benchmark on transformed images (`test_geo_manipulation_flags.py`, `test_geo_duplicate_scenes.py`).
+- **Failure Modes:** Legitimate photos of remote travel posters (detected via moiré analysis); social-media recompression destroying PRNU sensor noise.
+- **Security & Privacy:** Typed findings clearly distinguish anomalous metadata from deliberate fraud; no uncalibrated claims of guilt.
+- **Acceptance Criteria:** Detects 100% of injected coordinate contradictions; achieves $> 95\%$ recall on cropped and recompressed duplicate scenes.
+- **Definition of Done:** Manipulation detection, duplicate retrieval, and camera consistency engines validated.
+- **Current Status:** `PLANNED` (Functional requirements specified in TRD Section 10.10.1).
+
+| Checkpoint ID | Name | Description | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-GEO-07-C1** | Typed Location Manipulation Engine | Generates structured findings for coordinate spoofing and teleportation. | Manipulation flag test suite | `NOT_STARTED` |
+| **AIF-GEO-07-C2** | EXIF-to-Visual Semantic Checker | Flags marine vs inland and left-hand vs right-hand drive mismatches. | Semantic sanity benchmark | `NOT_STARTED` |
+| **AIF-GEO-07-C3** | Multi-Tier Near-Duplicate Finder | Discovers resized, cropped, and recompressed same-scene exhibits. | Duplicate image discovery test | `NOT_STARTED` |
+| **AIF-GEO-07-C4** | Hardware & PRNU Sensor Profiler | Audits camera serials, quantization tables, and PRNU noise residuals. | Camera consistency test suite | `NOT_STARTED` |
+
+---
+
+### Phase AIF-GEO-08: Cross-Evidence Spatio-Temporal Graph & Provenance Verification
+- **Phase Objective:** Construct formal directed location conflict graphs; validate C2PA Content Credentials provenance; execute multi-image DBSCAN spatio-temporal clustering; execute sub-second PostGIS spatial searches.
+- **Primary Requirements Covered:** GEO-16, GEO-20, GEO-23, GEO-24, GEO-25.
+- **Topics & Subtopics:**
+  - C2PA Content Credentials JUMBF parser, COSE signature check, and location assertion validation.
+  - Inter-subsystem bridges linking image coordinates to VISTA CCTV feeds and AURAS audio timestamps.
+  - Spatio-temporal DBSCAN clustering with Karney geodesic metric ($\epsilon = 500\text{m}, \Delta t = 2\text{h}$).
+  - Directed Evidence Graph construction (`EvidenceNode`, `ObservationNode`, `CoordinateNode`, `FindingNode`).
+  - PostGIS spatial indexing (`ST_DWithin`, `ST_Within`, `ST_Intersects`) with case-isolated Row-Level Security.
+- **Exact Engineering Tasks:**
+  1. Implement `ps05/engines/image/geo/provenance.py` validating C2PA manifests via `c2pa-python`.
+  2. Implement `ps05/engines/image/geo/conflict_graph.py` constructing NetworkX directed graphs and exporting Archify JSON IR.
+  3. Implement DBSCAN spatio-temporal clustering grouping exhibits into geographic stops and isolating noise points.
+  4. Implement spatial search query builder executing parameterized PostGIS queries with RLS case boundaries.
+- **Dependencies:** AIF-GEO-01, AIF-GEO-03, AIF-GEO-04, AIF-GEO-07, CEIPL (AIF-A13).
+- **Recommended Technologies:** `c2pa-python`, `networkx`, PostGIS, SQLAlchemy 2.0.
+- **Expected Artefacts:** `ps05/engines/image/geo/conflict_graph.py`, `tests/integration/test_geo_conflict_graph.py`, `tests/integration/test_geo_spatial_search.py`.
+- **Validation & Testing:** Multi-camera case clustering tests; C2PA signature validation suite; PostGIS query performance benchmark (`test_geo_c2pa_provenance.py`, `test_geo_conflict_graph.py`).
+- **Failure Modes:** Untrusted C2PA certificate roots; complex graph cycles with circular contradictions; query timeouts on massive unindexed spatial tables.
+- **Security & Privacy:** Enforce strict case-level authorization on all spatial queries; do not leak exhibits across unauthorized case boundaries.
+- **Acceptance Criteria:** C2PA verifier validates authentic manifests and rejects tampered bitstreams; spatial queries return in $< 200\text{ ms}$ over 50,000 indexed records; conflict graph cleanly exposes contradictory claims.
+- **Definition of Done:** Provenance verifier, conflict graph builder, spatial clusterer, and search engine fully tested.
+- **Current Status:** `PLANNED` (Graph schema and spatial DDL specified in TRD Section 4.4 & 10.10.1).
+
+| Checkpoint ID | Name | Description | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-GEO-08-C1** | C2PA Content Credentials Verifier | Validates JUMBF manifest, COSE signatures, and signed location claims. | C2PA signature validation suite | `NOT_STARTED` |
+| **AIF-GEO-08-C2** | Spatio-Temporal DBSCAN Clusterer | Groups exhibits within 500m and 2 hours; isolates unlocated items. | Multi-image clustering test | `NOT_STARTED` |
+| **AIF-GEO-08-C3** | Location-Claim Conflict Graph | Builds typed directed evidence graph and exports Archify JSON IR. | Conflict graph traversal tests | `NOT_STARTED` |
+| **AIF-GEO-08-C4** | PostGIS Evidence Search Engine | Executes case-isolated spatial queries with sub-second response times. | Spatial query performance test | `NOT_STARTED` |
+
+---
+
+### Phase AIF-GEO-09: Investigator Geospatial Workbench & Reporting Integration
+- **Phase Objective:** Integrate the complete geospatial evidence workspace into the forensic dashboard; provide synchronized map-timeline views and evidence drill-down; compile court-admissible Section 65B/63 BSA certified PDF reports and Archify JSON IR manifests.
+- **Primary Requirements Covered:** GEO-04 (UI Workbench), GEO-24 (Graph Viewer), Reporting Contracts.
+- **Topics & Subtopics:**
+  - Frontend geospatial workbench (original image viewer, metadata panel, interactive map, candidate ranking, conflict graph).
+  - Synchronized temporal timeline and confidence-coded marker overlays.
+  - Jinja2 HTML/CSS legal report template compilation with WeasyPrint.
+  - Archify JSON IR serializer for geospatial observations, trajectories, and evidentiary findings.
+- **Exact Engineering Tasks:**
+  1. Implement FastAPI API endpoints in `ps05/api/v1/geo.py` serving observations, candidates, tracks, and map GeoJSON.
+  2. Implement Jinja2 template `ps05/reporting/templates/geospatial_section.html` formatting geospatial findings for legal PDF output.
+  3. Implement Archify JSON IR formatting in `ps05/reporting/archify_adapter.py`.
+  4. Integrate reviewer disposition workflow allowing investigators to accept, reject, or mark findings as inconclusive.
+- **Dependencies:** AIF-GEO-03, AIF-GEO-08, AIF-A14 (Reporting Baseline).
+- **Recommended Technologies:** FastAPI, Jinja2, WeasyPrint, Archify IR, MapLibre GL JS.
+- **Expected Artefacts:** `src/ps05/api/v1/geo.py`, `src/ps05/reporting/templates/geospatial_section.html`, `tests/integration/test_geo_reporting.py`.
+- **Validation & Testing:** End-to-end report generation test; Section 65B legal compliance audit; Archify JSON IR validation (`test_geo_reporting.py`).
+- **Failure Modes:** WeasyPrint PDF layout overflow on long coordinate lists; missing thumbnail derivatives during PDF compilation.
+- **Security & Privacy:** Redact private coordinates from public-facing report summaries unless explicitly certified by investigator; verify digital signature sealing on output PDFs.
+- **Acceptance Criteria:** Generates Section 65B IEA / Section 63 BSA certified PDF report containing full geospatial findings, hashes, and uncertainty statements in $< 5\text{ seconds}$; Archify JSON IR validates against schema.
+- **Definition of Done:** Geospatial API endpoints and legal reporting pipeline operational, tested, and certified.
+- **Current Status:** `PLANNED` (Reporting contracts specified in TRD Section 12.6 & 14).
+
+| Checkpoint ID | Name | Description | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-GEO-09-C1** | Geospatial REST API Endpoints | Serves observations, candidate locations, tracks, and GeoJSON layers. | FastAPI route integration tests | `NOT_STARTED` |
+| **AIF-GEO-09-C2** | Archify Geospatial JSON IR Adapter | Serializes observations, candidates, and conflict graphs to Archify IR. | Archify schema validator test | `NOT_STARTED` |
+| **AIF-GEO-09-C3** | Section 65B/63 BSA PDF Compiler | Compiles court-admissible PDF report with maps, hashes, and findings. | WeasyPrint compilation audit | `NOT_STARTED` |
+| **AIF-GEO-09-C4** | Investigator Disposition Workflow | Supports review dispositions (`ACCEPTED`, `REJECTED`, `INCONCLUSIVE`). | Review state lifecycle test | `NOT_STARTED` |
+
+---
+
+### Phase AIF-GEO-10: Benchmarking, Privacy Audit, Security Hardening & Release
+- **Phase Objective:** Execute full-system validation across curated multi-camera corpora; conduct strict air-gap and privacy audits; verify deterministic reproducible execution; compile technical documentation and release gate package.
+- **Primary Requirements Covered:** All GEO-01 through GEO-26 capabilities, System Invariants.
+- **Topics & Subtopics:**
+  - Multi-camera benchmark corpus validation (200 diverse mobile/camera exhibits).
+  - Kernel-level air-gap packet audit verifying zero unauthorized outbound socket connections.
+  - Multi-tenant case data isolation audit (PostgreSQL Row-Level Security verification).
+  - 5-run determinism verification (bit-identical outputs for non-ML algorithms; stable ranking for ML models).
+- **Exact Engineering Tasks:**
+  1. Execute comprehensive automated regression suite across all 10 preceding AIF-GEO phases.
+  2. Conduct privacy audit verifying that uploaded image pixels and private coordinates are never leaked in application logs.
+  3. Validate deterministic execution across repeated runs with identical random seeds.
+  4. Perform documentation parity audit ensuring complete consistency across README, PRD, TRD, and PHASES.
+- **Dependencies:** AIF-GEO-01 through AIF-GEO-09.
+- **Recommended Technologies:** `pytest`, `pytest-cov`, `tcpdump`, Docker isolated network namespace.
+- **Expected Artefacts:** `tests/benchmarks/benchmark_geo_full.py`, `docs/audits/aif_geo_release_audit.md`.
+- **Validation & Testing:** Full test suite execution with code coverage $\ge 90\%$; packet capture log audit; determinism verification.
+- **Failure Modes:** Memory leaks during batch processing of 1,000+ case exhibits; non-deterministic candidate ranking across runs.
+- **Security & Privacy:** Complete verification of all 8 Geospatial Security Invariants defined in TRD Section 15.3.
+- **Acceptance Criteria:** 100% of unit and integration tests pass; zero network leaks detected in air-gapped run; release gate signed off by Lead Forensics Architect.
+- **Definition of Done:** All 26 capabilities verified, benchmarks documented, privacy audits signed off, and release tag applied.
+- **Current Status:** `PLANNED` (Verification criteria defined in TRD Section 13.4).
+
+| Checkpoint ID | Name | Description | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-GEO-10-C1** | Full-System Regression & Coverage | Executes complete test suite across all 26 geospatial capabilities. | `pytest tests/ --cov=ps05.engines.image.geo` | `NOT_STARTED` |
+| **AIF-GEO-10-C2** | Air-Gap & Privacy Leak Audit | Verifies zero network emissions and zero coordinate leakage in logs. | Packet capture log & log audit | `NOT_STARTED` |
+| **AIF-GEO-10-C3** | 5-Run Determinism Benchmark | Verifies identical output hashes across repeated analysis runs. | Hash comparison across 5 runs | `NOT_STARTED` |
+| **AIF-GEO-10-C4** | Documentation & Release Gate Package | Validates parity across README, PRD, TRD, and PHASES. | Documentation consistency check | `NOT_STARTED` |
+
+---
+
+### Master Checkpoint Traceability Matrix (GEO-01 through GEO-26)
+
+This table provides authoritative, bidirectional traceability linking every stable functional requirement (`GEO-01` through `GEO-26`) to its governing PRD product requirement, TRD technical specification, engineering phase, implementation checkpoint, required validation evidence, current status, and outstanding dependencies:
+
+| Capability ID | Capability Name | PRD Section | TRD Section | Phase ID | Checkpoint ID | Required Validation Evidence | Current Status | Outstanding Dependency |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **GEO-01** | Comprehensive GPS Metadata Extraction | PRD §6.6 GEO-01 | TRD §10.10.1 GEO-01 | AIF-GEO-01 | AIF-GEO-01-C1, C2 | ExifTool deep extraction test on 200 diverse device exhibits (`test_geo_exif_deep.py`). | `PLANNED` | Phase 0 Gate, AIF-A1 |
+| **GEO-02** | Coordinate Validity & Anomaly Checks | PRD §6.6 GEO-02 | TRD §10.10.1 GEO-02 | AIF-GEO-01 | AIF-GEO-01-C3, C4 | Anomaly detection test on synthetic out-of-bounds, Null Island, and truncated coords. | `PLANNED` | AIF-GEO-01-C2 |
+| **GEO-03** | Reverse Geocoding & Place Enrichment | PRD §6.6 GEO-03 | TRD §10.10.1 GEO-03 | AIF-GEO-03 | AIF-GEO-03-C1, C2 | Offline reverse geocoding test on Bihar administrative boundary dataset. | `PLANNED` | AIF-GEO-01 Gate |
+| **GEO-04** | Interactive Geospatial Evidence Map | PRD §6.6 GEO-04 | TRD §10.10.1 GEO-04 | AIF-GEO-03 | AIF-GEO-03-C3 | GeoJSON FeatureCollection schema validation and MapLibre tile layer test. | `PLANNED` | AIF-GEO-03-C1 |
+| **GEO-05** | Capture-Time & GPS-Time Consistency | PRD §6.6 GEO-05 | TRD §10.10.1 GEO-05 | AIF-GEO-02 | AIF-GEO-02-C3, C4 | Linear clock drift regression test on multi-photo camera sequences. | `PLANNED` | AIF-GEO-01 Gate |
+| **GEO-06** | Accuracy & Uncertainty Representation | PRD §6.6 GEO-06 | TRD §10.10.1 GEO-06 | AIF-GEO-02 | AIF-GEO-02-C2 | Uncertainty propagation test ($\sigma_{\text{diff}}$) and DOP semantic handling test. | `PLANNED` | AIF-GEO-02-C1 |
+| **GEO-07** | Cross-Image Timeline Reconstruction | PRD §6.6 GEO-07 | TRD §10.10.1 GEO-07 | AIF-GEO-04 | AIF-GEO-04-C3, C4 | Kinematic velocity gating and Kalman filter trajectory smoothing benchmark. | `PLANNED` | AIF-GEO-02 Gate |
+| **GEO-08** | External Track & Telemetry Correlation | PRD §6.6 GEO-08 | TRD §10.10.1 GEO-08 | AIF-GEO-04 | AIF-GEO-04-C1, C2 | Multi-format track parser and geodesic interpolation non-extrapolation test. | `PLANNED` | AIF-GEO-02 Gate |
+| **GEO-09** | Visual Location Recovery Without GPS | PRD §6.6 GEO-09 | TRD §10.10.1 GEO-09 | AIF-GEO-05 | AIF-GEO-05-C1, C2 | PaddleOCR signboard extraction and regional candidate ranking benchmark. | `PLANNED` | AIF-A6 Gate |
+| **GEO-10** | Direction & Landmark Geometry | PRD §6.6 GEO-10 | TRD §10.10.1 GEO-10 | AIF-GEO-05 | AIF-GEO-05-C4 | Circular angular difference and World Magnetic Model declination correction test. | `PLANNED` | AIF-GEO-01 Gate |
+| **GEO-11** | Solar Position & Shadow Consistency | PRD §6.6 GEO-11 | TRD §10.10.1 GEO-11 | AIF-GEO-06 | AIF-GEO-06-C1, C2 | NOAA solar azimuth/elevation calculation against USNO reference tables. | `PLANNED` | AIF-GEO-02 Gate |
+| **GEO-12** | Historical Weather Context | PRD §6.6 GEO-12 | TRD §10.10.1 GEO-12 | AIF-GEO-06 | AIF-GEO-06-C3 | Historical weather retrieval test from local ERA5 cache and Open-Meteo adapter. | `PLANNED` | AIF-GEO-02 Gate |
+| **GEO-13** | Elevation & Terrain Correlation | PRD §6.6 GEO-13 | TRD §10.10.1 GEO-13 | AIF-GEO-06 | AIF-GEO-06-C4 | Copernicus 30m DEM sampling and $h = H + N$ geoid undulation test. | `PLANNED` | AIF-GEO-01 Gate |
+| **GEO-14** | GPS Manipulation Indicators | PRD §6.6 GEO-14 | TRD §10.10.1 GEO-14 | AIF-GEO-07 | AIF-GEO-07-C1 | Location manipulation test on curated spoofed metadata and teleportation set. | `PLANNED` | AIF-GEO-01, 04 |
+| **GEO-15** | EXIF-to-Visual Content Consistency | PRD §6.6 GEO-15 | TRD §10.10.1 GEO-15 | AIF-GEO-07 | AIF-GEO-07-C2 | Semantic environmental consistency test (e.g. marine ocean image with inland GPS). | `PLANNED` | AIF-A3 Gate |
+| **GEO-16** | Cross-Evidence Geospatial Correlation | PRD §6.6 GEO-16 | TRD §10.10.1 GEO-16 | AIF-GEO-08 | AIF-GEO-08-C3 | Inter-subsystem linking test connecting AIF photos to VISTA CCTV and AURAS audio. | `PLANNED` | AIF-GEO-04, VISTA-A8 |
+| **GEO-17** | Near-Duplicate & Same-Scene Discovery | PRD §6.6 GEO-17 | TRD §10.10.1 GEO-17 | AIF-GEO-07 | AIF-GEO-07-C3 | Duplicate image discovery test on transformed (cropped/recompressed) corpus. | `PLANNED` | AIF-A8 Gate |
+| **GEO-18** | Camera & Device Hardware Consistency | PRD §6.6 GEO-18 | TRD §10.10.1 GEO-18 | AIF-GEO-07 | AIF-GEO-07-C4 | Hardware signature and quantization table clustering audit test. | `PLANNED` | AIF-A7 Gate |
+| **GEO-19** | Sensor PRNU Correlation (Research) | PRD §6.6 GEO-19 | TRD §10.10.1 GEO-19 | AIF-GEO-07 | AIF-GEO-07-C4 | PRNU sensor noise residual correlation test on reference camera flat-fields. | `PLANNED` | AIF-A9 Gate |
+| **GEO-20** | Signed Provenance & C2PA Verification | PRD §6.6 GEO-20 | TRD §10.10.1 GEO-20 | AIF-GEO-08 | AIF-GEO-08-C1 | C2PA Content Credentials signature and location assertion validation test. | `PLANNED` | CEIPL (AIF-A13) |
+| **GEO-21** | Map & Satellite-Image Comparison | PRD §6.6 GEO-21 | TRD §10.10.1 GEO-21 | AIF-GEO-05 | AIF-GEO-05-C3 | SIFT/RANSAC homography alignment test against satellite orthophoto tiles. | `PLANNED` | AIF-A8 Gate |
+| **GEO-22** | Landmark & Point-of-Interest Ranking | PRD §6.6 GEO-22 | TRD §10.10.1 GEO-22 | AIF-GEO-05 | AIF-GEO-05-C2 | Landmark candidate retrieval benchmark on 150 curated Bihar heritage sites. | `PLANNED` | AIF-GEO-05-C1 |
+| **GEO-23** | Multi-Image Geospatial Clustering | PRD §6.6 GEO-23 | TRD §10.10.1 GEO-23 | AIF-GEO-08 | AIF-GEO-08-C2 | Spatio-temporal DBSCAN clustering test on multi-camera case collections. | `PLANNED` | AIF-GEO-02 Gate |
+| **GEO-24** | Location-Claim Conflict Graph | PRD §6.6 GEO-24 | TRD §10.10.1 GEO-24 | AIF-GEO-08 | AIF-GEO-08-C3 | Directed evidence conflict graph construction and Archify JSON export test. | `PLANNED` | AIF-GEO-07 Gate |
+| **GEO-25** | Evidence-Aware Geospatial Search | PRD §6.6 GEO-25 | TRD §10.10.1 GEO-25 | AIF-GEO-08 | AIF-GEO-08-C4 | PostGIS spatial query performance test on 50,000 indexed evidence records. | `PLANNED` | AIF-GEO-03 Gate |
+| **GEO-26** | Offline Geographic Intelligence | PRD §6.6 GEO-26 | TRD §10.10.1 GEO-26 | AIF-GEO-03 | AIF-GEO-03-C4 | Air-gap network isolation test using packet capture socket auditor. | `PLANNED` | AIF-GEO-00 Gate |
+
+---
+
+## 7. Dedicated Offline Network Traffic Forensics Engineering Playbook (ONTF-A0 through ONTF-A13)
 
 The Offline Network Traffic Forensics (ONTF) engineering roadmap defines fourteen sequential, rigorous, and cryptographically grounded implementation phases for seized packet captures (`.pcap`, `.pcapng`). Each phase provides an exhaustive engineering specification with verifiable completion criteria and independent 5-column checkpoint tables conforming strictly to Indian evidentiary standards under Section 65B of the Indian Evidence Act (IEA) and Section 63 of the Bharatiya Sakshya Adhiniyam (BSA 2023):
 
@@ -3267,7 +3701,7 @@ All 14 ONTF phases completed and verified; benchmark report published; all 56 ch
 
 ---
 
-## 7. Unified Platform Delivery & Security Milestones
+## 8. Unified Platform Delivery & Security Milestones
 
 The platform delivery, dashboard, and hackathon packaging milestones synthesize findings across all forensic domains (AURAS Audio, VISTA Video, AIF Image, and ONTF Offline Network Traffic):
 
@@ -3289,7 +3723,7 @@ The platform delivery, dashboard, and hackathon packaging milestones synthesize 
 
 
 ---
-## 8. Development Roadmap Timeline (Gantt Chart)
+## 9. Development Roadmap Timeline (Gantt Chart)
 
 ```mermaid
 gantt
@@ -3332,6 +3766,19 @@ gantt
 
     section Image Forensics Subsystem (AIF)
     Phase 4: Image Forensics Subsystem (IFS):         p4, 2026-10-24, 2026-10-28
+
+    section AIF-GEO Geospatial Workstream
+    AIF-GEO-00: Audit & Architecture Baseline:        ga0, 2026-10-21, 2026-10-23
+    AIF-GEO-01: GPS Extraction & Validation :        ga1, 2026-10-23, 2026-10-25
+    AIF-GEO-02: Geodesy & Uncertainty Models:        ga2, 2026-10-25, 2026-10-27
+    AIF-GEO-03: Geographic Enrichment & Map  :        ga3, 2026-10-27, 2026-10-29
+    AIF-GEO-04: Track Correlation & Timeline :        ga4, 2026-10-29, 2026-10-31
+    AIF-GEO-05: Visual Geolocation & Landmark:        ga5, 2026-10-31, 2026-11-03
+    AIF-GEO-06: Environmental & Terrain Check:        ga6, 2026-11-03, 2026-11-05
+    AIF-GEO-07: Location Manipulation Clues  :        ga7, 2026-11-05, 2026-11-07
+    AIF-GEO-08: Cross-Evidence Conflict Graph:        ga8, 2026-11-07, 2026-11-09
+    AIF-GEO-09: Investigator Workbench & UI  :        ga9, 2026-11-09, 2026-11-11
+    AIF-GEO-10: Benchmarking & Air-Gap Audit :        ga10, 2026-11-11, 2026-11-13
 
     section ONTF Network Forensics Workstream
     ONTF-A0: Network Architecture & Sandbox  :         na0, 2026-10-21, 2026-10-23
