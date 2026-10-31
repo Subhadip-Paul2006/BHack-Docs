@@ -4182,29 +4182,29 @@ $$\text{Presentation Order (PTS): } I_0 \o B_1 \o B_2 \o P_3 \o B_4 \o B_5 \o P_
 Container timestamps are represented as discrete integer ticks scaled by a rational timebase:
 - $PTS_i \in \mathbb{Z}$: Presentation timestamp integer tick count.
 - $DTS_i \in \mathbb{Z}$: Decoding timestamp integer tick count.
-- $TB = rac{TB_{\text{num}}}{TB_{\text{den}}} \in \mathbb{Q}$: Stream rational timebase (e.g., $rac{1}{90000}$ for MPEG-TS, $rac{1}{1000}$ for Matroska/WebM, $rac{1}{600}$ for MP4).
+- $TB = \frac{TB_{\text{num}}}{TB_{\text{den}}} \in \mathbb{Q}$: Stream rational timebase (e.g., $\frac{1}{90000}$ for MPEG-TS, $\frac{1}{1000}$ for Matroska/WebM, $\frac{1}{600}$ for MP4).
 - Exact presentation time in seconds:
-  $$t_i = PTS_i \imes rac{TB_{\text{num}}}{TB_{\text{den}}}$$
+  $$t_i = PTS_i \imes \frac{TB_{\text{num}}}{TB_{\text{den}}}$$
 - Exact frame display duration:
-  $$\Delta t_i = t_i - t_{i-1} = (PTS_i - PTS_{i-1}) \imes rac{TB_{\text{num}}}{TB_{\text{den}}}$$
+  $$\Delta t_i = t_i - t_{i-1} = (PTS_i - PTS_{i-1}) \imes \frac{TB_{\text{num}}}{TB_{\text{den}}}$$
 *Rule:* Floating-point rounding is strictly forbidden in the primary data model; timestamps are persisted as $(PTS, TB_{\text{num}}, TB_{\text{den}})$ triples to prevent precision drift across multi-hour CCTV streams.
 
 #### 11.12.5 Variable-Frame-Rate-Aware Cadence Analysis
 Surveillance CCTV systems commonly operate in Variable Frame Rate (VFR) mode to conserve storage and bandwidth, throttling capture rates during inactivity ($1\text{--}5\text{ fps}$) and boosting rates upon motion sensor activation ($15\text{--}30\text{ fps}$).
-- **Failure of Constant-Frame-Rate (CFR) Assumptions:** Assuming a fixed cadence $\Delta t_{\text{expected}} = rac{1}{F}$ on VFR footage causes hundreds of false-positive missing frame detections.
+- **Failure of Constant-Frame-Rate (CFR) Assumptions:** Assuming a fixed cadence $\Delta t_{\text{expected}} = \frac{1}{F}$ on VFR footage causes hundreds of false-positive missing frame detections.
 - **Robust Non-Parametric Cadence Statistics:**
   For an analysis window $W$ of presentation intervals $\mathbf{\Delta t} = \{\Delta t_1, \Delta t_2, \dots, \Delta t_N\}$:
   $$m = \operatorname{median}(\mathbf{\Delta t})$$
   $$MAD = \operatorname{median}(\{|\Delta t_i - m| : i \in W\})$$
   The modified robust z-score measures interval divergence:
-  $$z_i = egin{cases} rac{0.6745 \cdot (\Delta t_i - m)}{MAD} & \text{if } MAD > 10^{-6}\text{ s} \ 0.0 & \text{if } MAD \le 10^{-6}\text{ s and } |\Delta t_i - m| \le 10^{-6}\text{ s} \ rac{|\Delta t_i - m|}{10^{-6}} & \text{if } MAD \le 10^{-6}\text{ s and } |\Delta t_i - m| > 10^{-6}\text{ s} \end{cases}$$
+  $$z_i = egin{cases} \frac{0.6745 \cdot (\Delta t_i - m)}{MAD} & \text{if } MAD > 10^{-6}\text{ s} \ 0.0 & \text{if } MAD \le 10^{-6}\text{ s and } |\Delta t_i - m| \le 10^{-6}\text{ s} \ \frac{|\Delta t_i - m|}{10^{-6}} & \text{if } MAD \le 10^{-6}\text{ s and } |\Delta t_i - m| > 10^{-6}\text{ s} \end{cases}$$
 - **Piecewise Cadence Segmentation & Change-Point Detection:**
   The system deploys Pruned Exact Linear Time (PELT) change-point detection on the time-series $\mathbf{\Delta t}$ using a normal-cost objective function with penalty $eta = 2 \ln(N)$. This segments the video into statistically homogeneous cadence regimes (e.g. Regime 1: $6.25\text{ fps}$, Regime 2: $25\text{ fps}$), preventing false alarms at legitimate camera mode switches.
 
 #### 11.12.6 Category FI-01: Missing or Deleted Frame Algorithms
 - **Mode A (Internal Timing Cadence Check):**
   Identifies presentation intervals where $z_i > \tau_{z,\text{gap}}$ (default $\tau_{z,\text{gap}} = 3.5$ marked `THRESHOLD_REQUIRES_VALIDATION`).
-  - Estimated missing frame count: $\hat{k}_{\text{missing}} = \operatorname{round}\left(rac{\Delta t_i}{m}
+  - Estimated missing frame count: $\hat{k}_{\text{missing}} = \operatorname{round}\left(\frac{\Delta t_i}{m}
 ight) - 1$.
   - Emits: `FRAME_GAP_OBSERVED`.
 - **Mode B (Source-Reference Sequence Comparison):**
@@ -4213,7 +4213,7 @@ ight) - 1$.
 otin \operatorname{LCS}(\mathbf{r}, \mathbf{q})\}$$
   - Emits: `CONFIRMED_FRAME_DELETION` with exact reference frame hashes.
 - **Mode C (Visual Continuity & Trajectory Rupture):**
-  For candidate intervals lacking timestamp markers, inter-frame forward-backward warping residuals $R_i$ and ByteTrack bounding box centroid velocities are evaluated. If spatial velocity $\mathbf{v}_i = rac{\mathbf{x}_{i} - \mathbf{x}_{i-1}}{\Delta t_i}$ exceeds kinematic threshold $v_{\max} = 5.0\text{ m/s}$ (or $150\text{ px/frame}$) without optical flow continuity, the system emits `POSSIBLE_FRAME_DELETION`.
+  For candidate intervals lacking timestamp markers, inter-frame forward-backward warping residuals $R_i$ and ByteTrack bounding box centroid velocities are evaluated. If spatial velocity $\mathbf{v}_i = \frac{\mathbf{x}_{i} - \mathbf{x}_{i-1}}{\Delta t_i}$ exceeds kinematic threshold $v_{\max} = 5.0\text{ m/s}$ (or $150\text{ px/frame}$) without optical flow continuity, the system emits `POSSIBLE_FRAME_DELETION`.
 - **Mode D (CCTV Recorder Log Corroboration):**
   Cross-references missing PTS spans against companion DVR JSON/XML event logs (e.g. `ALARM_MOTION_STOP`, `RECORDING_PAUSED`, `BUFFER_OVERFLOW`).
 
@@ -4224,7 +4224,7 @@ otin \operatorname{LCS}(\mathbf{r}, \mathbf{q})\}$$
 eq h_{j,k}]$$
    Near-duplicate condition: $d_H(h_i, h_j) \le \tau_{\text{pHash}}$ (default $\tau_{\text{pHash}} = 2$).
 3. **Structural Similarity (SSIM):**
-   $$SSIM(x,y) = rac{(2\mu_x\mu_y + C_1)(2\sigma_{xy} + C_2)}{(\mu_x^2 + \mu_y^2 + C_1)(\sigma_x^2 + \sigma_y^2 + C_2)}$$
+   $$SSIM(x,y) = \frac{(2\mu_x\mu_y + C_1)(2\sigma_{xy} + C_2)}{(\mu_x^2 + \mu_y^2 + C_1)(\sigma_x^2 + \sigma_y^2 + C_2)}$$
    where $C_1 = (0.01 \cdot 255)^2$, $C_2 = (0.03 \cdot 255)^2$. Near-identical condition: $SSIM \ge 0.985$.
 4. **Stationary CCTV Scene Invariant:**
    Surveillance cameras in empty rooms naturally produce $SSIM > 0.98$. To prevent false accusations:
@@ -4245,14 +4245,14 @@ ho < 0.60$).
   Dense optical flow fields $\mathbf{f}_{i \o i+1} = (u_f, v_f)$ and $\mathbf{f}_{i+1 \o i} = (u_b, v_b)$ are estimated using Gunnar Farnebäck or TV-L1 algorithms. Forward-warped frame:
   $$\hat{I}_{i+1}(x, y) = I_i(x + u_f(x, y), y + v_f(x, y))$$
   Normalised motion-compensated warping residual:
-  $$R_i = rac{1}{|\Omega_i|} \sum_{(x,y) \in \Omega_i} rac{|I_{i+1}(x, y) - \hat{I}_{i+1}(x, y)|}{255.0}$$
+  $$R_i = \frac{1}{|\Omega_i|} \sum_{(x,y) \in \Omega_i} \frac{|I_{i+1}(x, y) - \hat{I}_{i+1}(x, y)|}{255.0}$$
   where $\Omega_i$ is the non-occluded mask ($||\mathbf{f}_{i \o i+1} + \mathbf{f}_{i+1 \o i}||_2 < 1.0$).
 - **AI-Interpolation Halos:** Interpolated frames exhibit high spatial blur along occlusion edges with sharp textural patches. A sudden residual peak $R_i > \tau_{\text{warp}}$ accompanied by a dropped prediction error in the succeeding frame flags an interpolated insertion (`INSERTED_FRAME_CANDIDATE`).
 - **GOP Boundary Anomaly:** An isolated I-frame appearing mid-GOP (e.g. frame 7 of a 60-frame GOP) with discontinuous Macroblock QP distribution indicates a foreign spliced frame.
 
 #### 11.12.9 Category FI-04: Frozen or Repeated-Sequence Algorithms
 - **Consecutive Frame Difference:**
-  $$D_i = rac{1}{W \imes H \imes C} \sum_{x=1}^W \sum_{y=1}^H \sum_{c=1}^C |I_i(x,y,c) - I_{i-1}(x,y,c)|$$
+  $$D_i = \frac{1}{W \imes H \imes C} \sum_{x=1}^W \sum_{y=1}^H \sum_{c=1}^C |I_i(x,y,c) - I_{i-1}(x,y,c)|$$
 - **Freeze Interval Extraction:**
   A continuous sequence of frames $[i_{\text{start}}, i_{\text{end}}]$ where $D_i < \heta_{\text{diff}}$ and $d_H(h_i, h_{i-1}) = 0$ for duration $\Delta T_{\text{freeze}} = t_{i_{\text{end}}} - t_{i_{\text{start}}} \ge 1.0\text{ s}$.
 - **Multi-Modal Freeze Disambiguation Invariant:**
@@ -4266,11 +4266,11 @@ ho < 0.60$).
   In presentation order, $t_i > t_{i-1}$ must hold strictly. Any condition where $t_i < t_{i-1}$ indicates container timebase corruption or an explicit timestamp inversion.
 - **Kinematic Momentum & Trajectory Continuity:**
   For tracked human/vehicle entities $k$ with bounding box centers $\mathbf{c}_k(t) = (x_k(t), y_k(t))$:
-  $$\mathbf{v}_k(t) = rac{\mathbf{c}_k(t) - \mathbf{c}_k(t-1)}{\Delta t}, \quad \mathbf{a}_k(t) = rac{\mathbf{v}_k(t) - \mathbf{v}_k(t-1)}{\Delta t}$$
+  $$\mathbf{v}_k(t) = \frac{\mathbf{c}_k(t) - \mathbf{c}_k(t-1)}{\Delta t}, \quad \mathbf{a}_k(t) = \frac{\mathbf{v}_k(t) - \mathbf{v}_k(t-1)}{\Delta t}$$
   Reversed or shuffled blocks cause acceleration discontinuities $|\mathbf{a}_k(t)| \gg a_{\max}$ and abrupt $180^\circ$ vector reversals incompatible with physical mass and momentum.
 - **Reference Alignment via Kendall Rank Correlation:**
   When evaluating matched frame pairs between questioned sequence and known reference sequence:
-  $$\tau = rac{P - Q}{rac{1}{2} n(n - 1)}$$
+  $$\tau = \frac{P - Q}{\frac{1}{2} n(n - 1)}$$
   where $P$ is concordant pairs, $Q$ is discordant pairs. Normal playback yields $\tau = 1.0$; a reversed sequence yields $\tau = -1.0$; shuffled sequences yield $\tau \in (-1.0, 0.90)$. Flags: `REORDERED_FRAME_CANDIDATE`.
 
 #### 11.12.11 Optical Flow & Motion Continuity Analysis
@@ -4301,7 +4301,7 @@ I_hat(t) = Warp(I(t-1), f_fwd)"]
 Bitstream properties are extracted without full raster decoding:
 - **GOP Cadence & Slice Types:** Extracts NAL unit headers (`nal_unit_type` $1 = \text{non-IDR slice}$, $5 = \text{IDR keyframe}$, $7 = \text{SPS}$, $8 = \text{PPS}$). Computes instantaneous GOP length $L_{\text{GOP}}$. Mid-sequence splice edits often create truncated GOPs (e.g. $L_{\text{GOP}} = 8$ instead of $30$).
 - **Macroblock Quantization Parameter (QP) Analysis:** Extracts macroblock QP values ($0\text{--}51$). Spliced regions or double-compressed re-encodings show distinct spatial QP variance and periodic GOP pulsing:
-  $$\sigma^2_{\text{QP}}(t) = rac{1}{M} \sum_{j=1}^M (QP_j(t) - \overline{QP}(t))^2$$
+  $$\sigma^2_{\text{QP}}(t) = \frac{1}{M} \sum_{j=1}^M (QP_j(t) - \overline{QP}(t))^2$$
 - **Broken Reference Prediction:** P and B frames contain reference picture lists (`RefPicList0`, `RefPicList1`). Excised anchor frames cause demuxer/decoder warnings: `reference picture missing during decode` or `POC out of range`.
 
 #### 11.12.13 CCTV Clock & OCR Timestamp Correlation
@@ -4385,10 +4385,10 @@ To guarantee scientific validity, the platform specifies a controlled 1,000-samp
 
 #### 11.12.20 Evaluation Metrics & Mathematical Formulations
 1. **Event Classification:** For each anomaly category $c \in \{\text{Missing}, \text{Duplicate}, \text{Inserted}, \text{Freeze}, \text{Reordered}\}$:
-   $$\text{Precision}_c = rac{TP_c}{TP_c + FP_c}, \quad \text{Recall}_c = rac{TP_c}{TP_c + FN_c}, \quad F1_c = rac{2 \cdot \text{Precision}_c \cdot \text{Recall}_c}{\text{Precision}_c + \text{Recall}_c}$$
+   $$\text{Precision}_c = \frac{TP_c}{TP_c + FP_c}, \quad \text{Recall}_c = \frac{TP_c}{TP_c + FN_c}, \quad F1_c = \frac{2 \cdot \text{Precision}_c \cdot \text{Recall}_c}{\text{Precision}_c + \text{Recall}_c}$$
 2. **Temporal Localisation Intersection-over-Union ($tIoU$):**
    For ground-truth anomaly interval $T_g = [t_{g,\text{start}}, t_{g,\text{end}}]$ and predicted interval $T_p = [t_{p,\text{start}}, t_{p,\text{end}}]$:
-   $$tIoU = rac{|T_p \cap T_g|}{|T_p \cup T_g|} = rac{\max(0, \min(t_{p,\text{end}}, t_{g,\text{end}}) - \max(t_{p,\text{start}}, t_{g,\text{start}}))}{\max(t_{p,\text{end}}, t_{g,\text{end}}) - \min(t_{p,\text{start}}, t_{g,\text{start}})}$$
+   $$tIoU = \frac{|T_p \cap T_g|}{|T_p \cup T_g|} = \frac{\max(0, \min(t_{p,\text{end}}, t_{g,\text{end}}) - \max(t_{p,\text{start}}, t_{g,\text{start}}))}{\max(t_{p,\text{end}}, t_{g,\text{end}}) - \min(t_{p,\text{start}}, t_{g,\text{start}})}$$
    Boundary error: $\Delta t_{\text{start}} = |t_{p,\text{start}} - t_{g,\text{start}}|$, $\Delta t_{\text{end}} = |t_{p,\text{end}} - t_{g,\text{end}}|$.
 3. **Sequence Ordering Kendall's Tau ($\tau$):** Measures pairwise order agreement on matched reference frames.
 4. **False Alarm Rate on Hard Negatives:** Measures false alarms per video-hour on authentic controls (VFR jitter, PTZ panning, static scenes), mandating $\le 0.05$ false alarms/hour.
@@ -6008,6 +6008,184 @@ class IMLLocalizationResult(BaseModel):
 
 ---
 
+### 12.8 Cross-Source Timestamp Verification (CSTV) Pydantic v2 Contract Schemas
+
+```python
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+from pydantic import BaseModel, Field, ConfigDict
+
+
+class TimestampSemanticsEnum(str, Enum):
+    CAPTURE_TIME = "CAPTURE_TIME"
+    RECORDING_START = "RECORDING_START"
+    RECORDING_END = "RECORDING_END"
+    EVENT_TIME = "EVENT_TIME"
+    FILE_CREATION_TIME = "FILE_CREATION_TIME"
+    FILE_MODIFICATION_TIME = "FILE_MODIFICATION_TIME"
+    EXPORT_TIME = "EXPORT_TIME"
+    ENCODING_TIME = "ENCODING_TIME"
+    CONTAINER_CREATION_TIME = "CONTAINER_CREATION_TIME"
+    STREAM_START_TIME = "STREAM_START_TIME"
+    STREAM_PRESENTATION_TIME = "STREAM_PRESENTATION_TIME"
+    STREAM_DECODE_TIME = "STREAM_DECODE_TIME"
+    FRAME_PRESENTATION_TIME = "FRAME_PRESENTATION_TIME"
+    AUDIO_SAMPLE_TIME = "AUDIO_SAMPLE_TIME"
+    AUDIO_RECORDING_TIME = "AUDIO_RECORDING_TIME"
+    PACKET_CAPTURE_TIME = "PACKET_CAPTURE_TIME"
+    GPS_TIME = "GPS_TIME"
+    GPS_FIX_TIME = "GPS_FIX_TIME"
+    OVERLAY_DISPLAY_TIME = "OVERLAY_DISPLAY_TIME"
+    RECORDER_SYSTEM_TIME = "RECORDER_SYSTEM_TIME"
+    DEVICE_SYSTEM_TIME = "DEVICE_SYSTEM_TIME"
+    NTP_SYNC_TIME = "NTP_SYNC_TIME"
+    PTP_SYNC_TIME = "PTP_SYNC_TIME"
+    ACQUISITION_TIME = "ACQUISITION_TIME"
+    PROCESSING_TIME = "PROCESSING_TIME"
+    EXTERNAL_REFERENCE_TIME = "EXTERNAL_REFERENCE_TIME"
+    UNKNOWN_TIME_SEMANTICS = "UNKNOWN_TIME_SEMANTICS"
+
+
+class TimezoneStatusEnum(str, Enum):
+    EXPLICIT_OFFSET = "EXPLICIT_OFFSET"
+    EXPLICIT_IANA = "EXPLICIT_IANA"
+    UTC = "UTC"
+    UNKNOWN = "UNKNOWN"
+    AMBIGUOUS_DST = "AMBIGUOUS_DST"
+    NONEXISTENT_DST = "NONEXISTENT_DST"
+
+
+class TemporalDecisionStateEnum(str, Enum):
+    CONSISTENT = "CONSISTENT"
+    INCONSISTENT = "INCONSISTENT"
+    POTENTIALLY_CONSISTENT = "POTENTIALLY_CONSISTENT"
+    TIMEZONE_AMBIGUOUS = "TIMEZONE_AMBIGUOUS"
+    CLOCK_OFFSET_ESTIMATED = "CLOCK_OFFSET_ESTIMATED"
+    CLOCK_DRIFT_ESTIMATED = "CLOCK_DRIFT_ESTIMATED"
+    CLOCK_MODEL_INVALID = "CLOCK_MODEL_INVALID"
+    CLOCK_RESET_SUSPECTED = "CLOCK_RESET_SUSPECTED"
+    INSUFFICIENT_ANCHORS = "INSUFFICIENT_ANCHORS"
+    INSUFFICIENT_PRECISION = "INSUFFICIENT_PRECISION"
+    REFERENCE_UNVERIFIED = "REFERENCE_UNVERIFIED"
+    PARTIAL = "PARTIAL"
+    INCONCLUSIVE = "INCONCLUSIVE"
+    NOT_ANALYSED = "NOT_ANALYSED"
+
+
+class TimeUncertainty(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    value: Optional[float] = Field(None, description="Uncertainty magnitude in specified unit")
+    unit: str = Field("MILLISECONDS", description="Time unit (MICROSECONDS, MILLISECONDS, SECONDS)")
+    status: str = Field("KNOWN", description="KNOWN, ESTIMATED, or UNKNOWN")
+
+
+class TemporalObservation(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    observation_id: str = Field(..., description="Unique UUID for this observation")
+    evidence_id: str = Field(..., description="CEIPL exhibit identifier")
+    source_type: str = Field(..., description="Category from 17-source registry")
+    source_field: str = Field(..., description="Original field path, e.g. EXIF.DateTimeOriginal")
+    raw_value: str = Field(..., description="Exact unaltered string from source")
+    normalized_value: Optional[str] = Field(None, description="ISO 8601 string in UTC if offset known")
+    timestamp_semantics: TimestampSemanticsEnum = Field(...)
+    timezone_status: TimezoneStatusEnum = Field(TimezoneStatusEnum.UNKNOWN)
+    utc_offset: Optional[str] = Field(None, description="+HH:MM or -HH:MM")
+    precision: str = Field("SECOND", description="NANOSECOND, MICROSECOND, MILLISECOND, SECOND")
+    clock_id: str = Field("unknown", description="Physical clock or clock domain identifier")
+    device_identity_claim: Optional[str] = Field(None)
+    parser_source: str = Field(..., description="Parser adapter identifier")
+    parser_version: str = Field(...)
+    extraction_activity_id: str = Field(...)
+    ceipl_evidence_reference: str = Field(..., description="SHA-256 exhibit digest")
+    provenance_classification: str = Field("MACHINE_EXTRACTED")
+    uncertainty: TimeUncertainty = Field(default_factory=TimeUncertainty)
+    validation_state: str = Field("UNVALIDATED")
+
+
+class EventAnchor(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    anchor_id: str = Field(..., description="Unique UUID for this event anchor")
+    case_id: str = Field(...)
+    event_description: str = Field(..., description="Observable physical event")
+    event_type: str = Field(..., description="AUDIO_IMPULSE, OPTICAL_FLASH, SPEECH_LANDMARK, PACKET_BURST")
+    source_evidence_ids: List[str] = Field(..., min_length=2)
+    source_observation_ids: List[str] = Field(..., min_length=2)
+    observed_timestamps: Dict[str, str] = Field(..., description="Evidence ID to timestamp mapping")
+    correspondence_method: str = Field(..., description="Algorithm used to detect correspondence")
+    match_confidence: float = Field(..., ge=0.0, le=1.0)
+    measurement_uncertainty: TimeUncertainty = Field(default_factory=TimeUncertainty)
+    is_independent: bool = Field(True, description="False if derived from an existing calibrated clock")
+    supporting_evidence: List[str] = Field(default_factory=list)
+    contradictory_evidence: List[str] = Field(default_factory=list)
+    reviewer_status: str = Field("AUTOMATED", description="AUTOMATED, EXAMINER_CONFIRMED, REJECTED")
+
+
+class ClockCalibrationModel(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    model_id: str = Field(..., description="Unique model identifier")
+    case_id: str = Field(...)
+    source_clock_id: str = Field(...)
+    reference_clock_id: str = Field(...)
+    model_type: str = Field(..., description="CONSTANT_OFFSET, LINEAR_DRIFT, PIECEWISE_LINEAR")
+    estimated_offset_seconds: float = Field(..., description="Intercept parameter a")
+    estimated_drift_ppm: float = Field(0.0, description="Drift rate (b - 1) * 1e6")
+    fit_interval_start: str = Field(..., description="Convex hull start (ISO 8601)")
+    fit_interval_end: str = Field(..., description="Convex hull end (ISO 8601)")
+    calibration_anchor_ids: List[str] = Field(..., min_length=1)
+    validation_anchor_ids: List[str] = Field(default_factory=list)
+    residual_rmse_seconds: float = Field(...)
+    residual_max_seconds: float = Field(...)
+    confidence_interval_95_ppm: Optional[float] = Field(None)
+    model_status: str = Field("VALIDATED", description="PRELIMINARY, VALIDATED, INVALID, EXTRAPOLATED")
+    applied_assumptions: List[str] = Field(default_factory=list)
+    limitations: List[str] = Field(default_factory=list)
+
+
+class TemporalFinding(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    finding_id: str = Field(..., description="Unique UUID")
+    finding_code: str = Field(..., description="One of 22 TIME_* finding codes")
+    case_id: str = Field(...)
+    evidence_ids: List[str] = Field(default_factory=list)
+    observation_ids: List[str] = Field(default_factory=list)
+    relevant_clock_ids: List[str] = Field(default_factory=list)
+    original_timestamps: Dict[str, str] = Field(default_factory=dict)
+    normalized_timestamps: Dict[str, Optional[str]] = Field(default_factory=dict)
+    corrected_timestamps: Dict[str, Optional[str]] = Field(default_factory=dict)
+    model_id: Optional[str] = Field(None)
+    comparison_method: str = Field(...)
+    difference_seconds: Optional[float] = Field(None)
+    uncertainty_seconds: Optional[float] = Field(None)
+    severity: str = Field("INFO", description="INFO, LOW, MEDIUM, HIGH, CRITICAL")
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    decision_state: TemporalDecisionStateEnum = Field(...)
+    explanation: str = Field(...)
+    assumptions: List[str] = Field(default_factory=list)
+    limitations: List[str] = Field(default_factory=list)
+    supporting_evidence: List[str] = Field(default_factory=list)
+    contradictory_evidence: List[str] = Field(default_factory=list)
+    examiner_review_status: str = Field("PENDING", description="PENDING, ACCEPTED, MODIFIED, REJECTED")
+
+
+class TimelineEvent(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    timeline_event_id: str = Field(...)
+    case_id: str = Field(...)
+    evidence_id: str = Field(...)
+    source_modality: str = Field(..., description="IMAGE, AUDIO, VIDEO, CCTV, PCAP, GPS, LOG")
+    event_type: str = Field(...)
+    display_title: str = Field(...)
+    raw_timestamp: str = Field(...)
+    normalized_utc_timestamp: Optional[str] = Field(None)
+    corrected_utc_timestamp: Optional[str] = Field(None)
+    time_tier: str = Field("RAW_SOURCE", description="RAW_SOURCE, NORMALIZED_UTC, CORRECTED_ESTIMATED, INFERRED, UNVERIFIED")
+    uncertainty_seconds: float = Field(0.0)
+    clock_id: str = Field("unknown")
+    model_id: Optional[str] = Field(None)
+    finding_ids: List[str] = Field(default_factory=list)
+```
+
 ## 13. Testing, Benchmark & Validation Architecture
 
 The PS-05 testing framework enforces strict separation between software reliability, mathematical correctness, and machine learning generalization across both audio and video forensic domains:
@@ -6301,3 +6479,1485 @@ All deepfake detection model validation, benchmarking, calibration, and governan
 6. **OOD Score Purpose Limitation:** An Out-of-Distribution score measures mathematical distance from the model's certified training manifold. An OOD score must NEVER be reported, interpreted, or cited in courtroom testimony as affirmative evidence of deepfake tampering.
 7. **Scoped Approval Invariant:** A model marked `VALIDATED_FOR_DEFINED_SCOPE` is legally and forensically certified only for the specific tasks, media formats, quality bounds, and decision thresholds documented in its validation record. Executing the model outside its approved scope automatically generates an uncertified finding watermark.
 8. **Immutability of Historical Evaluation Artefacts:** Benchmark run manifests, split records, calibration transforms, regression logs, and examiner approvals must be stored in the CEIPL WORM vault with POSIX `0400` permissions. Once written, benchmark records can never be overwritten, modified, or deleted.
+
+
+---
+
+### 15.6 Cross-Source Timestamp Verification & Forensic Security Invariants
+
+All temporal analysis, clock calibration, and evidence timeline reconstruction processes within CSTV are governed by eight immutable legal and technical invariants:
+
+1. **Original Exhibit Bitstream Immutability Invariant:** Original digital evidence exhibits stored in the CEIPL WORM repository are mounted with POSIX `0400` read-only permissions and S3 Object Lock. Under no circumstances may CSTV overwrite, patch, or alter original file bytes, container atoms, or embedded metadata tags.
+2. **Derived Artifact Provenance Invariant:** All clock calibration models, event anchor associations, and corrected timeline tables must be generated and persisted as derived artifacts in the CEIPL Merkle DAG, bound to parent exhibit SHA-256 digests.
+3. **Non-Overwriting of Metadata Invariant:** Derived corrected timestamps must never replace or overwrite extracted metadata records in CMMS or database tables. A corrected timestamp must always be labeled and represented as a derived estimate with explicit reference to its calibration model ID.
+4. **Zero Silent Timezone Imputation Invariant:** When an evidence timestamp lacks an explicit UTC offset or timezone designation, the system must record the timezone state as `UNKNOWN`. Inferring UTC or adopting the local timezone of the forensic workstation is strictly forbidden.
+5. **Anti-Circular Calibration Invariant:** An event anchor used to estimate clock offset or drift parameters $\theta = \{a, b\}$ must never be used to validate model accuracy. Independent hold-out validation anchors must be strictly preserved to evaluate model fit.
+6. **Anti-Extrapolation Invariant:** A fitted clock drift model is forensically valid only within the temporal convex hull $[T_{\min}, T_{\max}]$ established by its calibration anchors. Projecting clock corrections outside this interval without explicit examiner warnings and confidence band expansion is prohibited.
+7. **Prohibition of Causal Assertion Invariant:** Temporal consistency, temporal ordering, and cross-source correlation provide evidence of chronological relationship only. CSTV is strictly barred from stating or implying physical causation solely based on temporal proximity.
+8. **Section 65B IEA / Section 63 BSA Traceability Invariant:** Every reconstructed timeline, clock correction curve, and finding must bind cryptographically to the source exhibit hashes, parser versions, mathematical model parameters, and software environment commit hashes to ensure complete courtroom admissibility.
+
+## 16. Cross-Media Metadata Service (CMMS) — Technical Architecture & Specification
+
+### 16.1 System Context, Component Boundaries & Shared-Service Integration
+
+The Cross-Media Metadata Service (CMMS) is a foundational, cross-cutting shared service within the PS-05 platform. It establishes a unified, evidence-aware metadata extraction, normalization, validation, consistency-analysis, and correlation pipeline.
+
+CMMS does **not** perform modality-specific forgery detection, deepfake classification, biometric facial analysis, speaker recognition, packet payload deep inspection, or cryptographic custody. Instead, CMMS operates strictly upstream of and alongside the specialized forensic engines (AIF, AURAS, VISTA, ONTF, AIF-GEO) and cryptographic subsystems (CEIPL, UFREDF), extracting and structuring raw and normalized technical metadata from every seized artifact without altering original evidence bitstreams.
+
+```mermaid
+flowchart TD
+    subgraph INGEST["Evidence Intake & Custody"]
+        RAW_EVID["Master Evidence Exhibits (WORM Storage)"]
+        CEIPL_SVC["CEIPL: Cryptographic Evidence Integrity & Provenance Layer"]
+        RAW_EVID -->|Pre-Extraction Bitstream SHA-256/SHA3-512| CEIPL_SVC
+    end
+
+    subgraph CMMS_CORE["CMMS: Cross-Media Metadata Service (Shared Platform Service)"]
+        MEDIA_IDENT["Media Format & Stream Identification
+(libmagic, MIME Sniffing, File Signatures)"]
+        PARSER_ORCH["Parser Selection & Defensive Orchestrator
+(Isolated Worker Sandboxes, Cgroups, Timeouts)"]
+
+        subgraph PARSER_ADAPTERS["Pluggable Parser Adapters"]
+            IMG_P["Image Adapters
+(ExifTool, Pillow, PyExifTool)"]
+            AUD_P["Audio Adapters
+(FFprobe, Mutagen, SoundFile)"]
+            VID_P["Video & CCTV Adapters
+(FFprobe, MediaInfo, Sidecar XML/JSON)"]
+            NET_P["Offline Network Adapters
+(PyShark/TShark, Scapy, Zeek Logs)"]
+            GEO_P["Geospatial Adapters
+(ExifTool GPS, XMP, IPTC Location)"]
+        end
+
+        RAW_STORE["Raw Metadata Immutability & Preservation
+(Exact Original Fields, Hex Tags, Unparsed Blocks)"]
+        NORM_ENG["Canonical Normalization Engine
+(Explicit Semantics, Units, 14 Timestamp Types, DMS->DD)"]
+        CONSIST_ENG["Rule-Based Metadata Consistency & Anomaly Engine
+(Clock Drift, Device Mismatches, Container vs Stream, Structural Anomalies)"]
+        CORREL_ENG["Cross-Evidence Correlation & Multi-Source Timeline Engine
+(Shared Hardware Clocks, Recording Windows, Companion Groups)"]
+        SNAP_GEN["Versioned Metadata Snapshot & Provenance Generator
+(RFC 8785 Canonical JSON, Snapshot Hash, Field-Level DAG Lineage)"]
+    end
+
+    subgraph FORENSIC_SUBSYSTEMS["Consuming Forensic Subsystems"]
+        AIF_ENG["AIF: Advanced Image Forensics
+(IRE, AIM, IVE)"]
+        AIF_GEO_ENG["AIF-GEO: Geospatial Forensic Intelligence
+(GeoCLIP, Candidate Ranking)"]
+        AURAS_ENG["AURAS: Advanced Audio Forensics
+(ARE, MVSI, ADDE)"]
+        VISTA_ENG["VISTA: Video & CCTV Forensics
+(VRE, VCI, CFITSA Temporal Engine)"]
+        ONTF_ENG["ONTF: Offline Network Forensics
+(Flow Reconstruction, Protocol Analysis)"]
+    end
+
+    subgraph REPORTING["Reporting & Admissibility"]
+        UFREDF_ENG["UFREDF: Unified Forensic Reporting & Evidence Dossier
+(Section 65B IEA / Section 63 BSA Certified Annexures)"]
+    end
+
+    RAW_EVID --> MEDIA_IDENT
+    MEDIA_IDENT --> PARSER_ORCH
+    PARSER_ORCH --> IMG_P & AUD_P & VID_P & NET_P & GEO_P
+    IMG_P & AUD_P & VID_P & NET_P & GEO_P --> RAW_STORE
+    RAW_STORE --> NORM_ENG
+    NORM_ENG --> CONSIST_ENG
+    CONSIST_ENG --> CORREL_ENG
+    CORREL_ENG --> SNAP_GEN
+
+    SNAP_GEN -.->|Register Snapshot & Provenance| CEIPL_SVC
+    SNAP_GEN ==>|Structured Image Metadata| AIF_ENG
+    SNAP_GEN ==>|Geospatial Telemetry| AIF_GEO_ENG
+    SNAP_GEN ==>|Audio Stream & Tag Telemetry| AURAS_ENG
+    SNAP_GEN ==>|Container, PTS & CCTV Telemetry| VISTA_ENG
+    SNAP_GEN ==>|Capture-Level Metadata| ONTF_ENG
+
+    AIF_ENG & AIF_GEO_ENG & AURAS_ENG & VISTA_ENG & ONTF_ENG --> UFREDF_ENG
+    SNAP_GEN ==>|Structured Evidence Metadata Dossier| UFREDF_ENG
+```
+
+#### 16.1.1 Architectural Ownership Boundaries
+
+| System Capability | CMMS Direct Ownership | Forensic Subsystem Ownership |
+| :--- | :--- | :--- |
+| **Metadata Extraction Orchestration** | **YES**: Manages parser adapter lifecycle, timeouts, memory ceilings, and fallback execution. | **NO**: Forensic engines receive structured metadata objects via API/DAG. |
+| **Raw Value Preservation** | **YES**: Retains exact unparsed strings, integer tags, and binary blocks without mutation. | **NO**: Forensic engines must not overwrite raw metadata records. |
+| **Canonical Normalization** | **YES**: Standardizes timestamps, rational frame rates, units, and coordinates. | **NO**: Consumes normalized fields; may derive secondary analytical features. |
+| **Field-Level Provenance** | **YES**: Tracks parser ID, parser version, source byte offset, and extraction activity ID. | **NO**: Links findings back to CMMS field provenance identifiers. |
+| **Metadata Consistency Findings** | **YES**: Detects internal header conflicts, container-stream mismatches, and timestamp order anomalies. | **NO**: Ingests findings as context for deepfake and forgery analysis. |
+| **Cross-Evidence Correlation** | **YES**: Correlates timestamps and recorder IDs across related exhibits in a case. | **NO**: Subsystems evaluate substantive forensic significance (e.g. motion continuity, lip-sync). |
+| **Image Tampering Detection** | **NO**: Purely forensic. | **YES**: AIF (IRE, AIM, IVE) owns ELA, PRNU, spline and copy-move forensics. |
+| **Audio Deepfake & Diarization** | **NO**: Purely forensic. | **YES**: AURAS (ARE, MVSI, ADDE) owns acoustic feature extraction and voice classification. |
+| **Video Deepfake & Temporal Forgery** | **NO**: Purely forensic. | **YES**: VISTA (VRE, VCI, CFITSA) owns GOP cadence analysis and temporal tampering localization. |
+| **Cryptographic Custody** | **NO**: Relies on CEIPL. | **YES**: CEIPL owns WORM hashing, RFC 3161 timestamps, and Merkle tree audit logs. |
+| **Legal Dossier Compilation** | **NO**: Emits JSON/Pydantic schemas. | **YES**: UFREDF compiles Section 65B IEA / Section 63 BSA courtroom certificates. |
+
+---
+
+### 16.2 Technology & Library Evaluation
+
+CMMS requires a robust, local, air-gapped parser-adapter stack. Every parser candidate is evaluated against strict security, license, OS compatibility, and maintainability criteria:
+
+| Library / Tool | Evaluated Version | Supported Formats | License | OS Support | Sandbox & Resource Limits | Failure Behavior | Selection Rationale & Role |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **ExifTool (Phil Harvey)** | 12.80+ (CLI / PyExifTool) | JPEG, TIFF, PNG, WebP, HEIC, RAW, DNG, MOV, MP4 | Artistic / GPLv1 | Linux, Windows | Process sandbox, 512MB RAM, 15s timeout | Non-zero exit or stderr warning; preserves partial tags | **Primary Image & Sidecar Metadata Parser**: Industry standard; broadest tag dictionary (EXIF, XMP, IPTC, MakerNotes). |
+| **Pillow (PIL Fork)** | 10.3.0+ | JPEG, PNG, TIFF, WebP, BMP, GIF | HPND / MIT-like | Linux, Windows | In-process, 256MB RAM ceiling | `UnidentifiedImageError`; trapped cleanly | **Fast Image Header & Structural Verification**: Provides fast in-memory format validation, dimension checks, and basic EXIF extraction. |
+| **OpenCV (`cv2`)** | 4.9.0+ | Standard raster formats | Apache 2.0 | Linux, Windows | In-process worker | C++ exception trapped via Python binding | **Structural Image Analysis Only**: Used for matrix inspection, channels, bit-depth, and raster validation; not a primary metadata parser. |
+| **FFprobe (FFmpeg)** | 6.1.1+ / 7.0+ | MP4, MOV, MKV, AVI, WebM, TS, WAV, MP3, FLAC, AAC | LGPL v2.1+ / GPL | Linux, Windows | Process sandbox, 1GB RAM, 30s timeout | JSON error output; partial stream arrays on corrupted files | **Primary Audio/Video Stream & Container Inspector**: Comprehensive demuxing, rational timebase, PTS/DTS packets, and stream descriptors. |
+| **MediaInfo (libmediainfo)** | 24.04+ (CLI / Python wrapper) | All major video/audio containers, MXF, GXF, CCTV | BSD-2-Clause | Linux, Windows | Process sandbox, 512MB RAM, 15s timeout | Emits incomplete XML/JSON; does not crash host | **Secondary Container & Codec Profiler**: Cross-validates FFprobe container tags, audio coding histories, and proprietary CCTV stream headers. |
+| **PyShark / TShark (Wireshark)** | TShark 4.2.4+ / PyShark 0.6+ | PCAP, PCAPNG, ERF | GPL v2+ | Linux, Windows | Isolated container worker, 2GB RAM, 60s timeout | Process timeout, stderr parsing warning; emits partial packet list | **Primary Offline Network Capture Parser**: Complete dissector support for capture headers, interface statistics, protocol trees, and TLS metadata. |
+| **Scapy** | 2.5.0+ | PCAP, PCAPNG | GPL v2 | Linux, Windows | In-process worker, 1GB RAM | `Scapy_Exception`; traps malformed frames | **Secondary Packet Inspection**: Fast local packet header traversal and custom layer decoding for offline network captures. |
+| **Pydantic v2** | 2.7.0+ | In-memory data validation | MIT | Linux, Windows | Python runtime | `ValidationError` with exact field error paths | **Universal Metadata Contract Enforcement**: Strict typing, serialization, and JSON schema generation for all CMMS inputs/outputs. |
+| **JSON Schema** | Draft 2020-12 | Interoperable schema definitions | IETF Standard | Cross-Platform | Validation library (`jsonschema`) | Schema validation error report | **Inter-Subsystem Contract Validation**: Guarantees schema compatibility across Python backend, TypeScript frontend, and reporting services. |
+| **PostgreSQL JSONB** | 16.2+ | Relational & structured JSON storage | PostgreSQL License | Linux, Windows | Query planner memory ceilings | Transaction abort on constraint violation | **Hybrid Persistence Engine**: B-tree indexed relational columns for queries/joins, JSONB for extensible raw tag dictionaries. |
+| **Redis / Celery** | Redis 7.2+ / Celery 5.3+ | Asynchronous task queue | BSD-3 / BSD | Linux, Windows | Configurable task time limits (soft/hard) | `SoftTimeLimitExceeded` trapped cleanly | **Asynchronous Parser Orchestration**: Decouples multi-gigabyte video and PCAP extraction from interactive REST request threads. |
+
+---
+
+### 16.3 Universal Metadata Schema & Contracts
+
+CMMS enforces a strictly typed, versioned data model implemented via Pydantic v2. The schema captures raw data, canonical normalizations, field provenance, and consistency findings without losing modality-specific properties.
+
+#### 16.3.1 Pydantic v2 Core Metadata Schemas
+
+```python
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional, Union
+from pydantic import BaseModel, Field, ConfigDict
+
+class MetadataClass(str, Enum):
+    EMBEDDED = "EMBEDDED"
+    CONTAINER = "CONTAINER"
+    STREAM = "STREAM"
+    FILESYSTEM = "FILESYSTEM"
+    ACQUISITION = "ACQUISITION"
+    DEVICE = "DEVICE"
+    GEOSPATIAL = "GEOSPATIAL"
+    NETWORK_CAPTURE = "NETWORK_CAPTURE"
+    PROCESSING = "PROCESSING"
+    DERIVED = "DERIVED"
+
+class NormalizationStatus(str, Enum):
+    EXACT = "EXACT"
+    PARTIAL = "PARTIAL"
+    INFERRED = "INFERRED"
+    UNSUPPORTED = "UNSUPPORTED"
+    FAILED = "FAILED"
+
+class ProvenanceType(str, Enum):
+    MACHINE_EXTRACTED = "MACHINE_EXTRACTED"
+    OPERATOR_REPORTED = "OPERATOR_REPORTED"
+    EXTERNALLY_ENRICHED = "EXTERNALLY_ENRICHED"
+    MODEL_INFERRED = "MODEL_INFERRED"
+    DERIVED_CALCULATION = "DERIVED_CALCULATION"
+
+class ValueQuality(str, Enum):
+    VERIFIED = "VERIFIED"
+    UNVERIFIED = "UNVERIFIED"
+    CONFLICTING = "CONFLICTING"
+    SUSPICIOUS = "SUSPICIOUS"
+    INCONCLUSIVE = "INCONCLUSIVE"
+
+class FieldProvenance(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    parser_id: str = Field(..., description="Unique identifier of the parser adapter (e.g. exiftool, ffprobe)")
+    parser_version: str = Field(..., description="Exact semantic version or commit hash of the parser executable")
+    source_evidence_id: str = Field(..., description="CEIPL evidence exhibit UUID")
+    source_evidence_hash: str = Field(..., description="SHA-256 of the input exhibit bitstream")
+    source_location: str = Field(..., description="Header block, atom path, or packet index (e.g. 'IFD0:DateTimeOriginal', 'moov/trak[0]/mdia')")
+    extraction_activity_id: str = Field(..., description="Unique UUID for this specific extraction execution")
+    extracted_at: datetime = Field(..., description="UTC timestamp of extraction execution")
+    provenance_type: ProvenanceType = Field(default=ProvenanceType.MACHINE_EXTRACTED)
+    transformation_rule: Optional[str] = Field(None, description="Identifier of normalization rule applied")
+    normalization_assumptions: List[str] = Field(default_factory=list, description="Explicit assumptions made during normalization")
+
+class MetadataField(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    field_id: str = Field(..., description="Hierarchical canonical field identifier (e.g. 'image.datetime_original', 'video.stream[0].codec')")
+    metadata_class: MetadataClass = Field(..., description="Classification category of the metadata field")
+    raw_name: str = Field(..., description="Exact tag or field name as reported by the source parser")
+    raw_group: Optional[str] = Field(None, description="Source group or IFD (e.g. 'EXIF', 'XMP-dc', 'QuickTime')")
+    raw_value: Any = Field(..., description="Exact original value without modification (string, int, dict, etc.)")
+    raw_value_type: str = Field(..., description="Data type of raw value as emitted by parser")
+
+    normalized_value: Optional[Any] = Field(None, description="Canonical normalized representation (ISO-8601, float, rational dict, etc.)")
+    normalized_value_type: Optional[str] = Field(None, description="Target data type of the normalized value")
+    normalization_status: NormalizationStatus = Field(default=NormalizationStatus.EXACT)
+    unit: Optional[str] = Field(None, description="Unit of measurement where applicable (e.g. 'Hz', 'deg', 'bps', 'bytes')")
+
+    provenance: FieldProvenance = Field(..., description="Complete origin and parser attribution for this field")
+    value_quality: ValueQuality = Field(default=ValueQuality.UNVERIFIED)
+    validation_notes: List[str] = Field(default_factory=list)
+
+class FindingSeverity(str, Enum):
+    INFO = "INFO"
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
+
+class MetadataConsistencyFinding(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    finding_id: str = Field(..., description="Unique finding UUID")
+    finding_code: str = Field(..., description="Machine-readable taxonomy code (e.g. META_TIMESTAMP_CONFLICT)")
+    rule_id: str = Field(..., description="Identifier of the consistency rule that triggered this finding")
+    severity: FindingSeverity = Field(..., description="Evidentiary significance or operational risk")
+    evidence_ids: List[str] = Field(..., min_length=1, description="List of involved evidence IDs")
+    involved_fields: List[str] = Field(..., min_length=1, description="List of field_ids evaluated")
+
+    raw_values: Dict[str, Any] = Field(..., description="Map of field_id to its raw value")
+    normalized_values: Dict[str, Any] = Field(..., description="Map of field_id to its normalized value")
+
+    discrepancy_description: str = Field(..., description="Human-readable forensic observation of the discrepancy")
+    alternative_explanations: List[str] = Field(..., description="Benign technical explanations (e.g. clock drift, export transcode, copy)")
+    limitations: str = Field(..., description="Explicit forensic limitations of this observation")
+    requires_examiner_review: bool = Field(default=True)
+    created_at: datetime = Field(..., description="UTC timestamp of finding generation")
+
+class EvidenceMetadataSnapshot(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: str = Field(default="1.0", description="CMMS schema specification version")
+    snapshot_id: str = Field(..., description="Unique snapshot UUID")
+    evidence_id: str = Field(..., description="CEIPL evidence exhibit UUID")
+    evidence_hash_sha256: str = Field(..., description="Cryptographic SHA-256 hash of original evidence bitstream")
+
+    declared_mime_type: Optional[str] = Field(None, description="MIME type claimed by intake or filename extension")
+    detected_mime_type: str = Field(..., description="MIME type verified via byte magic and structural inspection")
+    detected_format: str = Field(..., description="Canonical format identifier (e.g. JPEG, MP4, WAV, PCAPNG)")
+
+    extraction_status: str = Field(..., description="SUCCESS, PARTIAL, FAILED, or CORRUPTED")
+    parser_runs: List[Dict[str, Any]] = Field(default_factory=list, description="Execution records of all parsers invoked")
+    warnings: List[str] = Field(default_factory=list)
+    errors: List[str] = Field(default_factory=list)
+
+    fields: List[MetadataField] = Field(default_factory=list, description="Array of all extracted and normalized metadata fields")
+    consistency_findings: List[MetadataConsistencyFinding] = Field(default_factory=list)
+    companion_evidence_ids: List[str] = Field(default_factory=list, description="Associated sidecar, log, or manifest evidence IDs")
+
+    snapshot_hash: str = Field(..., description="SHA-256 of canonical RFC 8785 JSON representation of this snapshot")
+    created_at: datetime = Field(..., description="UTC timestamp of snapshot compilation")
+```
+
+---
+
+### 16.4 Raw Metadata Preservation & Canonical Normalization Framework
+
+The core architectural invariant of CMMS is **Non-Destructive Ingestion and Raw Immutability**. The platform never repairs, edits, strips, or overwrites metadata in the original evidence bitstream.
+
+```mermaid
+flowchart LR
+    subgraph INPUT["Input Bitstream"]
+        RAW_BYTES["Master Evidence Exhibit
+(Read-Only WORM Storage)"]
+    end
+
+    subgraph CMMS_LIFECYCLE["CMMS Dual-Track Representation Lifecycle"]
+        EXTRACT["Multi-Parser Extraction
+(ExifTool, FFprobe, MediaInfo, TShark)"]
+
+        subgraph TRACK_RAW["Track 1: Raw Preservation (Immutable)"]
+            RAW_REC["Raw Metadata Store
+- Exact parser string/int/bytes
+- Hex tag codes & IFD paths
+- Preserves vendor MakerNotes
+- Preserves unknown/corrupt tags"]
+        end
+
+        subgraph TRACK_NORM["Track 2: Canonical Normalization"]
+            NORM_RULES["Normalization Pipeline
+- Typed Pydantic casting
+- 14 Explicit Timestamp Types
+- GPS DMS -> Decimal Degrees
+- Rational Frame Rates (num/den)
+- Audio Sample Rates in Hz"]
+            QUAL_FLAG["Qualification & Traceability
+- EXACT, PARTIAL, or INFERRED
+- Records transformation rules
+- Records explicit assumptions
+- Retains original datum & DOP"]
+        end
+
+        BIND["Cryptographic Binding
+(RFC 8785 Canonical JSON + Dual Hash)"]
+    end
+
+    subgraph OUTPUT["Forensic Artifacts"]
+        CEIPL_DAG["CEIPL Provenance DAG
+(Linked to Parent Exhibit SHA-256)"]
+        DOWNSTREAM["Downstream Subsystems
+(AIF, AURAS, VISTA, ONTF, UFREDF)"]
+    end
+
+    RAW_BYTES --> EXTRACT
+    EXTRACT --> RAW_REC
+    EXTRACT --> NORM_RULES
+    NORM_RULES --> QUAL_FLAG
+    RAW_REC --> BIND
+    QUAL_FLAG --> BIND
+    BIND --> CEIPL_DAG
+    BIND --> DOWNSTREAM
+```
+
+#### 16.4.1 Canonical Normalization Rules
+
+Every normalized field must obey the following 8 preservation invariants:
+1. **Raw Preservation Invariant:** The raw value is stored alongside the normalized value and is never deleted or truncated.
+2. **Parser Attribution:** Every field records the specific parser adapter and exact parser version that extracted it.
+3. **Rule Identifier:** Every normalization maps to an explicit transformation function identifier (e.g. `NORM_TIMESTAMP_EXIF_ISO8601`, `NORM_GPS_DMS_TO_DD`).
+4. **Assumption Logging:** If timezone, datum, or frame rate requires an assumption, the assumption is explicitly appended to `normalization_assumptions`.
+5. **Qualification Tagging:** Normalization status is tagged as `EXACT` (mathematically lossless), `PARTIAL` (information loss occurred), or `INFERRED` (derived from contextual heuristics).
+6. **No Silent Timezone Imputation:** Local timestamps without an explicit UTC offset (`+HH:MM` or `Z`) are NEVER silently converted to UTC using the server's local clock. They are preserved as naive timestamps with `timezone: "UNKNOWN"`.
+7. **Rational Representation:** Rational numbers (shutter speeds, frame rates, timebases) are stored as exact rational dictionaries `{"numerator": int, "denominator": int}` in addition to approximate floating-point representations.
+8. **Coordinates & Geodesy:** GPS coordinates retain original DMS (Degrees, Minutes, Seconds) strings and hemisphere indicators (`N`, `S`, `E`, `W`) alongside converted WGS-84 decimal degrees.
+
+#### 16.4.2 Explicit Timestamp Semantics (14 Canonical Types)
+
+CMMS disallows the collapse of diverse timing indicators into a single generic `timestamp` field. The system enforces 14 discrete timestamp semantic classifications:
+
+| Timestamp Semantic Class | Forensic Meaning | Typical Source Tags |
+| :--- | :--- | :--- |
+| `CAPTURE_TIME` | Moment the physical sensor acquired the image/audio/video scene | `EXIF:DateTimeOriginal`, `SubSecTimeOriginal` |
+| `RECORDING_START` | Moment recording was triggered on recorder/DVR | BWF `OriginationTime`, CCTV stream start packet |
+| `RECORDING_END` | Moment recording ceased or file was closed | CCTV session footer, MP4 trailing atom |
+| `CONTAINER_CREATION_TIME` | Time the multiplexed container was assembled | QuickTime `moov/mvhd/creation_time`, Matroska `DateUTC` |
+| `STREAM_START_TIME` | Initial presentation timestamp of a specific track | Audio/video stream packet zero PTS ($t_0$) |
+| `FILE_CREATION_TIME` | Host filesystem inode creation timestamp | Ext4 `crtime`, NTFS `$STANDARD_INFORMATION` |
+| `FILE_MODIFICATION_TIME` | Host filesystem last-modified timestamp | Ext4 `mtime`, FAT32 modification date/time |
+| `EXPORT_TIME` | Time an exhibit was exported from a DVR/NVR or body-worn camera | NVR export manifest XML, vendor export tag |
+| `ENCODING_TIME` | Software video/audio compression execution time | XMP `History`, FFmpeg encoder header |
+| `PACKET_CAPTURE_TIME` | Hardware/kernel timestamp when network packet hit NIC | PCAP packet header timestamp (sec + usec/nsec) |
+| `GPS_TIME` | Atomic satellite clock time recorded by GPS receiver | `GPSDateStamp` + `GPSTimeStamp` (UTC) |
+| `OVERLAY_DISPLAY_TIME` | Visible burned-in on-screen display clock | Extracted via OCR in VISTA-CFI / CCTV engine |
+| `ACQUISITION_TIME` | Moment law enforcement seized/imaged the evidence | CEIPL intake manifest, chain-of-custody log |
+| `PROCESSING_TIME` | Moment CMMS or forensic engine executed analysis | CMMS worker execution timestamp (UTC) |
+
+---
+
+### 16.5 Modality-Specific Metadata Engines
+
+#### 16.5.1 Image Metadata Engine (AIF Integration)
+The Image Metadata Engine extracts metadata from raster and RAW formats (JPEG, PNG, TIFF, WebP, HEIC/HEIF, DNG, CR2, NEF, ARW, AVIF).
+- **EXIF Extraction:** Complete IFD0, ExifIFD, SubIFD, and InteropIFD traversal. Extracts camera Make, Model, Serial Number, LensMake, LensModel, ISO, FocalLength, FNumber, ExposureTime, Orientation, MeteringMode, and Flash status.
+- **GPS Extraction:** Latitude, Longitude, Altitude, Direction, Speed, MapDatum (default WGS-84), DOP (Dilution of Precision), and positioning error metrics.
+- **XMP & IPTC Support:** Dublin Core (`dc:`), Photoshop (`photoshop:`), Adobe XMP (`xmp:`), rights management, document lineage (`DocumentID`, `InstanceID`, `History`), and IPTC Core/Extension captions, creators, and instructions.
+- **Structural Forensics Support:** JPEG quantization table presence and DQT hash generation, Huffman table structures, ICC profile extraction, color primaries, alpha channels, and C2PA manifest presence/validation status.
+
+#### 16.5.2 Audio Metadata Engine (AURAS Integration)
+The Audio Metadata Engine inspects standalone audio files and audio streams demuxed from video containers.
+- **Stream Descriptors:** Codec identifier, profile, sample rate ($F_s$ in Hz), channel count, channel layout, bit depth, variable/constant bitrate, and stream start PTS.
+- **BWF & Professional Chunks:** RIFF chunk mapping, Broadcast Wave Format `bext` chunk (Originator, OriginatorReference, OriginationDate, OriginationTime, TimeReference, CodingHistory, UMID), and embedded iXML / ADM chunks.
+- **Compressed Audio Tags:** ID3v1, ID3v2.2/2.3/2.4 (TIT2, TPE1, TALB, TXXX, COMM, TSSE encoder tag, TLEN), Vorbis comments, FLAC `STREAMINFO`, and encoder delay/padding samples.
+- **Forensic Caveat Enforcement:** Software tags and encoder strings are classified strictly as `OPERATOR_REPORTED` or `EMBEDDED_CLAIM`. CMMS never infers synthetic voice generation from metadata alone; deepfake voice classification is strictly delegated to AURAS ADDE.
+
+#### 16.5.3 Video Metadata Engine (VISTA Integration)
+The Video Metadata Engine handles MP4, MOV, MKV, AVI, WebM, MPEG-TS, and 3GP containers.
+- **Container Level:** Brand and compatible brands, major version, creation and modification timestamps, duration, overall bitrate, container timebase, track layout, and embedded GPS atoms (`moov/meta`).
+- **Video Stream Level:** Codec, profile, level, dimensions ($W \times H$), pixel format, bit depth, declared frame rate, average frame rate, variable frame rate flag, stream timebase ($\text{TB}$), start PTS, duration, color primaries, matrix coefficients, and rotation matrix.
+- **Rational Timing Invariant:** For video streams, stream time is governed by the fundamental equation:
+  $$t_i = \text{PTS}_i \times \text{TB} = \text{PTS}_i \times \frac{\text{TB}_{\text{num}}}{\text{TB}_{\text{den}}}$$
+  CMMS preserves the raw integer $\text{PTS}_i$ and the rational fraction $\text{TB}_{\text{num}}/\text{TB}_{\text{den}}$ separately, preventing cumulative floating-point rounding errors. Decode timestamps ($\text{DTS}$) are preserved separately to respect B-frame reordering without raising false tampering alarms.
+
+#### 16.5.4 CCTV & DVR/NVR Metadata Engine
+Surveillance exports require specialized handling due to non-standard codecs, multiplexed channels, and proprietary companion sidecars.
+- **Recorder Metadata:** Manufacturer, model, DVR serial, camera channel index, channel label, native vs converted export indicator, and recorder timezone configuration.
+- **Companion Evidence Grouping:** CMMS models a CCTV export as a composite `CompanionEvidenceGroup`. The primary video stream, companion sidecar XML/JSON, recorder export log, and export manifest remain distinct CEIPL evidence exhibits, linked cryptographically by a shared `group_id`.
+- **Claim Isolation:** Operator notes, manual channel labels, and DVR setup text are classified as `OPERATOR_REPORTED` claims, strictly isolated from machine-extracted bitstream headers.
+
+#### 16.5.5 Offline Network Capture Metadata Engine (ONTF Integration)
+CMMS extracts structural and technical metadata from offline PCAP and PCAPNG captures. Live capture and active network probing are strictly out of scope.
+- **Capture-Level Headers:** Capture format, version, link-layer header type (DLT), snap length, timestamp resolution (microsecond vs nanosecond), capture start/end UTC times, interface descriptions, OS/hardware strings, and capture statistics.
+- **Packet-Level Inspection:** Packet indices, capture timestamps, frame length vs wire length (detecting truncation), transport protocol, IP header metadata, TCP flags, and TLS ClientHello SNI/cipher suites visible without payload decryption.
+- **Privacy & Security Safeguards:** Sensitive payload bytes (HTTP bodies, credentials, raw payload dumps) are omitted from general metadata fields by default. Protocol analysis and flow reconstruction belong strictly to ONTF.
+
+#### 16.5.6 Geospatial Metadata Engine (AIF-GEO Integration)
+The Geospatial Metadata Engine parses, normalizes, and packages location attributes for handoff to AIF-GEO.
+- **Coverage:** EXIF GPS, XMP location, IPTC location, and MP4 location atoms.
+- **Coordinate Transformation:** Preserves exact raw DMS strings and hemisphere indicators while calculating WGS-84 decimal degrees:
+  $$\text{Degrees}_{\text{decimal}} = \text{Sign} \times \left( \text{Deg} + \frac{\text{Min}}{60} + \frac{\text{Sec}}{3600}
+ight)$$
+- **Forensic Invariant:** Valid coordinates indicate only that a GPS tag was recorded in the file header. CMMS explicitly forbids issuing claims that valid coordinates prove physical capture at that geographic location. Verification of scene consistency belongs to AIF-GEO.
+
+---
+
+### 16.6 Rule-Based Metadata Consistency & Anomaly Engine
+
+CMMS evaluates extracted metadata against a comprehensive rule-based consistency matrix, emitting machine-readable finding codes.
+
+```mermaid
+flowchart TD
+    subgraph INPUTS["Input Metadata Fields"]
+        TS_FIELDS["Timestamp Fields
+(EXIF, XMP, IPTC, Stream, Filesystem, GPS)"]
+        DEV_FIELDS["Device Fields
+(Make, Model, Lens, Serial, Encoder)"]
+        STR_FIELDS["Structural Fields
+(MIME, Extension, Dimensions, Atoms)"]
+        CROSS_FIELDS["Cross-Evidence Fields
+(CCTV Window, Sidecar, Audio/Video Stream)"]
+    end
+
+    subgraph ENGINE["Rule-Based Consistency & Anomaly Engine"]
+        R_TS["Timestamp Consistency Evaluator
+- Inverted chronological order
+- Modification predates creation
+- GPS time vs local time divergence
+- Unreasonable precision jumps"]
+        R_DEV["Device & Software Evaluator
+- Make/Model mismatch with EXIF tags
+- Editing software tags present
+- Inconsistent encoder strings"]
+        R_STR["Structural Integrity Evaluator
+- Extension vs magic bytes mismatch
+- Truncated metadata blocks
+- Duplicate conflicting IFDs"]
+        R_CROSS["Cross-Evidence Evaluator
+- Video stream outside CCTV recording window
+- Sidecar metadata mismatch
+- Audio track duration vs video duration mismatch"]
+    end
+
+    subgraph FINDINGS["Structured Finding Records"]
+        F_CODE["Machine-Readable Finding Codes
+(e.g. META_TIMESTAMP_CONFLICT, META_FORMAT_MISMATCH)"]
+        F_SEV["Severity & Context Rating
+(INFO, LOW, MEDIUM, HIGH, CRITICAL)"]
+        F_EXPL["Dual Explanations
+- Anomaly Hypothesis
+- Benign Technical Explanation"]
+    end
+
+    TS_FIELDS --> R_TS
+    DEV_FIELDS --> R_DEV
+    STR_FIELDS --> R_STR
+    CROSS_FIELDS --> R_CROSS
+
+    R_TS & R_DEV & R_STR & R_CROSS --> F_CODE
+    F_CODE --> F_SEV
+    F_SEV --> F_EXPL
+```
+
+#### 16.6.1 Machine-Readable Finding Taxonomy (18 Standard Codes)
+
+| Finding Code | Evaluation Scope | Default Severity | Description & Investigative Context |
+| :--- | :--- | :--- | :--- |
+| `META_FORMAT_MISMATCH` | Structural | HIGH | Declared file extension does not match verified MIME magic bytes. |
+| `META_PARSE_FAILURE` | Parser | HIGH | Parser terminated abnormally or encountered unparseable header structures. |
+| `META_TRUNCATED_BLOCK` | Structural | HIGH | Metadata block (EXIF IFD, XMP packet, RIFF chunk) terminates before declared length. |
+| `META_DUPLICATE_BLOCK` | Structural | MEDIUM | Multiple conflicting metadata blocks of the same type detected in a single file. |
+| `META_CONFLICTING_VALUES` | Field | MEDIUM | Two parsers or two embedded tags report contradictory values for the same property. |
+| `META_TIMESTAMP_CONFLICT` | Temporal | HIGH | Discrepancy between capture time, modification time, or stream time exceeding tolerance. |
+| `META_TIMEZONE_UNKNOWN` | Temporal | LOW | Local timestamp lacks UTC offset or timezone designation; cannot be converted losslessly. |
+| `META_TIMESTAMP_ORDER_ANOMALY` | Temporal | HIGH | Chronological impossibility (e.g. file modification predates original creation timestamp). |
+| `META_DEVICE_FIELD_INCONSISTENCY` | Device | MEDIUM | Internal contradiction between camera Make, Model, Lens, or MakerNote tag structure. |
+| `META_SOFTWARE_FIELD_INCONSISTENCY` | Provenance | MEDIUM | Software tag indicates editing, transcoding, or export application (e.g. Photoshop, Premiere). |
+| `META_GPS_REFERENCE_INVALID` | Geospatial | MEDIUM | GPS coordinates contain out-of-bounds latitude/longitude or invalid hemisphere references. |
+| `META_GPS_TIME_CONFLICT` | Geospatial | HIGH | GPS atomic timestamp diverges significantly from embedded camera capture timestamp. |
+| `META_CONTAINER_STREAM_INCONSISTENCY` | Video/Audio | MEDIUM | Mismatch between container-level duration/timebase and elementary stream parameters. |
+| `META_CCTV_SIDECAR_MISMATCH` | CCTV | HIGH | Discrepancy between companion XML/JSON sidecar metadata and embedded recording bitstream. |
+| `META_CAPTURE_CLOCK_UNCERTAINTY` | Temporal | MEDIUM | Clock drift, NTP desynchronization, or variable clock rate identified in capture source. |
+| `META_UNSUPPORTED_FIELD` | Parser | INFO | Vendor-specific proprietary tag encountered that cannot be normalized canonically. |
+| `META_INCOMPLETE_EXTRACTION` | Operational | LOW | Extraction completed partially due to secondary parser timeout or unsupported sub-chunk. |
+| `META_CROSS_EVIDENCE_CONFLICT` | Cross-Evidence | HIGH | Contradiction between common metadata fields across two related case exhibits. |
+
+---
+
+### 16.7 Cross-Evidence Metadata Correlation & Multi-Source Timeline Support
+
+CMMS compiles cross-modal evidence timelines without arbitrarily selecting a single timestamp as absolute ground truth. Instead, the timeline preserves all candidate events, flagging corroborations and discrepancies.
+
+```mermaid
+gantt
+    title Multi-Source Evidence Timeline Reconstruction (Cross-Evidence Correlation)
+    dateFormat YYYY-MM-DD HH:mm:ss
+    axisFormat %H:%M:%S
+
+    section CCTV Feed (Exhibit C-01)
+    DVR Recording Window (Declared) :cctv_win, 2026-10-30 14:00:00, 2026-10-30 15:00:00
+    Video Elementary Stream Duration :cctv_stream, 2026-10-30 14:00:02, 2026-10-30 14:59:58
+    Burned-in OSD Clock Interval :cctv_osd, 2026-10-30 14:00:00, 2026-10-30 15:00:00
+
+    section Mobile Photo (Exhibit I-04)
+    EXIF DateTimeOriginal :milestone, img_exif, 2026-10-30 14:22:15, 0m
+    EXIF GPS Atomic Timestamp :milestone, img_gps, 2026-10-30 14:22:17, 0m
+    Filesystem Creation Timestamp :milestone, img_fs, 2026-10-30 14:22:16, 0m
+
+    section Body-Worn Audio (Exhibit A-02)
+    BWF Origination Time :milestone, aud_bwf, 2026-10-30 14:15:00, 0m
+    Audio Stream Active Window :aud_stream, 2026-10-30 14:15:00, 2026-10-30 14:45:00
+
+    section Network Traffic (Exhibit N-01)
+    PCAP Capture Window :pcap_win, 2026-10-30 14:20:00, 2026-10-30 14:30:00
+    Target Device DHCP Lease Timestamp :milestone, pcap_dhcp, 2026-10-30 14:21:45, 0m
+```
+
+#### 16.7.1 Cross-Evidence Correlation Invariants
+1. **Candidate Preservation:** Every timeline entry retains its original evidence ID, source field, raw timestamp, normalized UTC timestamp, and uncertainty window ($\pm \Delta t$).
+2. **Explicit Association Rationale:** Evidence items are correlated only when sharing an explicit case relationship, geographic proximity, or hardware identifier. CMMS never manufactures correlation based solely on timestamp coincidence.
+3. **Correlation Status Tracking:** Correlated events are classified as `CORROBORATED` (multiple independent sources agree within tolerance), `DISCREPANT` (sources conflict beyond tolerance), or `UNVERIFIED` (single source only).
+
+---
+
+### 16.8 CEIPL Provenance & Cryptographic Storage Architecture
+
+CMMS integrates seamlessly with CEIPL to establish an unbroken chain of custody for all metadata operations.
+
+```mermaid
+flowchart TD
+    subgraph CEIPL_VAULT["CEIPL Cryptographic Vault (WORM Storage)"]
+        EXHIBIT["Master Evidence Exhibit
+SHA-256: 7f83b165..."]
+        DAG_ROOT["CEIPL Provenance DAG Root Node"]
+        EXHIBIT --- DAG_ROOT
+    end
+
+    subgraph CMMS_OPS["CMMS Processing Pipeline"]
+        ACTIVITY["Extraction Activity UUID: act-8812...
+- Parser: ExifTool 12.80
+- Worker: worker-metadata-04
+- Execution Timestamp: 2026-10-31T07:15:00Z"]
+        SNAP["Metadata Snapshot Record
+- Schema Version: 1.0
+- Extracted Fields: 142
+- Consistency Findings: 2"]
+        CANON_JSON["RFC 8785 Canonical JSON Serialization"]
+        SNAP_HASH["Snapshot SHA-256 Digest
+e5b72a91..."]
+    end
+
+    subgraph CEIPL_LINEAGE["CEIPL Audit Log & Lineage Registration"]
+        PROV_NODE["Derived Provenance Node
+- Parent: Exhibit SHA-256
+- Activity ID: act-8812...
+- Artifact: Snapshot SHA-256
+- RFC 3161 Timestamp Token"]
+        MERKLE["CEIPL Merkle Tree Audit Log"]
+    end
+
+    DAG_ROOT --> ACTIVITY
+    ACTIVITY --> SNAP
+    SNAP --> CANON_JSON
+    CANON_JSON --> SNAP_HASH
+    SNAP_HASH --> PROV_NODE
+    PROV_NODE --> MERKLE
+```
+
+#### 16.8.1 Versioned Metadata Snapshots
+When parser adapters are upgraded or additional specialized parsers run, CMMS compiles a **new versioned snapshot** without overwriting the previous snapshot. Both snapshots link to the master exhibit in the CEIPL DAG, enabling examiners to audit metadata evolution across software versions.
+
+---
+
+### 16.9 Security Architecture, Hostile File Defense & Sandboxing
+
+Metadata parsers process untrusted binary files obtained from hostile environments. CMMS establishes strict defensive boundaries:
+
+1. **Unprivileged Worker Sandbox:** All external parser binaries (ExifTool, FFprobe, MediaInfo, TShark) execute inside isolated Linux unprivileged worker processes under non-root service accounts with drop-all Linux capabilities (`cap_drop: ALL`).
+2. **Resource Ceilings (Cgroups):**
+   - RAM Ceiling: $\le 512\text{ MB}$ for image parsers, $\le 1\text{ GB}$ for audio/video stream parsers, $\le 2\text{ GB}$ for network packet dissectors.
+   - CPU Timeouts: $15\text{ s}$ for image headers, $30\text{ s}$ for media stream traversal, $60\text{ s}$ for PCAP headers.
+3. **Decompression Bomb Protection:** Parsers check declared dimensions and uncompressed pixel buffer sizes prior to allocation. Files claiming $> 100\text{ Megapixels}$ or compression expansion ratios $> 50:1$ are immediately halted with `DECOMPRESSION_BOMB_DETECTED`.
+4. **Shell Injection Immunity:** External binaries are invoked strictly using discrete string argument vectors:
+   ```python
+   subprocess.run(["exiftool", "-json", "-G", file_path], shell=False, check=True)
+   ```
+   Direct shell string interpolation (`shell=True`) is strictly prohibited across the entire codebase.
+5. **Air-Gap Invariant:** Worker processes execute in isolated network namespaces (`--net=none`) with zero outbound network routing. Parsers encountering URLs inside metadata fields (e.g. XMP schema links, author URLs) are blocked from making network requests.
+6. **XSS & Report Sanitization:** Raw metadata strings (user comments, IPTC captions, author tags) are strictly HTML-escaped and sanitized prior to injection into web UIs or PDF report templates, neutralizing malicious HTML/JavaScript payloads.
+7. **Privacy-Aware Redaction:** CMMS supports investigator-authorized redaction of sensitive metadata (e.g. home GPS coordinates, examiner serial numbers) for public report exports. Redactions are applied exclusively to exported report copies; master evidence metadata remains unaltered.
+
+---
+
+### 16.10 Common Metadata REST API Specification
+
+CMMS exposes 10 standardized REST endpoints conforming to PS-05 API conventions:
+
+```text
+POST /api/v1/evidence/{evidence_id}/metadata/extract
+GET  /api/v1/evidence/{evidence_id}/metadata
+GET  /api/v1/evidence/{evidence_id}/metadata/raw
+GET  /api/v1/evidence/{evidence_id}/metadata/normalized
+GET  /api/v1/evidence/{evidence_id}/metadata/findings
+GET  /api/v1/evidence/{evidence_id}/metadata/snapshots
+GET  /api/v1/evidence/{evidence_id}/metadata/snapshots/{snapshot_id}
+GET  /api/v1/cases/{case_id}/metadata/timeline
+POST /api/v1/cases/{case_id}/metadata/compare
+POST /api/v1/cases/{case_id}/metadata/export
+```
+
+#### 16.10.1 Key API Endpoint Contracts
+
+##### 1. Initiate Metadata Extraction
+- **Endpoint:** `POST /api/v1/evidence/{evidence_id}/metadata/extract`
+- **Request Body:**
+  ```json
+  {
+    "force_reparse": false,
+    "parser_whitelist": ["exiftool", "ffprobe"],
+    "extract_deep_packets": false
+  }
+  ```
+- **Response (`202 Accepted`):**
+  ```json
+  {
+    "task_id": "task-cmms-9921b7a2-11c4",
+    "evidence_id": "ev-8842-4911-bc01",
+    "status": "PROCESSING",
+    "created_at": "2026-10-31T07:20:00Z"
+  }
+  ```
+
+##### 2. Retrieve Complete Metadata Record
+- **Endpoint:** `GET /api/v1/evidence/{evidence_id}/metadata`
+- **Response (`200 OK`):** Serialized `EvidenceMetadataSnapshot` schema containing complete fields, provenance, and consistency findings.
+
+##### 3. Cross-Evidence Metadata Comparison
+- **Endpoint:** `POST /api/v1/cases/{case_id}/metadata/compare`
+- **Request Body:**
+  ```json
+  {
+    "evidence_id_a": "ev-image-001",
+    "evidence_id_b": "ev-cctv-002",
+    "comparison_rules": ["TIMESTAMP_WINDOW_CONTAINMENT", "DEVICE_IDENTIFIER_CORRELATION"]
+  }
+  ```
+- **Response (`200 OK`):**
+  ```json
+  {
+    "comparison_id": "comp-7741-bb02",
+    "case_id": "case-bihar-2026-ps05",
+    "comparison_status": "COMPLETED",
+    "temporal_offset_seconds": 12.45,
+    "within_recording_window": true,
+    "discrepancies": [],
+    "findings": []
+  }
+  ```
+
+---
+
+### 16.11 Database & Persistence Specification
+
+CMMS utilizes a hybrid relational and JSONB storage model within the platform's PostgreSQL database:
+
+```mermaid
+erDiagram
+    cmms_metadata_snapshots ||--o{ cmms_parser_executions : "tracks"
+    cmms_metadata_snapshots ||--o{ cmms_metadata_fields : "contains"
+    cmms_metadata_snapshots ||--o{ cmms_consistency_findings : "generates"
+    cmms_companion_groups ||--o{ cmms_metadata_snapshots : "aggregates"
+    cmms_evidence_comparisons ||--o{ cmms_consistency_findings : "evaluates"
+
+    cmms_metadata_snapshots {
+        uuid snapshot_id PK
+        uuid evidence_id FK
+        varchar evidence_hash_sha256
+        varchar schema_version
+        varchar detected_mime_type
+        varchar detected_format
+        varchar extraction_status
+        varchar snapshot_hash
+        timestamp created_at
+    }
+
+    cmms_parser_executions {
+        uuid execution_id PK
+        uuid snapshot_id FK
+        varchar parser_id
+        varchar parser_version
+        integer exit_code
+        float execution_time_ms
+        text error_log
+    }
+
+    cmms_metadata_fields {
+        uuid field_uuid PK
+        uuid snapshot_id FK
+        varchar field_id
+        varchar metadata_class
+        varchar raw_name
+        jsonb raw_value
+        jsonb normalized_value
+        varchar normalization_status
+        varchar unit
+        varchar source_parser
+        varchar source_location
+        jsonb provenance_metadata
+    }
+
+    cmms_consistency_findings {
+        uuid finding_id PK
+        uuid snapshot_id FK
+        varchar finding_code
+        varchar rule_id
+        varchar severity
+        jsonb involved_fields
+        jsonb raw_values
+        jsonb normalized_values
+        text discrepancy_description
+        boolean requires_examiner_review
+    }
+
+    cmms_companion_groups {
+        uuid group_id PK
+        uuid primary_evidence_id
+        uuid case_id
+        varchar group_type
+        timestamp created_at
+    }
+
+    cmms_evidence_comparisons {
+        uuid comparison_id PK
+        uuid case_id
+        uuid evidence_id_a
+        uuid evidence_id_b
+        jsonb comparison_results
+        timestamp created_at
+    }
+```
+
+#### 16.11.1 Indexing & Performance Strategy
+- **B-Tree Indexes:** Enforced on `snapshot_id`, `evidence_id`, `field_id`, `metadata_class`, and `finding_code`.
+- **GIN Indexes:** Enforced on `cmms_metadata_fields.raw_value` and `cmms_metadata_fields.normalized_value` for high-speed jsonb path queries across millions of metadata tags.
+- **Row-Level Security (RLS):** All CMMS tables inherit PostgreSQL RLS policies tied to the investigator's active `case_id` cryptographic token, preventing cross-tenant leakage.
+
+---
+
+### 16.12 Unified Forensic Reporting (UFREDF) Integration
+
+CMMS formats and exports metadata evidence into the court-admissible UFREDF reporting pipeline.
+
+#### 16.12.1 Section 65B / Section 63 BSA Report Invariants
+1. **Source Categorization:** Reports must explicitly distinguish `MACHINE_EXTRACTED` bitstream metadata from `OPERATOR_REPORTED` interview values and `MODEL_INFERRED` scores.
+2. **Attribution Neutrality:** Reports must state findings using neutral forensic language (*"Observed"*, *"Discrepancy identified"*, *"Uncertainty window $\pm 2\text{s}$"*).
+3. **Prohibition of Authenticity Absolutes:** The report generator strictly suppresses phrases such as *"Metadata proves the file is authentic"* or *"Valid EXIF guarantees originality"*.
+4. **Annexure Contents:** Courtroom PDF annexures must include:
+   - SHA-256 and SHA3-512 hashes of the examined exhibit.
+   - Exact parser identifiers and versions.
+   - Complete table of raw vs normalized values for critical timing and device fields.
+   - List of all consistency findings with benign alternative explanations.
+   - Section 65B(4) / Section 63 certificate metadata attesting to the automated, unaltered extraction process.
+
+---
+
+### 16.13 Testing, Performance Benchmarking & Ground-Truth Validation
+
+The CMMS test suite guarantees correctness, resilience against corrupted files, and strict performance SLAs:
+
+```
+tests/cmms/
+├── unit/
+│   ├── test_media_identification.py       # Magic bytes, MIME verification, extension mismatch
+│   ├── test_image_exif_parser.py          # EXIF, XMP, IPTC, MakerNotes, quantization tables
+│   ├── test_audio_metadata_parser.py      # BWF bext, iXML, ID3v2, FLAC STREAMINFO
+│   ├── test_video_metadata_parser.py      # Container atoms, PTS/DTS, rational timebase
+│   ├── test_cctv_sidecar_parser.py        # XML/JSON companion logs, DVR channel mapping
+│   ├── test_pcap_metadata_parser.py       # PCAP/PCAPNG header resolution, interface stats
+│   ├── test_timestamp_normalizer.py       # 14 timestamp semantics, timezone unknown handling
+│   ├── test_coordinate_normalizer.py      # DMS to DD conversion, hemisphere, datum bounds
+│   └── test_consistency_rules.py          # 18 finding codes, conflict detection logic
+├── integration/
+│   ├── test_ceipl_lineage_binding.py      # WORM registration, snapshot hash assertions
+│   ├── test_aif_metadata_handoff.py       # Image metadata ingestion into IRE/IVE
+│   ├── test_auras_metadata_handoff.py     # Stream metadata ingestion into ARE/ADDE
+│   ├── test_vista_cctv_handoff.py         # CCTV timeline handoff into CFITSA
+│   └── test_ufredf_dossier_export.py      # Section 63 BSA PDF annexure generation
+└── adversarial/
+    ├── test_malformed_headers.py          # Fuzzed EXIF, truncated IFDs, corrupt RIFF chunks
+    ├── test_decompression_bombs.py        # 100MP image bombs, nested zip containers
+    ├── test_malicious_metadata_strings.py # XSS payloads, SQL injection, control characters
+    └── test_parser_sandbox_limits.py      # RAM ceilings, CPU timeout terminations
+```
+
+#### 16.13.1 Performance SLA Targets
+- **Image Metadata Extraction:** Median latency $\le 80\text{ ms}$; p95 $\le 250\text{ ms}$ for standard raster files.
+- **Audio Stream Extraction:** Median latency $\le 120\text{ ms}$; p95 $\le 400\text{ ms}$ for standard audio files.
+- **Video Header Extraction:** Median latency $\le 250\text{ ms}$; p95 $\le 800\text{ ms}$ for MP4/MOV containers up to 10GB (header demux only).
+- **PCAP Capture Extraction:** Median latency $\le 500\text{ ms}$; p95 $\le 1.8\text{ s}$ for captures up to 500MB (capture-level headers and packet summary).
+- **Batch Extraction Throughput:** $\ge 50\text{ exhibits/minute}$ on standard 8-core forensic workstation.
+
+---
+
+### 16.14 Requirement Traceability Matrix (CMMS-01 through CMMS-78)
+
+Every CMMS requirement defined in PRD Section 15 maps directly to its technical implementation section, Pydantic schema, test suite, and engineering phase:
+
+| Req ID | Requirement Summary | TRD Section | Implementation Schema / Component | Verification Method | Planned Phase | Current Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **CMMS-01** | Shared Service Architecture | §16.1 | `CMMSOrchestrator`, `MetadataClass` | Architecture verification | CMMS-A0 | `PLANNED` |
+| **CMMS-02** | Pluggable Parser Adapters | §16.2 | `BaseParserAdapter`, `ParserRegistry` | Unit tests across adapters | CMMS-A1 | `PLANNED` |
+| **CMMS-03** | Format & Magic Identification | §16.1, §16.13 | `libmagic` wrapper, `MediaIdentifier` | 50-file format fixture test | CMMS-A1 | `PLANNED` |
+| **CMMS-04** | Dual-Track Raw/Normalized Store | §16.4 | `MetadataField`, `EvidenceMetadataSnapshot` | Round-trip serialization test | CMMS-A1 | `PLANNED` |
+| **CMMS-05** | Shared Subsystem Handoff | §16.1, §16.10 | REST API, DAG serialization | Subsystem contract tests | CMMS-A0 | `PLANNED` |
+| **CMMS-06** | Broad Image Format Support | §16.2, §16.5.1 | `ExifToolAdapter`, `PillowAdapter` | Test matrix (JPEG, PNG, HEIC, RAW) | CMMS-A2 | `PLANNED` |
+| **CMMS-07** | Comprehensive EXIF Extraction | §16.5.1 | IFD0, ExifIFD tag dictionaries | Controlled camera fixture tests | CMMS-A2 | `PLANNED` |
+| **CMMS-08** | EXIF GPS Telemetry | §16.5.1, §16.5.6| `GPSNormalizer`, WGS-84 model | GPS fixture assertion | CMMS-A2 | `PLANNED` |
+| **CMMS-09** | XMP Data & History Extraction | §16.5.1 | Adobe XMP namespace parser | Multi-layer Photoshop fixtures | CMMS-A2 | `PLANNED` |
+| **CMMS-10** | IPTC Core & Extension Parsing | §16.5.1 | IPTC Application Record parser | Newsroom captioned fixtures | CMMS-A2 | `PLANNED` |
+| **CMMS-11** | Image Structural Forensics | §16.5.1 | Quantization DQT hasher, ICC profile | Tampered JPEG fixture test | CMMS-A2 | `PLANNED` |
+| **CMMS-12** | C2PA Manifest Discovery | §16.5.1 | C2PA box detector | C2PA signed/unsigned fixtures | CMMS-A2 | `PLANNED` |
+| **CMMS-13** | Audio Format & Stream Support | §16.5.2 | `FFprobeAudioAdapter` | 10-format audio test matrix | CMMS-A3 | `PLANNED` |
+| **CMMS-14** | Technical Stream Descriptors | §16.5.2 | Sample rate, channels, bit depth | Stream profile assertions | CMMS-A3 | `PLANNED` |
+| **CMMS-15** | BWF `bext` & UMID Extraction | §16.5.2 | BWF RIFF chunk parser | Broadcast wave fixture tests | CMMS-A3 | `PLANNED` |
+| **CMMS-16** | Embedded iXML / ADM Parsing | §16.5.2 | iXML chunk parser | Multi-track audio fixtures | CMMS-A3 | `PLANNED` |
+| **CMMS-17** | Compressed Audio Tags | §16.5.2 | ID3v2, Vorbis, FLAC parser | Tag inspection unit tests | CMMS-A3 | `PLANNED` |
+| **CMMS-18** | Audio Provenance Neutrality | §16.5.2 | `ProvenanceType.OPERATOR_REPORTED` | Policy compliance tests | CMMS-A3 | `PLANNED` |
+| **CMMS-19** | Video Container Parsing | §16.5.3 | `FFprobeVideoAdapter`, `MediaInfoAdapter` | MP4, MOV, MKV fixtures | CMMS-A4 | `PLANNED` |
+| **CMMS-20** | Video Elementary Stream Metrics| §16.5.3 | Codec, profile, dimensions, color | Stream inspection tests | CMMS-A4 | `PLANNED` |
+| **CMMS-21** | Rational Timebase Representation| §16.4.2, §16.5.3| `RationalTimebase` model | Exact fraction assertion tests | CMMS-A4 | `PLANNED` |
+| **CMMS-22** | Demuxed Audio Track Lineage | §16.5.3 | AFB stream bridge metadata | DAG linkage verification | CMMS-A4 | `PLANNED` |
+| **CMMS-23** | Variable Frame Rate Detection | §16.5.3 | Cadence standard deviation analyzer | VFR vs CFR fixture tests | CMMS-A4 | `PLANNED` |
+| **CMMS-24** | B-Frame Preservation Invariant | §16.5.3 | PTS vs DTS separation logic | Decode order invariant test | CMMS-A4 | `PLANNED` |
+| **CMMS-25** | CCTV Recorder Profile Parsing | §16.5.4 | CCTV adapter, vendor signatures | CCTV export fixture tests | CMMS-A4 | `PLANNED` |
+| **CMMS-26** | CCTV Export Sidecar Binding | §16.5.4 | `CompanionEvidenceGroup` model | XML/JSON sidecar binding tests | CMMS-A4 | `PLANNED` |
+| **CMMS-27** | Multi-Channel CCTV Mapping | §16.5.4 | Channel index/label dictionary | Multi-camera NVR fixtures | CMMS-A4 | `PLANNED` |
+| **CMMS-28** | CCTV Timezone Configuration | §16.5.4 | Recorder timezone offset model | Timezone offset tests | CMMS-A4 | `PLANNED` |
+| **CMMS-29** | Recorder Log Parsing | §16.5.4 | DVR export log parser | Log event correlation tests | CMMS-A4 | `PLANNED` |
+| **CMMS-30** | Operator Claim Separation | §16.5.4 | `ProvenanceType` claim boundary | Claim isolation tests | CMMS-A4 | `PLANNED` |
+| **CMMS-31** | Offline PCAP/PCAPNG Parsing | §16.5.5 | `TSharkAdapter`, `ScapyAdapter` | PCAP/PCAPNG fixture tests | CMMS-A5 | `PLANNED` |
+| **CMMS-32** | Capture-Level Metadata | §16.5.5 | Snaplen, link type, precision | Capture header assertions | CMMS-A5 | `PLANNED` |
+| **CMMS-33** | Packet-Level Header Telemetry | §16.5.5 | Packet index, timestamp, protocols | Packet traversal tests | CMMS-A5 | `PLANNED` |
+| **CMMS-34** | Sensitive Payload Exclusion | §16.5.5 | Payload stripping filter | Payload omission verification | CMMS-A5 | `PLANNED` |
+| **CMMS-35** | Air-Gapped Network Invariant | §16.5.5, §16.9 | Sandbox network namespace isolation | Zero-socket audit test | CMMS-A5 | `PLANNED` |
+| **CMMS-36** | Geospatial Field Extraction | §16.5.6 | GPS EXIF/XMP/IPTC extractor | Controlled GPS image tests | CMMS-A2 | `PLANNED` |
+| **CMMS-37** | Lossless Coordinate Normalizer | §16.4.1, §16.5.6| DMS to decimal degree engine | Float precision assertions | CMMS-A6 | `PLANNED` |
+| **CMMS-38** | Geodetic Datum Preservation | §16.5.6 | WGS-84 datum & DOP model | Geodetic metadata assertions | CMMS-A6 | `PLANNED` |
+| **CMMS-39** | Geospatial Handoff to AIF-GEO | §16.5.6 | AIF-GEO input contract | Integration contract tests | CMMS-A6 | `PLANNED` |
+| **CMMS-40** | Common Versioned Metadata Model| §16.3 | Pydantic v2 `EvidenceMetadataSnapshot` | JSON Schema validation | CMMS-A1 | `PLANNED` |
+| **CMMS-41** | Field-Level Provenance Tracking| §16.3.1 | `FieldProvenance` model | 100% field attribution assertion | CMMS-A1 | `PLANNED` |
+| **CMMS-42** | Strongly-Typed Value Contracts | §16.3.1 | Union types (int, float, rational) | Type-check validation tests | CMMS-A1 | `PLANNED` |
+| **CMMS-43** | Canonical Normalization Pipeline| §16.4 | Normalizer functions | Multi-modal normalizer suite | CMMS-A6 | `PLANNED` |
+| **CMMS-44** | Explicit Transformation Rules | §16.4.1 | Transformation rule registry | Rule ID traceability test | CMMS-A6 | `PLANNED` |
+| **CMMS-45** | Missing/Conflict Status Enum | §16.3.1 | `ValueQuality`, `NormalizationStatus`| Status transition tests | CMMS-A1 | `PLANNED` |
+| **CMMS-46** | RFC 8785 JSON Canonicalization | §16.8 | Canonical JSON serializer | Deterministic hash tests | CMMS-A1 | `PLANNED` |
+| **CMMS-47** | 14 Timestamp Semantics Contract | §16.4.2 | Timestamp enum & model | Semantic mapping tests | CMMS-A6 | `PLANNED` |
+| **CMMS-48** | Zero Silent Timezone Conversion| §16.4.1 | Naive timestamp validator | Timezone unknown guard tests | CMMS-A6 | `PLANNED` |
+| **CMMS-49** | Timestamp Chronology Checker | §16.6 | `TimestampConsistencyRule` | Inverted timestamp fixtures | CMMS-A7 | `PLANNED` |
+| **CMMS-50** | Device Consistency Checker | §16.6 | `DeviceConsistencyRule` | Camera/lens mismatch tests | CMMS-A7 | `PLANNED` |
+| **CMMS-51** | Software & Processing History | §16.6 | `SoftwareConsistencyRule` | Edited file tag tests | CMMS-A7 | `PLANNED` |
+| **CMMS-52** | Structural Integrity Checker | §16.6 | `StructuralConsistencyRule` | Truncated/duplicate IFD tests | CMMS-A7 | `PLANNED` |
+| **CMMS-53** | Cross-Evidence Correlation | §16.7 | `CrossEvidenceCorrelator` | Multi-evidence case fixtures | CMMS-A7 | `PLANNED` |
+| **CMMS-54** | Multi-Source Candidate Timeline| §16.7 | `EvidenceTimeline` model | Multi-timestamp timeline test | CMMS-A7 | `PLANNED` |
+| **CMMS-55** | Time Window Containment Checker| §16.7 | Window containment algorithm | CCTV window fixture tests | CMMS-A7 | `PLANNED` |
+| **CMMS-56** | Cross-Evidence Conflict Finding| §16.6.1, §16.7 | `META_CROSS_EVIDENCE_CONFLICT` | Conflicting exhibit tests | CMMS-A7 | `PLANNED` |
+| **CMMS-57** | Non-Causality Correlation Policy| §16.7.1 | Policy validator in timeline API | Disclaimer inclusion audit | CMMS-A7 | `PLANNED` |
+| **CMMS-58** | CEIPL Exhibit Hash Binding | §16.8 | CEIPL client wrapper | Pre-extraction SHA-256 assert | CMMS-A8 | `PLANNED` |
+| **CMMS-59** | Non-Destructive Raw Immutability| §16.4, §16.8 | Read-only POSIX `0400` checks | Bitstream immutability test | CMMS-A8 | `PLANNED` |
+| **CMMS-60** | Versioned Metadata Snapshots | §16.8.1 | Snapshot versioning manager | Multi-snapshot lineage test | CMMS-A8 | `PLANNED` |
+| **CMMS-61** | CEIPL DAG Provenance Node | §16.8 | DAG manifest node registrar | DAG lineage traversal test | CMMS-A8 | `PLANNED` |
+| **CMMS-62** | Merkle Audit Log Registration | §16.8 | CEIPL audit logger | Append-only audit log check | CMMS-A8 | `PLANNED` |
+| **CMMS-63** | Unprivileged Parser Sandbox | §16.9 | Linux unprivileged worker runner | Sandbox escape/privilege test | CMMS-A8 | `PLANNED` |
+| **CMMS-64** | Cgroup RAM & CPU Ceilings | §16.9 | Linux cgroup resource limits | Memory/timeout kill tests | CMMS-A8 | `PLANNED` |
+| **CMMS-65** | Decompression Bomb Defense | §16.9 | Image/container size pre-checker | Bomb rejection test suite | CMMS-A8 | `PLANNED` |
+| **CMMS-66** | Shell Injection Immunity | §16.9 | Argument list validator | Vector argument syntax checks | CMMS-A8 | `PLANNED` |
+| **CMMS-67** | Privacy Redaction for Reports | §16.9 | Redaction export transformer | Redacted export hash check | CMMS-A8 | `PLANNED` |
+| **CMMS-68** | Standard REST API Endpoints | §16.10 | FastAPI REST router | OpenAPI contract test suite | CMMS-A8 | `PLANNED` |
+| **CMMS-69** | Celery Asynchronous Pipeline | §16.2, §16.10 | Celery worker task runner | Async queue throughput test | CMMS-A8 | `PLANNED` |
+| **CMMS-70** | Hybrid PostgreSQL/JSONB Storage| §16.11 | SQLAlchemy / Alembic models | Database query latency tests | CMMS-A8 | `PLANNED` |
+| **CMMS-71** | UFREDF Section 65B/63 Dossier | §16.12 | UFREDF metadata report builder | Courtroom PDF generation test | CMMS-A8 | `PLANNED` |
+| **CMMS-72** | Neutral Forensic Language Rule | §16.12 | Vocabulary linter on templates | Banned phrase regex check | CMMS-A8 | `PLANNED` |
+| **CMMS-73** | Multi-Modal Unit Test Suite | §16.13 | `pytest tests/cmms/unit/` | 100% unit test passing gate | CMMS-A9 | `PLANNED` |
+| **CMMS-74** | End-to-End Subsystem Pipelines | §16.13 | `pytest tests/cmms/integration/`| Subsystem E2E execution tests | CMMS-A9 | `PLANNED` |
+| **CMMS-75** | Adversarial & Corrupted Fixtures| §16.13 | `pytest tests/cmms/adversarial/`| 50-corrupt file test suite | CMMS-A9 | `PLANNED` |
+| **CMMS-76** | Performance Latency SLAs | §16.13.1 | Benchmark timing harness | Latency benchmark assertions | CMMS-A9 | `PLANNED` |
+| **CMMS-77** | Batch Ingestion Throughput | §16.13.1 | Multi-worker load test | 50 exhibits/min throughput | CMMS-A9 | `PLANNED` |
+| **CMMS-78** | Ground-Truth Fixture Corpus | §16.13 | 500-file verified test corpus | Exact-value assertions | CMMS-A9 | `PLANNED` |
+
+---
+
+### 16.15 Forensic, Evidentiary & Security Invariants
+
+All metadata operations across CMMS are governed by eight immutable legal and technical invariants:
+
+1. **Zero Bitstream Alteration Invariant:** Seized evidence exhibits stored in the WORM repository are mounted with POSIX `0400` read-only permissions and S3 Object Lock. Reading, extracting, or parsing metadata must NEVER modify the underlying evidence file in place.
+2. **Raw Immutability Invariant:** Every extracted metadata record preserves the exact unparsed, un-normalized raw string, integer, or byte structure as emitted by the source parser. Normalization transforms must never overwrite or delete raw values.
+3. **Explicit Timestamp & No Silent Timezone Imputation:** When an embedded timestamp lacks an explicit UTC offset (`+HH:MM` or `Z`), the system must record the timezone as `UNKNOWN`. Silently converting naive timestamps to UTC based on host machine time is strictly prohibited.
+4. **Prohibition of Authenticity Absolutes:** CMMS emits technical observations and consistency indicators. Under no circumstances may CMMS or its generated reports state that valid metadata *"proves"* that an exhibit is authentic or unaltered.
+5. **Separation of Machine Data from Claims:** Values extracted directly from binary headers (`MACHINE_EXTRACTED`) must never be conflated with operator statements (`OPERATOR_REPORTED`), external web data (`EXTERNALLY_ENRICHED`), or AI predictions (`MODEL_INFERRED`).
+6. **Air-Gap Default & No URL Fetching:** Metadata extraction runs 100% locally in air-gapped worker sandboxes. URLs, web hooks, or remote schemas discovered inside metadata fields must never trigger automatic network connections.
+7. **B-Frame Legal Invariant:** Stream-level decode order differences resulting from bidirectional B-frame prediction must never be interpreted, cited, or reported in courtroom testimony as evidence of temporal tampering.
+8. **Section 65B IEA / Section 63 BSA Traceability:** Every generated metadata record, snapshot, and consistency finding must bind cryptographically to the master exhibit SHA-256 digest, exact parser identifier and version, and extraction timestamp, guaranteeing complete evidentiary traceability.
+
+---
+
+## 17. Cross-Source Timestamp Verification (CSTV) — Technical Architecture & Specification
+
+### 17.1 System Context, Component Boundaries & Shared-Service Integration
+
+The Cross-Source Timestamp Verification (CSTV) subsystem is a platform-wide, cross-cutting temporal correlation and verification service within the PS-05 forensic architecture. It analyzes, compares, correlates, and validates temporal records across multiple independent or related digital evidence sources.
+
+CSTV is **not** a new modality-specific detection engine. It consumes verified or extracted outputs from existing specialist subsystems via stable contracts:
+
+| Subsystem | Responsibility Boundary | Contract Interface with CSTV |
+| :--- | :--- | :--- |
+| **CMMS** | Extracts, preserves, and normalizes raw metadata and embedded timestamps | Ingests `MetadataRecord` and `ExtractedTimestampField` |
+| **CEIPL** | Preserves original evidence bitstreams, dual hashes (SHA-256/SHA3-512), and Merkle DAG provenance | Registers derived `ClockModel` and `ReconstructedTimeline` artifacts |
+| **AIF** | Analyzes digital image raster for tampering and spatial manipulation | Supplies visual timestamp observations and image capture event anchors |
+| **AURAS** | Analyzes audio waveforms, speech, diarization, and acoustic events | Supplies audio sample timelines ($t = t_0 + n/f_s$) and transient event onsets |
+| **VISTA** | Reverse-engineers video bitstreams, presentation timestamps (PTS/DTS), and cadence | Supplies frame presentation timestamps ($t = \text{PTS} \times TB$) and OCR clocks |
+| **AIF-GEO** | Analyzes GPS coordinates, tracks, and astrometric solar positioning | Supplies GPS fix timestamps, leap-second data, and geodesic track intervals |
+| **ONTF** | Parses offline PCAP/PCAPNG packet headers and flow timelines | Supplies packet arrival timestamps and network connection event windows |
+| **UFREDF** | Compiles unified electronic evidence reports under Section 65B IEA / Section 63 BSA | Consumes `TimelineEvent` records, finding summaries, and uncertainty annexures |
+
+#### 17.1.1 CSTV Conceptual Platform Architecture
+
+```mermaid
+flowchart TD
+    subgraph SOURCES["1. Evidence Ingestion & Specialist Extraction"]
+        IMG["Digital Images\n(EXIF / XMP)"]
+        AUD["Audio Streams\n(Sample Index n / fs)"]
+        VID["Video / CCTV\n(PTS * TB / OSD OCR)"]
+        NET["Offline PCAP\n(Packet Nanoseconds)"]
+        GPS_SRC["GPS Tracks\n(NMEA / GPX Fixes)"]
+        LOGS["System Logs\n(Syslog / DVR XML)"]
+    end
+
+    subgraph CMMS_CEIPL["2. Custody & Metadata Pipeline"]
+        CEIPL_WORM["CEIPL WORM Vault\n(0400 Read-Only, Dual Hash)"]
+        CMMS_EXTRACT["CMMS Extraction Pipeline\n(Raw Field Preservation)"]
+        IMG & AUD & VID & NET & GPS_SRC & LOGS --> CEIPL_WORM
+        CEIPL_WORM --> CMMS_EXTRACT
+    end
+
+    subgraph CANONICAL_MODEL["3. Canonical Temporal Evidence Model"]
+        NORM_ENG["Time Normalization Engine\n(UTC Offset / IANA Zoneinfo)"]
+        LEAP_ENG["GPS Leap-Second Engine\n(IERS Bulletin Tables)"]
+        SEM_REG["Timestamp Semantics Registry\n(27 Standard Semantic Types)"]
+        CMMS_EXTRACT --> NORM_ENG & LEAP_ENG & SEM_REG
+        NORM_ENG & LEAP_ENG & SEM_REG --> CANON_OBS["Canonical Temporal Observations\n(Pydantic v2 Typed Schemas)"]
+    end
+
+    subgraph CSTV_CORE["4. CSTV Temporal Analysis & Verification Engines"]
+        OFF_ENG["Clock Offset Estimator\n(Pairwise Difference O_ij)"]
+        DRIFT_ENG["Robust Linear Drift Engine\n(Huber, RANSAC, Theil-Sen)"]
+        RESET_ENG["Clock Reset & Discontinuity Engine\n(PELT Change-Point Detection)"]
+        ANCHOR_ENG["Cross-Source Event Anchor Correlator\n(Audio Transient, Visual Flash, Network Burst)"]
+        INTERVAL_ENG["Temporal Sequence & Interval Engine\n(Allen's 13 Relations, Tarjan's SCC)"]
+        UNCERT_ENG["Uncertainty Propagation Engine\n(Covariance Bands, 14 Decision States)"]
+
+        CANON_OBS --> OFF_ENG & DRIFT_ENG & RESET_ENG & ANCHOR_ENG & INTERVAL_ENG & UNCERT_ENG
+    end
+
+    subgraph OUTPUTS["5. Evidentiary Deliverables & Legal Dossiers"]
+        TIMELINE["Master Evidence Timeline Canvas\n(Multi-Tiered Visual Rendering)"]
+        CONFLICT_GRAPH["Sequence Conflict Graph\n(Directed Inversion Identification)"]
+        DERIVED_WORM["Derived Model Exhibits\n(CEIPL Merkle Lineage Linked)"]
+        LEGAL_DOSSIER["Section 65B IEA / Section 63 BSA Dossier\n(UFREDF Certified PDF)"]
+
+        CSTV_CORE --> TIMELINE & CONFLICT_GRAPH & DERIVED_WORM
+        TIMELINE & CONFLICT_GRAPH & DERIVED_WORM --> LEGAL_DOSSIER
+    end
+```
+
+### 17.2 Canonical Temporal Evidence Model & Data Contracts
+
+#### 17.2.1 Timestamp Semantics Taxonomy
+A raw timestamp value must never be conflated with the physical instant of an incident. CSTV strictly enforces 27 semantic types:
+- `CAPTURE_TIME`: Exact sensor exposure instant.
+- `RECORDING_START` / `RECORDING_END`: Boundary times of a continuous recording session.
+- `EVENT_TIME`: Observable real-world physical event landmark.
+- `FILE_CREATION_TIME` / `FILE_MODIFICATION_TIME`: Filesystem directory metadata (`crtime`, `mtime`).
+- `EXPORT_TIME` / `ENCODING_TIME`: Video remuxing, DVR export, or software encoding instant.
+- `CONTAINER_CREATION_TIME`: Time recorded in file container header (e.g. MP4 `mvhd` atom).
+- `STREAM_START_TIME` / `STREAM_PRESENTATION_TIME` / `STREAM_DECODE_TIME`: Bitstream elementary stream timing.
+- `FRAME_PRESENTATION_TIME`: Exact rational time a video frame is presented for display ($t = \text{PTS} \times TB$).
+- `AUDIO_SAMPLE_TIME` / `AUDIO_RECORDING_TIME`: Sample-accurate signal coordinate ($t = t_0 + n/f_s$).
+- `PACKET_CAPTURE_TIME`: Hardware/kernel packet capture timestamp in PCAP/PCAPNG headers.
+- `GPS_TIME` / `GPS_FIX_TIME`: Satellite constellation time and receiver navigation fix epoch.
+- `OVERLAY_DISPLAY_TIME`: Human-readable clock string burned into visual raster by camera/DVR OSD.
+- `RECORDER_SYSTEM_TIME` / `DEVICE_SYSTEM_TIME`: Internal RTC clock register of host hardware.
+- `NTP_SYNC_TIME` / `PTP_SYNC_TIME`: Documented network time synchronization synchronization event.
+- `ACQUISITION_TIME` / `PROCESSING_TIME`: Forensic lab evidence intake and analysis execution instants.
+- `EXTERNAL_REFERENCE_TIME`: Independently verified ground-truth reference instant.
+- `UNKNOWN_TIME_SEMANTICS`: Explicit fallback when semantic origin cannot be determined.
+
+#### 17.2.2 Ingestion & Normalization Sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant EVID as Seized Exhibit
+    participant CEIPL as CEIPL Custody Vault
+    participant CMMS as CMMS Extraction
+    participant NORM as CSTV Normalizer
+    participant REG as Temporal Source Registry
+    participant DB as PostgreSQL Temporal Store
+
+    EVID->>CEIPL: Ingest file & compute dual hash (SHA-256 / SHA3-512)
+    CEIPL->>CMMS: Dispatch exhibit for metadata extraction
+    CMMS->>CMMS: Parse EXIF, BWF, container atoms, PTS, PCAP
+    CMMS->>NORM: Transmit raw timestamp fields & provenance
+    NORM->>NORM: Validate syntax & classify semantics (27 types)
+    alt Explicit UTC offset or IANA timezone present
+        NORM->>NORM: Compute normalized UTC instant: t_UTC = t_local - Delta_UTC
+    else Timezone missing or unparseable
+        NORM->>NORM: Mark timezone_status = UNKNOWN; retain raw string
+    end
+    alt GPS time scale detected
+        NORM->>NORM: Apply IERS leap-second table: t_UTC = t_GPS - Delta_t_LS
+    end
+    NORM->>REG: Register typed TemporalObservation record
+    REG->>DB: Persist observation in temporal_observations table
+    DB-->>CEIPL: Register observation hash in Merkle DAG
+```
+
+### 17.3 Timezone, UTC, GPS Time and Time Scale Normalization
+
+1. **Normalization Formula:** For a timestamp with a verified local offset:
+   $$t_{\text{UTC}} = t_{\text{local}} - \Delta_{\text{UTC}}$$
+   where $t_{\text{local}}$ is the local clock reading and $\Delta_{\text{UTC}}$ is the declared local offset (e.g. $+05:30$).
+2. **Prohibition of Silent Imputation:** If $\Delta_{\text{UTC}}$ is absent, the system records `timezone_status = UNKNOWN` and refuses automated UTC calculation. Silently assuming the forensic server's local timezone is strictly prohibited.
+3. **Daylight Saving Time (DST) Transitions:**
+   - **Ambiguous Hour (Fall-Back):** In jurisdictions with a 1-hour fall-back (e.g. 02:30:00 occurs twice), CSTV branches into dual candidate intervals $[t_{\text{UTC},1}, t_{\text{UTC},2}]$ and issues `TIME_TIMEZONE_AMBIGUOUS`.
+   - **Nonexistent Hour (Spring-Forward):** In a spring-forward transition, local times within the skipped interval are flagged as invalid with `TIME_TIMEZONE_AMBIGUOUS`.
+4. **GPS Time Scale Conversion:** GPS time operates without leap seconds, originating at 1980-01-06 00:00:00 UTC. As of 2026, GPS time is ahead of UTC by exactly 18 leap seconds:
+   $$t_{\text{UTC}} = t_{\text{GPS}} - \Delta t_{\text{LS}}$$
+   CSTV embeds versioned leap-second tables derived from the International Earth Rotation and Reference Systems Service (IERS) Bulletin C, recording the bulletin version in the observation lineage.
+
+### 17.4 Clock Offset and Clock Drift Estimation Engine
+
+#### 17.4.1 Mathematical Foundations
+1. **Clock Offset:** The instantaneous time difference between source clock $C_i(t)$ and reference timeline $R(t)$:
+   $$O_i(t) = C_i(t) - R(t)$$
+2. **Linear Clock Drift Model:** For paired event observations over an unperturbed operational interval:
+   $$t_i = a_i + b_i T + \epsilon_i$$
+   where:
+   - $t_i$: Observed timestamp reported by source clock $i$.
+   - $T$: Ground-truth or reference timeline coordinate.
+   - $a_i$: Estimated base clock offset at reference epoch $T = 0$.
+   - $b_i$: Relative clock rate parameter (dimensionless ratio).
+   - $\epsilon_i$: Residual measurement noise.
+3. **Drift in Parts Per Million (ppm):**
+   $$\text{Drift}_{\text{ppm}} = (b_i - 1) \times 10^6$$
+   *Note:* A typical uncalibrated quartz real-time clock exhibits drift of $\pm 10$ to $\pm 50\text{ ppm}$ ($0.86\text{ s/day}$ to $4.32\text{ s/day}$).
+4. **Derived Reference Time Estimation:**
+   $$\hat{T} = \frac{t_i - a_i}{b_i}$$
+5. **Robust Estimator Selection:**
+   - **Ordinary Least Squares (OLS):** Used only when $N \ge 3$, residual normality holds ($\text{Shapiro-Wilk } p > 0.05$), and zero leverage outliers exist.
+   - **Huber Regressor:** Minimizes Huber loss with transition threshold $\delta = 1.345 \sigma$:
+     $$L_\delta(r) = \begin{cases} \frac{1}{2} r^2, & |r| \le \delta \\ \delta |r| - \frac{1}{2} \delta^2, & |r| > \delta \end{cases}$$
+   - **RANSAC:** Fits parameters on random 2-anchor minimal subsets, identifying maximum consensus sets to reject gross event-anchor misidentifications.
+   - **Theil-Sen Estimator:** Computes median pairwise slopes across all anchor pairs $(k, l)$:
+     $$b = \operatorname{median}_{k < l} \left( \frac{t_l - t_k}{T_l - T_k} \right)$$
+     Provides a high breakdown point (up to 29.3%) against corrupted anchor pairs.
+
+#### 17.4.2 Clock Offset & Drift Estimation Workflow
+
+```mermaid
+flowchart TD
+    START["Input Pairwise Event Observations\n{(T_k, t_k)} for k = 1..N"] --> COUNT{"Anchor Count N"}
+
+    COUNT -->|N = 1| STATIC["Point Offset Calculation Only\nO_i(T_1) = t_1 - T_1\n(Drift Estimation Strictly Prohibited)"]
+    COUNT -->|N = 2| LINE["Two-Point Linear Mapping\n(Flagged as PRELIMINARY_UNVALIDATED;\nExtrapolation Strictly Prohibited)"]
+    COUNT -->|N >= 3| PARTITION{"Partition Strategy\n(N >= 4 ?)"}
+
+    PARTITION -->|Yes: N >= 4| SPLIT["Split into Disjoint Sets:\n- Calibration Set: k anchors\n- Validation Set: N - k anchors"]
+    PARTITION -->|No: N = 3| LEAVE_ONE["Leave-One-Out Cross-Validation Split"]
+
+    SPLIT & LEAVE_ONE --> OUTLIER{"Outlier Check\n(|r_k| > 3 * MAD ?)"}
+    OUTLIER -->|No Outliers| OLS["Fit OLS / Theil-Sen Estimator"]
+    OUTLIER -->|Outliers Present| ROBUST["Fit Huber Loss / RANSAC Estimator\nDownweight / Reject Outlier Anchors"]
+
+    OLS & ROBUST --> PELT{"Change-Point Detection\n(PELT Residual Variance Jump ?)"}
+    PELT -->|Discontinuity Detected| PIECEWISE["Fit Piecewise Linear Segments\nt_i = a_m + b_m * T for T in [tau_{m-1}, tau_m)"]
+    PELT -->|Continuous Residuals| CONTINUOUS["Validate Single Continuous Model\nt_i = a + b * T"]
+
+    PIECEWISE & CONTINUOUS --> VAL["Evaluate Independent Validation Residuals:\nepsilon_val = t_val - (a + b * T_val)"]
+    VAL --> BOUNDS["Enforce Temporal Convex Hull Bounds:\nValid strictly for T in [T_min, T_max]"]
+    BOUNDS --> OUTPUT["Output Validated ClockCalibrationModel\n- a (Offset), b (Rate), Drift (ppm)\n- Residual RMSE & CI_95% Bands"]
+```
+
+### 17.5 Cross-Source Event Anchor Identification & Validation
+
+#### 17.5.1 Event Anchor Data Contract
+Every cross-source anchor represents an identifiable, observable real-world event captured across two or more independent evidence sources:
+- `anchor_id`: Unique cryptographic identifier.
+- `event_description`: Detailed physical description of event.
+- `source_evidence_ids`: List of exhibits witnessing the event.
+- `observed_timestamps`: Timestamp readings in each exhibit coordinate space.
+- `correspondence_method`: Technical alignment technique used.
+- `match_confidence`: Statistical confidence score $\in [0.0, 1.0]$.
+- `is_independent`: True if derived from physical observation, False if derived from pre-calibrated clock.
+
+#### 17.5.2 Event-Anchor Creation & Validation Sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant EXAM as Forensic Examiner / Detector
+    participant AURAS as AURAS Audio Engine
+    participant VISTA as VISTA Video Engine
+    participant CSTV as CSTV Anchor Manager
+    participant VAL as Anti-Circular Validator
+    participant CEIPL as CEIPL DAG Registry
+
+    EXAM->>AURAS: Detect acoustic impulse (e.g. gunshot onset at t_audio)
+    EXAM->>VISTA: Detect visual flash (e.g. muzzle flash frame at PTS_video)
+    AURAS-->>CSTV: Submit Audio Observation (sample index n, uncertainty 2ms)
+    VISTA-->>CSTV: Submit Video Observation (PTS tick, uncertainty 16.7ms)
+    CSTV->>CSTV: Formulate candidate EventAnchor (Cross-modal flash/bang)
+    CSTV->>VAL: Submit anchor for calibration/validation assignment
+    VAL->>VAL: Verify anchor independence (prohibit circular calibration)
+    VAL->>VAL: Assign to Calibration Set or Validation Set
+    VAL-->>CSTV: Anchor approved with status VALIDATED_INDEPENDENT
+    CSTV->>CEIPL: Register EventAnchor JSON manifest in WORM vault
+```
+
+#### 17.5.3 Cross-Media Correlation Sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant CSTV as CSTV Correlation Engine
+    participant AIF as AIF (Images)
+    participant AUR as AURAS (Audio)
+    participant VIS as VISTA (CCTV / Video)
+    participant NET as ONTF (Offline PCAP)
+    participant GEO as AIF-GEO (GPS Tracks)
+
+    CSTV->>AIF: Request image capture times & uncertainty
+    CSTV->>AUR: Request continuous audio sample timeline & acoustic onsets
+    CSTV->>VIS: Request video presentation times (PTS) & CCTV OCR clock strings
+    CSTV->>NET: Request packet capture timestamps & flow windows
+    CSTV->>GEO: Request GPS track interpolation & fix epochs
+
+    AIF-->>CSTV: Return EXIF observations & solar azimuth angles
+    AUR-->>CSTV: Return audio sample timeline: t = t0 + n/fs
+    VIS-->>CSTV: Return frame PTS: t = PTS * TB & OSD strings
+    NET-->>CSTV: Return PCAP packet arrival intervals
+    GEO-->>CSTV: Return geodesic track coordinates & leap-second corrected UTC
+
+    CSTV->>CSTV: Align observations onto common UTC reference coordinate
+    CSTV->>CSTV: Compute cross-modal pairwise offsets & confidence bounds
+    CSTV->>CSTV: Emit cross-modal findings (e.g. TIME_CROSS_SOURCE_CORRELATION)
+```
+
+### 17.6 Temporal Sequence, Interval Algebra & Conflict Graph
+
+#### 17.6.1 Interval-Based Representation & Allen's Relations
+Every event is modeled as a closed temporal interval $I_i = [t_{i,\min}, t_{i,\max}]$ to accommodate measurement precision and parsing uncertainty. CSTV evaluates all 13 Allen's interval relations:
+- `BEFORE` ($I_1 < I_2$): $t_{1,\max} < t_{2,\min}$
+- `MEETS` ($I_1 \text{ m } I_2$): $t_{1,\max} = t_{2,\min}$
+- `OVERLAPS` ($I_1 \text{ o } I_2$): $t_{1,\min} < t_{2,\min} < t_{1,\max} < t_{2,\max}$
+- `DURING` ($I_1 \text{ d } I_2$): $t_{2,\min} < t_{1,\min} < t_{1,\max} < t_{2,\max}$
+- `STARTS` ($I_1 \text{ s } I_2$): $t_{1,\min} = t_{2,\min}$ and $t_{1,\max} < t_{2,\max}$
+- `FINISHES` ($I_1 \text{ f } I_2$): $t_{1,\max} = t_{2,\max}$ and $t_{1,\min} > t_{2,\min}$
+- `EQUALS` ($I_1 = I_2$): $t_{1,\min} = t_{2,\min}$ and $t_{1,\max} = t_{2,\max}$
+- (And the 6 inverse relations: `AFTER`, `MET_BY`, `OVERLAPPED_BY`, `CONTAINS`, `STARTED_BY`, `FINISHED_BY`).
+
+#### 17.6.2 Temporal Conflict Graph Architecture
+
+```mermaid
+flowchart LR
+    subgraph EXHIBITS["Evidence Exhibits"]
+        E1["Exhibit A\n(Phone Photo 1)"]
+        E2["Exhibit B\n(Phone Photo 2)"]
+        E3["Exhibit C\n(Audio Recording)"]
+        E4["Exhibit D\n(CCTV Video)"]
+    end
+
+    subgraph OBSERVATIONS["Timestamp Observations"]
+        O1["Obs 1: EXIF 14:10:00\n[14:09:59.5, 14:10:00.5]"]
+        O2["Obs 2: EXIF 14:12:00\n[14:11:59.5, 14:12:00.5]"]
+        O3["Obs 3: Audio Siren Event\n[14:10:30.0, 14:10:32.0]"]
+        O4["Obs 4: CCTV OSD Clock\n[14:05:00.0, 14:05:01.0]"]
+    end
+
+    subgraph RELATIONS["Temporal Graph Edges"]
+        E1 --> O1
+        E2 --> O2
+        E3 --> O3
+        E4 --> O4
+
+        O1 -->|BEFORE| O3
+        O3 -->|BEFORE| O2
+        O4 -.->|CONFLICT: Drifted by -330s| O1
+    end
+
+    subgraph RESOLUTION["Conflict Resolution"]
+        MODEL["Fitted Clock Model\na = -330s, b = 1.000034"]
+        O4 --> MODEL
+        MODEL -->|CORRECTED: 14:10:30| O3
+    end
+```
+
+### 17.7 Clock Synchronization & External Reference Ingestion
+
+CSTV ingests time synchronization logs while enforcing strict evidentiary controls across four distinct tiers:
+1. **DECLARED_SYNCHRONIZATION:** A device configuration file claims NTP synchronization. *Forensic status: Unverified assertion.*
+2. **LOGGED_SYNCHRONIZATION:** Device syslog or Windows Event Log contains NTP sync messages with reported offset and stratum. *Forensic status: Corroborating log evidence.*
+3. **INDEPENDENTLY_CORROBORATED:** Multiple independent witnesses (e.g. gateway switch logs, cell tower handoffs, GPS navigation fixes) corroborate synchronization. *Forensic status: High confidence reference.*
+4. **UNKNOWN_STATUS:** Standalone hardware with no available synchronization logs. *Forensic status: Free-running uncalibrated clock.*
+
+*Air-Gap Safeguard:* CSTV never queries external Internet time servers during forensic processing. All reference times must be introduced through ingested case exhibits or certified examiner reference entries.
+
+### 17.8 Derived Corrected Timeline & Uncertainty Propagation
+
+#### 17.8.1 Uncertainty Propagation Formula
+For independent measurement errors with standard deviations $\sigma_1$ and $\sigma_2$:
+$$\sigma_{\text{diff}} = \sqrt{\sigma_1^2 + \sigma_2^2}$$
+For reference time $\hat{T} = \frac{t_i - a_i}{b_i}$, parameter covariance from regression matrix $(X^T X)^{-1}$ propagates into the estimated reference variance:
+$$\operatorname{Var}(\hat{T}) \approx \frac{\sigma_{t_i}^2}{b_i^2} + \frac{1}{b_i^2} \operatorname{Var}(a_i) + \frac{(t_i - a_i)^2}{b_i^4} \operatorname{Var}(b_i) - 2 \frac{(t_i - a_i)}{b_i^3} \operatorname{Cov}(a_i, b_i)$$
+The 95% confidence interval band is:
+$$CI_{95\%}(\hat{T}) = \left[ \hat{T} - 1.96 \sqrt{\operatorname{Var}(\hat{T})}, \; \hat{T} + 1.96 \sqrt{\operatorname{Var}(\hat{T})} \right]$$
+
+#### 17.8.2 Uncertainty Evaluation Workflow
+
+```mermaid
+flowchart TD
+    INPUT["Input Timestamp & Model Parameters\nt_i, sigma_t, a, b, Cov(a,b)"] --> UNIT{"Unit Compatibility Check\n(Seconds, Compatible Dimensions ?)"}
+    UNIT -->|Incompatible| ERR["Halt & Flag: INSUFFICIENT_PRECISION"]
+    UNIT -->|Compatible| COV["Compute Analytical Parameter Variance\nVar(T_hat) = f(sigma_t, Var(a), Var(b), Cov(a,b))"]
+
+    COV --> HULL{"Within Calibration Convex Hull ?\nT_hat in [T_min, T_max]"}
+    HULL -->|Inside Hull| CI["Calculate Standard CI_95% Bands:\nT_hat +/- 1.96 * sqrt(Var(T_hat))"]
+    HULL -->|Outside Hull| EXTRAP["Expand Prediction Intervals via Leverage h_ii\nFlag finding: TIME_MODEL_EXTRAPOLATION"]
+
+    CI & EXTRAP --> DECISION{"Confidence vs Threshold"}
+    DECISION -->|Uncertainty <= Threshold| STATE1["Decision State: CLOCK_DRIFT_ESTIMATED"]
+    DECISION -->|Uncertainty > Threshold| STATE2["Decision State: INCONCLUSIVE (High Uncertainty)"]
+    DECISION -->|Zero Anchors / Precision Loss| STATE3["Decision State: INSUFFICIENT_ANCHORS"]
+```
+
+#### 17.8.3 Twenty-Two Machine-Readable Finding Taxonomy (`TIME_*`)
+
+```text
+TIME_TIMESTAMP_SEMANTICS_UNKNOWN     TIME_TIMEZONE_UNKNOWN
+TIME_TIMEZONE_AMBIGUOUS              TIME_TIMESTAMP_CONFLICT
+TIME_OFFSET_MISMATCH                 TIME_CLOCK_OFFSET_ESTIMATED
+TIME_CLOCK_DRIFT_ESTIMATED           TIME_NONLINEAR_DRIFT_SUSPECTED
+TIME_CLOCK_RESET_SUSPECTED           TIME_CLOCK_JUMP_OBSERVED
+TIME_TIMESTAMP_ORDER_CONFLICT        TIME_TEMPORAL_GAP_OBSERVED
+TIME_DUPLICATE_EVENT_TIME            TIME_ANCHOR_MATCH_AMBIGUOUS
+TIME_INSUFFICIENT_ANCHORS            TIME_MODEL_EXTRAPOLATION
+TIME_UNTRUSTED_REFERENCE             TIME_SYNC_CLAIM_UNVERIFIED
+TIME_GPS_UTC_CONVERSION_UNCERTAIN    TIME_CROSS_SOURCE_CORRELATION
+TIME_UNEXPLAINED_TEMPORAL_DISCREPANCY TIME_INSUFFICIENT_PRECISION
+```
+
+### 17.9 Case-Wide Master Evidence Timeline Engine
+
+#### 17.9.1 Multi-Tiered Timeline Visual Discrimination
+The platform visually discriminates five evidentiary tiers across all UI timelines and export reports:
+1. **Tier 1 (Raw Source Time):** Rendered in neutral grey; depicts the exact unaltered string from metadata.
+2. **Tier 2 (Normalized UTC Time):** Rendered in dark blue; depicts UTC instant derived from verified offset.
+3. **Tier 3 (Corrected Estimated Time):** Rendered in purple with dashed error bar; depicts model-derived estimate $\hat{T} \pm CI_{95\%}$.
+4. **Tier 4 (Inferred Event Time):** Rendered in amber; depicts cross-correlated physical event timing.
+5. **Tier 5 (Unverified / Unknown Time):** Rendered in striped red; depicts timestamps lacking timezone or clock calibration.
+
+#### 17.9.2 Case-Wide Evidence Timeline Architecture
+
+```mermaid
+flowchart TD
+    subgraph REPO["Case Evidence Repository"]
+        E1["Exhibit 1: Traffic CCTV"]
+        E2["Exhibit 2: Shop CCTV"]
+        E3["Exhibit 3: Bystander Audio"]
+        E4["Exhibit 4: Police Bodycam"]
+        E5["Exhibit 5: Gateway PCAP"]
+    end
+
+    subgraph CSTV_MAPPER["CSTV Multi-Tier Timeline Engine"]
+        T1["Tier 1: Raw Bitstream Timestamps (Unmodified)"]
+        T2["Tier 2: Normalized UTC Chronology"]
+        T3["Tier 3: Corrected Timeline (Drift & Offset Compensated)"]
+        E1 & E2 & E3 & E4 & E5 --> T1 --> T2 --> T3
+    end
+
+    subgraph UI_CANVAS["Interactive Forensic Timeline Workbench"]
+        CANVAS["Multi-Track Timeline Canvas\n- Synchronized Pan/Zoom\n- Time-Range Filter Slider\n- Modality Visibility Toggles\n- Evidence Conflict Overlays"]
+        T3 --> CANVAS
+    end
+
+    subgraph EXPORT["Legal Dossier Compilation"]
+        UFREDF_DOC["UFREDF Section 65B/63 BSA Dossier\n- Master Case Chronology Table\n- Clock Calibration Certificates\n- Uncertainty & Confidence Annexures"]
+        CANVAS --> UFREDF_DOC
+    end
+```
+
+### 17.10 Database Schema & Relational Persistence (PostgreSQL)
+
+```sql
+-- 1. Temporal Source Registry
+CREATE TABLE IF NOT EXISTS temporal_sources (
+    source_id VARCHAR(64) PRIMARY KEY,
+    case_id VARCHAR(64) NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    evidence_id VARCHAR(64) NOT NULL,
+    source_category VARCHAR(32) NOT NULL, -- e.g. IMAGE_METADATA, VIDEO_STREAM
+    source_identifier VARCHAR(255) NOT NULL,
+    clock_id VARCHAR(64) NOT NULL,
+    trust_tier VARCHAR(32) NOT NULL DEFAULT 'UNVERIFIED',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Timestamp Observations Table
+CREATE TABLE IF NOT EXISTS timestamp_observations (
+    observation_id VARCHAR(64) PRIMARY KEY,
+    case_id VARCHAR(64) NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    evidence_id VARCHAR(64) NOT NULL,
+    source_id VARCHAR(64) REFERENCES temporal_sources(source_id),
+    source_field VARCHAR(255) NOT NULL,
+    raw_value TEXT NOT NULL,
+    normalized_utc_timestamp TIMESTAMP WITH TIME ZONE,
+    timestamp_semantics VARCHAR(64) NOT NULL,
+    timezone_status VARCHAR(32) NOT NULL,
+    utc_offset VARCHAR(16),
+    precision_level VARCHAR(32) NOT NULL,
+    uncertainty_value DOUBLE PRECISION,
+    uncertainty_unit VARCHAR(16) DEFAULT 'MILLISECONDS',
+    clock_id VARCHAR(64) NOT NULL,
+    parser_source VARCHAR(64) NOT NULL,
+    parser_version VARCHAR(32) NOT NULL,
+    ceipl_hash VARCHAR(128) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_obs_case_time ON timestamp_observations(case_id, normalized_utc_timestamp);
+CREATE INDEX idx_obs_clock ON timestamp_observations(clock_id);
+
+-- 3. Clock Identities Table
+CREATE TABLE IF NOT EXISTS clock_identities (
+    clock_id VARCHAR(64) PRIMARY KEY,
+    case_id VARCHAR(64) NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    device_name VARCHAR(255),
+    clock_type VARCHAR(64) NOT NULL, -- HARDWARE_RTC, NTP_SYNCED, FREE_RUNNING
+    reference_status VARCHAR(32) NOT NULL DEFAULT 'UNVERIFIED',
+    declared_timezone VARCHAR(64),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. Event Anchors Table
+CREATE TABLE IF NOT EXISTS event_anchors (
+    anchor_id VARCHAR(64) PRIMARY KEY,
+    case_id VARCHAR(64) NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    event_description TEXT NOT NULL,
+    event_type VARCHAR(64) NOT NULL,
+    source_evidence_ids JSONB NOT NULL,
+    source_observation_ids JSONB NOT NULL,
+    observed_timestamps JSONB NOT NULL,
+    correspondence_method VARCHAR(64) NOT NULL,
+    match_confidence DOUBLE PRECISION NOT NULL,
+    uncertainty_value DOUBLE PRECISION,
+    is_independent BOOLEAN NOT NULL DEFAULT TRUE,
+    reviewer_status VARCHAR(32) NOT NULL DEFAULT 'AUTOMATED',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 5. Clock Calibration Models Table
+CREATE TABLE IF NOT EXISTS clock_calibration_models (
+    model_id VARCHAR(64) PRIMARY KEY,
+    case_id VARCHAR(64) NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    source_clock_id VARCHAR(64) NOT NULL REFERENCES clock_identities(clock_id),
+    reference_clock_id VARCHAR(64) NOT NULL,
+    model_type VARCHAR(32) NOT NULL, -- CONSTANT_OFFSET, LINEAR_DRIFT, PIECEWISE_LINEAR
+    estimated_offset_seconds DOUBLE PRECISION NOT NULL,
+    estimated_drift_ppm DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    fit_interval_start TIMESTAMP WITH TIME ZONE NOT NULL,
+    fit_interval_end TIMESTAMP WITH TIME ZONE NOT NULL,
+    calibration_anchor_ids JSONB NOT NULL,
+    validation_anchor_ids JSONB NOT NULL,
+    residual_rmse_seconds DOUBLE PRECISION NOT NULL,
+    confidence_interval_95_ppm DOUBLE PRECISION,
+    model_status VARCHAR(32) NOT NULL DEFAULT 'VALIDATED',
+    ceipl_artifact_hash VARCHAR(128) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 6. Temporal Findings Table
+CREATE TABLE IF NOT EXISTS temporal_findings (
+    finding_id VARCHAR(64) PRIMARY KEY,
+    case_id VARCHAR(64) NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    finding_code VARCHAR(64) NOT NULL,
+    evidence_ids JSONB NOT NULL,
+    observation_ids JSONB NOT NULL,
+    decision_state VARCHAR(64) NOT NULL,
+    severity VARCHAR(16) NOT NULL,
+    confidence DOUBLE PRECISION NOT NULL,
+    explanation TEXT NOT NULL,
+    details JSONB NOT NULL,
+    examiner_review_status VARCHAR(32) NOT NULL DEFAULT 'PENDING',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_findings_case ON temporal_findings(case_id, finding_code);
+
+-- 7. Evidence Timeline Events Table
+CREATE TABLE IF NOT EXISTS evidence_timeline_events (
+    timeline_event_id VARCHAR(64) PRIMARY KEY,
+    case_id VARCHAR(64) NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    evidence_id VARCHAR(64) NOT NULL,
+    source_modality VARCHAR(32) NOT NULL,
+    event_type VARCHAR(64) NOT NULL,
+    raw_timestamp TEXT NOT NULL,
+    normalized_utc_timestamp TIMESTAMP WITH TIME ZONE,
+    corrected_utc_timestamp TIMESTAMP WITH TIME ZONE,
+    time_tier VARCHAR(32) NOT NULL DEFAULT 'RAW_SOURCE',
+    uncertainty_seconds DOUBLE PRECISION DEFAULT 0.0,
+    clock_id VARCHAR(64) NOT NULL,
+    model_id VARCHAR(64) REFERENCES clock_calibration_models(model_id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_timeline_case_time ON evidence_timeline_events(case_id, corrected_utc_timestamp);
+```
+
+### 17.11 API and Service Contracts
+
+#### 17.11.1 Proposed REST Routes
+```text
+POST /api/v1/cases/{case_id}/temporal/analyse       # Trigger asynchronous case-wide temporal analysis
+GET  /api/v1/cases/{case_id}/temporal/timeline      # Fetch master multi-tier timeline with range filters
+GET  /api/v1/cases/{case_id}/temporal/findings      # Fetch machine-readable temporal finding records
+GET  /api/v1/cases/{case_id}/temporal/conflicts     # Fetch sequence conflict graph and Tarjan cycles
+POST /api/v1/cases/{case_id}/temporal/compare       # Pairwise cross-media temporal correlation
+POST /api/v1/cases/{case_id}/temporal/anchors       # Create or confirm an event anchor
+GET  /api/v1/temporal/clocks/{clock_id}             # Inspect clock properties and drift history
+GET  /api/v1/temporal/models/{model_id}             # Inspect clock calibration model parameters
+GET  /api/v1/temporal/models/{model_id}/validation  # Retrieve independent validation residuals and CI
+POST /api/v1/temporal/models/{model_id}/apply       # Generate derived corrected timeline snapshot
+```
+
+#### 17.11.2 Celery Worker Task Signatures
+```python
+@celery_app.task(bind=True, name="tasks.cstv.run_case_temporal_analysis", queue="temporal_heavy")
+def run_case_temporal_analysis(self, case_id: str, config: Dict[str, Any]) -> Dict[str, Any]:
+    """Execute end-to-end normalization, anchor correlation, drift modeling and timeline construction."""
+    ...
+
+@celery_app.task(bind=True, name="tasks.cstv.estimate_clock_drift", queue="temporal_cpu")
+def estimate_clock_drift(self, source_clock_id: str, anchor_ids: List[str]) -> Dict[str, Any]:
+    """Fit robust linear regression, evaluate change points, and compute CI bands."""
+    ...
+```
+
+### 17.12 Technology Selection and Evaluation Matrix
+
+| Capability | Evaluated Technology | Selection Status | Forensic & Engineering Rationale |
+| :--- | :--- | :--- | :--- |
+| **Timezone & Offsets** | Python `zoneinfo` + IANA TZDB | **SELECTED** | Official standard library, offline local timezone database, full DST rule support |
+| **GPS Time Conversion**| Custom leap-second table + IERS | **SELECTED** | Air-gapped, zero external dependencies, version-controlled leap second bulletin |
+| **Numerical Modeling** | NumPy + SciPy | **SELECTED** | Vectorized rational timebase math, linear algebra, covariance matrix inversion |
+| **Robust Regression**  | scikit-learn (`HuberRegressor`, `TheilSenRegressor`) | **SELECTED** | Mathematically verified implementations, robust outlier breakdown bounds |
+| **RANSAC Engine**      | scikit-learn (`RANSACRegressor`) | **SELECTED** | Isolates multi-second gross anchor mismatches from misidentified events |
+| **Change-Point Analysis**| `ruptures` (PELT algorithm) | **SELECTED** | Optimal piecewise linear segmentation with $O(N)$ runtime complexity |
+| **Signal Correlation** | `scipy.signal.correlate` | **SELECTED** | Normalized cross-correlation for audio transient and visual onset alignment |
+| **Data Contracts**     | Pydantic v2 | **SELECTED** | Strict typing, sub-millisecond serialization, explicit JSON schema generation |
+| **Persistence**        | PostgreSQL 16 + B-tree/JSONB | **SELECTED** | Fast timestamp range indexing, native JSONB support for multi-source payloads |
+| **Orchestration**      | Celery + Redis | **SELECTED** | Asynchronous execution, isolated worker memory cgroups, retry idempotency |
+
+### 17.13 Testing, Benchmarks and Validation Protocols
+
+1. **Synthetic Ground-Truth Fixtures:** Construct 500 controlled test scenarios:
+   - Known zero offset, constant offset ($\Delta t \in [-3600, +3600]\text{ s}$), linear drift ($\pm 1$ to $\pm 100\text{ ppm}$).
+   - Discontinuous clock jumps ($\Delta t = 60\text{ s}$) and clock resets (e.g. to 1970-01-01).
+   - Timezone edge cases: Leap seconds, DST fall-back (repeated hour), DST spring-forward (missing hour).
+2. **Acceptance Benchmarks:**
+   - **Offset Estimation Accuracy:** Mean Absolute Error (MAE) $\le 0.05\text{ s}$ on controlled audio-video fixtures.
+   - **Drift Rate Accuracy:** Drift estimation error $\le 0.5\text{ ppm}$ over recording durations $\ge 1\text{ hour}$.
+   - **False Alarm Rate:** Zero false tampering findings on authentic VFR streams, legitimate DST shifts, or valid NTP step logs.
+   - **Reproducibility:** 100% bit-exact parameter reproduction across five consecutive execution runs.

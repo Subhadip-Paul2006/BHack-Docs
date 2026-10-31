@@ -20,6 +20,7 @@ The PS-05 development lifecycle is structured into eleven platform-level phases 
 - **ONTF Network Traffic Forensics Subsystem:** Fourteen engineering phases (**ONTF-A0 through ONTF-A13**).
 - **Cross-Modal Deepfake Validation Framework (CDVF):** Twelve engineering phases (**CDVF-A0 through CDVF-A11**), providing a shared scientific benchmarking, empirical calibration, OOD gating, and model-governance backbone governing AIF, AURAS, and VISTA detection engines.
 - **CCTV Frame Integrity & Temporal Sequence Analysis (CFITSA):** Ten dedicated engineering phases (**VISTA-CFI-00 through VISTA-CFI-09**), providing specialized temporal sequence, variable-frame-rate cadence, motion continuity, and CCTV clock integrity validation embedded within VRE and the CCTV Forensic Profile.
+- **Cross-Source Timestamp Verification (CSTV):** Eleven dedicated engineering phases (**CSTV-A0 through CSTV-A10**), providing platform-wide temporal evidence contracts, timezone/GPS leap-second normalization, relative clock offset & robust drift modeling, piecewise clock reset segmentation, cross-source event anchor matching, Allen's interval algebra, sequence conflict graph analysis, and case-wide timeline reconstruction.
 - **Shared Platform Layer:** Common pre-decode dual-hashing, WORM vault persistence, Celery worker orchestration, and Section 65B/63 BSA legal reporting infrastructure.
 
 ```mermaid
@@ -250,6 +251,16 @@ flowchart TD
 | **CDVF-A9** | First-Class Abstention Policy & Cross-Modal Fusion DAG | CDVF Abstention | `PLANNED` | CDVF-A8 Gate | 7 canonical states, risk vs coverage, DAG anti-averaging fusion |
 | **CDVF-A10** | Subgroup Fairness, Robustness & 12-Gate Scoped Approval | CDVF Governance | `PLANNED` | CDVF-A9 Gate | Subgroup disparity audit, 12-gate release review, Ed25519 approval record |
 | **CDVF-A11** | Continuous Regression, 24-Item WORM Bundle & Release Readiness| CDVF Release | `PLANNED` | CDVF-A10 Gate | Automated regression test, 24-item WORM bundle, Sec 65B/63 BSA dossier |
+| **CMMS-A0** | Repository Discovery, Architecture Baseline & Integration Map | Shared Core / CMMS | `PLANNED` | Phase 0 Gate | Existing metadata capabilities audit, integration boundary map, zero duplicate architecture |
+| **CMMS-A1** | Metadata Contracts, Canonical Schema & Pydantic v2 Models | CMMS Contracts | `PLANNED` | CMMS-A0 Gate | `EvidenceMetadataSnapshot`, `MetadataField`, `FieldProvenance`, JSON Schema Draft 2020-12 |
+| **CMMS-A2** | Image Metadata Adapters: EXIF, XMP, IPTC & GPS | CMMS Image | `PLANNED` | CMMS-A1 Gate | ExifTool & Pillow adapters, DQT hasher, C2PA manifest detector, WGS-84 coordinate model |
+| **CMMS-A3** | Audio Metadata Adapters: Stream, BWF/iXML & Compressed Tags | CMMS Audio | `PLANNED` | CMMS-A1 Gate | FFprobe audio adapter, BWF bext/UMID parser, iXML extractor, ID3v2/Vorbis tag normalizer |
+| **CMMS-A4** | Video & CCTV Metadata Adapters: Container, Stream, Recorder & Sidecar | CMMS Video/CCTV | `PLANNED` | CMMS-A1 Gate | FFprobe & MediaInfo adapters, rational timebase PTS/DTS, companion evidence group parser |
+| **CMMS-A5** | Offline Network Capture Metadata: PCAP/PCAPNG Header & Summary | CMMS Network | `PLANNED` | CMMS-A1 Gate | PyShark/TShark & Scapy adapters, snaplen/DLT parser, packet index summaries, zero-socket sandbox |
+| **CMMS-A6** | Canonical Normalization Framework & 14 Timestamp Semantics | CMMS Normalization | `PLANNED` | CMMS-A2..A5 Gates | Normalization pipeline, 14 timestamp semantics, naive timezone guard, DMS-to-DD engine |
+| **CMMS-A7** | Rule-Based Consistency Analysis & Cross-Evidence Correlation | CMMS Consistency | `PLANNED` | CMMS-A6 Gate | 18-finding code engine, multi-source candidate timeline, CCTV recording window containment |
+| **CMMS-A8** | CEIPL Provenance Lineage, UFREDF Reporting & Sandbox Security | CMMS Core/Sec | `PLANNED` | CMMS-A7 Gate | RFC 8785 snapshot hashing, CEIPL DAG registration, Linux cgroup sandbox, Sec 63 BSA annexure |
+| **CMMS-A9** | Testing Suite, Adversarial Fixtures, Benchmarking & Release | Validation/Release | `PLANNED` | CMMS-A8 Gate | 500-fixture corpus, malformed file fuzzing suite, latency SLAs, air-gap packet audit |
 | **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15, NA13, GA10, CDVF-A11 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
 | **Phase 8** | Web Dashboard & Examiner Workbench | UI / Presentation | `PLANNED` | Phase 7 Gate | Next.js interactive UI, multi-modal waveform viewer |
 | **Phase 9** | Security Hardening & Air-Gapped Packaging | DevOps / Security | `PLANNED` | Phase 8 Gate | Offline Docker containers, POSIX 0400 WORM scripts |
@@ -1722,7 +1733,7 @@ Audit Existing Modules -> Scaffold Directory Structure -> Implement Pydantic v2 
 **3. Purpose:** Implement defensive container demuxing and packet parsing using PyAV. Extract raw integer PTS/DTS, exact rational timebases, packet sizes, keyframe flags, and build the monotonically sorted presentation display timeline without floating-point precision loss.
 **4. Topics & Subtopics:**
 - Defensive Container Demuxing: Sandboxed `av.open()` with 10s packet read timeouts.
-- Rational Timebase Precision: $t_i = PTS_i \imes rac{TB_{\text{num}}}{TB_{\text{den}}}$.
+- Rational Timebase Precision: $t_i = PTS_i \imes \frac{TB_{\text{num}}}{TB_{\text{den}}}$.
 - B-Frame Resolution: Composition offset parsing via ISO/IEC 14496-12 `ctts` box.
 - Stream Inventory: Video stream index, codec parameters, pixel format, interlacing.
 - Bitstream Corruption Trapping: Recovery at next valid NAL keyframe.
@@ -5649,6 +5660,271 @@ Continuous regression harness and bundle packager implemented, end-to-end integr
 
 ---
 
+
+
+---
+
+## 8.B Dedicated Cross-Media Metadata Service Engineering Playbook (CMMS-A0 through CMMS-A9)
+
+The Cross-Media Metadata Service (CMMS) is the shared, cross-cutting metadata extraction, normalization, consistency-analysis, and correlation engine of the PS-05 platform. It services all forensic modalities (AIF images, AURAS audio, VISTA video/CCTV, ONTF network captures, and AIF-GEO geospatial) without duplicating specialized detection logic.
+
+```mermaid
+flowchart TD
+    subgraph CMMS_PHASES["CMMS Engineering Workstream Progression (CMMS-A0 through CMMS-A9)"]
+        A0["Phase CMMS-A0: Repository Discovery & Architecture Baseline
+(Audits existing parsers, maps AIF/AURAS/VISTA/ONTF boundaries)"]
+        A1["Phase CMMS-A1: Metadata Contracts, Canonical Schema & Pydantic v2
+(Implements FieldProvenance, MetadataField, EvidenceMetadataSnapshot)"]
+
+        subgraph PARSER_STREAM["Modality Adapter Development (Parallel)"]
+            A2["Phase CMMS-A2: Image Metadata Adapters
+(EXIF, XMP, IPTC, GPS, DQT, C2PA)"]
+            A3["Phase CMMS-A3: Audio Metadata Adapters
+(Stream descriptors, BWF bext, iXML, ID3v2)"]
+            A4["Phase CMMS-A4: Video & CCTV Adapters
+(Container atoms, PTS/DTS, DVR logs, Sidecars)"]
+            A5["Phase CMMS-A5: Offline Network Adapters
+(PCAP/PCAPNG capture headers, packet summaries)"]
+        end
+
+        A6["Phase CMMS-A6: Normalization Framework & 14 Timestamp Semantics
+(Dual-track raw/norm, explicit UTC offsets, rational timebases)"]
+        A7["Phase CMMS-A7: Rule-Based Consistency Engine & Cross-Evidence Correlation
+(18 finding codes, multi-source timeline, window containment)"]
+        A8["Phase CMMS-A8: CEIPL Provenance Lineage, UFREDF Reporting & Sandboxing
+(RFC 8785 canonical JSON, DAG node registration, cgroup limits)"]
+        A9["Phase CMMS-A9: Testing Suite, Adversarial Fixtures & Release Readiness
+(500-fixture corpus, malformed fuzzing, latency SLAs, sign-off)"]
+    end
+
+    A0 --> A1
+    A1 --> A2 & A3 & A4 & A5
+    A2 & A3 & A4 & A5 --> A6
+    A6 --> A7
+    A7 --> A8
+    A8 --> A9
+```
+
+---
+
+### Phase CMMS-A0: Repository Discovery, Architecture Baseline & Integration Map
+
+- **Purpose:** Audit existing metadata parsing logic across AIF, AURAS, VISTA, and ONTF to eliminate redundant implementations; formalize service integration boundaries with CEIPL and UFREDF.
+- **Prerequisites:** Phase 0 Gate (`IMPLEMENTED_AND_VERIFIED`).
+- **Scope:** Complete codebase audit of image, audio, video, and network metadata handling; definition of shared service contracts.
+- **Detailed Tasks:**
+  1. Audit existing `exiftool`, `pyexiftool`, `ffprobe`, `scapy`, and `tshark` usages across repository source files.
+  2. Map capability handoffs: define exact boundary where CMMS metadata handoff ends and specialized detection begins (e.g. CMMS extracts PTS; VISTA-CFI analyzes temporal cadence).
+  3. Formalize CEIPL cryptographic interface: pre-extraction hashing, activity UUID generation, and derived artifact manifest registration.
+  4. Author `CMMS_ARCHITECTURE_BASELINE.md` documenting verified existing capabilities and deprecation roadmap for standalone parser scripts.
+- **Dependencies:** Phase 0 standards, CEIPL interface specifications.
+- **Deliverables:** Architecture baseline report, interface boundary contracts, deprecation register.
+- **Tests:** Architectural linting asserting no duplicate parser wrappers outside `src/cmms/`.
+- **Checkpoints:** `CMMS-CP-00-01` (Complete repository audit and dependency graph signed off).
+- **Acceptance Criteria:** 100% of planned metadata capabilities mapped to existing subsystems without circular dependencies.
+- **Exit Criteria:** Formal sign-off on shared-service boundaries; zero unresolved architectural collisions.
+- **Known Risks:** Latent coupling between existing prototype scripts and ad-hoc metadata dictionaries.
+- **Deferred Work:** Actual refactoring of legacy prototype scripts deferred to respective engine integration phases.
+
+---
+
+### Phase CMMS-A1: Metadata Contracts, Canonical Schema & Pydantic v2 Models
+
+- **Purpose:** Establish the strongly typed, versioned data contracts governing all CMMS operations.
+- **Prerequisites:** `CMMS-CP-00-01`.
+- **Scope:** Pydantic v2 schemas for raw metadata, canonical normalization, field-level provenance, consistency findings, snapshots, and API payloads.
+- **Detailed Tasks:**
+  1. Implement `FieldProvenance`, `MetadataField`, `MetadataConsistencyFinding`, and `EvidenceMetadataSnapshot` in `src/cmms/schemas/core.py`.
+  2. Implement RFC 8785 canonical JSON serialization engine guaranteeing bit-exact deterministic snapshot hashing.
+  3. Export interoperable JSON Schema Draft 2020-12 artifacts for TypeScript frontend and external consumers.
+  4. Define `BaseParserAdapter` abstract base class enforcing standard lifecycle: `identify()`, `extract()`, `validate()`, `health_check()`.
+- **Dependencies:** `CMMS-A0`.
+- **Deliverables:** Typed Pydantic v2 schema package, JSON Schema bundles, adapter abstract base class.
+- **Tests:** Schema round-trip serialization tests, immutable property tests, deterministic hashing assertions.
+- **Checkpoints:** `CMMS-CP-01-01` (Pydantic v2 models validated against 50 synthetic test dictionaries).
+- **Acceptance Criteria:** Zero validation errors on valid metadata payloads; strict rejection of un-attributed fields.
+- **Exit Criteria:** Core schemas published and imported by mock consumers.
+- **Known Risks:** Schema rigidity causing overhead on deeply nested vendor MakerNotes.
+- **Deferred Work:** Database ORM mappings implemented in CMMS-A8.
+
+---
+
+### Phase CMMS-A2: Image Metadata Adapters: EXIF, XMP, IPTC & GPS
+
+- **Purpose:** Implement safe, sandboxed extraction adapters for raster and RAW image formats.
+- **Prerequisites:** `CMMS-CP-01-01`.
+- **Scope:** JPEG, PNG, TIFF, WebP, HEIC/HEIF, RAW, DNG, AVIF image formats; EXIF, XMP, IPTC, GPS, DQT, and C2PA blocks.
+- **Detailed Tasks:**
+  1. Implement `ExifToolAdapter` wrapping `exiftool -json -G` with discrete vector arguments and process sandboxing.
+  2. Implement `PillowAdapter` for rapid in-memory header validation and fallback EXIF parsing.
+  3. Implement JPEG DQT (Quantization Table) extractor and SHA-256 table hasher for compression analysis support.
+  4. Implement C2PA JUMBF metadata box detector logging manifest presence and raw payload pointers.
+  5. Implement raw tag preservation logic ensuring vendor MakerNotes and unmapped integer tags are retained intact.
+- **Dependencies:** `CMMS-A1`, ExifTool 12.80+ binary.
+- **Deliverables:** `ImageMetadataAdapter` suite, DQT hasher module, C2PA box detector.
+- **Tests:** Unit tests covering 100 image fixtures (DSLR RAW, smartphone JPEG, HEIC, edited Photoshop files).
+- **Checkpoints:** `CMMS-CP-02-01` (100% field extraction pass on Nikon, Canon, Sony, iPhone, and Android test images).
+- **Acceptance Criteria:** Raw tags preserved with 100% fidelity; zero process crashes on corrupt EXIF headers.
+- **Exit Criteria:** Image adapter passes all unit tests and registers with `ParserRegistry`.
+- **Known Risks:** ExifTool process overhead on high-throughput batch ingestion.
+- **Deferred Work:** Visual pixel tampering analysis handled by AIF (not CMMS).
+
+---
+
+### Phase CMMS-A3: Audio Metadata Adapters: Stream, BWF/iXML & Compressed Tags
+
+- **Purpose:** Implement technical and embedded metadata extraction from standalone audio files and demuxed streams.
+- **Prerequisites:** `CMMS-CP-01-01`.
+- **Scope:** WAV, RF64, BWF, MP3, FLAC, AAC, M4A, OGG, Opus, AIFF formats.
+- **Detailed Tasks:**
+  1. Implement `FFprobeAudioAdapter` extracting sample rate, channels, channel layout, bit depth, bitrate, and duration.
+  2. Implement Broadcast Wave Format (BWF) RIFF parser extracting `bext` chunk (Originator, UMID, CodingHistory).
+  3. Implement embedded iXML and ADM chunk parser for multi-track production recorder exhibits.
+  4. Implement compressed tag parser extracting ID3v1, ID3v2.2-2.4, Vorbis comments, and FLAC STREAMINFO.
+  5. Enforce forensic neutrality: tag encoder strings and software markers strictly as `OPERATOR_REPORTED` claims.
+- **Dependencies:** `CMMS-A1`, FFprobe 6.1.1+ binary.
+- **Deliverables:** `AudioMetadataAdapter` suite, BWF/iXML parser modules.
+- **Tests:** Unit tests against professional recorder WAVs (Sound Devices, Zoom), consumer MP3s, and podcast M4As.
+- **Checkpoints:** `CMMS-CP-03-01` (Successful extraction of bext, UMID, and stream parameters across 50 audio fixtures).
+- **Acceptance Criteria:** Stream parameters and embedded chunks parsed accurately without modifying original audio.
+- **Exit Criteria:** Audio adapter passes all unit tests and integrates with AURAS ingestion pipeline.
+- **Known Risks:** Corrupted ID3v2 padding causing unbounded stream seeking.
+- **Deferred Work:** Acoustic voice deepfake detection strictly handled by AURAS ADDE.
+
+---
+
+### Phase CMMS-A4: Video & CCTV Metadata Adapters: Container, Stream, Recorder & Sidecar
+
+- **Purpose:** Implement container-level, elementary stream, and surveillance recorder metadata extraction.
+- **Prerequisites:** `CMMS-CP-01-01`.
+- **Scope:** MP4, MOV, MKV, AVI, WebM, MPEG-TS, 3GP, and proprietary DVR/NVR exports.
+- **Detailed Tasks:**
+  1. Implement `FFprobeVideoAdapter` extracting container creation time, duration, bitrate, and track dispositions.
+  2. Extract video stream technical descriptors: codec, profile, level, dimensions, pixel format, and color primaries.
+  3. Implement rational timebase handler storing raw integer PTS and exact fraction $\text{TB}_{\text{num}}/\text{TB}_{\text{den}}$ separately.
+  4. Implement `MediaInfoAdapter` for secondary verification of container structures and proprietary CCTV headers.
+  5. Implement `CCTVSidecarAdapter` parsing companion XML/JSON manifests, channel mappings, and export logs.
+  6. Implement `CompanionEvidenceGroup` model linking video exhibits with sidecars under a unified cryptographic group ID.
+- **Dependencies:** `CMMS-A1`, FFprobe, MediaInfo binaries.
+- **Deliverables:** `VideoMetadataAdapter`, `CCTVSidecarAdapter`, companion grouping module.
+- **Tests:** Unit tests on VFR mobile videos, broadcast MXF, Hikvision/Dahua surveillance exports, and multi-track MP4s.
+- **Checkpoints:** `CMMS-CP-04-01` (Zero rounding errors on rational timebase assertions across 10,000 video packets).
+- **Acceptance Criteria:** PTS/DTS streams decoupled cleanly; B-frame reordering explicitly preserved without false alarms.
+- **Exit Criteria:** Video and CCTV adapters pass all unit tests and register with `ParserRegistry`.
+- **Known Risks:** Infinite loops or buffer overflows on fuzzed video containers.
+- **Deferred Work:** Temporal frame cadence and duplicate frame forensics handled by VISTA-CFI.
+
+---
+
+### Phase CMMS-A5: Offline Network Capture Metadata: PCAP/PCAPNG Header & Summary
+
+- **Purpose:** Implement metadata extraction for offline network evidence (PCAP and PCAPNG captures).
+- **Prerequisites:** `CMMS-CP-01-01`.
+- **Scope:** PCAP and PCAPNG files; capture headers, interface statistics, packet counts, and transport headers.
+- **Detailed Tasks:**
+  1. Implement `TSharkCaptureAdapter` executing inside isolated, unprivileged sandboxes with strict memory ceilings.
+  2. Extract capture-level properties: link-layer type (DLT), snap length, timestamp resolution (micro/nanosecond), interface names.
+  3. Extract packet-level metadata summaries: packet index, timestamp, frame vs wire length, IP 5-tuple, and TCP flags.
+  4. Enforce privacy and security filter: strip application payload bodies from general metadata records by default.
+  5. Guarantee 100% offline air-gap invariant: verify zero network socket creation during capture parsing.
+- **Dependencies:** `CMMS-A1`, TShark 4.2+, Scapy 2.5+.
+- **Deliverables:** `NetworkMetadataAdapter` suite, payload sanitization filter.
+- **Tests:** Unit tests on standard Ethernet PCAPs, wireless captures, nanosecond PCAPNGs, and truncated captures.
+- **Checkpoints:** `CMMS-CP-05-01` (Successful capture-level and packet summary extraction across 30 capture fixtures).
+- **Acceptance Criteria:** Zero external network traffic generated; snap length and timestamp precision correctly recorded.
+- **Exit Criteria:** Network adapter passes all unit tests and integrates with ONTF ingestion pipeline.
+- **Known Risks:** Enormous PCAP file sizes ($> 10\text{ GB}$) causing memory exhaustion during packet traversal.
+- **Deferred Work:** Deep flow reconstruction, attack scenario synthesis, and MITRE mapping handled by ONTF.
+
+---
+
+### Phase CMMS-A6: Canonical Normalization Framework & 14 Timestamp Semantics
+
+- **Purpose:** Implement standard canonical normalization rules across all extracted metadata fields.
+- **Prerequisites:** `CMMS-CP-02-01`, `CMMS-CP-03-01`, `CMMS-CP-04-01`, `CMMS-CP-05-01`.
+- **Scope:** Timestamp normalization across 14 semantic types, GPS coordinate conversion, unit standardization, and rational numbers.
+- **Detailed Tasks:**
+  1. Implement canonical timestamp normalization engine enforcing the 14 discrete timestamp semantic classifications.
+  2. Implement strict timezone guard: naive timestamps without explicit UTC offsets are flagged `timezone: "UNKNOWN"` and never silently converted to host UTC.
+  3. Implement geodetic coordinate normalizer converting DMS strings to WGS-84 decimal degrees while retaining original DMS and datum.
+  4. Implement unit normalizer standardizing frequencies (Hz), bitrates (bps), dimensions (px), and file sizes (bytes).
+  5. Implement `TransformationRuleRegistry` tracking exact rule IDs and assumptions for every normalized field.
+- **Dependencies:** `CMMS-A2` through `CMMS-A5`.
+- **Deliverables:** `CanonicalNormalizer` suite, timestamp classifier, geodetic conversion module.
+- **Tests:** Unit tests verifying naive timestamp handling, leap seconds, subsecond precision, and DMS-to-DD conversions.
+- **Checkpoints:** `CMMS-CP-06-01` (Zero timezone assumption leakage across 200 mixed-timezone metadata records).
+- **Acceptance Criteria:** Every normalized field retains raw value, transformation rule ID, and qualification status (`EXACT`, `PARTIAL`, `INFERRED`).
+- **Exit Criteria:** Normalizer produces validated `MetadataField` records across all media modalities.
+- **Known Risks:** Inconsistent subsecond formatting across legacy camera models.
+- **Deferred Work:** Visual scene shadow-to-time corroboration handled by AIF-GEO.
+
+---
+
+### Phase CMMS-A7: Rule-Based Consistency Analysis & Cross-Evidence Correlation
+
+- **Purpose:** Implement rule-based anomaly detection across metadata fields and cross-evidence correlation across case exhibits.
+- **Prerequisites:** `CMMS-CP-06-01`.
+- **Scope:** 18 standard machine-readable finding codes; multi-source evidence timeline reconstruction.
+- **Detailed Tasks:**
+  1. Implement rule engine evaluating internal consistency: format vs magic bytes, chronological timestamp order, device tag contradictions, and truncated blocks.
+  2. Implement cross-evidence consistency evaluator comparing timestamps and hardware identifiers across related case exhibits.
+  3. Implement CCTV recording window containment checker verifying whether external photos/audio fall within surveillance coverage.
+  4. Implement `EvidenceTimelineReconstructor` assembling multi-source candidate event timelines with uncertainty bounds.
+  5. Enforce forensic reporting neutrality: finding codes must include benign alternative explanations and disclaimers of non-causality.
+- **Dependencies:** `CMMS-A6`.
+- **Deliverables:** `ConsistencyRuleEngine`, `CrossEvidenceCorrelator`, `TimelineReconstructor`.
+- **Tests:** Unit and integration tests using controlled anomaly fixtures (inverted timestamps, mismatched camera tags, shifted clocks).
+- **Checkpoints:** `CMMS-CP-07-01` (100% detection rate on 50 controlled metadata anomaly fixtures without false tamper accusations).
+- **Acceptance Criteria:** Findings emitted with severity, explanation, limitations, and examiner review requirements.
+- **Exit Criteria:** Consistency engine integrated into metadata extraction pipeline.
+- **Known Risks:** Overly aggressive conflict thresholds triggering false alarms on legitimate camera clock drift.
+- **Deferred Work:** Video pixel-level motion continuity handled by VISTA CFITSA.
+
+---
+
+### Phase CMMS-A8: CEIPL Provenance Lineage, UFREDF Reporting & Sandbox Security
+
+- **Purpose:** Bind metadata records into the platform's cryptographic custody layer, configure process sandboxing, and integrate with courtroom reporting.
+- **Prerequisites:** `CMMS-CP-07-01`.
+- **Scope:** CEIPL WORM integration, RFC 8785 canonical JSON hashing, Linux cgroup sandboxing, FastAPI endpoints, PostgreSQL persistence, and UFREDF export.
+- **Detailed Tasks:**
+  1. Implement CEIPL lineage client registering `EvidenceMetadataSnapshot` artifacts as derived nodes in the evidence DAG.
+  2. Implement PostgreSQL database schema (`cmms_metadata_snapshots`, `cmms_metadata_fields`, `cmms_consistency_findings`) with GIN indexes and RLS policies.
+  3. Implement 10 standardized REST API endpoints in FastAPI with Celery asynchronous background task orchestration.
+  4. Configure Linux cgroups enforcing strict memory ceilings ($\le 512\text{ MB}$ images, $\le 1\text{ GB}$ media, $\le 2\text{ GB}$ PCAP) and execution timeouts.
+  5. Implement UFREDF metadata dossier export compiling Section 65B IEA / Section 63 BSA compliant PDF annexures with dual hashes.
+- **Dependencies:** `CMMS-A7`, CEIPL subsystem, PostgreSQL 16+, Redis/Celery.
+- **Deliverables:** CEIPL integration client, PostgreSQL migrations, FastAPI router, Celery worker tasks, UFREDF export builder.
+- **Tests:** End-to-end API integration tests, database query latency tests, cgroup memory exhaustion tests.
+- **Checkpoints:** `CMMS-CP-08-01` (End-to-end pipeline execution from REST upload to CEIPL DAG registration and PDF export).
+- **Acceptance Criteria:** 100% of metadata snapshots cryptographically signed; worker processes terminated cleanly on resource ceiling breaches.
+- **Exit Criteria:** Complete shared-service backend operational in local environment.
+- **Known Risks:** High database storage footprint if millions of unparsed tags are stored in JSONB.
+- **Deferred Work:** Frontend UI visualization components handled in Phase 8.
+
+---
+
+### Phase CMMS-A9: Testing Suite, Adversarial Fixtures, Benchmarking & Release Readiness
+
+- **Purpose:** Execute exhaustive adversarial validation, stress benchmarking, and security audits across the completed metadata service.
+- **Prerequisites:** `CMMS-CP-08-01`.
+- **Scope:** 500-sample ground-truth fixture corpus, fuzzed malformed headers, decompression bombs, latency SLAs, and air-gap packet inspection.
+- **Detailed Tasks:**
+  1. Curate 500-file multi-modal ground-truth test corpus with verified bit-exact metadata expectations across all supported formats.
+  2. Execute adversarial stress suite: fuzzed EXIF headers, invalid GPS coordinates, truncated RIFF chunks, and malicious XSS strings.
+  3. Execute decompression bomb resilience tests verifying immediate termination of 100MP bomb files.
+  4. Benchmark extraction latency asserting SLAs: median $\le 80\text{ ms}$ for images, $\le 120\text{ ms}$ for audio, $\le 250\text{ ms}$ for video headers.
+  5. Conduct strict air-gap network audit using packet capture tools verifying zero outbound packets during batch extraction.
+  6. Finalize engineering documentation and sign off on Phase CMMS-A9 release gate.
+- **Dependencies:** `CMMS-A0` through `CMMS-A8`.
+- **Deliverables:** Benchmark evaluation report, adversarial stress audit, validated test corpus, release sign-off certificate.
+- **Tests:** Automated regression test suite covering unit, integration, adversarial, and performance tests.
+- **Checkpoints:** `CMMS-CP-09-01` (All 78 CMMS requirements verified; 100% test pass rate across 500 fixtures; zero network leaks).
+- **Acceptance Criteria:** Latency SLAs achieved; zero security vulnerabilities identified; Section 63 BSA compliance certified.
+- **Exit Criteria:** CMMS formally certified for production platform deployment.
+- **Known Risks:** Hardware performance discrepancies between development and evaluation environments.
+- **Deferred Work:** Continuous post-release model drift monitoring handled in platform maintenance.
+
 ## 9. Unified Platform Delivery & Security Milestones
 
 The platform delivery, dashboard, and hackathon packaging milestones synthesize findings across all forensic domains (AURAS Audio, VISTA Video, AIF Image, ONTF Offline Network Traffic, and CDVF Shared Validation):
@@ -5868,3 +6144,537 @@ Every CCTV Frame Integrity and Temporal Sequence Forensics requirement (`CFI-01`
 | **CFI-20** | Evidence Lineage & CEIPL Integration | PRD §14.13 | TRD §11.12.1 | **VISTA-CFI-00** | `VISTA-CFI-CP-00-04` | Pre-decode dual hash and RFC 8785 JSON manifest DAG binding | `PLANNED` | Phase 1 Gate |
 | **CFI-21** | Security Safeguards & Resource Ceilings | PRD §14.13 | TRD §11.12.17 | **VISTA-CFI-00** | `VISTA-CFI-CP-01-01` | Worker memory $\le 4\text{ GB}$, ring buffer $\le 64$ frames, 10s timeout | `PLANNED` | Phase 0 Gate |
 | **CFI-22** | Reproducibility & Release Validation | PRD §14.12 | TRD §11.12.20 | **VISTA-CFI-09** | `VISTA-CFI-CP-09-04` | 100% deterministic report hashes across 5 runs; air-gap verified | `PLANNED` | `VISTA-CFI-08` |
+
+
+---
+
+## 14. CMMS Master Requirement Traceability Matrix (CMMS-01 through CMMS-78)
+
+Every Cross-Media Metadata Service requirement (`CMMS-01` through `CMMS-78`) is formally mapped to its PRD specification, TRD technical architecture section, implementing engineering phase, verification checkpoint, expected validation evidence, execution status, and technical dependencies:
+
+| Req ID | Requirement Title | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Validation Evidence | Status | Dependencies / Blockers |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **CMMS-01** | Shared Service Architecture | PRD §15.6 | TRD §16.1 | **CMMS-A0** | `CMMS-CP-00-01` | Architectural linting confirms single shared metadata pipeline across all engines | `PLANNED` | Phase 0 Gate |
+| **CMMS-02** | Pluggable Parser Adapters | PRD §15.6 | TRD §16.2 | **CMMS-A1** | `CMMS-CP-01-01` | Adapter registry unit test verifies dynamic parser registration and execution | `PLANNED` | `CMMS-A0` |
+| **CMMS-03** | Format & Magic Identification | PRD §15.6 | TRD §16.1, §16.13 | **CMMS-A1** | `CMMS-CP-01-01` | Magic byte sniffer correctly identifies 50 test files with mismatched extensions | `PLANNED` | `CMMS-A0` |
+| **CMMS-04** | Dual-Track Raw/Normalized Store | PRD §15.6 | TRD §16.4 | **CMMS-A1** | `CMMS-CP-01-01` | Serialization test asserts raw and normalized fields preserved simultaneously | `PLANNED` | `CMMS-A0` |
+| **CMMS-05** | Shared Subsystem Handoff | PRD §15.6 | TRD §16.1, §16.10 | **CMMS-A0** | `CMMS-CP-00-01` | Interface contract assertions for AIF, AURAS, VISTA, ONTF, and UFREDF | `PLANNED` | Phase 0 Gate |
+| **CMMS-06** | Broad Image Format Support | PRD §15.6 | TRD §16.2, §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Successful extraction across JPEG, PNG, TIFF, WebP, HEIC, RAW, DNG, AVIF | `PLANNED` | `CMMS-A1` |
+| **CMMS-07** | Comprehensive EXIF Extraction | PRD §15.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Complete IFD0, ExifIFD, SubIFD extraction across 100 test camera files | `PLANNED` | `CMMS-A1` |
+| **CMMS-08** | EXIF GPS Telemetry | PRD §15.6 | TRD §16.5.1, §16.5.6| **CMMS-A2** | `CMMS-CP-02-01` | Extracts Lat/Long/Alt, DOP, positioning error, and satellite timestamps | `PLANNED` | `CMMS-A1` |
+| **CMMS-09** | XMP Data & History Extraction | PRD §15.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Extracts DocumentID, InstanceID, History events, and editing software agents | `PLANNED` | `CMMS-A1` |
+| **CMMS-10** | IPTC Core & Extension Parsing | PRD §15.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Parses IPTC Application Records, captions, copyrights, and location tags | `PLANNED` | `CMMS-A1` |
+| **CMMS-11** | Image Structural Forensics | PRD §15.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Extracts JPEG DQT quantization tables, Huffman tables, and ICC color profiles | `PLANNED` | `CMMS-A1` |
+| **CMMS-12** | C2PA Manifest Discovery | PRD §15.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Detects C2PA JUMBF boxes and validates cryptographic manifest presence | `PLANNED` | `CMMS-A1` |
+| **CMMS-13** | Audio Format & Stream Support | PRD §15.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Extracts stream metadata across WAV, RF64, MP3, FLAC, AAC, OGG, Opus, AIFF | `PLANNED` | `CMMS-A1` |
+| **CMMS-14** | Technical Stream Descriptors | PRD §15.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Extracts sample rate, channels, bit depth, bitrate, and duration in float seconds | `PLANNED` | `CMMS-A1` |
+| **CMMS-15** | BWF `bext` & UMID Extraction | PRD §15.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Parses Broadcast Wave `bext` chunk, Originator, TimeReference, and UMID | `PLANNED` | `CMMS-A1` |
+| **CMMS-16** | Embedded iXML / ADM Parsing | PRD §15.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Extracts multi-track production recorder XML metadata chunks | `PLANNED` | `CMMS-A1` |
+| **CMMS-17** | Compressed Audio Tags | PRD §15.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Parses ID3v1/v2, Vorbis comments, and FLAC STREAMINFO metadata tags | `PLANNED` | `CMMS-A1` |
+| **CMMS-18** | Audio Provenance Neutrality | PRD §15.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Asserts encoder strings tagged `OPERATOR_REPORTED`; no AI inferences made | `PLANNED` | `CMMS-A1` |
+| **CMMS-19** | Video Container Parsing | PRD §15.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Parses MP4, MOV, MKV, AVI, WebM, TS containers, brands, and track layouts | `PLANNED` | `CMMS-A1` |
+| **CMMS-20** | Video Elementary Stream Metrics| PRD §15.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Extracts codec, profile, level, dimensions, pixel format, and color primaries | `PLANNED` | `CMMS-A1` |
+| **CMMS-21** | Rational Timebase Representation| PRD §15.6 | TRD §16.4.2, §16.5.3| **CMMS-A4** | `CMMS-CP-04-01` | Preserves exact integer PTS and rational timebase fractions without rounding | `PLANNED` | `CMMS-A1` |
+| **CMMS-22** | Demuxed Audio Track Lineage | PRD §15.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Registers demuxed audio track metadata linked via AFB bridge in CEIPL DAG | `PLANNED` | `CMMS-A1` |
+| **CMMS-23** | Variable Frame Rate Detection | PRD §15.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Measures packet cadence variance to classify stream as CFR or VFR | `PLANNED` | `CMMS-A1` |
+| **CMMS-24** | B-Frame Preservation Invariant | PRD §15.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Preserves PTS vs DTS separation; suppresses false alarms on decode reordering | `PLANNED` | `CMMS-A1` |
+| **CMMS-25** | CCTV Recorder Profile Parsing | PRD §15.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Extracts DVR manufacturer, model, serial, and channel labels from CCTV exports | `PLANNED` | `CMMS-A1` |
+| **CMMS-26** | CCTV Export Sidecar Binding | PRD §15.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Binds companion XML/JSON sidecar metadata to primary recording exhibit | `PLANNED` | `CMMS-A1` |
+| **CMMS-27** | Multi-Channel CCTV Mapping | PRD §15.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Maps multi-channel recorder streams to discrete camera exhibits | `PLANNED` | `CMMS-A1` |
+| **CMMS-28** | CCTV Timezone Configuration | PRD §15.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Extracts recorder timezone settings and evaluates against UTC stream time | `PLANNED` | `CMMS-A1` |
+| **CMMS-29** | Recorder Log Parsing | PRD §15.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Ingests companion DVR export logs and correlates system event timestamps | `PLANNED` | `CMMS-A1` |
+| **CMMS-30** | Operator Claim Separation | PRD §15.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Classifies operator notes and interview forms strictly as `OPERATOR_REPORTED` | `PLANNED` | `CMMS-A1` |
+| **CMMS-31** | Offline PCAP/PCAPNG Parsing | PRD §15.6 | TRD §16.5.5 | **CMMS-A5** | `CMMS-CP-05-01` | Parses offline PCAP/PCAPNG captures without requiring live network access | `PLANNED` | `CMMS-A1` |
+| **CMMS-32** | Capture-Level Metadata | PRD §15.6 | TRD §16.5.5 | **CMMS-A5** | `CMMS-CP-05-01` | Extracts link type, snap length, timestamp resolution, and interface records | `PLANNED` | `CMMS-A1` |
+| **CMMS-33** | Packet-Level Header Telemetry | PRD §15.6 | TRD §16.5.5 | **CMMS-A5** | `CMMS-CP-05-01` | Summarizes packet index, capture timestamps, frame lengths, and IP 5-tuples | `PLANNED` | `CMMS-A1` |
+| **CMMS-34** | Sensitive Payload Exclusion | PRD §15.6 | TRD §16.5.5 | **CMMS-A5** | `CMMS-CP-05-01` | Verifies application layer payload bytes are omitted from general metadata | `PLANNED` | `CMMS-A1` |
+| **CMMS-35** | Air-Gapped Network Invariant | PRD §15.6 | TRD §16.5.5, §16.9 | **CMMS-A5** | `CMMS-CP-05-01` | Network packet audit confirms zero outbound network sockets during execution | `PLANNED` | `CMMS-A1` |
+| **CMMS-36** | Geospatial Field Extraction | PRD §15.6 | TRD §16.5.6 | **CMMS-A2** | `CMMS-CP-02-01` | Extracts GPS coordinates, altitude, direction, speed, and DOP metrics | `PLANNED` | `CMMS-A1` |
+| **CMMS-37** | Lossless Coordinate Normalizer | PRD §15.6 | TRD §16.4.1, §16.5.6| **CMMS-A6** | `CMMS-CP-06-01` | Converts DMS to decimal degrees while preserving original hemisphere and text | `PLANNED` | `CMMS-A2` |
+| **CMMS-38** | Geodetic Datum Preservation | PRD §15.6 | TRD §16.5.6 | **CMMS-A6** | `CMMS-CP-06-01` | Preserves source map datum (WGS-84) and positioning error metrics | `PLANNED` | `CMMS-A2` |
+| **CMMS-39** | Geospatial Handoff to AIF-GEO | PRD §15.6 | TRD §16.5.6 | **CMMS-A6** | `CMMS-CP-06-01` | Validates structured geospatial metadata payload handoff to AIF-GEO engine | `PLANNED` | `CMMS-A6` |
+| **CMMS-40** | Common Versioned Metadata Model| PRD §15.6 | TRD §16.3 | **CMMS-A1** | `CMMS-CP-01-01` | Validates `EvidenceMetadataSnapshot` across all 5 evidence modalities | `PLANNED` | `CMMS-A0` |
+| **CMMS-41** | Field-Level Provenance Tracking| PRD §15.6 | TRD §16.3.1 | **CMMS-A1** | `CMMS-CP-01-01` | Asserts 100% of extracted fields possess complete `FieldProvenance` records | `PLANNED` | `CMMS-A0` |
+| **CMMS-42** | Strongly-Typed Value Contracts | PRD §15.6 | TRD §16.3.1 | **CMMS-A1** | `CMMS-CP-01-01` | Pydantic v2 type enforcement on numeric, rational, boolean, and string fields | `PLANNED` | `CMMS-A0` |
+| **CMMS-43** | Canonical Normalization Pipeline| PRD §15.6 | TRD §16.4 | **CMMS-A6** | `CMMS-CP-06-01` | Transforms raw metadata into canonical units without mutating raw fields | `PLANNED` | `CMMS-A2..A5` |
+| **CMMS-44** | Explicit Transformation Rules | PRD §15.6 | TRD §16.4.1 | **CMMS-A6** | `CMMS-CP-06-01` | Every normalized field links to a registered transformation function UUID | `PLANNED` | `CMMS-A6` |
+| **CMMS-45** | Missing/Conflict Status Enum | PRD §15.6 | TRD §16.3.1 | **CMMS-A1** | `CMMS-CP-01-01` | Implements `MISSING`, `CONFLICTING`, `UNVERIFIED`, `PARTIAL` status enums | `PLANNED` | `CMMS-A0` |
+| **CMMS-46** | RFC 8785 JSON Canonicalization | PRD §15.6 | TRD §16.8 | **CMMS-A1** | `CMMS-CP-01-01` | Deterministic SHA-256 snapshot hashing across independent runtime platforms | `PLANNED` | `CMMS-A0` |
+| **CMMS-47** | 14 Timestamp Semantics Contract | PRD §15.6 | TRD §16.4.2 | **CMMS-A6** | `CMMS-CP-06-01` | Strict classification of timestamps into 14 explicit semantic classes | `PLANNED` | `CMMS-A2..A5` |
+| **CMMS-48** | Zero Silent Timezone Conversion| PRD §15.6 | TRD §16.4.1 | **CMMS-A6** | `CMMS-CP-06-01` | Guard test verifies naive timestamps are preserved as `timezone: UNKNOWN` | `PLANNED` | `CMMS-A6` |
+| **CMMS-49** | Timestamp Chronology Checker | PRD §15.6 | TRD §16.6 | **CMMS-A7** | `CMMS-CP-07-01` | Detects inverted creation vs modification timestamps across evidence files | `PLANNED` | `CMMS-A6` |
+| **CMMS-50** | Device Consistency Checker | PRD §15.6 | TRD §16.6 | **CMMS-A7** | `CMMS-CP-07-01` | Flags contradictions between Make, Model, Lens, and MakerNote tags | `PLANNED` | `CMMS-A6` |
+| **CMMS-51** | Software & Processing History | PRD §15.6 | TRD §16.6 | **CMMS-A7** | `CMMS-CP-07-01` | Identifies editing software markers (Photoshop, Premiere, Audacity) | `PLANNED` | `CMMS-A6` |
+| **CMMS-52** | Structural Integrity Checker | PRD §15.6 | TRD §16.6 | **CMMS-A7** | `CMMS-CP-07-01` | Flags truncated IFDs, duplicate blocks, and container-stream mismatches | `PLANNED` | `CMMS-A6` |
+| **CMMS-53** | Cross-Evidence Correlation | PRD §15.6 | TRD §16.7 | **CMMS-A7** | `CMMS-CP-07-01` | Correlates common metadata fields across multiple exhibits in a case | `PLANNED` | `CMMS-A6` |
+| **CMMS-54** | Multi-Source Candidate Timeline| PRD §15.6 | TRD §16.7 | **CMMS-A7** | `CMMS-CP-07-01` | Reconstructs multi-source timelines without premature ground-truth selection | `PLANNED` | `CMMS-A6` |
+| **CMMS-55** | Time Window Containment Checker| PRD §15.6 | TRD §16.7 | **CMMS-A7** | `CMMS-CP-07-01` | Evaluates photo/audio timestamps against CCTV recording start/end windows | `PLANNED` | `CMMS-A6` |
+| **CMMS-56** | Cross-Evidence Conflict Finding| PRD §15.6 | TRD §16.6.1, §16.7 | **CMMS-A7** | `CMMS-CP-07-01` | Emits `META_CROSS_EVIDENCE_CONFLICT` on contradictory multi-exhibit claims | `PLANNED` | `CMMS-A6` |
+| **CMMS-57** | Non-Causality Correlation Policy| PRD §15.6 | TRD §16.7.1 | **CMMS-A7** | `CMMS-CP-07-01` | Disclaimers of non-causality verified in all generated correlation reports | `PLANNED` | `CMMS-A7` |
+| **CMMS-58** | CEIPL Exhibit Hash Binding | PRD §15.6 | TRD §16.8 | **CMMS-A8** | `CMMS-CP-08-01` | Pre-extraction exhibit SHA-256 bound to metadata snapshot manifest | `PLANNED` | `CMMS-A7` |
+| **CMMS-59** | Non-Destructive Raw Immutability| PRD §15.6 | TRD §16.4, §16.8 | **CMMS-A8** | `CMMS-CP-08-01` | Asserts POSIX `0400` read-only permissions on master evidence exhibits | `PLANNED` | `CMMS-A7` |
+| **CMMS-60** | Versioned Metadata Snapshots | PRD §15.6 | TRD §16.8.1 | **CMMS-A8** | `CMMS-CP-08-01` | Multiple snapshots for same exhibit stored without overwriting history | `PLANNED` | `CMMS-A7` |
+| **CMMS-61** | CEIPL DAG Provenance Node | PRD §15.6 | TRD §16.8 | **CMMS-A8** | `CMMS-CP-08-01` | Registers extraction activity and snapshot hash as child node in DAG | `PLANNED` | `CMMS-A7` |
+| **CMMS-62** | Merkle Audit Log Registration | PRD §15.6 | TRD §16.8 | **CMMS-A8** | `CMMS-CP-08-01` | Snapshot creation event recorded in append-only CEIPL Merkle tree | `PLANNED` | `CMMS-A7` |
+| **CMMS-63** | Unprivileged Parser Sandbox | PRD §15.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | External parsers run in isolated process namespaces with `cap_drop: ALL` | `PLANNED` | `CMMS-A7` |
+| **CMMS-64** | Cgroup RAM & CPU Ceilings | PRD §15.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | Enforces 512MB/1GB/2GB RAM limits and 15s/30s/60s CPU timeouts | `PLANNED` | `CMMS-A7` |
+| **CMMS-65** | Decompression Bomb Defense | PRD §15.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | Traps and terminates files declaring $> 100\text{ MP}$ or expansion $> 50:1$ | `PLANNED` | `CMMS-A7` |
+| **CMMS-66** | Shell Injection Immunity | PRD §15.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | Static code analysis verifies 100% discrete vector execution (`shell=False`) | `PLANNED` | `CMMS-A7` |
+| **CMMS-67** | Privacy Redaction for Reports | PRD §15.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | Authorizes redaction on exported report views without mutating master exhibits | `PLANNED` | `CMMS-A7` |
+| **CMMS-68** | Standard REST API Endpoints | PRD §15.6 | TRD §16.10 | **CMMS-A8** | `CMMS-CP-08-01` | 10 REST endpoints implemented conforming to OpenAPI specification | `PLANNED` | `CMMS-A7` |
+| **CMMS-69** | Celery Asynchronous Pipeline | PRD §15.6 | TRD §16.2, §16.10 | **CMMS-A8** | `CMMS-CP-08-01` | Long-running extraction tasks dispatched cleanly to Celery worker queues | `PLANNED` | `CMMS-A7` |
+| **CMMS-70** | Hybrid PostgreSQL/JSONB Storage| PRD §15.6 | TRD §16.11 | **CMMS-A8** | `CMMS-CP-08-01` | B-tree + GIN indexed schema with Row-Level Security policies active | `PLANNED` | `CMMS-A7` |
+| **CMMS-71** | UFREDF Section 65B/63 Dossier | PRD §15.6 | TRD §16.12 | **CMMS-A8** | `CMMS-CP-08-01` | Generates Section 65B IEA / Section 63 BSA PDF certificate annexures | `PLANNED` | `CMMS-A7` |
+| **CMMS-72** | Neutral Forensic Language Rule | PRD §15.6 | TRD §16.12 | **CMMS-A8** | `CMMS-CP-08-01` | Linter asserts reports contain zero absolute claims of "authenticity" | `PLANNED` | `CMMS-A7` |
+| **CMMS-73** | Multi-Modal Unit Test Suite | PRD §15.6 | TRD §16.13 | **CMMS-A9** | `CMMS-CP-09-01` | 100% test pass rate across unit test suite in `tests/cmms/unit/` | `PLANNED` | `CMMS-A8` |
+| **CMMS-74** | End-to-End Subsystem Pipelines | PRD §15.6 | TRD §16.13 | **CMMS-A9** | `CMMS-CP-09-01` | E2E integration tests passing for AIF, AURAS, VISTA, ONTF, and AIF-GEO | `PLANNED` | `CMMS-A8` |
+| **CMMS-75** | Adversarial & Corrupted Fixtures| PRD §15.6 | TRD §16.13 | **CMMS-A9** | `CMMS-CP-09-01` | Zero unhandled exceptions on 50 fuzzed and truncated metadata files | `PLANNED` | `CMMS-A8` |
+| **CMMS-76** | Performance Latency SLAs | PRD §15.6 | TRD §16.13.1 | **CMMS-A9** | `CMMS-CP-09-01` | Benchmarks confirm image $\le 80\text{ms}$, audio $\le 120\text{ms}$, video $\le 250\text{ms}$ | `PLANNED` | `CMMS-A8` |
+| **CMMS-77** | Batch Ingestion Throughput | PRD §15.6 | TRD §16.13.1 | **CMMS-A9** | `CMMS-CP-09-01` | Load test achieves $\ge 50\text{ exhibits/minute}$ batch throughput | `PLANNED` | `CMMS-A8` |
+| **CMMS-78** | Ground-Truth Fixture Corpus | PRD §15.6 | TRD §16.13 | **CMMS-A9** | `CMMS-CP-09-01` | 500-fixture multi-modal corpus verified with bit-exact metadata assertions | `PLANNED` | `CMMS-A8` |
+
+---
+
+## 14. Dedicated Cross-Source Timestamp Verification Engineering Playbook (CSTV-A0 through CSTV-A10)
+
+The Cross-Source Timestamp Verification (CSTV) subsystem executes across eleven disciplined, sequential engineering phases:
+
+```mermaid
+flowchart TD
+    CSTV_A0["CSTV-A0: Repo Discovery & Architecture Baseline\n(Audit CMMS, VISTA, AURAS, ONTF timing)"] --> CSTV_A1["CSTV-A1: Temporal Evidence Contracts & Registry\n(17 Sources, 27 Semantics, Pydantic v2)"]
+    CSTV_A1 --> CSTV_A2["CSTV-A2: Time Normalization & Timezone Framework\n(UTC Offsets, DST Fall-Back, GPS Leap Seconds)"]
+    CSTV_A1 & CSTV_A2 --> CSTV_A3["CSTV-A3: Canonical Timeline & Interval Model\n(Allen's 13 Relations, Tiered Visualization)"]
+
+    CSTV_A2 --> CSTV_A4["CSTV-A4: Clock Offset Estimation Engine\n(Pairwise Offset O_ij, Reference Hierarchy)"]
+    CSTV_A4 --> CSTV_A5["CSTV-A5: Clock Drift & Reset Segmentation\n(Huber, RANSAC, Theil-Sen, PELT Change-Point)"]
+
+    CSTV_A1 & CSTV_A3 --> CSTV_A6["CSTV-A6: Cross-Source Event Anchor Engine\n(Audio Transient, Visual Flash, Disjoint Split)"]
+    CSTV_A5 & CSTV_A6 --> CSTV_A7["CSTV-A7: Cross-Media Temporal Correlation\n(Image, Audio, Video, CCTV, PCAP, GPS)"]
+
+    CSTV_A3 & CSTV_A7 --> CSTV_A8["CSTV-A8: Uncertainty & Sequence Conflict Graph\n(Tarjan Cycle Detection, Covariance CI_95%)"]
+    CSTV_A8 --> CSTV_A9["CSTV-A9: CEIPL Provenance & Legal Reporting\n(WORM 0400 Vault, Section 65B/63 BSA Dossier)"]
+    CSTV_A9 --> CSTV_A10["CSTV-A10: Benchmarking & Release Readiness\n(500 Fixtures, Offset MAE <= 0.05s, Drift <= 0.5ppm)"]
+```
+
+---
+
+### Phase CSTV-A0: Repository Discovery and Temporal Architecture Baseline
+- **1. Phase Overview & Goals:** Audit existing temporal analysis capabilities across CMMS, VISTA, AURAS, AIF-GEO, and ONTF. Establish architectural boundaries ensuring CSTV operates as a shared verification service without duplicating specialist signal or bitstream decoders.
+- **2. Scope & Target Components:** `src/cstv/`, `src/cmms/`, `src/vista/cadence/`, `src/auras/signal/`, `src/ontf/parser/`.
+- **3. Prerequisites & Invariants:** Phase 0 standards verified; CEIPL WORM vault accessible; zero duplication of audio diarization or video demuxing.
+- **4. Detailed Engineering Tasks:**
+  1. Map existing timestamp parsing functions in CMMS and VISTA.
+  2. Audit third-party dependencies (`zoneinfo`, `scipy.signal`, `scikit-learn`, `ruptures`) for air-gapped compatibility.
+  3. Define interface contracts between CSTV and consuming forensic engines.
+  4. Author architectural gap analysis report and integration blueprint.
+- **5. Unit & Integration Test Specifications:**
+  - `test_cstv_dependency_airgap()`: Verifies zero runtime socket queries.
+  - `test_specialist_engine_delegation()`: Verifies delegation of sample math to AURAS and PTS math to VISTA.
+- **6. Performance & Benchmark Targets:** Architecture audit completed with zero duplicate timestamp parsers identified.
+- **7. Expected Deliverables & Artifacts:** `docs/cstv/architecture_baseline.md`, interface stubs in `src/cstv/interfaces/`.
+- **8. Verifiable Checkpoints:**
+  - `CSTV-CP-00-01`: Existing timing capabilities across all 5 specialist subsystems fully audited and cataloged.
+  - `CSTV-CP-00-02`: Python dependencies validated for air-gapped offline execution.
+  - `CSTV-CP-00-03`: CEIPL WORM vault write-protection and hash binding interfaces verified.
+  - `CSTV-CP-00-04`: Architectural boundary test asserts zero duplicate demuxing or signal processing code.
+- **9. Acceptance Criteria:** Subsystem responsibilities strictly decoupled per TRD §17.1.
+- **10. Exit Criteria:** Approval of baseline architecture by lead forensic architect.
+- **11. Forensic & Legal Safeguards:** Enforces original exhibit immutability; ensures non-destructive read-only access.
+- **12. Risk Mitigation & Edge Cases:** Fallback stubs for optional dependencies (`ruptures`).
+- **13. Deferred Work:** Real model fitting deferred to CSTV-A5.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase CSTV-A1: Temporal Evidence Contracts & Source Registry
+- **1. Phase Overview & Goals:** Formulate typed data contracts and the 17-category temporal source registry. Implement the 27-state timestamp semantics enumeration and PostgreSQL relational persistence schemas.
+- **2. Scope & Target Components:** `src/cstv/contracts/`, `src/cstv/registry/`, `src/db/models/temporal.py`.
+- **3. Prerequisites & Invariants:** CSTV-A0 completed; Pydantic v2 installed; PostgreSQL 16 database running.
+- **4. Detailed Engineering Tasks:**
+  1. Implement `TemporalObservation`, `TimeUncertainty`, and `EventAnchor` Pydantic v2 schemas.
+  2. Implement `TimestampSemanticsEnum` (27 types) and `TemporalSourceRegistry`.
+  3. Author Alembic database migration for 11 temporal relational tables.
+  4. Create B-tree and JSONB indexes for case-wide timestamp range queries.
+- **5. Unit & Integration Test Specifications:**
+  - `test_temporal_observation_serialization()`: Validates Pydantic serialization.
+  - `test_timestamp_semantics_completeness()`: Validates all 27 semantic types.
+  - `test_db_temporal_tables_ddl()`: Verifies DDL execution, primary keys, and foreign key cascades.
+- **6. Performance & Benchmark Targets:** Pydantic validation latency $< 0.1\text{ ms}$ per observation record.
+- **7. Expected Deliverables & Artifacts:** `src/cstv/contracts/schemas.py`, `alembic/versions/*_cstv_tables.py`.
+- **8. Verifiable Checkpoints:**
+  - `CSTV-CP-01-01`: 17-category temporal source registry operational with typed categories.
+  - `CSTV-CP-01-02`: 18-attribute `TemporalObservation` schema passes strict type validation.
+  - `CSTV-CP-01-03`: All 27 timestamp semantics states implemented without un-typed strings.
+  - `CSTV-CP-01-04`: PostgreSQL database migration executes cleanly with composite indexes on `(case_id, normalized_utc_timestamp)`.
+- **9. Acceptance Criteria:** 100% test pass rate across schema serialization and database DDL tests.
+- **10. Exit Criteria:** Database migration committed and verified in test harness.
+- **11. Forensic & Legal Safeguards:** Raw string preservation invariant strictly enforced in database constraints.
+- **12. Risk Mitigation & Edge Cases:** Support for nanosecond strings via custom integer tick wrappers.
+- **13. Deferred Work:** Normalization logic implemented in CSTV-A2.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase CSTV-A2: Time Normalization and Timezone Framework
+- **1. Phase Overview & Goals:** Build the air-gapped time normalization engine. Handle explicit UTC offsets, IANA timezone database resolution, daylight saving transitions, and GPS-to-UTC leap-second conversions.
+- **2. Scope & Target Components:** `src/cstv/normalizer/`, `src/cstv/normalizer/leap_seconds.py`.
+- **3. Prerequisites & Invariants:** CSTV-A1 completed; IERS leap-second table embedded locally.
+- **4. Detailed Engineering Tasks:**
+  1. Implement timezone offset parser supporting `+HH:MM`, `-HH:MM`, and `Z`.
+  2. Implement zero-silent-conversion guard: flag missing timezone as `UNKNOWN`.
+  3. Implement DST transition handler: detect ambiguous (fall-back) and nonexistent (spring-forward) hours.
+  4. Implement GPS-to-UTC conversion: $t_{\text{UTC}} = t_{\text{GPS}} - \Delta t_{\text{LS}}$ with IERS Bulletin C lookup.
+- **5. Unit & Integration Test Specifications:**
+  - `test_utc_offset_calculation()`: Verifies $t_{\text{UTC}} = t_{\text{local}} - \Delta_{\text{UTC}}$.
+  - `test_unknown_timezone_guard()`: Asserts exception or UNKNOWN flag when offset missing.
+  - `test_dst_ambiguity_branching()`: Validates dual candidate intervals during fall-back.
+  - `test_gps_leap_second_conversion()`: Validates 18-second offset on modern GPS fixes.
+- **6. Performance & Benchmark Targets:** Normalization throughput $\ge 5,000$ timestamps/sec.
+- **7. Expected Deliverables & Artifacts:** `src/cstv/normalizer/engine.py`, `src/cstv/normalizer/leap_seconds.json`.
+- **8. Verifiable Checkpoints:**
+  - `CSTV-CP-02-01`: Explicit offset normalization correctly computes UTC across positive and negative timezones.
+  - `CSTV-CP-02-02`: Zero-silent-conversion invariant passes: unannotated timestamps strictly retain `UNKNOWN` status.
+  - `CSTV-CP-02-03`: DST fall-back ambiguity correctly yields dual candidate intervals with `TIME_TIMEZONE_AMBIGUOUS`.
+  - `CSTV-CP-02-04`: GPS leap-second converter accurately transforms GPS time to UTC with IERS provenance logging.
+- **9. Acceptance Criteria:** Zero silent timezone conversions across 100 test cases.
+- **10. Exit Criteria:** Normalization engine integrated into ingestion pipeline.
+- **11. Forensic & Legal Safeguards:** Explicit labeling of all timezone assumptions in forensic findings.
+- **12. Risk Mitigation & Edge Cases:** Historical leap-second table covers all epochs from 1980 to 2026.
+- **13. Deferred Work:** Interval algebra integration in CSTV-A3.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase CSTV-A3: Temporal Timeline and Interval Model
+- **1. Phase Overview & Goals:** Implement the interval-based temporal representation ($I = [t_{\min}, t_{\max}]$) and Allen's 13 interval relations. Build the multi-tiered master evidence timeline serialization engine.
+- **2. Scope & Target Components:** `src/cstv/timeline/`, `src/cstv/timeline/allen_algebra.py`.
+- **3. Prerequisites & Invariants:** CSTV-A2 completed; normalized UTC timestamps available.
+- **4. Detailed Engineering Tasks:**
+  1. Implement `TemporalInterval` class with uncertainty bounds $[t - \sigma, t + \sigma]$.
+  2. Implement Allen's 13 interval relations (BEFORE, MEETS, OVERLAPS, DURING, etc.).
+  3. Author timeline aggregator synthesizing 11 evidence categories for a case.
+  4. Implement visual tier tagging (Raw, Normalized, Corrected, Inferred, Unverified).
+- **5. Unit & Integration Test Specifications:**
+  - `test_allens_thirteen_relations()`: Exhaustive unit test of all 13 qualitative relations.
+  - `test_timeline_aggregation_multimodal()`: Validates chronological sorting across 11 sources.
+  - `test_timeline_tier_tagging()`: Asserts correct visual tier assignment.
+- **6. Performance & Benchmark Targets:** Aggregates and sorts 10,000 timeline events in $< 1.0\text{ s}$.
+- **7. Expected Deliverables & Artifacts:** `src/cstv/timeline/interval.py`, `src/cstv/timeline/builder.py`.
+- **8. Verifiable Checkpoints:**
+  - `CSTV-CP-03-01`: Interval arithmetic handles subsecond uncertainty bounds correctly.
+  - `CSTV-CP-03-02`: Allen's 13 interval relations pass formal mathematical logic suite.
+  - `CSTV-CP-03-03`: Timeline serialization produces court-admissible JSON payloads with source references.
+  - `CSTV-CP-03-04`: Visual discrimination contract correctly distinguishes raw from corrected and inferred times.
+- **9. Acceptance Criteria:** Master timeline API returns fully populated multi-tiered JSON within latency target.
+- **10. Exit Criteria:** Timeline endpoints ready for frontend canvas consumption.
+- **11. Forensic & Legal Safeguards:** Original timestamps remain visible alongside normalized/derived times.
+- **12. Risk Mitigation & Edge Cases:** Graceful rendering of open-ended intervals ($t_{\max} = \infty$).
+- **13. Deferred Work:** Conflict graph integration in CSTV-A8.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase CSTV-A4: Clock Offset Estimation Engine
+- **1. Phase Overview & Goals:** Build the pairwise relative clock offset estimation engine. Implement defensible reference clock hierarchy selection and single-anchor offset calculation with uncertainty propagation.
+- **2. Scope & Target Components:** `src/cstv/clocks/`, `src/cstv/clocks/offset_engine.py`.
+- **3. Prerequisites & Invariants:** CSTV-A1 completed; clock IDs disambiguated.
+- **4. Detailed Engineering Tasks:**
+  1. Implement pairwise offset calculator: $O_{ij}(t) = C_i(t) - C_j(t)$.
+  2. Implement reference clock selection hierarchy (GPS > NTP-verified > Recorder > Unverified).
+  3. Enforce single-anchor gating: calculate static offset $O_i(T_1)$ while strictly prohibiting drift extrapolation.
+  4. Propagate measurement uncertainty $\sigma_{O} = \sqrt{\sigma_i^2 + \sigma_j^2}$.
+- **5. Unit & Integration Test Specifications:**
+  - `test_pairwise_offset_calculation()`: Validates offset and uncertainty math.
+  - `test_reference_clock_hierarchy()`: Asserts selection of highest-trust reference.
+  - `test_single_anchor_extrapolation_guard()`: Asserts exception if drift requested on 1 anchor.
+- **6. Performance & Benchmark Targets:** Computes 1,000 pairwise clock offsets in $< 50\text{ ms}$.
+- **7. Expected Deliverables & Artifacts:** `src/cstv/clocks/offset.py`, `src/cstv/clocks/hierarchy.py`.
+- **8. Verifiable Checkpoints:**
+  - `CSTV-CP-04-01`: Pairwise clock difference correctly handles positive, negative, and zero offsets.
+  - `CSTV-CP-04-02`: Reference clock hierarchy automatically selects GPS/NTP over free-running quartz clocks.
+  - `CSTV-CP-04-03`: Single-anchor gating invariant successfully blocks premature drift estimation.
+  - `CSTV-CP-04-04`: Analytical measurement variance correctly propagates into reported offset bounds.
+- **9. Acceptance Criteria:** Offset estimation MAE $\le 0.05\text{ s}$ on controlled static offset fixtures.
+- **10. Exit Criteria:** Clock offset engine integrated with temporal findings emitter.
+- **11. Forensic & Legal Safeguards:** Output explicitly states whether reference clock is verified or unverified.
+- **12. Risk Mitigation & Edge Cases:** Fallback to relative difference when no trusted reference exists.
+- **13. Deferred Work:** Multi-anchor drift modeling in CSTV-A5.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase CSTV-A5: Clock Drift and Reset Analysis
+- **1. Phase Overview & Goals:** Build the robust linear regression engine (Huber, RANSAC, Theil-Sen) to estimate clock drift rates in parts per million. Implement PELT change-point detection to identify clock resets and fit piecewise linear segments.
+- **2. Scope & Target Components:** `src/cstv/clocks/drift_engine.py`, `src/cstv/clocks/segmentation.py`.
+- **3. Prerequisites & Invariants:** CSTV-A4 completed; $N \ge 3$ event anchors available.
+- **4. Detailed Engineering Tasks:**
+  1. Implement linear drift regression: $t_i = a_i + b_i T + \epsilon_i$, $\text{Drift}_{\text{ppm}} = (b_i - 1) \times 10^6$.
+  2. Implement robust estimators: Huber loss ($\delta = 1.345\sigma$), RANSAC, and Theil-Sen median slope.
+  3. Implement change-point detection via PELT on residual series to flag step jumps ($|\Delta O| > \tau_{\text{jump}}$).
+  4. Enforce piecewise model fitting: prohibit single global model spanning an identified reset.
+  5. Enforce temporal convex hull bounds: clamp model validity to $[T_{\min}, T_{\max}]$.
+- **5. Unit & Integration Test Specifications:**
+  - `test_linear_drift_ppm_calculation()`: Validates drift rate recovery on synthetic data ($34.2\text{ ppm}$).
+  - `test_huber_ransac_outlier_rejection()`: Verifies immunity to gross anchor mismatches.
+  - `test_pelt_clock_reset_detection()`: Validates detection of 60s step jump and segmentation.
+  - `test_anti_extrapolation_guard()`: Asserts warning/error when evaluating outside $[T_{\min}, T_{\max}]$.
+- **6. Performance & Benchmark Targets:** Drift estimation error $\le 0.5\text{ ppm}$; PELT segmentation in $< 200\text{ ms}$.
+- **7. Expected Deliverables & Artifacts:** `src/cstv/clocks/drift.py`, `src/cstv/clocks/pelt_detector.py`.
+- **8. Verifiable Checkpoints:**
+  - `CSTV-CP-05-01`: Robust estimators downweight anchor outliers without skewing slope parameters.
+  - `CSTV-CP-05-02`: Linear drift calculation accurately reports rate in ppm and derived time $\hat{T}$.
+  - `CSTV-CP-05-03`: PELT change-point algorithm reliably flags sudden clock jumps and device reboots.
+  - `CSTV-CP-05-04`: Piecewise segmentation enforces non-overlapping validity bounds across resets.
+- **9. Acceptance Criteria:** Drift estimation error $\le 0.5\text{ ppm}$ on 100 synthetic benchmark fixtures.
+- **10. Exit Criteria:** Calibration models serializable to `ClockCalibrationModel` schema.
+- **11. Forensic & Legal Safeguards:** Prohibits global extrapolation; marks derived times as model estimates.
+- **12. Risk Mitigation & Edge Cases:** Fallback to Theil-Sen when anchor count $N < 10$.
+- **13. Deferred Work:** Cross-source correlation in CSTV-A7.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase CSTV-A6: Cross-Source Event Anchors
+- **1. Phase Overview & Goals:** Implement the event anchor engine. Correlate multimodal event landmarks (audio impulses, visual flashes, network packet bursts) and enforce the anti-circular calibration invariant.
+- **2. Scope & Target Components:** `src/cstv/anchors/`, `src/cstv/anchors/correlator.py`.
+- **3. Prerequisites & Invariants:** CSTV-A1 and CSTV-A3 completed; access to AURAS and VISTA features.
+- **4. Detailed Engineering Tasks:**
+  1. Implement `EventAnchorManager` managing multi-evidence landmark pairings.
+  2. Implement audio transient cross-correlation via `scipy.signal.correlate`.
+  3. Implement visual flash alignment via luminance peak matching.
+  4. Enforce anti-circular calibration: split anchors into disjoint calibration and validation partitions.
+  5. Compute anchor reliability score based on signal SNR and temporal resolution.
+- **5. Unit & Integration Test Specifications:**
+  - `test_audio_visual_flash_bang_alignment()`: Aligns optical flash with acoustic onset.
+  - `test_anti_circular_partitioning()`: Asserts zero overlap between calibration and validation anchors.
+  - `test_anchor_reliability_scoring()`: Validates multi-factor confidence heuristic.
+- **6. Performance & Benchmark Targets:** Event cross-correlation completes in $< 500\text{ ms}$ for 1-hour media files.
+- **7. Expected Deliverables & Artifacts:** `src/cstv/anchors/manager.py`, `src/cstv/anchors/audio_visual.py`.
+- **8. Verifiable Checkpoints:**
+  - `CSTV-CP-06-01`: Standardized `EventAnchor` records generated with complete observation linkage.
+  - `CSTV-CP-06-02`: Audio impulse cross-correlation achieves sub-10ms alignment precision.
+  - `CSTV-CP-06-03`: Optical flash luminance derivative aligns visual events across camera streams.
+  - `CSTV-CP-06-04`: Anti-circular calibration invariant strictly enforces disjoint calibration/validation sets.
+- **9. Acceptance Criteria:** 100% of calibration anchors remain strictly separated from validation sets.
+- **10. Exit Criteria:** Event anchors available for clock model fitting and validation.
+- **11. Forensic & Legal Safeguards:** Examiner can review, confirm, or reject candidate automated anchors.
+- **12. Risk Mitigation & Edge Cases:** Rejection of low-confidence anchors ($R_{xy} < 0.6$).
+- **13. Deferred Work:** Full multi-source timeline alignment in CSTV-A7.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase CSTV-A7: Cross-Media Temporal Correlation
+- **1. Phase Overview & Goals:** Build the multi-source cross-media correlation engine. Align image EXIF, audio streams, video/CCTV feeds, offline PCAP packet flows, GPS tracks, and system event logs onto a unified coordinate space.
+- **2. Scope & Target Components:** `src/cstv/correlator/`, `src/cstv/correlator/multi_source.py`.
+- **3. Prerequisites & Invariants:** CSTV-A5 and CSTV-A6 completed; specialist subsystem adapters connected.
+- **4. Detailed Engineering Tasks:**
+  1. Implement Image-to-Audio correlation: compare EXIF capture instant with continuous audio timeline.
+  2. Implement Audio-to-Video correlation: correlate sample index ($t = t_0 + n/f_s$) with video PTS ($t = \text{PTS} \times TB$).
+  3. Implement CCTV multi-camera spatial-temporal alignment across independent DVR feeds.
+  4. Implement PCAP-to-Media correlation: align packet burst intervals with visible on-screen events.
+  5. Implement GPS track temporal interpolation via AIF-GEO geodesic time coordinates.
+  6. Enforce non-causality safeguard: prevent automated claims of physical causation in emitted findings.
+- **5. Unit & Integration Test Specifications:**
+  - `test_image_audio_correlation()`: Aligns photo capture with ambient audio recording.
+  - `test_cctv_multicamera_alignment()`: Synchronizes municipal camera with shop DVR.
+  - `test_pcap_video_burst_correlation()`: Aligns data exfiltration packet window with terminal screen.
+  - `test_non_causality_disclaimer()`: Asserts inclusion of non-causality disclaimer in findings.
+- **6. Performance & Benchmark Targets:** Cross-correlates 10 multi-modal exhibits in $< 2.0\text{ s}$.
+- **7. Expected Deliverables & Artifacts:** `src/cstv/correlator/engine.py`, `src/cstv/correlator/adapters/`.
+- **8. Verifiable Checkpoints:**
+  - `CSTV-CP-07-01`: Image and audio timelines cross-correlated with explicit offset and uncertainty bounds.
+  - `CSTV-CP-07-02`: Multi-camera CCTV alignment achieves sub-frame temporal synchronization.
+  - `CSTV-CP-07-03`: Offline PCAP packet bursts temporally correlated with CCTV terminal display changes.
+  - `CSTV-CP-07-04`: Non-causality evidentiary safeguard strictly included in all emitted findings.
+- **9. Acceptance Criteria:** Zero false causation claims; successful multi-source alignment across test corpus.
+- **10. Exit Criteria:** Multi-source correlation results feed into conflict graph engine.
+- **11. Forensic & Legal Safeguards:** Prohibits conflation of correlation with causation in courtroom reports.
+- **12. Risk Mitigation & Edge Cases:** Handling sparse evidence where only 1 or 2 modalities overlap.
+- **13. Deferred Work:** Conflict graph and uncertainty evaluation in CSTV-A8.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase CSTV-A8: Uncertainty, Conflict Analysis & Findings
+- **1. Phase Overview & Goals:** Construct the Sequence Conflict Graph and execute Tarjan's SCC cycle detection to flag impossible causal loops. Build the analytical uncertainty propagation engine and emit 22 machine-readable `TIME_*` findings across 14 canonical decision states.
+- **2. Scope & Target Components:** `src/cstv/conflicts/`, `src/cstv/uncertainty/`, `src/cstv/findings/`.
+- **3. Prerequisites & Invariants:** CSTV-A3 and CSTV-A7 completed; regression covariance matrices available.
+- **4. Detailed Engineering Tasks:**
+  1. Build directed Sequence Conflict Graph $G = (V, E)$ using NetworkX.
+  2. Implement Tarjan's Strongly Connected Components algorithm to detect causal cycles.
+  3. Implement analytical variance propagation: compute $CI_{95\%}(\hat{T})$ using parameter covariance $(X^T X)^{-1}$.
+  4. Implement 14 canonical decision states and first-class inconclusive outcome policy.
+  5. Implement 22 machine-readable `TIME_*` finding codes with severity, confidence, and explanation.
+- **5. Unit & Integration Test Specifications:**
+  - `test_conflict_graph_cycle_detection()`: Detects impossible temporal inversion loop ($A < B < C < A$).
+  - `test_uncertainty_covariance_propagation()`: Validates $CI_{95\%}$ band expansion outside convex hull.
+  - `test_inconclusive_decision_policy()`: Asserts INCONCLUSIVE outcome when uncertainty exceeds threshold.
+  - `test_twenty_two_finding_codes()`: Validates serialization of all 22 finding codes.
+- **6. Performance & Benchmark Targets:** Cycle detection executes in $< 100\text{ ms}$ for 1,000-node graph.
+- **7. Expected Deliverables & Artifacts:** `src/cstv/conflicts/graph.py`, `src/cstv/uncertainty/propagator.py`, `src/cstv/findings/catalog.py`.
+- **8. Verifiable Checkpoints:**
+  - `CSTV-CP-08-01`: Sequence conflict graph correctly constructs directed edges and detects causal cycles.
+  - `CSTV-CP-08-02`: Uncertainty engine correctly propagates parameter covariance into 95% confidence bands.
+  - `CSTV-CP-08-03`: 14 canonical decision states prevent forced binary verdicts on uncertain exhibits.
+  - `CSTV-CP-08-04`: 22 machine-readable finding codes (`TIME_*`) serialize with complete evidence lineage.
+- **9. Acceptance Criteria:** Zero unhandled cycles; 100% compliance with inconclusive outcome policy.
+- **10. Exit Criteria:** Findings and conflict graphs ready for CEIPL and UFREDF packaging.
+- **11. Forensic & Legal Safeguards:** Transparent presentation of conflicting evidence and residual uncertainty.
+- **12. Risk Mitigation & Edge Cases:** Graceful degradation on disconnected graph components.
+- **13. Deferred Work:** Legal reporting integration in CSTV-A9.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase CSTV-A9: CEIPL and UFREDF Integration
+- **1. Phase Overview & Goals:** Integrate CSTV with the CEIPL cryptographic provenance layer and UFREDF legal reporting framework. Register derived clock models and corrected timeline snapshots in the WORM vault and generate Section 65B IEA / Section 63 BSA certified dossiers.
+- **2. Scope & Target Components:** `src/cstv/ceipl_bridge.py`, `src/cstv/reporting/`, `src/ufredf/temporal/`.
+- **3. Prerequisites & Invariants:** CSTV-A8 completed; CEIPL client and UFREDF report generator operational.
+- **4. Detailed Engineering Tasks:**
+  1. Author CEIPL adapter registering `ClockCalibrationModel` and `ReconstructedTimeline` in Merkle DAG.
+  2. Implement POSIX `0400` read-only locking for exported timeline JSON snapshots.
+  3. Author UFREDF Section 65B/63 BSA certified PDF report template for temporal authenticity.
+  4. Implement tamper-evident audit logging for manual examiner anchor edits and model approvals.
+- **5. Unit & Integration Test Specifications:**
+  - `test_ceipl_merkle_dag_registration()`: Verifies parent-child hash linkage in DAG.
+  - `test_worm_vault_snapshot_locking()`: Asserts POSIX 0400 permissions on exported timeline files.
+  - `test_ufredf_section65b_pdf_generation()`: Validates court-certified PDF export containing hash manifests.
+  - `test_examiner_override_audit_trail()`: Asserts append-only audit record on examiner parameter modification.
+- **6. Performance & Benchmark Targets:** PDF dossier compilation in $< 3.0\text{ s}$ for 50-page evidence annexure.
+- **7. Expected Deliverables & Artifacts:** `src/cstv/ceipl_bridge.py`, `src/ufredf/templates/temporal_dossier.html`.
+- **8. Verifiable Checkpoints:**
+  - `CSTV-CP-09-01`: Derived clock models and timeline snapshots registered as immutable nodes in CEIPL DAG.
+  - `CSTV-CP-09-02`: Exported timeline JSON artifacts locked with POSIX 0400 read-only permissions in WORM vault.
+  - `CSTV-CP-09-03`: Automated Section 65B IEA / Section 63 BSA certified PDF dossier generated with Ed25519 signatures.
+  - `CSTV-CP-09-04`: Tamper-evident audit logging records all manual examiner interventions with cryptographic hashes.
+- **9. Acceptance Criteria:** Certified PDF report passes simulated courtroom evidentiary cross-examination audit.
+- **10. Exit Criteria:** Complete legal reporting pipeline operational.
+- **11. Forensic & Legal Safeguards:** Section 65B/63 BSA certificate binds to software commit hash and exhibit digests.
+- **12. Risk Mitigation & Edge Cases:** Fallback text-only summary if PDF rendering engine encounters font errors.
+- **13. Deferred Work:** Final benchmark and release gates in CSTV-A10.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase CSTV-A10: Benchmarking and Release Readiness
+- **1. Phase Overview & Goals:** Execute end-to-end benchmark validation across a 500-fixture synthetic and real-world ground-truth test corpus. Validate numerical precision, false-positive suppression, and release gates.
+- **2. Scope & Target Components:** `tests/cstv/benchmarks/`, `scripts/benchmark_cstv.py`.
+- **3. Prerequisites & Invariants:** CSTV-A0 through CSTV-A9 completed; benchmark corpus assembled.
+- **4. Detailed Engineering Tasks:**
+  1. Construct 500 controlled ground-truth fixtures covering offsets, linear drift, step jumps, and DST.
+  2. Execute automated regression benchmark evaluating MAE, drift error (ppm), and false alarm rates.
+  3. Validate negative controls: verify zero false tampering findings on authentic VFR/DST files.
+  4. Perform 5-run bit-exact deterministic repeatability test.
+  5. Compile final release evaluation dossier.
+- **5. Unit & Integration Test Specifications:**
+  - `test_benchmark_offset_accuracy()`: Asserts MAE $\le 0.05\text{ s}$ across benchmark corpus.
+  - `test_benchmark_drift_accuracy()`: Asserts drift error $\le 0.5\text{ ppm}$ over $\ge 1\text{ hour}$ fixtures.
+  - `test_negative_controls_false_alarms()`: Asserts 0 false tampering alerts on authentic controls.
+  - `test_deterministic_reproducibility()`: Asserts 100% bit-exact parameter matching across 5 identical runs.
+- **6. Performance & Benchmark Targets:** 100% release gate pass rate; offset MAE $\le 0.05\text{ s}$; drift error $\le 0.5\text{ ppm}$.
+- **7. Expected Deliverables & Artifacts:** `reports/cstv_benchmark_release_dossier.pdf`, benchmark test suite.
+- **8. Verifiable Checkpoints:**
+  - `CSTV-CP-10-01`: 500-fixture synthetic and real-world ground-truth corpus fully validated.
+  - `CSTV-CP-10-02`: Benchmark confirms offset MAE $\le 0.05\text{ s}$ and drift estimation error $\le 0.5\text{ ppm}$.
+  - `CSTV-CP-10-03`: False-positive suppression verified: zero false tampering alerts on authentic VFR/DST controls.
+  - `CSTV-CP-10-04`: 5-run repeatability test confirms 100% bit-exact parameter reproducibility under identical inputs.
+- **9. Acceptance Criteria:** All 44 checkpoints across CSTV-A0 through CSTV-A10 fully satisfied.
+- **10. Exit Criteria:** CSTV capability officially approved and signed off for PS-05 release.
+- **11. Forensic & Legal Safeguards:** Complete benchmark reproducibility dossier archived in WORM vault.
+- **12. Risk Mitigation & Edge Cases:** Continuous regression testing integrated into CI/CD pipeline.
+- **13. Deferred Work:** Post-hackathon hardware GPS receiver calibration adapters.
+- **14. Status:** `PLANNED`
+
+---
+
+## 15. CSTV Master Requirement Traceability Matrix (CSTV-01 through CSTV-84)
+
+Every Cross-Source Timestamp Verification requirement (`CSTV-01` through `CSTV-84`) is mapped to its PRD specification, TRD technical section, implementing engineering phase, verification checkpoint, expected evidence, and execution status:
+
+| Req ID | Requirement Title | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Validation Evidence | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **CSTV-01** | Platform-Wide Shared Architecture Integration | PRD §16.5 | TRD §17.1 | **CSTV-A0** | `CSTV-CP-00-01` | Architecture audit confirms shared service design | `PLANNED` |
+| **CSTV-02** | Non-Destructive Temporal Analysis Invariant | PRD §16.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A0** | `CSTV-CP-00-03` | Bitstream hash invariance check passes | `PLANNED` |
+| **CSTV-03** | Modality Specialist Timing Delegation | PRD §16.5 | TRD §17.1 | **CSTV-A0** | `CSTV-CP-00-04` | Zero duplicate signal/video decoder logic | `PLANNED` |
+| **CSTV-04** | Cryptographic Lineage & DAG Provenance Binding | PRD §16.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A0** | `CSTV-CP-00-03` | Merkle DAG node parent hash assertion test | `PLANNED` |
+| **CSTV-05** | Air-Gapped Operation & External Time Safeguards | PRD §16.5, §16.9 | TRD §15.6, §17.7 | **CSTV-A0** | `CSTV-CP-00-02` | Zero external network calls in sandbox audit | `PLANNED` |
+| **CSTV-06** | Seventeen-Category Temporal Source Registry | PRD §16.4.1, §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-01` | Registry contract validation across 17 sources | `PLANNED` |
+| **CSTV-07** | Eighteen-Field Timestamp Observation Schema | PRD §16.4.1, §16.5 | TRD §12.8, §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Pydantic v2 `TemporalObservation` test suite | `PLANNED` |
+| **CSTV-08** | Canonical Timestamp Data Representation | PRD §16.5 | TRD §12.8, §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | JSON schema validation against canonical format | `PLANNED` |
+| **CSTV-09** | Exact Integer & Rational Precision Preservation | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Numerical benchmark: zero float rounding drift | `PLANNED` |
+| **CSTV-10** | Multi-Evidence Case Scoping & Exhibit Isolation | PRD §16.5 | TRD §17.10 | **CSTV-A1** | `CSTV-CP-01-04` | PostgreSQL multi-tenant isolation unit test | `PLANNED` |
+| **CSTV-11** | Physical Clock Identity Disambiguation | PRD §16.5 | TRD §17.2, §17.10 | **CSTV-A1** | `CSTV-CP-01-01` | Disambiguates recorder RTC vs camera clock | `PLANNED` |
+| **CSTV-12** | Source Trust & Provenance Classification | PRD §16.5 | TRD §17.2, §17.7 | **CSTV-A1** | `CSTV-CP-01-01` | Classifies HARDWARE vs EXIF vs USER trust | `PLANNED` |
+| **CSTV-13** | 27-State Timestamp Semantics Taxonomy | PRD §16.4.2, §16.5 | TRD §12.8, §17.2 | **CSTV-A1** | `CSTV-CP-01-03` | `TimestampSemanticsEnum` completeness tests | `PLANNED` |
+| **CSTV-14** | Semantic Contradiction & Anomaly Detection | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-03` | Flags modification date preceding creation | `PLANNED` |
+| **CSTV-15** | Container vs Stream Presentation Time Disambiguation | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-03` | Differentiates MP4 `mvhd` date from PTS start | `PLANNED` |
+| **CSTV-16** | CCTV OSD Overlay vs System Clock Disambiguation | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-03` | Differentiates OCR clock text from DVR log | `PLANNED` |
+| **CSTV-17** | Audio Sample-Index Continuous Time Mapping | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Sample math verification ($t = t_0 + n/f_s$) | `PLANNED` |
+| **CSTV-18** | Video Frame PTS Rational Timebase Conversion | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Rational tick conversion ($t = \text{PTS} \times TB$) | `PLANNED` |
+| **CSTV-19** | Offline PCAP Packet Timestamp Ingestion | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Nanosecond precision packet capture test | `PLANNED` |
+| **CSTV-20** | Timezone Offset Normalization & IANA Tracking | PRD §16.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-01` | Validates $t_{\text{UTC}} = t_{\text{local}} - \Delta_{\text{UTC}}$ | `PLANNED` |
+| **CSTV-21** | Prohibition of Silent Local Machine Timezone Inference | PRD §16.5, §16.10 | TRD §15.6, §17.3 | **CSTV-A2** | `CSTV-CP-02-02` | Asserts UNKNOWN flag on naive timestamps | `PLANNED` |
+| **CSTV-22** | Daylight Saving Time (DST) Transition Disambiguation | PRD §16.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-03` | Dual candidate intervals on fall-back transition | `PLANNED` |
+| **CSTV-23** | Multi-Hypothesis Timezone Ambiguity Representation | PRD §16.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-03` | Serializes candidate UTC interval branches | `PLANNED` |
+| **CSTV-24** | GPS Time to UTC Leap-Second Conversion | PRD §16.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-04` | 18-second leap-second offset conversion test | `PLANNED` |
+| **CSTV-25** | Leap-Second Lineage & Provenance Tracking | PRD §16.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-04` | Logs IERS Bulletin C version in observation | `PLANNED` |
+| **CSTV-26** | Pairwise Relative Clock Offset Estimation | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A4** | `CSTV-CP-04-01` | Calculates $O_{ij}(t) = C_i(t) - C_j(t)$ | `PLANNED` |
+| **CSTV-27** | Reference Clock Selection & Hierarchy Governance | PRD §16.5 | TRD §17.4 | **CSTV-A4** | `CSTV-CP-04-02` | Enforces GPS > NTP > Recorder trust priority | `PLANNED` |
+| **CSTV-28** | Linear Clock Drift Modeling ($t_i = a + b T + \epsilon$) | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-02` | Accurately recovers slope and drift in ppm | `PLANNED` |
+| **CSTV-29** | Ordinary Least Squares (OLS) Linear Regression | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | SciPy regression benchmark on clean anchors | `PLANNED` |
+| **CSTV-30** | Weighted Least Squares (WLS) Anchor Variance Weighting | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | Weights regression by inverse anchor variance | `PLANNED` |
+| **CSTV-31** | Huber Loss Robust Regression Engine | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | Downweights moderate anchor residual outliers | `PLANNED` |
+| **CSTV-32** | RANSAC Outlier Rejection Regression | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | Rejects gross anchor mismatches ($\ge 2\text{s}$) | `PLANNED` |
+| **CSTV-33** | Theil-Sen Median-Based Non-Parametric Slope | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | 29.3% breakdown point on noisy anchor sets | `PLANNED` |
+| **CSTV-34** | Minimum Anchor Threshold Enforcement ($N \ge 3$) | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-02` | Blocks unvalidated drift estimation on $N < 3$ | `PLANNED` |
+| **CSTV-35** | Anti-Extrapolation Boundary Gating | PRD §16.5, §16.6 | TRD §15.6, §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Restricts model validity to $[T_{\min}, T_{\max}]$ | `PLANNED` |
+| **CSTV-36** | Clock Reset & Discontinuity Step Detection | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-03` | Flags sudden clock step jumps ($|\Delta O| > \tau$) | `PLANNED` |
+| **CSTV-37** | Non-Linear & Thermal Clock Drift Modeling | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-03` | Evaluates non-linear residual trends | `PLANNED` |
+| **CSTV-38** | Piecewise Linear Clock Segmentation Engine | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Fits separate pre-reset/post-reset models | `PLANNED` |
+| **CSTV-39** | Change-Point Detection via PELT Algorithm | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-03` | Optimal change-point segmentation in $O(N)$ | `PLANNED` |
+| **CSTV-40** | Segment-Specific Validity Bounds Enforcement | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Clamps segment evaluation to $[t_{\text{start}}, t_{\text{end}}]$ | `PLANNED` |
+| **CSTV-41** | Prohibition of Global Model Spanning Resets | PRD §16.5, §16.6 | TRD §15.6, §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Invariant check blocks single continuous model | `PLANNED` |
+| **CSTV-42** | Derived Segmented Time Mapping Engine | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Computes $\hat{T}$ across segmented timelines | `PLANNED` |
+| **CSTV-43** | Multi-Source Case Timeline Aggregation | PRD §16.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-03` | Aggregates 11 evidence categories into one view | `PLANNED` |
+| **CSTV-44** | Image and Audio Cross-Modal Correlation | PRD §16.3.2, §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-01` | Aligns EXIF capture instant with audio timeline | `PLANNED` |
+| **CSTV-45** | Audio and Video Cross-Stream Synchronization | PRD §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-01` | Aligns audio sample time with video PTS | `PLANNED` |
+| **CSTV-46** | CCTV Multi-Camera Spatial-Temporal Alignment | PRD §16.3.2, §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-02` | Synchronizes shop DVR with municipal camera | `PLANNED` |
+| **CSTV-47** | Offline PCAP & CCTV Video Timeline Correlation | PRD §16.3.2, §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-03` | Aligns network traffic burst with CCTV screen | `PLANNED` |
+| **CSTV-48** | GPS Track & Media Capture Temporal Interpolation | PRD §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-04` | Geodesic coordinate interpolation at photo time | `PLANNED` |
+| **CSTV-49** | Device & Recorder Event Log Alignment | PRD §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-01` | Aligns power-cycle syslog with video reboot | `PLANNED` |
+| **CSTV-50** | Cross-Evidence Non-Causality Evidentiary Safeguard | PRD §16.5, §16.10 | TRD §15.6, §17.5 | **CSTV-A7** | `CSTV-CP-07-04` | Non-causality statement in all finding texts | `PLANNED` |
+| **CSTV-51** | Standardized Event Anchor Data Contract | PRD §16.5, §16.7 | TRD §12.8, §17.5 | **CSTV-A6** | `CSTV-CP-06-01` | `EventAnchor` Pydantic v2 schema test suite | `PLANNED` |
+| **CSTV-52** | Acoustic Impulse Cross-Correlation Alignment | PRD §16.5, §16.7 | TRD §17.5 | **CSTV-A6** | `CSTV-CP-06-02` | Cross-correlation aligns gunshot transients | `PLANNED` |
+| **CSTV-53** | Audio-Visual Flash & Acoustic Onset Alignment | PRD §16.5, §16.7 | TRD §17.5 | **CSTV-A6** | `CSTV-CP-06-03` | Luminance derivative aligns with audio peak | `PLANNED` |
+| **CSTV-54** | Visual Common-Event Tracking & Feature Matching | PRD §16.5, §16.7 | TRD §17.5 | **CSTV-A6** | `CSTV-CP-06-03` | Matches pedestrian step landmark across feeds | `PLANNED` |
+| **CSTV-55** | Anti-Circular Calibration Invariant Enforcement | PRD §16.5, §16.7 | TRD §15.6, §17.5 | **CSTV-A6** | `CSTV-CP-06-04` | Disjoint sets: zero calibration/validation overlap | `PLANNED` |
+| **CSTV-56** | Multi-Factor Anchor Reliability Scoring | PRD §16.5, §16.7 | TRD §17.5 | **CSTV-A6** | `CSTV-CP-06-04` | Computes confidence $\in [0.0, 1.0]$ with SNR | `PLANNED` |
+| **CSTV-57** | Interval-Based Temporal Representation ($I = [t_{\min}, t_{\max}]$) | PRD §16.5, §16.8 | TRD §17.6 | **CSTV-A3** | `CSTV-CP-03-01` | Interval arithmetic accommodates measurement $\sigma$ | `PLANNED` |
+| **CSTV-58** | Allen's Thirteen Interval Relations Implementation | PRD §16.5, §16.8 | TRD §17.6 | **CSTV-A3** | `CSTV-CP-03-02` | Logic suite tests all 13 qualitative relations | `PLANNED` |
+| **CSTV-59** | Temporal Ordering & Monotonicity Verification | PRD §16.5, §16.8 | TRD §17.6 | **CSTV-A3** | `CSTV-CP-03-02` | Flags causal inversions and non-monotonic steps | `PLANNED` |
+| **CSTV-60** | Sequence Conflict Graph Construction | PRD §16.5, §16.8 | TRD §17.6 | **CSTV-A8** | `CSTV-CP-08-01` | Builds directed evidence graph with typed edges | `PLANNED` |
+| **CSTV-61** | Conflict Graph Cycle Detection (Tarjan's SCC) | PRD §16.5, §16.8 | TRD §17.6 | **CSTV-A8** | `CSTV-CP-08-01` | Tarjan's algorithm flags impossible causal loops | `PLANNED` |
+| **CSTV-62** | Explainable Temporal Conflict Generation | PRD §16.5 | TRD §17.6 | **CSTV-A8** | `CSTV-CP-08-01` | Generates drift/timezone conflict hypotheses | `PLANNED` |
+| **CSTV-63** | Measurement Uncertainty Propagation Engine | PRD §16.5, §16.10 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-02` | Calculates $\sigma_{\text{diff}} = \sqrt{\sigma_1^2 + \sigma_2^2}$ | `PLANNED` |
+| **CSTV-64** | Clock Model Parameter Covariance & Confidence Bands | PRD §16.5 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-02` | Computes $CI_{95\%}(\hat{T})$ using $(X^T X)^{-1}$ | `PLANNED` |
+| **CSTV-65** | Decoupled Multi-Dimensional Forensic Verdicts | PRD §16.5, §16.10 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-03` | Separates consistency, trust, and authenticity | `PLANNED` |
+| **CSTV-66** | Fourteen Canonical Decision States Taxonomy | PRD §16.5, §16.10 | TRD §12.8, §17.8 | **CSTV-A8** | `CSTV-CP-08-03` | Maps findings to 14 canonical states | `PLANNED` |
+| **CSTV-67** | First-Class Inconclusive Outcome Policy | PRD §16.5, §16.10 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-03` | Abstention permitted on high uncertainty | `PLANNED` |
+| **CSTV-68** | Twenty-Two Machine-Readable Finding Codes (`TIME_*`) | PRD §16.5 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-04` | Serializes 22 typed finding records with details | `PLANNED` |
+| **CSTV-69** | Case-Wide Interactive Master Evidence Timeline | PRD §16.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-03` | Serializes complete case chronological payload | `PLANNED` |
+| **CSTV-70** | Multi-Tiered Timeline Visual Discrimination | PRD §16.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-04` | Visually discriminates Raw vs Corrected vs Inferred | `PLANNED` |
+| **CSTV-71** | Timeline Multi-Attribute Filtering & Faceting | PRD §16.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-03` | Filters by evidence ID, clock, and modality | `PLANNED` |
+| **CSTV-72** | Interactive Dual-Timeline Comparison Canvas | PRD §16.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-04` | Parallel canvas rendering reference vs observed | `PLANNED` |
+| **CSTV-73** | CEIPL Cryptographic Evidence Lineage Integration | PRD §16.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A9** | `CSTV-CP-09-01` | Merkle DAG registers all models and findings | `PLANNED` |
+| **CSTV-74** | Derived WORM Artifact Registration | PRD §16.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A9** | `CSTV-CP-09-02` | Vault POSIX 0400 write-protection verified | `PLANNED` |
+| **CSTV-75** | Immutable Original Timestamp Preservation | PRD §16.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A9** | `CSTV-CP-09-01` | Asserts original metadata remains unaltered | `PLANNED` |
+| **CSTV-76** | Section 65B IEA / Section 63 BSA Legal Dossier Export | PRD §16.5, §16.11 | TRD §15.6, §17.9 | **CSTV-A9** | `CSTV-CP-09-03` | Generates court-certified PDF report with hashes | `PLANNED` |
+| **CSTV-77** | Multi-Tenant Case Scoping & RBAC Access Control | PRD §16.5, §16.11 | TRD §17.10 | **CSTV-A9** | `CSTV-CP-09-04` | RBAC test verifies zero inter-case data leaks | `PLANNED` |
+| **CSTV-78** | Tamper-Evident Audit Logging for Examiner Overrides | PRD §16.5, §16.11 | TRD §15.6, §17.10 | **CSTV-A9** | `CSTV-CP-09-04` | Immutable log records examiner manual edits | `PLANNED` |
+| **CSTV-79** | High-Throughput Normalization & Latency Performance | PRD §16.5, §16.9 | TRD §17.3, §17.9 | **CSTV-A10** | `CSTV-CP-10-02` | $\ge 5,000$ timestamps/sec; timeline $< 1.5\text{s}$ | `PLANNED` |
+| **CSTV-80** | Scalable Relational Database Persistence (PostgreSQL) | PRD §16.5 | TRD §17.10 | **CSTV-A1** | `CSTV-CP-01-04` | Index performance verified on 100k rows | `PLANNED` |
+| **CSTV-81** | Asynchronous Celery Worker Task Orchestration | PRD §16.5 | TRD §17.11 | **CSTV-A1** | `CSTV-CP-01-04` | Async task execution and cgroup limits pass | `PLANNED` |
+| **CSTV-82** | Controlled Synthetic & Ground-Truth Test Benchmarks | PRD §16.5 | TRD §17.13 | **CSTV-A10** | `CSTV-CP-10-01` | 500-fixture validation suite executes cleanly | `PLANNED` |
+| **CSTV-83** | False-Positive Suppression on Legitimate Media | PRD §16.5, §16.10 | TRD §17.13 | **CSTV-A10** | `CSTV-CP-10-03` | Zero false tampering findings on authentic controls | `PLANNED` |
+| **CSTV-84** | Deterministic Repeatability & Release Validation | PRD §16.5 | TRD §17.13 | **CSTV-A10** | `CSTV-CP-10-04` | 5-run bit-exact parameter hash consistency | `PLANNED` |

@@ -32,7 +32,9 @@ Manual forensic examination is time-consuming, requires scarce specialized exper
 6. **AIF-GEO Geospatial Forensics & Evidence Correlation Subsystem:** Multi-source extraction, normalisation, and verification of geographic metadata and location evidence from digital images. Features geodetic distance and uncertainty modeling, capture-time solar/shadow alignment, historical weather and terrain elevation correlation, visual location recovery without GPS (OCR, landmark retrieval, SIFT/ORB + RANSAC geometric verification), external GPS track correlation (GPX, KML, NMEA), multi-image spatial clustering (DBSCAN), and an interactive evidence-linked map and location-claim conflict graph.
 7. **Cross-Modal Deepfake Validation Framework (CDVF):** Centralized scientific benchmarking, empirical confidence calibration (Platt/temperature scaling), out-of-distribution (OOD) domain shift gating, formal abstention/inconclusive decision policies, leakage-proof dataset governance, and scoped release gates governing deepfake detection models across AIF, AURAS, and VISTA without acting as a competing detector.
 8. **Image Manipulation Localisation Framework (IMLF):** Shared spatial reasoning capability within AIF that localises, segments, and corroborates copy-move, splicing, inpainting, AI-generated patch, and facial manipulations into calibrated pixel masks and vector polygons with multi-scale tiling and an examiner review workbench.
-9. **Court-Admissible Legal Certification:** Automated generation of tamper-evident electronic evidence certificates under **Section 65B of the Indian Evidence Act (IEA)** and **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** with Archify JSON Intermediate Representation (IR).
+9. **Cross-Media Metadata Service (CMMS):** A shared, evidence-aware metadata extraction, normalisation, validation, consistency-analysis and correlation layer supporting digital images, audio recordings, video files, CCTV exports, offline PCAP/PCAPNG captures, and geospatial evidence. CMMS preserves raw metadata values, produces canonically normalised representations, identifies anomalies and inconsistencies across fields and evidence items, and exposes structured metadata records to AIF, AURAS, VISTA, AIF-GEO, ONTF, CEIPL, and UFREDF without duplicating modality-specific forensic analysis inside each engine.
+10. **Cross-Source Timestamp Verification (CSTV):** A platform-wide temporal verification and correlation capability that analyzes, compares, and cross-validates timestamps across 17 distinct evidence source categories (EXIF, audio samples, video PTS/DTS, CCTV OSD overlays, offline PCAPs, GPS tracks, device/recorder logs). CSTV estimates clock offsets and linear/piecewise drift rates in parts per million (ppm), detects clock resets, aligns multimodal event anchors, evaluates Allen's interval algebra and sequence conflict graphs, and reconstructs unified multi-tiered case timelines without overwriting source metadata.
+11. 10. **Court-Admissible Legal Certification:** Automated generation of tamper-evident electronic evidence certificates under **Section 65B of the Indian Evidence Act (IEA)** and **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** with Archify JSON Intermediate Representation (IR).
 
 ---
 
@@ -47,6 +49,9 @@ Manual forensic examination is time-consuming, requires scarce specialized exper
 - **G-6:** Extract, validate, enrich, and cross-correlate image location evidence (EXIF GPS, visual landmarks, external tracks, solar/shadows, terrain) while preserving raw originals and maintaining explicit uncertainty bounds.
 - **G-7:** Produce verifiable, court-ready PDF certificates and Archify JSON Intermediate Representation (IR) graphs.
 - **G-8:** Operate 100% offline in air-gapped forensic laboratory environments with zero external network dependencies.
+- **G-9:** Extract, preserve, normalise and cross-correlate technical metadata from all evidence modalities through a shared CMMS service, eliminating duplicate extraction implementations and providing structured, field-level provenance to every forensic subsystem.
+
+- **G-10:** Verify, correlate, and reconstruct temporal sequences across all seized digital evidence sources through CSTV, estimating clock offset and drift parameters, detecting sudden clock resets, validating causal ordering via conflict graphs, and compiling defense-resilient multi-tier case timelines.
 
 ### Non-Goals
 - **NG-1:** The platform is not an automated judicial judge. It outputs probabilistic evidence, anomaly heatmaps, and confidence intervals to assist certified human forensic examiners.
@@ -57,6 +62,8 @@ Manual forensic examination is time-consuming, requires scarce specialized exper
 - **NG-6:** It does not claim that extracting an EXIF GPS coordinate or matching an online reverse-geocoding place proves that an image was captured there, nor does it send sensitive evidence images or confidential coordinates to unauthorized external cloud APIs.
 
 ---
+
+- **NG-7:** CSTV does not determine the absolute historical truth of an incident or establish physical causality merely because two events share temporal proximity. It reconstructs and evaluates temporal consistency between evidence sources.
 
 ## 3. High-Level Platform Architecture
 
@@ -100,6 +107,11 @@ flowchart TB
             VCI["VCI: Video Content Intelligence Engine"]
             CCTV_PROF["🛡️ CCTV Adaptive Forensic Profile (Cross-Cutting)"]
         end
+        subgraph CMMS_BLOCK["📋 CMMS Cross-Media Metadata Service (Shared)"]
+            CMMS_PARSE["Parser Adapters: ExifTool, FFprobe, MediaInfo, TShark"]
+            CMMS_NORM["Normalisation, Timestamp Semantics, Field Provenance"]
+            CMMS_CONSIST["Consistency Analysis, Cross-Evidence Correlation"]
+        end
         subgraph ONTF["🌐 ONTF Offline Network Traffic Forensics Subsystem"]
             ONTF_INGEST["Offline PCAP/PCAPNG Ingestion & Validation"]
             ONTF_PARSER["Pluggable Parser Pipeline (TShark, Scapy, Zeek Logs)"]
@@ -140,10 +152,12 @@ flowchart TB
     ROUTER --> QUEUE
     QUEUE --> DERIVE
     DERIVE --> AURAS
+    DERIVE --> CMMS_BLOCK
     DERIVE --> AIF
     DERIVE --> VISTA
     DERIVE --> ONTF
     CDVF_LAYER -.->|Model Governance, Calibration & OOD Gating| AURAS & AIF & VISTA
+    CMMS_BLOCK -.->|Structured Metadata Records| AIF & AURAS & VISTA & ONTF
     CRYPTO -.->|Integrity & Provenance Layer| INTAKE & AIF & AURAS & VISTA & ONTF & CDVF_LAYER & REPORT
     AFB -.->|Extracted Audio Stream (DAG Linked)| AURAS
     AURAS & AIF & VISTA & ONTF --> AGG
@@ -624,7 +638,7 @@ CFITSA provides an evidence-preserving, mathematically defensible forensic workf
 | **Frame & Packet Identity** | Preserves 5 decoupled coordinate dimensions: `packet_index`, `decoder_output_index`, `presentation_order_index`, `source_reference_index`, `scene_relative_index`. | VRE Demuxer Core |
 | **Decode vs Presentation Order** | Enforces B-frame legal invariant: decode order $
 eq$ presentation order is recognized as legitimate codec behaviour; verified via ISO/IEC 14496-12 `ctts` atom. | VRE Bitstream Parser |
-| **Timebase & Timestamp Math** | Unrounded integer tick math scaled by exact rational timebase $t_i = PTS_i \imes rac{TB_{\text{num}}}{TB_{\text{den}}}$. Zero floating-point rounding drift. | VRE Cadence Core |
+| **Timebase & Timestamp Math** | Unrounded integer tick math scaled by exact rational timebase $t_i = PTS_i \imes \frac{TB_{\text{num}}}{TB_{\text{den}}}$. Zero floating-point rounding drift. | VRE Cadence Core |
 | **VFR-Aware Cadence Analysis** | Robust non-parametric statistics: median interval $m$, $MAD = \operatorname{median}(\|\Delta t_i - m\|)$, modified z-score $z_i$, and PELT piecewise change-point segmentation. | VRE Cadence Core |
 | **Missing-Frame Detection (FI-01)** | Mode A (timing gaps), Mode B (reference sequence LCS/edit distance), Mode C (motion warping residual $R_i$), Mode D (companion DVR logs). | VRE Temporal Engine |
 | **Duplicate-Frame Detection (FI-02)** | 256-bit BLAKE3 exact planar raster hash, 64-bit DCT perceptual hash ($d_H \le 2$), SSIM ($\ge 0.985$), and PRNU sensor noise check to safeguard static scenes. | VRE Duplicate Detector |
@@ -1066,6 +1080,243 @@ For complete technical specifications, mathematical foundations, schemas, and ph
 ---
 
 ---
+
+## 4.27 Cross-Media Metadata Service (CMMS)
+
+> **Shared Platform Service — Not a Modality-Specific Detection Engine**
+
+CMMS is the PS-05 unified metadata pipeline. It extracts technical and embedded metadata from every evidence modality, preserves raw values, produces canonically normalised records, performs rule-based consistency analysis, and exposes structured metadata objects to consuming forensic engines — all without replacing specialised detection engines.
+
+**Evidence Metadata Pipeline:**
+
+```
+Evidence Reference --> Media Identification --> Parser Selection --> Extraction
+--> Raw Preservation --> Normalisation --> Validation --> Consistency Analysis
+--> Cross-Evidence Correlation --> Structured Metadata Record --> Subsystem / UFREDF
+```
+
+CMMS does **not** perform deepfake detection, audio classification, video forgery analysis, speaker identification, or cryptographic custody. Those responsibilities remain with AIF, AURAS, VISTA, and CEIPL respectively.
+
+### 4.27.1 Supported Evidence Categories
+
+| Category | Parser Candidates | Key Metadata Standards |
+| :--- | :--- | :--- |
+| Digital images (JPEG, PNG, TIFF, HEIC, WebP, RAW, DNG, AVIF) | ExifTool, Pillow | EXIF, XMP, IPTC, GPS, ICC, C2PA presence |
+| Audio recordings (WAV, MP3, FLAC, AAC, OGG, AIFF, Opus) | FFprobe, ExifTool | ID3v1/v2, Vorbis comments, BWF bext, iXML, stream metadata |
+| Video files (MP4, MOV, MKV, AVI, WebM, TS/M2TS, 3GP) | FFprobe, MediaInfo | Container atoms, stream descriptors, PTS/timebase, encoder tags |
+| CCTV / DVR / NVR exports | FFprobe, MediaInfo, sidecar parsers | Recorder metadata, channel maps, export timestamps, sidecar XML/JSON |
+| Offline PCAP/PCAPNG captures | PyShark/TShark, Scapy | Link type, snap length, timestamp precision, capture statistics |
+| Geospatial metadata | ExifTool (via AIF-GEO) | EXIF GPS, XMP location, IPTC location, DMS/decimal coordinates |
+
+### 4.27.2 Core Design Principles
+
+1. **Raw Value Immutability:** Every extracted field retains its original raw value and source block. Raw values are never overwritten.
+2. **Field-Level Provenance:** Each record includes parser identifier, parser version, source evidence ID, source block location, extraction timestamp, and transformation history.
+3. **Explicit Timestamp Semantics:** CMMS distinguishes at least 14 timestamp semantic types (CAPTURE_TIME, RECORDING_START, CONTAINER_CREATION_TIME, GPS_TIME, PACKET_CAPTURE_TIME, OVERLAY_DISPLAY_TIME, etc.). Timezone inference is explicit and traceable.
+4. **Metadata Categories are Never Merged:** Embedded metadata (EXIF), filesystem metadata, container metadata, and operator-supplied values remain separate. A filesystem modification timestamp is never presented as the verified image capture time.
+5. **Consistency Indicators, Not Authenticity Verdicts:** CMMS emits machine-readable finding codes (e.g. `META_TIMESTAMP_CONFLICT`, `META_DEVICE_FIELD_INCONSISTENCY`) as forensic indicators. It does not issue authenticity judgements.
+6. **Parser Failure Transparency:** A parser failure never silently produces an empty successful record. Partial extraction, warnings, and errors are preserved in the extraction status.
+
+### 4.27.3 Integration Points
+
+| Consuming Subsystem | Metadata Supplied by CMMS |
+| :--- | :--- |
+| **AIF (IRE, AIM, IVE)** | EXIF/XMP/IPTC/GPS fields, image structure, consistency findings, field provenance |
+| **AURAS** | Audio stream metadata, BWF/iXML origination tags, encoder strings, recording timestamps |
+| **VISTA (VRE, VCI, CCTV)** | Container/stream metadata, PTS/timebase, CCTV recorder context, sidecar association |
+| **AIF-GEO** | Extracted GPS coordinates, altitude, direction, DOP indicators, original DMS values |
+| **ONTF** | PCAP/PCAPNG capture-level metadata: link type, snap length, timestamp resolution, interface list |
+| **CEIPL** | Evidence hash binding, extraction activity provenance, derived artifact registration |
+| **UFREDF** | Structured metadata summaries, consistency findings, provenance references, timestamp uncertainty |
+
+### 4.27.4 Finding Taxonomy (Proposed)
+
+```
+META_FORMAT_MISMATCH                META_PARSE_FAILURE
+META_TRUNCATED_BLOCK                META_DUPLICATE_BLOCK
+META_CONFLICTING_VALUES             META_TIMESTAMP_CONFLICT
+META_TIMEZONE_UNKNOWN               META_TIMESTAMP_ORDER_ANOMALY
+META_DEVICE_FIELD_INCONSISTENCY     META_SOFTWARE_FIELD_INCONSISTENCY
+META_GPS_REFERENCE_INVALID          META_GPS_TIME_CONFLICT
+META_CONTAINER_STREAM_INCONSISTENCY META_CCTV_SIDECAR_MISMATCH
+META_CAPTURE_CLOCK_UNCERTAINTY      META_CROSS_EVIDENCE_CONFLICT
+META_INCOMPLETE_EXTRACTION          META_EXTERNAL_ENRICHMENT_REQUIRED
+```
+
+### 4.27.5 Explicit Forensic Limitations
+
+- Metadata can be modified, removed, fabricated, or copied by any party with file access.
+- Valid metadata consistency does **not** prove evidence authenticity.
+- Missing metadata does **not** prove tampering.
+- A camera model field does **not** independently identify a physical device.
+- Filesystem timestamps do **not** automatically represent capture time.
+- Timezone inference must be explicit and traceable; silent UTC conversion of unknown-timezone timestamps is prohibited.
+- External enrichment must not be triggered by embedded metadata URLs and must be recorded separately from extracted evidence values.
+- Cross-evidence temporal correlation does not independently establish causality.
+
+### 4.27.6 Implementation Status
+
+| Capability | Phase | Status |
+| :--- | :--- | :--- |
+| CMMS architecture and shared-service specification (CMMS-01..05) | CMMS-A0 | `PLANNED` |
+| Image metadata adapters: EXIF, XMP, IPTC, GPS (CMMS-06..12) | CMMS-A2 | `PLANNED` |
+| Audio metadata adapters: stream, BWF/iXML, ID3 (CMMS-13..18) | CMMS-A3 | `PLANNED` |
+| Video and CCTV metadata adapters (CMMS-19..30) | CMMS-A4 | `PLANNED` |
+| Offline PCAP/PCAPNG metadata adapters (CMMS-31..35) | CMMS-A5 | `PLANNED` |
+| Normalisation and timestamp framework (CMMS-40..52) | CMMS-A6 | `PLANNED` |
+| Consistency analysis and cross-evidence correlation (CMMS-47..57) | CMMS-A7 | `PLANNED` |
+| CEIPL provenance, reporting, and security integration (CMMS-58..72) | CMMS-A8 | `PLANNED` |
+| Benchmarking and release readiness (CMMS-73..78) | CMMS-A9 | `PLANNED` |
+
+Source code implementation is **explicitly out of scope** for this documentation release.
+See `PRD.md Section 15`, `TRD.md Section 16`, and `PHASES.md Section 9.B` for full specifications.
+
+
+## 4.28 Cross-Source Timestamp Verification (CSTV)
+
+> **Platform-Wide Temporal Verification & Timeline Correlation Capability — Not a Modality-Specific Engine**
+
+Cross-Source Timestamp Verification (CSTV) is the PS-05 platform-wide temporal verification, clock drift analysis, and multi-source timeline reconstruction capability. It analyzes, compares, correlates, and validates temporal records across multiple independent or related digital evidence sources seized within a forensic case.
+
+```mermaid
+flowchart TD
+    subgraph SOURCES["Multi-Source Evidence Exhibits (Seized Media)"]
+        IMG["Digital Images\n(EXIF DateTimeOriginal)"]
+        AUD["Audio Recordings\n(Sample Index n / fs)"]
+        VID["Video / CCTV\n(Frame PTS * TB / OSD OCR)"]
+        NET["Offline PCAP\n(Packet Nanoseconds)"]
+        GPS_SRC["GPS Tracks\n(NMEA / GPX Fixes)"]
+        LOGS["System Logs\n(Syslog / DVR XML)"]
+    end
+
+    subgraph CMMS_CEIPL["Ingestion, Custody & Extraction"]
+        CEIPL_VAULT["CEIPL WORM Vault\n(POSIX 0400 Read-Only, Dual Hash)"]
+        CMMS_EXTRACT["CMMS Shared Metadata Service\n(Raw Field Extraction & Preservation)"]
+        SOURCES --> CEIPL_VAULT --> CMMS_EXTRACT
+    end
+
+    subgraph CSTV_CORE["CSTV Temporal Verification & Modeling"]
+        CANONICAL["1. Canonical Temporal Model\n(18 Attributes, 27 Semantic Types, Zero Float Loss)"]
+        NORMALIZER["2. Time Normalization Engine\n(UTC Offsets, IANA TZDB, IERS GPS Leap Seconds)"]
+        OFFSET_ENG["3. Clock Offset Estimator\n(Pairwise Difference O_ij(t) = C_i(t) - C_j(t))"]
+        DRIFT_ENG["4. Robust Linear Drift Engine\n(Huber, RANSAC, Theil-Sen, Drift in ppm)"]
+        RESET_ENG["5. Clock Reset & PELT Segmentation\n(Change-Point Detection, Piecewise Models)"]
+        ANCHOR_ENG["6. Cross-Source Event Anchors\n(Audio Transient, Visual Flash, Anti-Circular Split)"]
+        INTERVAL_ENG["7. Interval Algebra & Conflict Graph\n(Allen's 13 Relations, Tarjan's SCC Cycles)"]
+        UNCERT_ENG["8. Uncertainty & Inconclusive Gating\n(Parameter Covariance CI_95%, 14 Decision States)"]
+
+        CMMS_EXTRACT --> CANONICAL --> NORMALIZER
+        NORMALIZER --> OFFSET_ENG --> DRIFT_ENG --> RESET_ENG
+        CANONICAL --> ANCHOR_ENG --> DRIFT_ENG
+        NORMALIZER --> INTERVAL_ENG --> UNCERT_ENG
+    end
+
+    subgraph DELIVERABLES["Court-Admissible Deliverables"]
+        TIMELINE["Master Evidence Timeline Canvas\n(Multi-Tiered Visual Rendering: Raw / UTC / Corrected)"]
+        CONFLICT_REPORT["Sequence Conflict Graph\n(Impossible Temporal Inversions Identified)"]
+        LEGAL_DOSSIER["Section 65B IEA / Section 63 BSA Dossier\n(UFREDF Certified PDF with Hash Lineage)"]
+
+        CSTV_CORE --> TIMELINE & CONFLICT_REPORT
+        TIMELINE & CONFLICT_REPORT --> LEGAL_DOSSIER
+    end
+```
+
+### 4.28.1 Why Cross-Source Timestamp Verification Matters
+In multi-device criminal investigations, digital evidence rarely arrives with synchronized clocks:
+1. **Uncalibrated Real-Time Clocks (RTC):** Surveillance CCTV DVRs frequently drift by seconds or minutes per week, or reset to factory defaults (e.g. 1970-01-01) following power outages.
+2. **Burned-In OSD vs. Stream PTS Conflicts:** Video frame presentation timestamps (PTS) routinely contradict human-readable on-screen display (OSD) clock text due to manual DVR tampering or encoder clock latency.
+3. **Timezone Ambiguity:** Mobile photos, dashcam footage, and voice recordings often store local wall-clock times without embedded UTC offsets, creating multi-hour errors when cross-referenced across jurisdictions or daylight saving transitions.
+4. **Conflation of Metadata Fields:** Novice tools often treat filesystem modification dates (`st_mtime`), container headers (`mvhd`), and sensor exposure dates (`DateTimeOriginal`) interchangeably, leading to catastrophic evidentiary errors in court.
+5. **Cross-Media Desynchronization:** Audio recordings, cellular phone extractions, offline PCAP packet captures, and GPS track logs seized from the same physical incident cannot be reliably synthesized without mathematical offset and drift calibration.
+
+### 4.28.2 Supported Temporal Source Registry (17 Categories)
+CSTV registers and analyzes temporal records across 17 distinct categories:
+- **Image Metadata:** `EXIF.DateTimeOriginal`, `SubSecTimeOriginal`, XMP capture dates.
+- **Image File Properties:** Filesystem timestamps (`ctime`, `mtime`, `crtime`).
+- **Audio Metadata:** BWF `bext` origination timestamp, iXML chunks, ID3 tags.
+- **Audio Signal Timeline:** Sample-accurate continuous timeline ($t = t_0 + n/f_s$).
+- **Video Container:** MP4 `mvhd` creation atom, MKV segment header date.
+- **Video Stream:** Elementary stream start time, timebase ($TB$), `ctts` offset.
+- **Video Frame:** Presentation timestamp (PTS), decode timestamp (DTS).
+- **CCTV Recorder Clock:** Internal DVR/NVR hardware clock setting, OSD text overlay.
+- **CCTV Logs:** Companion DVR export XML/JSON logs, motion events, alarm logs.
+- **Network Capture:** Microsecond and nanosecond packet header timestamps in PCAP/PCAPNG.
+- **GPS Fix:** Satellite constellation date/time, sentence fix epochs (NMEA, GPX).
+- **Geospatial Track:** Trackpoint timestamps from KML, NMEA, and FIT logs.
+- **Operating System:** Windows Event Logs, Linux syslog, auth.log records.
+- **Recorder Clock Config:** Hardware RTC registers, NTP sync configuration files.
+- **Acquisition Process:** Forensic imager hardware timestamp, write-block log.
+- **Processing System:** Platform parser and analysis execution timestamps.
+- **External Reference:** Independently verified ground-truth reference instant.
+
+### 4.28.3 Core Mathematical Foundations
+
+1. **Clock Offset:** Instantaneous difference between source clock $C_i(t)$ and reference timeline $R(t)$:
+   $$O_i(t) = C_i(t) - R(t)$$
+2. **Linear Clock Drift Model:** For paired event observations over an unperturbed operational interval:
+   $$t_i = a_i + b_i T + \epsilon_i$$
+   where $t_i$ is observed clock time, $T$ is reference time, $a_i$ is base offset, and $b_i$ is relative clock rate. Estimated drift in parts per million:
+   $$\text{Drift}_{\text{ppm}} = (b_i - 1) \times 10^6$$
+3. **Derived Reference Correction:** When the clock model is validated across $[T_{\min}, T_{\max}]$:
+   $$\hat{T} = \frac{t_i - a_i}{b_i}$$
+4. **Uncertainty Propagation:** For independent measurement errors $\sigma_1$ and $\sigma_2$:
+   $$\sigma_{\text{diff}} = \sqrt{\sigma_1^2 + \sigma_2^2}$$
+5. **Piecewise Change-Point Segmentation:** When PELT change-point detection flags a clock jump $|\Delta O| > \tau$, CSTV fits piecewise linear models with non-overlapping validity bounds, strictly prohibiting a single global regression across a reset.
+
+### 4.28.4 Integration with Existing Subsystems
+
+| Consuming Subsystem | Integration Point with CSTV |
+| :--- | :--- |
+| **CMMS** | CSTV consumes raw and normalized metadata records, timestamp semantics, and field provenance. |
+| **CEIPL** | CSTV anchors derived clock models, timeline snapshots, and conflict graphs in the CEIPL Merkle DAG. |
+| **AIF** | Supplies image capture timestamps, multi-image sequences, and visual event landmarks. |
+| **AURAS** | Supplies sample-accurate audio timelines ($t = t_0 + n/f_s$) and acoustic transient onsets. |
+| **VISTA** | Supplies frame presentation timestamps ($t = \text{PTS} \times TB$), OCR clock strings, and AV sync offsets. |
+| **AIF-GEO** | Supplies GPS fix epochs, leap-second tables, and geodesic track intervals. |
+| **ONTF** | Supplies packet capture timestamps, network flow timelines, and connection event windows. |
+| **UFREDF** | Consumes master evidence timelines, clock calibration certificates, and Section 65B/63 BSA annexures. |
+
+### 4.28.5 Explicit Forensic Limitations & Uncertainty Principles
+1. A timestamp is an electronically recorded claim about time, not autonomous proof of physical reality.
+2. Uncalibrated quartz real-time clocks routinely exhibit non-linear drift under thermal stress.
+3. Filesystem timestamps (`mtime`, `ctime`) change trivially during file copying or ingestion.
+4. Embedded EXIF tags can be modified without altering image raster pixels.
+5. Unknown timezone values must remain `UNKNOWN`; silent conversion to local workstation time is prohibited.
+6. GPS time and UTC differ by leap seconds; conversion requires validated historical tables.
+7. A single event anchor establishes relative offset only; clock drift cannot be extrapolated.
+8. A mathematical clock model does not prove the chosen reference clock was accurate.
+9. High regression $R^2$ does not prove the selected event anchors were correctly identified.
+10. Audiovisual lip-sync does not establish the absolute time of day the recording occurred.
+11. Network packet timestamps reflect gateway capture timing, not remote application creation time.
+12. CCTV on-screen display (OSD) clocks may lag or advance relative to internal presentation timestamps.
+13. Legitimate video remuxing or transcoding rewrites container atoms while preserving video frames.
+14. Video B-frame decode order ($\text{DTS}$) naturally precedes presentation order ($\text{PTS}$); this is legitimate codec behaviour.
+15. Power outages, battery removals, or NTP steps cause legitimate discontinuous clock jumps.
+16. Missing metadata does not constitute affirmative proof of malicious tampering.
+17. Cross-source temporal agreement does not prove common authorship or causation.
+18. Corrected timestamps are model-derived estimates and must always be labeled as such.
+19. All calibrations must be accompanied by explicit uncertainty intervals ($CI_{95\%}$).
+20. Inconclusive outcomes are legally and scientifically valid forensic determinations.
+
+### 4.28.6 Implementation Status
+
+| Capability | Phase | Status |
+| :--- | :--- | :--- |
+| Temporal architecture baseline & specialist subsystem delegation (CSTV-01..05) | CSTV-A0 | `PLANNED` |
+| 17-source registry, 27-state semantics, and PostgreSQL persistence (CSTV-06..19) | CSTV-A1 | `PLANNED` |
+| Time normalization, timezone framework, and GPS leap-second handling (CSTV-20..25) | CSTV-A2 | `PLANNED` |
+| Canonical event timeline, interval algebra, and multi-tier rendering (CSTV-57..59, 69..72) | CSTV-A3 | `PLANNED` |
+| Pairwise clock offset estimation and reference clock hierarchy (CSTV-26..27) | CSTV-A4 | `PLANNED` |
+| Robust linear drift modeling (Huber/RANSAC/Theil-Sen) and PELT resets (CSTV-28..42) | CSTV-A5 | `PLANNED` |
+| Cross-source event anchors and anti-circular calibration protocols (CSTV-51..56) | CSTV-A6 | `PLANNED` |
+| Multi-source cross-media correlation (Image, Audio, Video, CCTV, PCAP, GPS) (CSTV-43..50) | CSTV-A7 | `PLANNED` |
+| Sequence conflict graph, Tarjan cycle detection, and 22 findings (CSTV-60..68) | CSTV-A8 | `PLANNED` |
+| CEIPL Merkle provenance, WORM vault locking, and Section 65B/63 BSA dossiers (CSTV-73..78) | CSTV-A9 | `PLANNED` |
+| 500-fixture benchmarking, false-positive suppression, and release gates (CSTV-79..84) | CSTV-A10 | `PLANNED` |
+
+Source code implementation is **explicitly out of scope** for this documentation release.
+See `PRD.md Section 16`, `TRD.md Section 17`, and `PHASES.md Section 14` for full specifications.
+
 
 ## 5. Implementation Status
 
