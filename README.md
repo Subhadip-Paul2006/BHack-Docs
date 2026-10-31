@@ -18,7 +18,7 @@ In contemporary cyber-crime investigations, extortion cases, surveillance review
 
 Manual forensic examination is time-consuming, requires scarce specialized expertise, and struggles with complex multi-modal manipulations. The **PS-05 Platform** is an enterprise-grade, modular, explainable, and auditable digital forensics system engineered for law enforcement agencies (state police departments, Bihar Police cyber cells) and Forensic Science Laboratories (FSLs). It provides:
 
-1. **Cryptographic Chain of Custody & Evidence Integrity Verification (CEIPL / EIV):** End-to-end evidence integrity verification, Write-Once-Read-Many (WORM) storage, pre-decode streaming dual-hashing (SHA-256 and SHA-512 / SHA3-256), RFC 8785 canonical manifests, detached Ed25519 signatures, RFC 3161 trusted timestamps, append-only hash-chained custody ledgers, derivative Merkle DAG lineage, and standalone offline verification.
+1. **Cryptographic Chain of Custody & Evidence Integrity Verification (CEIPL / EIV):** End-to-end evidence integrity verification, Write-Once-Read-Many (WORM) storage, pre-decode streaming dual-hashing (SHA-256 and SHA3-512), RFC 8785 canonical manifests, detached Ed25519 signatures, RFC 3161 trusted timestamps, append-only hash-chained custody ledgers, derivative Merkle DAG lineage, and standalone offline verification.
 2. **AIF Advanced Image Forensics Subsystem:** High-resolution image understanding (IVE), physics/frequency reverse engineering (IRE), AI generation/steganography detection (AIM), and judicial biometric comparison (FPA).
 3. **AURAS Audio Forensics Subsystem:** Deep electroacoustic signal analysis and Audio Edit & Splice Localisation (ARE/AESL), multilingual voice and overlap-aware diarization (MVSI), and calibrated multi-branch audio deepfake detection (ADDE).
 4. **VISTA Video & CCTV Forensics Subsystem:** Modular five-engine video forensics architecture:
@@ -34,7 +34,7 @@ Manual forensic examination is time-consuming, requires scarce specialized exper
 8. **Image Manipulation Localisation Framework (IMLF):** Shared spatial reasoning capability within AIF that localises, segments, and corroborates copy-move, splicing, inpainting, AI-generated patch, and facial manipulations into calibrated pixel masks and vector polygons with multi-scale tiling and an examiner review workbench.
 9. **Cross-Media Metadata Service (CMMS):** A shared, evidence-aware metadata extraction, normalisation, validation, consistency-analysis and correlation layer supporting digital images, audio recordings, video files, CCTV exports, offline PCAP/PCAPNG captures, and geospatial evidence. CMMS preserves raw metadata values, produces canonically normalised representations, identifies anomalies and inconsistencies across fields and evidence items, and exposes structured metadata records to AIF, AURAS, VISTA, AIF-GEO, ONTF, CEIPL, and UFREDF without duplicating modality-specific forensic analysis inside each engine.
 10. **Cross-Source Timestamp Verification (CSTV):** A platform-wide temporal verification and correlation capability that analyzes, compares, and cross-validates timestamps across 17 distinct evidence source categories (EXIF, audio samples, video PTS/DTS, CCTV OSD overlays, offline PCAPs, GPS tracks, device/recorder logs). CSTV estimates clock offsets and linear/piecewise drift rates in parts per million (ppm), detects clock resets, aligns multimodal event anchors, evaluates Allen's interval algebra and sequence conflict graphs, and reconstructs unified multi-tiered case timelines without overwriting source metadata.
-11. **Court-Admissible Legal Certification:** Automated generation of tamper-evident electronic evidence certificates under **Section 65B of the Indian Evidence Act (IEA)** and **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** with Archify JSON Intermediate Representation (IR).
+11. **Cryptographic Evidence Package & Legal Certificate Preparation:** Automated generation of cryptographically verifiable, tamper-evident forensic evidence packages for examiner review and legal submission under **Section 65B of the Indian Evidence Act (IEA)** and **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** with Archify JSON Intermediate Representation (IR). Court admissibility is determined by the presiding judicial authority upon the authorized human examiner's statutory declaration — not by the platform software alone.
 
 ---
 
@@ -47,7 +47,7 @@ Manual forensic examination is time-consuming, requires scarce specialized exper
 - **G-4:** Identify surveillance video tampering (missing CCTV frames, looping sequences, tampered digital clock overlays, desynchronized audio).
 - **G-5:** Ingest and analyze offline network traffic captures (PCAP/PCAPNG) associated with seized PCs or mobile devices to isolate attack patterns without requiring live network monitoring.
 - **G-6:** Extract, validate, enrich, and cross-correlate image location evidence (EXIF GPS, visual landmarks, external tracks, solar/shadows, terrain) while preserving raw originals and maintaining explicit uncertainty bounds.
-- **G-7:** Produce verifiable, court-ready PDF certificates and Archify JSON Intermediate Representation (IR) graphs.
+- **G-7:** Produce cryptographically verifiable, examiner-reviewed forensic evidence PDF dossiers (prepared for legal submission under Section 65B IEA / Section 63 BSA) and Archify JSON Intermediate Representation (IR) graphs.
 - **G-8:** Operate 100% offline in air-gapped forensic laboratory environments with zero external network dependencies.
 - **G-9:** Extract, preserve, normalise and cross-correlate technical metadata from all evidence modalities through a shared CMMS service, eliminating duplicate extraction implementations and providing structured, field-level provenance to every forensic subsystem.
 
@@ -131,7 +131,7 @@ flowchart TB
         BENCH_RUNNER["Unified 19-Parameter Benchmark Runner (Modes A-G)"]
         CALIB_OOD["Confidence Calibration (ECE <= 0.05) & OOD Gating"]
         ABSTAIN_POLICY["Abstention Engine (INCONCLUSIVE_OOD / LOW_QUALITY)"]
-        APPROVAL_GATES["12-Gate Scoped Model Approval (VALIDATED_FOR_DEFINED_SCOPE)"]
+        APPROVAL_GATES["6-Gate Scoped Model Approval (VALIDATED_FOR_DEFINED_SCOPE)"]
     end
 
     subgraph CRYPTO["🔐 CEIPL Shared Cryptographic & Provenance Foundation"]
@@ -141,7 +141,7 @@ flowchart TB
         C2PA["C2PA Content Credentials & Provenance Parser"]
     end
 
-    subgraph REPORT["📜 Forensic Dossier & Legal Certification"]
+    subgraph REPORT["📜 Forensic Dossier & Statutory Certificate Preparation"]
         AGG["Cross-Engine Finding Aggregator"]
         ARCHIFY["Archify Forensic JSON IR & Visualizer"]
         PDF["Section 65B IEA / Section 63 BSA PDF Certificate"]
@@ -188,7 +188,7 @@ To overcome these challenges, **AURAS** employs three independent, decoupled eng
 2. **MVSI (Multilingual Voice & Speaker Intelligence Engine):** Biometric and linguistic intelligence, isolating speakers, transcribing turns, handling simultaneous overlapping speech, and classifying Indian languages/code-switching.
 3. **ADDE (Audio Deepfake Detection Engine):** Machine learning detection of synthetic, voice-converted, and vocoded speech using raw waveforms, spectrotemporal graphs, and self-supervised representations.
 
-All three engines consume read-only, traceable working artifacts generated from the WORM vault. The cross-engine aggregation layer synthesizes these independent findings into a court-admissible forensic dossier without manufacturing artificial certainty.
+All three engines consume read-only, traceable working artifacts generated from the WORM vault. The cross-engine aggregation layer synthesizes these independent findings into a structured forensic evidence dossier without manufacturing artificial certainty.
 
 ### 4.2 Engine Comparison Matrix
 
@@ -290,7 +290,7 @@ flowchart TD
 > **Subsystem Boundary Definition:**
 > **AIF (Advanced Image Forensics)** is the specialized image forensics subsystem of the PS-05 platform, operating in parallel with the **AURAS** audio subsystem. AIF provides research-oriented, security-conscious, implementation-ready forensic verification for static digital images, document captures, scanned certificates, and photographic evidence.
 
-Image evidence in modern criminal and cyber investigations presents distinct forensic challenges. Digital images are subject to compression artifacts, multi-stage social media re-encoding, localized geometric tampering, generative AI synthesis, inpainting, facial manipulation, and steganographic payload concealment. To deliver mathematically defensible, court-admissible forensic verification, **AIF** is organized into three decoupled principal engines, one cross-cutting biometric analysis module, and a unified cryptographic integrity foundation:
+Image evidence in modern criminal and cyber investigations presents distinct forensic challenges. Digital images are subject to compression artifacts, multi-stage social media re-encoding, localized geometric tampering, generative AI synthesis, inpainting, facial manipulation, and steganographic payload concealment. To deliver mathematically defensible, rigorous, cryptographically verifiable forensic verification, **AIF** is organized into three decoupled principal engines, one cross-cutting biometric analysis module, and a unified cryptographic integrity foundation:
 
 1. **IVE (Image Understanding & Visual Evidence Engine):** First-pass visual triage, universal ingestion profiling, hierarchical evidence classification (~150 categories across 15 parent groups), task-aware object detection and instance segmentation, people counting with crowd-density handling, face detection and landmarking (FPA), authorized reference comparison, and document OCR / layout analysis.
 2. **IRE (Image Reverse Engineering Engine):** Physics-, format-, and signal-based analysis. Deep container and metadata extraction (EXIF, XMP, IPTC, ICC profiles, quantization tables, MakerNotes), colour space and frequency analysis (2D FFT, DCT coefficients, noise residuals), classical computer vision & geometric forensics (Canny edge detection, contour hierarchies, convex hulls, Hough transforms, SIFT/ORB + RANSAC homography, difference maps), copy-move forgery detection, splicing localization, camera sensor profiling (PRNU, CFA demosaicing consistency), and edit/transfer history analysis.
@@ -405,7 +405,7 @@ Video evidence combines high-volume spatial imagery, temporal motion vectors, co
 - **Surveillance/CCTV tampering:** Altered on-screen display (OSD) clock timestamps, camera switching artifacts, or proprietary export header rewrites.
 
 #### Architectural Boundaries & Fundamental Principles
-1. **Overall Platform Alignment:** VISTA operates within the unified PS-05 architecture, sharing the evidence intake pipeline, immutable storage, audit logging, and legal certification infrastructure.
+1. **Overall Platform Alignment:** VISTA operates within the unified PS-05 architecture, sharing the evidence intake pipeline, immutable storage, audit logging, and statutory certificate preparation infrastructure.
 2. **Relationship to AURAS (Audio Subsystem):** VISTA does **not** reimplement audio forensics. Through its **Audio Forensic Bridge (AFB)**, VISTA extracts native audio streams with zero transcoding loss and routes them into **AURAS** (ARE for signal/edit analysis, MVSI for speech diarization/VAD/language ID, and ADDE for voice deepfake detection).
 3. **Relationship to AIF (Image Subsystem):** VISTA maintains logical decoupling from AIF while sharing foundational computer vision paradigms (e.g., face detection landmarks, frequency domain transforms, and localized inpainting detection).
 4. **Shared CEIPL Foundation:** The **Cryptographic Evidence Integrity & Provenance Layer (CEIPL)** is a shared platform core service—**not** a sixth VISTA engine. All VISTA exhibits, stream extracts, and derived artifacts are anchored in CEIPL's cryptographic DAG.
@@ -610,7 +610,7 @@ flowchart TD
 (CCTV OSD Clock Drift delta(t), AFB Audio Power, Cross-Camera Graphs)"]
     CORR --> WORKBENCH["7. Examiner Interactive Workbench
 (Dual Timeline, Cadence Curves, Adjacent Frame Comparator)"]
-    WORKBENCH --> REPORT["8. Court-Certified Forensic Dossier
+    WORKBENCH --> REPORT["8. Structured Forensic Evidence Dossier
 (Section 65B IEA / Section 63 BSA Signed PDF Report)"]
 ```
 
@@ -652,7 +652,7 @@ eq$ presentation order is recognized as legitimate codec behaviour; verified via
 | **Multi-Camera Alignment** | Independent WORM exhibit preservation, UTC normalization, relative clock offset estimation $\Delta t_{\text{cam1-cam2}}$, and trajectory handoff corroboration. | CCTV Multi-Cam Engine |
 | **Audio-Visual Alignment** | AFB lossless audio stream-copy, ambient noise continuity during video freezes, and AVSC SyncNet talking-head lip-sync cross-correlation ($S_{\text{sync}}$). | AFB & AVSC Engines |
 | **Examiner Review Workbench** | Synchronized dual-timeline canvas, interactive cadence curves, similarity heatmaps, optical flow vector overlays, and side-by-side adjacent frame comparators. | VISTA Workbench UI |
-| **Court-Admissible Legal Dossier** | Automated compilation of Section 65B IEA / Section 63 BSA certified PDF dossiers with SHA-256/SHA3-512 hashes, frame numbers, and examiner Ed25519 signatures. | CEIPL / Reporting |
+| **Structured Forensic Evidence Dossier** | Automated compilation of Section 63 BSA certificate schedules with SHA-256/SHA3-512 hashes, frame numbers, and examiner Ed25519 signatures. | CEIPL / Reporting |
 
 #### Evidentiary Principles & Uncertainty Governance
 - **Observable Anomaly vs Historical Deletion:** An isolated video file with cleanly rewritten timestamps cannot definitively prove that frames were deleted prior to acquisition. The system labels findings as `FRAME_GAP_OBSERVED` or `POSSIBLE_FRAME_DELETION` and strictly abstains from asserting uncorroborated historical events in court testimony.
@@ -695,7 +695,7 @@ For deeper technical and implementation details, see:
 > **Architectural Boundary Clarification:** The **ONTF (Offline Network Traffic Forensics)** subsystem is dedicated strictly to the post-incident examination of previously captured, legally seized network traffic files (`.pcap` and `.pcapng`).
 > **Strict Operational Boundary:** ONTF is an **offline forensic analysis tool**, NOT an intrusion detection system (IDS), network sniffer, continuous Zeek monitor, or live packet tap. It operates entirely on static capture artifacts in air-gapped environments.
 
-In contemporary cyber investigations—ranging from corporate espionage and ransomware outbreaks to mobile spyware and unauthorized data exfiltration—seized PCs, smartphones, or network appliances are often accompanied by historical packet captures. Investigating raw packet captures manually via generic packet viewers is labor-intensive, error-prone, and struggles to establish court-admissible device attribution or timeline correlation.
+In contemporary cyber investigations—ranging from corporate espionage and ransomware outbreaks to mobile spyware and unauthorized data exfiltration—seized PCs, smartphones, or network appliances are often accompanied by historical packet captures. Investigating raw packet captures manually via generic packet viewers is labor-intensive, error-prone, and struggles to establish mathematically defensible device attribution or timeline correlation.
 
 The ONTF subsystem automates offline evidence intake, safe parsing, telemetry normalization, multi-dimensional feature extraction, and MITRE ATT&CK mapping while strictly preserving the raw evidentiary bitstream.
 
@@ -767,7 +767,7 @@ flowchart TD
     end
 
     DETECT_LAYER --> FUSION["Cross-Modal Finding Aggregator & Conflict Resolver"]
-    FUSION --> REPORT["8. Court-Admissible Forensic Dossier<br/>(Section 65B/63 BSA Certified PDF + Archify JSON IR)"]
+    FUSION --> REPORT["8. Structured Forensic Evidence Dossier<br/>(Section 63 BSA Schedule + Archify JSON IR)"]
 ```
 
 #### Detailed Execution Steps:
@@ -778,7 +778,7 @@ flowchart TD
 5. **Scoping & Device Attribution:** For Mode B, resolves candidate IP and MAC addresses from DHCP, ARP, and NDP transactions. Assigns a formal attribution confidence score and isolates flows involving the target device.
 6. **Feature Engineering:** Computes bidirectional flow metrics, inter-arrival time (IAT) distributions, FFT-based beacon periodicity scores, TCP flag ratios, and communication graph centrality metrics.
 7. **Multi-Stage Threat Detection:** Evaluates deterministic behavioral rules, statistical anomaly detectors, and supervised flow classifiers; correlates multi-stage event sequences; and maps validated anomalies to MITRE ATT&CK techniques.
-8. **Forensic Reporting:** Assembles findings into an 11-part court-admissible electronic evidence dossier certified under Section 65B IEA / Section 63 BSA, sealed with Ed25519 digital signatures and RFC 3161 timestamps.
+8. **Forensic Reporting:** Assembles findings into an 11-part structured electronic evidence dossier with Section 63 BSA certificate schedules, sealed with Ed25519 digital signatures and RFC 3161 timestamps.
 
 ---
 
@@ -817,7 +817,7 @@ eq$ Verified Evidence:** Information supplied by the investigator (e.g., "This P
 eq$ Confirmed Causation or Intent:** Detecting multiple failed connections or unusual ports indicates anomalous traffic; it does not independently prove criminal intent or a confirmed breach. Legitimate software bugs, network misconfigurations, P2P applications, and cloud telemetry often mimic suspicious behavior.
 8. **Forecasted States $
 eq$ Historical Reality:** Where bounded temporal world-models or graph forecasting models project potential attack propagation horizons, these candidate future states are purely probabilistic simulations. They must **NEVER** be cited as historical events that actually took place.
-9. **Legitimate Inconclusive Attribution:** When packet headers lack layer-2 frames, DHCP logs are missing, multiple devices share a single NAT IP, or traffic volume is insufficient, **"Attribution Inconclusive / Insufficient Network Telemetry"** is the mandatory, court-admissible scientific determination.
+9. **Legitimate Inconclusive Attribution:** When packet headers lack layer-2 frames, DHCP logs are missing, multiple devices share a single NAT IP, or traffic volume is insufficient, **"Attribution Inconclusive / Insufficient Network Telemetry"** is the mandatory, examiner-reviewed scientific determination.
 
 For deeper technical and implementation details, see:
 - Product requirements and personas: [PRD.md § 6.5](PRD.md)
@@ -966,7 +966,7 @@ flowchart LR
     BENCH --> CAL_OOD["4. Calibration & OOD Engine\n(Platt/Temp Scaling, Mahalanobis Distance)"]
     CAL_OOD --> GATING{"5. OOD & Signal Gating\nS_OOD <= tau_OOD & Quality OK?"}
 
-    GATING -->|Yes: In-Distribution| GATES["6. 12-Gate Scoped Approval\n(ECE <= 0.05, Drop <= 15%, Disparity <= 2.0x)"]
+    GATING -->|Yes: In-Distribution| GATES["6. 6-Gate Scoped Approval (12 Verification Checks)\n(ECE <= 0.05, Drop <= 15%, Disparity <= 2.0x)"]
     GATING -->|No: Domain Shift / Low Signal| ABSTAIN["7. First-Class Abstention\n(INCONCLUSIVE_OOD / LOW_QUALITY)"]
 
     GATES -->|All Gates Passed| APPROVE["VALIDATED_FOR_DEFINED_SCOPE\n(Signed Ed25519 Approval Record)"]
@@ -992,8 +992,8 @@ flowchart LR
 | **Spatio-Temporal Localisation Metrics** | Measures where manipulation occurred: spatial mask Intersection-over-Union ($\operatorname{IoU}$) with safe zero-union division handling ($\operatorname{IoU}=1.0$ if both clean), temporal interval intersection ($\operatorname{tIoU}$), and boundary transition error ($\Delta t_{\text{boundary}}$). Localisation is evaluated independently from detection. | AIF, AURAS, VISTA |
 | **Cross-Modal Fusion & Anti-Averaging Invariant** | Strictly prohibits naive score averaging ($\text{Authenticity} \neq \frac{\text{Image} + \text{Audio} + \text{Video}}{3}$). Traces shared pixel and audio dependencies in a Directed Acyclic Graph (DAG) and highlights cross-modal contradictions (`SELECTIVE_VIDEO_MANIPULATION_WITH_GENUINE_AUDIO`). | Cross-Engine Aggregator |
 | **Subgroup Fairness & Disparity Audit** | Evaluates performance disparities across demographic groups (skin tone, gender/age where labeled), device tiers, illumination levels, and regional dialects/languages. Disparity ratios $> 2.0\times$ trigger mandatory scope restrictions. | AIF, AURAS, VISTA |
-| **12-Gate Scoped Model Approval** | Models are promoted to active investigation triage only after satisfying 12 formal release gates. Unverified thresholds are marked `THRESHOLD_REQUIRES_VALIDATION`. Approved models receive status `VALIDATED_FOR_DEFINED_SCOPE` sealed with an examiner Ed25519 signature. | Platform Governance |
-| **24-Item WORM Evaluation Bundle** | Emits an immutable 24-item artifact bundle archived in the WORM storage vault with POSIX `0400` permissions, generating court-admissible Section 65B/63 BSA validation dossiers and Archify JSON IR graphs. | CEIPL / Reporting |
+| **6-Gate Scoped Model Approval** | Models are promoted to active investigation triage only after satisfying 6 formal sequential release gates (Gate 1 Registration → Gate 2 Functional Validation → Gate 3 Performance Benchmarking → Gate 4 Calibration & OOD → Gate 5 Forensic Expert Review → Gate 6 Scoped Release). Unverified thresholds are marked `THRESHOLD_REQUIRES_VALIDATION`. Approved models receive status `VALIDATED_FOR_DEFINED_SCOPE` sealed with an examiner Ed25519 signature. | Platform Governance |
+| **24-Item WORM Evaluation Bundle** | Emits an immutable 24-item artifact bundle archived in the WORM storage vault with POSIX `0400` permissions, generating structured Section 65B/63 BSA validation dossiers for examiner review and Archify JSON IR graphs. | CEIPL / Reporting |
 
 #### Modality Validation Protocols at a Glance
 
@@ -1028,7 +1028,7 @@ For comprehensive technical specifications, mathematical formulas, Pydantic sche
 ### 4.27 Image Manipulation Localisation Framework (IMLF)
 
 > **Architectural Boundary Clarification:** The **Image Manipulation Localisation Framework (IMLF)** is a shared spatial reasoning, coordinate normalisation, and evidence fusion capability embedded directly within the **Advanced Image Forensics (AIF)** subsystem.
-> IMLF does **NOT** replace the specialized detection engines of AIF (**IRE**, **AIM**, **IVE**, or **FPA**). Instead, it coordinates their spatial findings, normalizes coordinate reference frames across geometric transforms, resolves multi-detector conflicts, evaluates pixel-level localization uncertainty, and compiles court-admissible forensic masks.
+> IMLF does **NOT** replace the specialized detection engines of AIF (**IRE**, **AIM**, **IVE**, or **FPA**). Instead, it coordinates their spatial findings, normalizes coordinate reference frames across geometric transforms, resolves multi-detector conflicts, evaluates pixel-level localization uncertainty, and compiles examiner-reviewed forensic masks.
 
 #### Why Image-Level Classification $\neq$ Pixel-Level Localisation
 In court testimony under **Section 63 of Bharatiya Sakshya Adhiniyam, 2023 (BSA)**, an assertion that an image is *"likely manipulated"* without spatial evidence is legally fragile:
@@ -1069,7 +1069,7 @@ flowchart LR
 | **Multi-Detector Evidence DAG** | Spatial overlap clustering ($\operatorname{IoU} \ge 0.50$), Bayesian consensus scoring, co-dependent backbone tracking, and strict anti-averaging invariant enforcement. | IMLF Fusion Core |
 | **Mathematical Evaluation Suite** | Independent image-level ROC-AUC / CDR @ 0.01 FAR and pixel-level metrics: $\operatorname{IoU}$, Dice coefficient, Matthews Correlation Coefficient (MCC), and boundary $F_1$ ($\tau = 2\text{ px}$). | CDVF / IMLF Benchmark |
 | **Examiner Review Workbench** | Interactive multi-layer canvas, real-time threshold and reliability sliders ($< 50\text{ ms}$ latency), synchronized split-view panning, and examiner disposition audit trails. | Archify IR / UI |
-| **Court-Admissible Legal Dossier** | Automated compilation of certified PDF dossiers under Section 65B IEA / Section 63 BSA with bitstream SHA-256 hashes, vector polygon overlays, and examiner Ed25519 signatures. | CEIPL / Reporting |
+| **Structured Forensic Evidence Dossier** | Automated compilation of Section 63 BSA certificate schedules with bitstream SHA-256 hashes, vector polygon overlays, and examiner Ed25519 signatures. | CEIPL / Reporting |
 
 #### Actual vs. Planned Implementation Status
 - **Specification & Technical Contracts:** `DOCUMENTED` — Architectural specifications, manipulation taxonomy, Pydantic v2 schemas, and metric formulations are established in [PRD.md § 13](PRD.md), [TRD.md § 10.11, § 12.4](TRD.md), and [PHASES.md § 5.B](PHASES.md).
@@ -1214,7 +1214,7 @@ flowchart TD
         NORMALIZER --> INTERVAL_ENG --> UNCERT_ENG
     end
 
-    subgraph DELIVERABLES["Court-Admissible Deliverables"]
+    subgraph DELIVERABLES["Evidentiary Deliverables"]
         TIMELINE["Master Evidence Timeline Canvas\n(Multi-Tiered Visual Rendering: Raw / UTC / Corrected)"]
         CONFLICT_REPORT["Sequence Conflict Graph\n(Impossible Temporal Inversions Identified)"]
         LEGAL_DOSSIER["Section 65B IEA / Section 63 BSA Dossier\n(UFREDF Certified PDF with Hash Lineage)"]
@@ -1369,9 +1369,9 @@ flowchart TD
         REFINE --> HYSTERESIS --> QC_CHECK
     end
 
-    subgraph DELIVERABLES["5. Court-Certified Deliverables"]
+    subgraph DELIVERABLES["5. Evidentiary Deliverables"]
         CANVAS["Examiner Review Workbench (Sample-Accurate Scrub Canvas)"]
-        UFREDF_DOC["UFREDF Section 65B/63 BSA Dossier (Court-Certified PDF)"]
+        UFREDF_DOC["UFREDF Section 63 BSA Dossier (Cryptographically Signed PDF)"]
         QC_CHECK --> CANVAS --> UFREDF_DOC
     end
 ```
@@ -1462,7 +1462,7 @@ The **Unified Forensic Dashboard (UFD)** and its practitioner interface, the **U
 
 $$\text{Case Creation} \longrightarrow \text{Evidence Registration} \longrightarrow \text{Integrity Verification} \longrightarrow \text{Forensic Processing} \longrightarrow \text{Findings Review} \longrightarrow \text{Cross-Modal Correlation} \longrightarrow \text{Examiner Assessment} \longrightarrow \text{Report Issuance}$$
 
-UFD does **not** execute forensic detection algorithms, perform deepfake classifications, or store authoritative evidence bitstreams. Instead, it securely consumes, coordinates, and visualizes authoritative data from existing platform subsystems: **CEIPL** (custody, hashing, WORM fixity), **CMMS** (metadata extraction & normalization), **CSTV** (cross-source timeline verification), **AIF** (image tampering maps & masks), **AURAS** (audio waveform/spectrogram & voice spoofing), **VISTA** (video/CCTV frame cadence & temporal anomalies), **ONTF** (offline network capture flows), **AIF-GEO** (geospatial evidence mapping), **CDVF** (detector calibration, OOD gating & model governance), and **UFREDF** (court-admissible Section 65B/63 BSA dossier compilation).
+UFD does **not** execute forensic detection algorithms, perform deepfake classifications, or store authoritative evidence bitstreams. Instead, it securely consumes, coordinates, and visualizes authoritative data from existing platform subsystems: **CEIPL** (custody, hashing, WORM fixity), **CMMS** (metadata extraction & normalization), **CSTV** (cross-source timeline verification), **AIF** (image tampering maps & masks), **AURAS** (audio waveform/spectrogram & voice spoofing), **VISTA** (video/CCTV frame cadence & temporal anomalies), **ONTF** (offline network capture flows), **AIF-GEO** (geospatial evidence mapping), **CDVF** (detector calibration, OOD gating & model governance), and **UFREDF** (structured Section 63 BSA dossier preparation).
 
 ### 4.31.1 Architecture & Subsystem Integration
 
@@ -1598,7 +1598,7 @@ UFD is engineered to comply with **W3C WCAG 2.2 Level AA** standards:
 | End-to-End Workbench Validation & Release Readiness (`UFD-98`..`100`) | UFD-A11 | `PLANNED` |
 
 Source code implementation is **explicitly out of scope** for this documentation release.
-See `PRD.md Section 19`, `TRD.md Section 19`, and `PHASES.md Section 19` for full specifications.
+See `PRD.md Section 20`, `TRD.md Section 20`, and `PHASES.md Section 21` for full specifications.
 
 ### 4.32 Evidence Integrity Verification (EIV)
 
@@ -1612,7 +1612,7 @@ EIV is **not** an independent forensic detection engine, a sixth VISTA engine, o
 flowchart TD
     subgraph INTAKE["1. Pre-Decode Ingestion & Streaming Dual-Hash"]
         RAW["Seized Media Exhibit<br/>(CCTV, Image, Audio, PCAP)"]
-        HASHER["Streaming Dual-Hasher<br/>(NIST FIPS 180-4 SHA-256 + SHA-512)"]
+        HASHER["Streaming Dual-Hasher<br/>(NIST FIPS 180-4 SHA-256 + NIST FIPS 202 SHA3-512)"]
         STAGING["Secure Ephemeral Staging<br/>(POSIX 0600, Max RAM <= 64MB)"]
         RAW --> HASHER & STAGING
     end
@@ -1648,7 +1648,7 @@ flowchart TD
 
 ### 4.32.1 The Ten Core Evidentiary Questions Answered by EIV
 1. **Acquisition Identity:** What exact file or evidence object was acquired, under what initial parameters, and by whom?
-2. **Intake Digest:** What cryptographic digests (SHA-256 and SHA-512 / SHA3-256) were computed over the raw bitstream prior to decoding?
+2. **Intake Digest:** What cryptographic digests (SHA-256 and SHA3-512) were computed over the raw bitstream prior to decoding?
 3. **Post-Acquisition Immutability:** Was the original evidence modified, truncated, or substituted in any way after acquisition?
 4. **Storage Fixity:** Does the stored physical file in the vault match its original baseline integrity reference?
 5. **Transfer Fidelity:** Does the evidence object match bit-for-bit after network transfer or inter-agency retrieval?
@@ -1659,7 +1659,7 @@ flowchart TD
 10. **Independent Verifiability:** Can a complete evidence package be independently verified by defense counsel on an air-gapped machine without trusting the platform software?
 
 ### 4.32.2 Core Architectural Principles & Invariants
-1. **Pre-Decode Streaming Dual-Hashing:** Ingested media is piped directly into streaming SHA-256 and SHA-512 hashers before any decoder, demuxer, or metadata parser opens the file. Peak memory is bounded to $\le 64 \text{ MB}$ even for 50 GB exhibits.
+1. **Pre-Decode Streaming Dual-Hashing:** Ingested media is piped directly into concurrent streaming SHA-256 (NIST FIPS 180-4) and SHA3-512 (NIST FIPS 202 Keccak sponge) hashers before any decoder, demuxer, or metadata parser opens the file. Peak memory is bounded to $\le 64 \text{ MB}$ even for 50 GB exhibits.
 2. **Decoupled 10-Entity Identity Model:** Evidence identity is completely decoupled from filenames, directory paths, storage keys, and algorithms across 10 distinct entities (`case_id`, `evidence_id`, `acquisition_id`, `file_id`, `hash_id`, `metadata_snapshot_id`, `derivative_id`, `custody_event_id`, `manifest_id`, `verification_id`).
 3. **Duplicate Provenance Preservation:** Distinct seizures of identical files retain independent `evidence_id`, `acquisition_id`, and custody ledgers; storage-level deduplication never merges legal provenance.
 4. **RFC 8785 Canonical Manifests:** Metadata and hash references are sealed into versioned JSON manifests canonicalized via RFC 8785 (JCS) for cross-platform deterministic byte reproducibility.
@@ -1673,7 +1673,7 @@ flowchart TD
 
 ### 4.32.3 Ten-Dimension Verification Result Model & Eleven Outcome States
 EIV rejects monolithic `authentic: true/false` flags, evaluating ten distinct dimensions:
-- `BYTE_INTEGRITY`: Current vault bytes match intake SHA-256 and SHA-512 baseline digests.
+- `BYTE_INTEGRITY`: Current vault bytes match intake SHA-256 and SHA3-512 baseline digests.
 - `MANIFEST_INTEGRITY`: Canonical JCS bytes match manifest SHA-256 fingerprint.
 - `SIGNATURE_VALIDITY`: Detached Ed25519 digital signature is mathematically valid.
 - `SIGNER_TRUST`: Signer key recognized, authorized, and unrevoked in KMS.
@@ -1695,7 +1695,7 @@ Synthesis yields eleven canonical outcome states:
 5. WORM storage prevents unauthorized modification within the vault; it does *not* prevent capture-stage tampering.
 6. A custody ledger verifies recorded actions; it cannot automatically record physical unmonitored handling outside the system.
 7. Technical integrity verification does *not* automatically confer judicial admissibility under Section 63 BSA / 65B IEA.
-8. Dual hashes from the same family (SHA-256 / SHA-512) share Merkle-Damgard structural assumptions.
+8. The primary SHA-256 and the SHA3-512 secondary are from structurally independent algorithm families (Merkle-Damgard vs. Keccak sponge), providing dual-hash independence; however, neither can detect pre-acquisition tampering or prove real-world event authenticity.
 9. Merkle inclusion proofs certify specific chunk slices; they never replace whole-file digests as the primary legal reference.
 10. A valid hash of a derived artifact confirms byte integrity of the output; it does *not* certify that the transformation was scientifically valid.
 11. A successful storage backup operation is meaningless without verified post-backup restoration readback.
@@ -1726,13 +1726,13 @@ Synthesis yields eleven canonical outcome states:
 | 16-Mutation Suite, 500-Fixture Benchmark & Air-Gap Image (`EIV-99`..`100`) | CEIPL-EIV-10 | `PLANNED` |
 
 Source code implementation is **explicitly out of scope** for this documentation release.
-See `PRD.md Section 18`, `TRD.md Section 19`, and `PHASES.md Section 18` for full specifications.
+See `PRD.md Section 19`, `TRD.md Section 19`, and `PHASES.md Section 19` for full specifications.
 
 ### 4.33 Unified Forensic Reporting & Evidence Dossier Framework (UFREDF)
 
 > **Shared Reporting, Synthesis & Statutory Attestation Layer — Not a Detection Engine**
 
-The **Unified Forensic Reporting & Evidence Dossier Framework (UFREDF)** serves as the authoritative legal synthesis and reporting layer for the entire PS-05 platform. UFREDF consumes structured findings, metadata, timelines, and custody records from all forensic subsystems, validates them against strict mathematical schemas, and compiles court-admissible electronic evidence dossiers complying with **Section 65B of the Indian Evidence Act, 1872 (IEA)** and **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)**.
+The **Unified Forensic Reporting & Evidence Dossier Framework (UFREDF)** serves as the authoritative legal synthesis and reporting layer for the entire PS-05 platform. UFREDF consumes structured findings, metadata, timelines, and custody records from all forensic subsystems, validates them against strict mathematical schemas, and compiles structured electronic evidence dossiers with certificate schedules prepared under **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** and legacy Section 65B IEA.
 
 #### 4.33.1 High-Level Architecture & Integration
 
@@ -1754,7 +1754,7 @@ flowchart LR
 | :--- | :--- | :--- |
 | **Section 63 BSA Schedule** | Automated statutory certificate detailing device operating conditions, lawful control, and custody. | Dual-control sign-off required (`ROLE-EXAMINER` + `ROLE-REPREV`); bilingual Hindi/English headers. |
 | **RFC 8785 JSON IR** | Bit-identical, canonical machine-readable snapshot conforming to JSON Canonicalization Scheme (JCS). | Schema-validated against Pydantic v2 contracts; deterministic hashing across OS runtimes. |
-| **Archival PDF/A-1b** | Long-term court-admissible document generation using local Typst / WeasyPrint engines. | 100% offline air-gapped compilation; zero dynamic scripts; VeraPDF automated compliance gate. |
+| **Archival PDF/A-1b** | Long-term archival document generation using local Typst / WeasyPrint engines. | 100% offline air-gapped compilation; zero dynamic scripts; VeraPDF automated compliance gate. |
 | **Detached Ed25519 Signatures** | RFC 8032 detached digital signatures for lightweight, zero-dependency courtroom verification. | Strictly separated from embedded PAdES PDF signatures; public keys embedded in export bundle. |
 | **Anti-Averaging DAG** | Preserves individual modality probabilities as separate nodes in an evidence DAG. | Strictly forbids deceptive scalar score averaging; highlights cross-modal conflicts prominently. |
 | **Stand-Alone Export Bundle** | Compiles PDF, JSON IR, signatures, and zero-PyPI Python verifier into an air-gapped zip package. | Zip-slip and path traversal defenses enforced; self-contained verification without platform connectivity. |
@@ -1778,8 +1778,8 @@ The project architecture is finalized; core foundation artifacts and behavioral 
 
 | Component / Subsystem | Current Status | Milestone Reference | Target Tech Stack |
 | :--- | :--- | :--- | :--- |
-| **Foundational Docs & Architecture** | `IMPLEMENTED_AND_VERIFIED` | Phase 0 | Markdown, Mermaid, pyproject.toml |
-| **Archify Configuration Schema** | `IMPLEMENTED_AND_VERIFIED` | Phase 0 | `archify.config.json` |
+| **Foundational Docs & Architecture** | `SPECIFICATION_COMPLETE` (docs); `NOT_STARTED` (software) | Phase 0 | Markdown, Mermaid, pyproject.toml |
+| **Archify Configuration Schema** | `SPECIFICATION_COMPLETE` (docs); `NOT_STARTED` (software) | Phase 0 | `archify.config.json` |
 | **Shared Core & Ingestion (WORM)** | `PLANNED` | Phase 1 / AURAS-A0 / AIF-A1 | Python, hashlib, SQLAlchemy, Redis |
 | **CEIPL Cryptographic Foundation** | `PLANNED` | Phase 1 / AIF-A1, A13 / VISTA-A1 | Ed25519, RFC 8785, RFC 3161, Merkle |
 | **AIF: Ingestion & Defensive Parsing** | `PLANNED` | Phase 4 / AIF-A2 | Pillow (safe limits), OpenCV, magic |
@@ -1790,7 +1790,7 @@ The project architecture is finalized; core foundation artifacts and behavioral 
 | **AIF: Reverse Engineering & Metadata** | `PLANNED` | Phase 4 / AIF-A7 | ExifTool, DQT/SOF parsers, ICC profile |
 | **AIF: Classical Vision & RANSAC** | `PLANNED` | Phase 4 / AIF-A8 | Canny, Sobel, SIFT/ORB, RANSAC |
 | **AIF: Manipulation Localization** | `PLANNED` | Phase 4 / AIF-A9 | TruFor, CMFD, PRNU sensor noise |
-| **AIF-IML: Baseline Contracts & Taxonomy** | `IMPLEMENTED_AND_VERIFIED` | AIF-IML-00 | Pydantic v2, Coordinate Invariants, Schemas |
+| **AIF-IML: Baseline Contracts & Taxonomy** | `SPECIFICATION_COMPLETE` (docs); `NOT_STARTED` (software) | AIF-IML-00 | Pydantic v2, Coordinate Invariants, Schemas |
 | **AIF-IML: Copy-Move Forgery Engine (CMFD)** | `PLANNED` | AIF-IML-01 | SIFT/RootSIFT, RANSAC H, Block-DCT, COVERAGE |
 | **AIF-IML: Splicing, Noise & PRNU Inconsistency**| `PLANNED` | AIF-IML-02 | 2D Wavelet Residuals, Boundary Seams, Columbia |
 | **AIF-IML: Deep Localisation Baselines (TruFor/CAT-Net)**| `PLANNED` | AIF-IML-03 | TruFor RGB+Noise, CAT-Net v2 DCT, SHA-256 |
@@ -1840,7 +1840,7 @@ The project architecture is finalized; core foundation artifacts and behavioral 
 | **CDVF: Cross-Dataset & Unseen Generators** | `PLANNED` | CDVF-A7 | DeepfakeBench, Diffusers, Hugging Face |
 | **CDVF: Confidence Calibration & OOD Gating** | `PLANNED` | CDVF-A8 | Scikit-learn, Platt/Temp Scaling, Mahalanobis |
 | **CDVF: Abstention & Cross-Modal Fusion DAG** | `PLANNED` | CDVF-A9 | NetworkX, Pydantic v2, CEIPL DAG |
-| **CDVF: Subgroup Fairness & 12-Gate Approval** | `PLANNED` | CDVF-A10 | Fairlearn concepts, Ed25519 Signer |
+| **CDVF: Subgroup Fairness & 6-Gate Scoped Approval** | `PLANNED` | CDVF-A10 | Fairlearn concepts, Ed25519 Signer |
 | **CDVF: Continuous Regression & Evaluation Dossier**| `PLANNED`| CDVF-A11 | WeasyPrint, Jinja2, Archify JSON IR |
 | **Platform Legal Reporting & Archify IR** | `PLANNED` | Phase 7 / AURAS-A9 / AIF-A14 / VISTA-A12 / ONTF-A12 | Jinja2, WeasyPrint, Archify |
 | **Web Dashboard & Workbench** | `PLANNED` | Phase 8 | Next.js, React, TailwindCSS |
@@ -1952,7 +1952,7 @@ The platform enforces eleven strict forensic and security invariants across all 
 ## 10. Development Roadmap & Project Phases
 
 Refer to [PHASES.md](PHASES.md) for full phase gates and definitions of done:
-- **Phase 0:** Architecture Baseline & Repository Foundation (`IMPLEMENTED_AND_VERIFIED`)
+- **Phase 0:** Architecture Baseline & Repository Foundation (`SPECIFICATION_COMPLETE` in docs; software `NOT_STARTED`)
 - **Shared Ingestion & Crypto Track:**
   - **AIF-A1 / Phase 1:** Shared Evidence Contracts & Cryptographic Foundation (CEIPL)
   - **AIF-A2:** Secure Image Intake & File Validation
@@ -1983,7 +1983,7 @@ Refer to [PHASES.md](PHASES.md) for full phase gates and definitions of done:
   - **CEIPL-EIV-09:** Cross-Subsystem Engine Adapters & Section 63 BSA PDF Dossier (`PLANNED`)
   - **CEIPL-EIV-10:** 16-Case Mutation Testing, 500-Fixture Benchmark & Air-Gap Image (`PLANNED`)
 - **AIF-IML Image Manipulation Localisation Workstream:**
-  - **AIF-IML-00:** Repository Audit, Localisation Contracts & Baseline Gap Matrix (`IMPLEMENTED_AND_VERIFIED`)
+  - **AIF-IML-00:** Repository Audit, Localisation Contracts & Baseline Gap Matrix (`SPECIFICATION_COMPLETE` in docs; software `NOT_STARTED`)
   - **AIF-IML-01:** Classical Copy-Move Forgery Localisation Engine (SIFT/RootSIFT/RANSAC)
   - **AIF-IML-02:** Image Splicing, Noise Residual & Sensor Inconsistency Engine
   - **AIF-IML-03:** Deep-Learning Manipulation Localisation Baselines (TruFor & CAT-Net v2)
@@ -2042,7 +2042,7 @@ Refer to [PHASES.md](PHASES.md) for full phase gates and definitions of done:
   - **CDVF-A7:** Cross-Dataset (Modes A-G) & Unseen-Generator Evaluation
   - **CDVF-A8:** Confidence Calibration & Out-of-Distribution Gating
   - **CDVF-A9:** Abstention Policy & Cross-Modal Evidence Fusion DAG
-  - **CDVF-A10:** Subgroup Fairness, Robustness & 12-Gate Scoped Approval
+  - **CDVF-A10:** Subgroup Fairness, Robustness & 6-Gate Scoped Model Approval
   - **CDVF-A11:** Continuous Regression, Evaluation Dossier & Release Readiness
 - **Platform Delivery Track:**
   - **Phase 7:** Platform Cross-Engine Reporting (Section 65B/63 BSA Dossier)
@@ -2231,7 +2231,7 @@ The platform can generate a structured certificate containing SHA-256 / SHA3-512
 
 | Capability | Status | Phase Reference |
 | :--- | :--- | :--- |
-| Architecture & documentation baseline | `IMPLEMENTED_AND_VERIFIED` | Phase 0 |
+| Architecture & documentation baseline | `SPECIFICATION_COMPLETE` (docs); `NOT_STARTED` (software) | Phase 0 |
 | CEIPL cryptographic foundation | `PLANNED` | Phase 1 / AIF-A1 / VISTA-A1 |
 | AIF image forensics (IVE / IRE / AIM / FPA) | `PLANNED` | AIF-A2..A15 |
 | AURAS audio forensics (ARE / MVSI / ADDE) | `PLANNED` | AURAS-A0..A10 |
