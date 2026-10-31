@@ -288,6 +288,17 @@ flowchart TD
 | **CEIPL-EIV-09** | Cross-Subsystem & UFREDF Integration | CEIPL / EIV | `PLANNED` | EIV-08 Gate | Engine intake adapters, Section 63 BSA PDF dossier |
 | **CEIPL-EIV-10** | Security, Performance & Release Readiness | CEIPL / EIV | `PLANNED` | EIV-09 Gate | 16-mutation test suite, 500 fixtures, air-gap Docker |
 | **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15, NA13, GA10, CDVF-A11 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
+| **UFREDF-A0** | Reporting Architecture & Legal Standards Discovery | UFREDF / Core | `PLANNED` | Phase 0 Gate | Section 65B/63 BSA legal checklist, Archify IR integration map |
+| **UFREDF-A1** | Canonical JSON IR Schema & RFC 8785 Serializer | UFREDF / Core | `PLANNED` | UFREDF-A0 Gate | RFC 8785 JCS canonical serializer, Pydantic v2 schemas |
+| **UFREDF-A2** | Evidence Inventory & CEIPL Fixity Attestation | UFREDF / Data | `PLANNED` | UFREDF-A1 Gate | Intake schedule compiler, dual-hash tables, Merkle custody parser |
+| **UFREDF-A3** | Scientific Methodology, Provenance & Limitations | UFREDF / Data | `PLANNED` | UFREDF-A2 Gate | Tool/checkpoint provenance recorder, limitation statement builder |
+| **UFREDF-A4** | Cross-Subsystem Findings & Multi-Modal Fusion | UFREDF / Data | `PLANNED` | UFREDF-A3 Gate | AIF, AURAS, VISTA, ONTF, GEO findings & CDVF DAG compiler |
+| **UFREDF-A5** | Reviewer Workflow, Annotations & Digital Signatures | UFREDF / Review | `PLANNED` | UFREDF-A4 Gate | Two-tier review gate, detached Ed25519 & embedded PAdES signers |
+| **UFREDF-A6** | ISO 19005-1 PDF/A-1b Archival Compilation Pipeline | UFREDF / Export | `PLANNED` | UFREDF-A5 Gate | Offline Typst/WeasyPrint sandbox, VeraPDF compliance gate |
+| **UFREDF-A7** | Section 63 BSA Schedule & Redaction Engine | UFREDF / Legal | `PLANNED` | UFREDF-A6 Gate | Device custody affirmations, bilingual headers, PII redaction |
+| **UFREDF-A8** | Standalone Evidence Package & Verification Bundle | UFREDF / Packaging | `PLANNED` | UFREDF-A7 Gate | Self-contained court zip bundle, CLI verifier script, TSA receipt |
+| **UFREDF-A9** | Sandboxing, Security Hardening & Air-Gap Build | UFREDF / Security | `PLANNED` | UFREDF-A8 Gate | SSTI defense, zero network egress audit, memory quota gates |
+| **UFREDF-A10** | End-to-End Validation & FSL Release Benchmark | UFREDF / Release | `PLANNED` | UFREDF-A9 Gate | 50-case benchmark suite, court usability sign-off, release seal |
 | **UFD-A0** | Repository & UX Architecture Discovery | UFD / Core UI | `PLANNED` | Phase 0 Gate | Existing API/frontend discovery map, no backend service duplication |
 | **UFD-A1** | Design System & Navigation Framework | UFD / Core UI | `PLANNED` | UFD-A0 Gate | Shared application shell, WCAG 2.2 AA tokens, navigation router |
 | **UFD-A2** | Authentication, RBAC & Case Workspace | UFD / Case Mgmt | `PLANNED` | UFD-A1 Gate | 9-role authorization, dual-control engine, case management |
@@ -6342,7 +6353,7 @@ Every Cross-Source Timestamp Verification requirement (`CSTV-01` through `CSTV-8
 
 ---
 
-## 16. Dedicated Audio Edit and Splice Localisation Engineering Playbook (AURAS-AESL-00 through AURAS-AESL-10)
+## 17. Dedicated Audio Edit and Splice Localisation Engineering Playbook (AURAS-AESL-00 through AURAS-AESL-10)
 
 The Audio Edit and Splice Localisation (AESL) capability embedded within ARE executes across eleven disciplined, sequential engineering phases:
 
@@ -6693,7 +6704,7 @@ flowchart TD
 
 ---
 
-## 17. AESL Master Requirement Traceability Matrix (AESL-01 through AESL-90)
+## 18. AESL Master Requirement Traceability Matrix (AESL-01 through AESL-90)
 
 Every Audio Edit and Splice Localisation requirement (`AESL-01` through `AESL-90`) is mapped to its PRD specification, TRD technical section, implementing engineering phase, verification checkpoint, expected evidence, and execution status:
 
@@ -6790,7 +6801,7 @@ Every Audio Edit and Splice Localisation requirement (`AESL-01` through `AESL-90
 | **AESL-89** | Controlled 500-Fixture Evaluation Dataset | PRD §17.6 | TRD §18.15 | **AURAS-AESL-10** | `AESL-CP-10-01` | 500 ground-truth fixtures evaluated | `PLANNED` |
 | **AESL-90** | Region-Level IoU & Boundary MAE Metrics | PRD §17.6 | TRD §18.15 | **AURAS-AESL-10** | `AESL-CP-10-02` | $\text{tIoU} \ge 0.75$, $\text{MAE} \le 15\text{ms}$ | `PLANNED` |
 
-## 18. Dedicated Evidence Integrity Verification Engineering Playbook (CEIPL-EIV-00 through CEIPL-EIV-10)
+## 19. Dedicated Evidence Integrity Verification Engineering Playbook (CEIPL-EIV-00 through CEIPL-EIV-10)
 
 ```mermaid id="eivroadmap"
 flowchart TD
@@ -7118,7 +7129,7 @@ flowchart TD
 - **Risks & Mitigations:** Hardware differences in field workstations affecting throughput. *Mitigation:* Auto-tuning chunk buffers based on system RAM.
 - **Current Status:** `NOT_STARTED`
 
-## 19. EIV Master Requirement Traceability Matrix (EIV-01 through EIV-100)
+## 20. EIV Master Requirement Traceability Matrix (EIV-01 through EIV-100)
 
 | Req ID | Requirement Summary | PRD Reference | TRD Reference | Implementation Phase | Checkpoint ID | Verification Method | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -7224,7 +7235,7 @@ flowchart TD
 | **EIV-100** | Air-Gapped Packaging & Security Hardening: Docker deployment with zero egress | PRD §18.7 | TRD §19.17 | **CEIPL-EIV-10** | `EIV-CP-10-04` | Automated Test / Audit | `PLANNED` |
 ---
 
-## 20. Dedicated Unified Forensic Evidence Dashboard Engineering Playbook (UFD-A0 through UFD-A11)
+## 21. Dedicated Unified Forensic Evidence Dashboard Engineering Playbook (UFD-A0 through UFD-A11)
 
 > **Document Status:** `CANONICAL ENGINEERING PLAYBOOK` — Dedicated engineering tasks, deliverables, verification gates, and checkpoints established for the Unified Forensic Evidence Dashboard & Examiner Workbench. Directly operationalizes requirements `UFD-01` through `UFD-100` and deepens Platform Phase 8.
 
@@ -7605,7 +7616,7 @@ flowchart LR
 
 ---
 
-## 21. UFD Master Requirement Traceability Matrix (UFD-01 through UFD-100)
+## 22. UFD Master Requirement Traceability Matrix (UFD-01 through UFD-100)
 
 | Req ID | Requirement Focus | PRD Ref | TRD Ref | Planned Phase | Checkpoint ID | Verification Method | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :---: |
@@ -7709,3 +7720,383 @@ flowchart LR
 | **UFD-98** | System Latency Budgets & SLA Compliance | PRD §19.7 | TRD §20.17 | `UFD-A11` | `UFD-CP-11-01` | Benchmark Test Suite | `PLANNED` |
 | **UFD-99** | Seven End-to-End Investigation Scenarios | PRD §19.8 | TRD §20.11 | `UFD-A11` | `UFD-CP-11-01` | 7 E2E Scenario Suite | `PLANNED` |
 | **UFD-100**| Release Readiness & Examiner Acceptance Sign-Off| PRD §19.8| TRD §20.18 | `UFD-A11` | `UFD-CP-11-02` | Acceptance Dossier Review|`PLANNED` |
+---
+
+## 23. Dedicated Unified Forensic Reporting & Evidence Dossier Framework Engineering Playbook (UFREDF-A0 through UFREDF-A10)
+
+> **Document Status:** `CANONICAL ENGINEERING PLAYBOOK` — Dedicated engineering tasks, deliverables, verification gates, and checkpoints established for the Unified Forensic Reporting & Evidence Dossier Framework. Directly operationalizes requirements `REP-01` through `REP-30` and deepens Platform Phase 7.
+
+```mermaid
+flowchart LR
+    UF_A0["UFREDF-A0\nLegal Standards"] --> UF_A1["UFREDF-A1\nRFC 8785 JSON IR"]
+    UF_A1 --> UF_A2["UFREDF-A2\nInventory & Hashes"]
+    UF_A2 --> UF_A3["UFREDF-A3\nMethodology & Prov"]
+    UF_A3 --> UF_A4["UFREDF-A4\nMulti-Modal Fusion"]
+    UF_A4 --> UF_A5["UFREDF-A5\nDual Signatures"]
+    UF_A5 --> UF_A6["UFREDF-A6\nPDF/A-1b Compiler"]
+    UF_A6 --> UF_A7["UFREDF-A7\nSec 63 BSA Schedule"]
+    UF_A7 --> UF_A8["UFREDF-A8\nEvidence Package"]
+    UF_A8 --> UF_A9["UFREDF-A9\nSandbox & Air-Gap"]
+    UF_A9 --> UF_A10["UFREDF-A10\nRelease Benchmark"]
+```
+
+---
+
+### Phase UFREDF-A0: Reporting Architecture & Legal Standards Discovery
+
+- **Objective:** Establish the statutory evidence reporting requirements under Section 65B of the Indian Evidence Act, 1872 and Section 63 of the Bharatiya Sakshya Adhiniyam, 2023, mapping required schedule fields against all 10 upstream forensic subsystems and the Archify visualization engine.
+- **Prerequisites:** Platform Phase 0 completed; CEIPL, CMMS, CSTV, AIF, AURAS, VISTA, ONTF, CDVF, and UFD contracts documented.
+- **Scope:** Legal requirement mapping, Archify JSON IR interface specification, and reporting boundary definitions.
+- **Detailed Tasks:**
+  1. Compile a comprehensive statutory checklist covering Section 63 BSA electronic record certification requirements.
+  2. Map all metadata, fixity, and finding outputs from CEIPL, CMMS, CSTV, AIF, AURAS, VISTA, ONTF, and CDVF into reporting fields.
+  3. Formulate the boundary contract between UFREDF compilation and Archify visualization post-processing.
+  4. Specify the offline air-gap constraint: zero external font downloads, cloud PDF APIs, or remote signature validation services.
+- **Dependencies:** Platform Phase 0, CEIPL-EIV-00, CDVF-A0.
+- **Deliverables:** Statutory Reporting Specification, Archify Integration Blueprint, Reporting Boundary Contract.
+- **Unit Tests:** `test_statutory_field_mapping()`, `test_subsystem_reporting_contract_coverage()`.
+- **Integration Tests:** `test_archify_ir_compatibility()`, `test_reporting_pipeline_reachability()`.
+- **Security Tests:** `test_offline_reporting_dependencies()`, `test_no_external_font_calls()`.
+- **Accessibility Tests:** Initial PDF/UA-1 accessibility checklist formulation.
+- **Performance Tests:** Architecture discovery query benchmark ($\le 50\text{ms}$).
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFREDF-CP-00-01` | Section 63 BSA statutory fields mapped 100% to upstream forensic subsystem data models | `PLANNED` |
+  | `UFREDF-CP-00-02` | Archify JSON IR post-processing interface cleanly isolated from raw evidence storage | `PLANNED` |
+- **Acceptance Criteria:** Statutory and technical boundaries approved; zero duplicate detection logic in reporting tier.
+- **Exit Criteria:** Reporting architecture specification signed off; discovery manifest committed.
+- **Risks & Mitigations:** Evolving state court practice directions mitigated by modular statutory template engine.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFREDF-A1: Canonical JSON IR Schema & RFC 8785 Serializer
+
+- **Objective:** Develop the canonical JSON Intermediate Representation (IR) schema and RFC 8785 deterministic serializer, providing a tamper-evident, machine-readable snapshot for every generated report.
+- **Prerequisites:** Phase UFREDF-A0 completed.
+- **Scope:** JSON IR schema definition (Pydantic v2), RFC 8785 canonical serializer, and validation harness.
+- **Detailed Tasks:**
+  1. Implement Pydantic v2 schemas for `ReportSnapshot`, `EvidenceScheduleItem`, and `StatutorySection63Schedule`.
+  2. Implement an RFC 8785 compliant canonical serializer ensuring bit-identical serialization across different operating systems.
+  3. Build automated schema validation pipelines rejecting malformed, truncated, or uncalibrated finding inputs.
+  4. Implement canonical dossier URN generation (`urn:ps05:dossier:{case_id}:{uuid}`).
+- **Dependencies:** Phase UFREDF-A0.
+- **Deliverables:** JSON IR Pydantic v2 Schemas, RFC 8785 Canonical Serializer, Dossier URN Generator.
+- **Unit Tests:** `test_rfc8785_canonical_serialization()`, `test_dossier_urn_format()`.
+- **Integration Tests:** `test_json_ir_export_and_parse()`, `test_pydantic_schema_strictness()`.
+- **Security Tests:** `test_json_injection_prevention()`, `test_schema_poisoning_defense()`.
+- **Accessibility Tests:** Screen-reader friendly JSON property naming conventions.
+- **Performance Tests:** Canonical serialization benchmark ($\le 50\text{ms}$ for 10,000-line JSON IR).
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFREDF-CP-01-01` | RFC 8785 serialization produces identical SHA-256 digests across Linux and Windows | `PLANNED` |
+  | `UFREDF-CP-01-02` | 100% of dossier snapshots validate against canonical JSON schema with zero warnings | `PLANNED` |
+- **Acceptance Criteria:** Deterministic serialization verified; schema enforces strict typing.
+- **Exit Criteria:** Serialization test suite passes 100%; canonical IR generator committed.
+- **Risks & Mitigations:** Floating-point serialization differences mitigated by strict integer/decimal string encoding.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFREDF-A2: Evidence Inventory & CEIPL Fixity Attestation
+
+- **Objective:** Build the automated evidence inventory and fixity attestation compiler, pulling pre-decode dual-hashes (`SHA-256` and `SHA3-512`), WORM vault paths, and chain-of-custody ledgers directly from CEIPL.
+- **Prerequisites:** Phase UFREDF-A1, CEIPL-EIV-06.
+- **Scope:** Evidence schedule compilation, hash integrity schedules, and Merkle custody ledger summarization.
+- **Detailed Tasks:**
+  1. Build the evidence schedule compiler collecting all seized exhibits, filenames, file sizes, and MIME types.
+  2. Embed pre-decode dual-hashes (`SHA-256` + `SHA3-512` or hardware-accelerated `SHA-512`) for every referenced exhibit.
+  3. Extract CEIPL immutable custody events, rendering a tamper-evident audit timeline with Merkle root hashes.
+  4. Implement quarantine checks: prevent compilation of official reports referencing exhibits with active fixity failures.
+- **Dependencies:** Phase UFREDF-A1, CEIPL-EIV-06, CMMS-A9.
+- **Deliverables:** Evidence Schedule Compiler, Dual-Hash Fixity Table Generator, Custody Ledger Formatter.
+- **Unit Tests:** `test_evidence_schedule_hash_formatting()`, `test_custody_timeline_chronology()`.
+- **Integration Tests:** `test_ceipl_to_ufredf_inventory_pipeline()`, `test_quarantined_exhibit_reporting_block()`.
+- **Security Tests:** `test_hash_tampering_detection_in_report()`, `test_storage_path_sanitization()`.
+- **Accessibility Tests:** Accessible table markup (`scope="col"`, `scope="row"`) for evidence schedules.
+- **Performance Tests:** Inventory compilation latency $\le 100\text{ms}$ across 1,000 exhibits.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFREDF-CP-02-01` | Every referenced exhibit includes verified pre-decode dual-hashes from CEIPL | `PLANNED` |
+  | `UFREDF-CP-02-02` | Quarantined exhibits automatically halt official courtroom dossier compilation | `PLANNED` |
+- **Acceptance Criteria:** Evidence inventory matches physical exhibits; fixity records verified against CEIPL ledger.
+- **Exit Criteria:** Fixity and custody compilation passes all integrity assertion tests.
+- **Risks & Mitigations:** Custody ledger sequence breaks prevented via Merkle inclusion proof verification.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFREDF-A3: Scientific Methodology, Provenance & Limitations
+
+- **Objective:** Implement the scientific reproducibility and forensic limitation modules, documenting all tool versions, model checkpoint SHA-256 digests, mathematical algorithms, and competing physical hypotheses.
+- **Prerequisites:** Phase UFREDF-A2, CDVF-A11.
+- **Scope:** Methodology documentation, checkpoint provenance schedules, and alternative technical hypothesis builders.
+- **Detailed Tasks:**
+  1. Build the tool and dependency provenance recorder documenting exact software versions, git commits, and OS environments.
+  2. Embed verified model checkpoint SHA-256 checksums from the CDVF model registry.
+  3. Generate mathematical methodology summaries describing algorithms (e.g. PELT, Farneback, SyncNet, XceptionNet).
+  4. Implement the mandatory Forensic Limitations section, detailing environmental bounds, compression artifacts, and acoustic reverberation.
+- **Dependencies:** Phase UFREDF-A2, CDVF-A11.
+- **Deliverables:** Methodology Formatter, Provenance Registry Annexure, Limitation Statement Generator.
+- **Unit Tests:** `test_checkpoint_hash_recording()`, `test_limitation_statement_presence()`.
+- **Integration Tests:** `test_cdvf_to_ufredf_provenance_pipeline()`, `test_methodology_reproducibility()`.
+- **Security Tests:** `test_unverified_model_checkpoint_flagging()`, `test_dependency_tamper_alert()`.
+- **Accessibility Tests:** Clear semantic heading hierarchy for complex scientific explanations.
+- **Performance Tests:** Methodology formatting latency $\le 50\text{ms}$.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFREDF-CP-03-01` | All pre-trained model checkpoints in report have verified SHA-256 checksums | `PLANNED` |
+  | `UFREDF-CP-03-02` | Mandatory forensic limitations and competing hypotheses are present in every report | `PLANNED` |
+- **Acceptance Criteria:** Independent examiners can reproduce analysis from documented parameters.
+- **Exit Criteria:** Methodology and limitation modules validated by certified forensic reviewers.
+- **Risks & Mitigations:** Incomplete limitation disclosures prevented via mandatory schema validation gates.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFREDF-A4: Cross-Subsystem Findings & Multi-Modal Fusion
+
+- **Objective:** Aggregate multi-modal technical findings from AIF, AURAS, VISTA, ONTF, and AIF-GEO, rendering the CDVF cross-modal correlation matrix without scalar probability averaging.
+- **Prerequisites:** Phase UFREDF-A3.
+- **Scope:** Findings ingestion, modality annexures, CDVF correlation matrix rendering, and OOD/inconclusive disclosures.
+- **Detailed Tasks:**
+  1. Ingest modality findings: AIF tampering heatmaps/masks, AURAS spectrograms/splices, VISTA PTS cadences, ONTF flows, and GEO coordinates.
+  2. Render the CDVF cross-modal correlation matrix with the 7-code conflict taxonomy (`CORROBORATED` to `CONFLICTING`).
+  3. Enforce the Anti-Averaging Invariant: multi-modal probabilities are presented as separate DAG nodes, never as a composite average.
+  4. Render first-class disclosures for out-of-distribution (OOD) alerts, degraded signals, and inconclusive outcomes.
+  5. Embed the CSTV aligned timeline and clock drift regression table $\delta(t)$ as a structured technical annexure.
+- **Dependencies:** Phase UFREDF-A3, CSTV-A10, CDVF-A11, UFD-A5.
+- **Deliverables:** Multi-Modal Findings Aggregator, Cross-Modal Matrix Formatter, CSTV Timeline Annexure.
+- **Unit Tests:** `test_multi_modal_findings_formatting()`, `test_anti_averaging_enforcement()`.
+- **Integration Tests:** `test_subsystem_findings_to_report_pipeline()`, `test_cstv_timeline_annexure_binding()`.
+- **Security Tests:** `test_finding_score_tampering_detection()`, `test_no_uncalibrated_scores_labeled_probabilities()`.
+- **Accessibility Tests:** Textual summaries and tabular data alternatives for all embedded heatmaps and spectrograms.
+- **Performance Tests:** Multi-modal findings aggregation $\le 200\text{ms}$ for 500 findings.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFREDF-CP-04-01` | Multi-modal findings are preserved in an evidence DAG without scalar score averaging | `PLANNED` |
+  | `UFREDF-CP-04-02` | CSTV clock drift regression curves and uncertainty intervals are fully documented | `PLANNED` |
+- **Acceptance Criteria:** Cross-modal corroborations and conflicts accurately represented; OOD states fully disclosed.
+- **Exit Criteria:** Findings aggregation verified against multi-modal test case pack.
+- **Risks & Mitigations:** Visual overcrowding mitigated by high-density, structured appendix layouts.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFREDF-A5: Reviewer Workflow, Annotations & Digital Signatures
+
+- **Objective:** Implement the formal report review lifecycle, examiner annotation binding, detached Ed25519 digital signatures, and dual-control courtroom issuance workflow.
+- **Prerequisites:** Phase UFREDF-A4.
+- **Scope:** Review state transitions, technical reviewer approval gate, dual-control sign-off, and Ed25519/PAdES signers.
+- **Detailed Tasks:**
+  1. Implement the nine-state report lifecycle machine (`DRAFT` through `APPROVED`, `SIGNED`, and `ISSUED`).
+  2. Implement the independent technical review gate requiring formal sign-off from `ROLE-TECHREV`.
+  3. Build the examiner annotation editor recording free-text observations bound cryptographically to the report snapshot.
+  4. Implement detached RFC 8032 Ed25519 digital signing of the compiled report SHA-256 digest.
+  5. Implement the dual-control courtroom issuance challenge requiring two distinct authorized signatures (`ROLE-EXAMINER` + `ROLE-REPREV`).
+- **Dependencies:** Phase UFREDF-A4, UFD-A2, UFD-A8.
+- **Deliverables:** Report Review Workflow Engine, Examiner Annotation Ledger, Dual-Signer Cryptographic Module.
+- **Unit Tests:** `test_report_lifecycle_transitions()`, `test_ed25519_detached_signature_verification()`.
+- **Integration Tests:** `test_dual_control_issuance_two_actor_workflow()`, `test_technical_review_gate_enforcement()`.
+- **Security Tests:** `test_unauthorized_issuance_rejection()`, `test_signature_tampering_detection()`.
+- **Accessibility Tests:** Accessible confirmation dialogs and visible status indicators on report review screens.
+- **Performance Tests:** Ed25519 signature generation and verification $\le 10\text{ms}$.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFREDF-CP-05-01` | Report issuance strictly requires dual cryptographic sign-off from Examiner and Reviewer | `PLANNED` |
+  | `UFREDF-CP-05-02` | Detached Ed25519 signatures validate cleanly against examiner public keys | `PLANNED` |
+- **Acceptance Criteria:** Zero unilateral report issuances; reviewer workflow fully auditable.
+- **Exit Criteria:** Dual-control workflow passes multi-actor simulation tests with 100% success.
+- **Risks & Mitigations:** Key compromise mitigated by local hardware token / KMS Ed25519 private key isolation.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFREDF-A6: ISO 19005-1 PDF/A-1b Archival Compilation Pipeline
+
+- **Objective:** Deploy the offline long-term archival PDF/A-1b compilation engine, embedding local fonts, ICC color profiles, and VeraPDF validation gates.
+- **Prerequisites:** Phase UFREDF-A5.
+- **Scope:** PDF/A-1b compiler (Typst / WeasyPrint), font embedding, ICC profile tagging, and VeraPDF validation.
+- **Detailed Tasks:**
+  1. Build the offline compilation pipeline using Typst / WeasyPrint with local Inter, Roboto, and Devanagari fonts.
+  2. Embed DeviceRGB / sRGB ICC color profiles (IEC 61966-2.1) in all rasterized images and heatmaps.
+  3. Enforce strict PDF/A-1b compliance: forbid dynamic JavaScript, audio embeds, and external font links.
+  4. Integrate the automated VeraPDF validator into the build pipeline, rejecting non-compliant documents.
+  5. Implement immutable snapshot storage: write compiled PDF/A-1b files to POSIX 0400 WORM vaults.
+- **Dependencies:** Phase UFREDF-A5.
+- **Deliverables:** PDF/A-1b Compilation Engine, Offline Asset Bundle, VeraPDF Validation Gatekeeper.
+- **Unit Tests:** `test_pdfa1b_metadata_conformance()`, `test_icc_profile_embedding()`.
+- **Integration Tests:** `test_verapdf_compliance_audit()`, `test_worm_vault_snapshot_storage()`.
+- **Security Tests:** `test_no_javascript_in_compiled_pdf()`, `test_no_external_resource_fetches()`.
+- **Accessibility Tests:** Screen-reader tagging (`Tagged PDF`) and bookmarks navigation structure.
+- **Performance Tests:** 50-page PDF/A-1b dossier compilation latency $\le 2.5\text{s}$.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFREDF-CP-06-01` | 100% of compiled dossiers achieve zero errors on official VeraPDF validation audit | `PLANNED` |
+  | `UFREDF-CP-06-02` | Compiled PDF/A-1b files are stored in POSIX 0400 read-only WORM partitions | `PLANNED` |
+- **Acceptance Criteria:** Dossiers strictly conform to ISO 19005-1; archival longevity guaranteed.
+- **Exit Criteria:** VeraPDF compliance test suite passes 100%; WORM write-lock verified.
+- **Risks & Mitigations:** Large PDF rendering slowdowns mitigated by streaming asset compilation.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFREDF-A7: Section 63 BSA Schedule & Redaction Engine
+
+- **Objective:** Implement the Section 63 BSA statutory schedule generator, bilingual Hindi/English certification headers, and privacy-preserving PII redaction engine.
+- **Prerequisites:** Phase UFREDF-A6.
+- **Scope:** Section 63 BSA schedule generator, bilingual headers, and role-authorized PII redaction module.
+- **Detailed Tasks:**
+  1. Build the Section 63 BSA statutory schedule generator with lawful control affirmations and device operating conditions.
+  2. Implement certified bilingual certificate headers (English and Hindi) conforming to state court practice rules.
+  3. Build the role-authorized PII redaction engine allowing masking of sensitive victim details or classified intelligence.
+  4. Enforce redaction lineage: redacted reports link directly to unredacted parent hashes and record authorizing officer credentials.
+- **Dependencies:** Phase UFREDF-A6.
+- **Deliverables:** Statutory Section 63 BSA Schedule Builder, Bilingual Template Engine, Redaction Lineage Module.
+- **Unit Tests:** `test_section_63_bsa_schedule_formatting()`, `test_redaction_lineage_hash_link()`.
+- **Integration Tests:** `test_bilingual_hindi_english_rendering()`, `test_redacted_export_pipeline()`.
+- **Security Tests:** `test_unauthorized_redaction_rejection()`, `test_redacted_data_zero_leakage()`.
+- **Accessibility Tests:** Screen-reader accessible alternative text for redacted content blocks.
+- **Performance Tests:** Redaction transform latency $\le 100\text{ms}$.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFREDF-CP-07-01` | Section 63 BSA legal schedule fully complies with statutory operating condition affirmations | `PLANNED` |
+  | `UFREDF-CP-07-02` | Redacted dossiers maintain cryptographic lineage linking to unredacted parent hash | `PLANNED` |
+- **Acceptance Criteria:** Statutory certificates accepted by judicial standards; redactions legally auditable.
+- **Exit Criteria:** Legal review signed off; bilingual rendering verified on high-resolution print tests.
+- **Risks & Mitigations:** Unicode font rendering anomalies in Hindi prevented via pre-tested Devanagari font glyph sets.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFREDF-A8: Standalone Evidence Package & Verification Bundle
+
+- **Objective:** Build the standalone export packaging engine that compiles the PDF/A-1b dossier, JSON IR, detached signatures, and offline verification scripts into a self-contained court bundle.
+- **Prerequisites:** Phase UFREDF-A7.
+- **Scope:** Packaging engine, standalone Python/CLI verification script, and RFC 3161 TSA verification receipts.
+- **Detailed Tasks:**
+  1. Implement the standalone packaging engine generating a structured zip archive (`Dossier-{case_id}.zip`).
+  2. Embed a standalone, zero-PyPI Python verification script (`verify_dossier.py`) allowing judges/advocates to verify hashes locally.
+  3. Include the compiled PDF/A-1b file, canonical JSON IR file, detached `.sig` Ed25519 signature file, and public keys.
+  4. Embed RFC 3161 timestamp authority (TSA) tokens providing independent proof of existence.
+  5. Compute and append package-level SHA-256 and SHA3-512 manifest digests.
+- **Dependencies:** Phase UFREDF-A7.
+- **Deliverables:** Standalone Packaging Engine, Zero-Dependency Verification Script, Evidence Bundle Manifest.
+- **Unit Tests:** `test_standalone_verification_script()`, `test_package_manifest_integrity()`.
+- **Integration Tests:** `test_export_package_assembly()`, `test_offline_verifier_execution_on_clean_machine()`.
+- **Security Tests:** `test_zip_slip_and_path_traversal_defense()`, `test_package_tampering_detection()`.
+- **Accessibility Tests:** Plain-text `README.txt` included in package detailing verification steps for screen-reader users.
+- **Performance Tests:** Package compilation latency $\le 1.0\text{s}$ for 100MB dossier package.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFREDF-CP-08-01` | Standalone CLI script verifies hashes and Ed25519 signatures on clean Python without PyPI | `PLANNED` |
+  | `UFREDF-CP-08-02` | Export zip package enforces canonical relative paths with zero path traversal vectors | `PLANNED` |
+- **Acceptance Criteria:** Third parties can independently verify dossier integrity without platform connectivity.
+- **Exit Criteria:** Standalone verifier passes automated testing across Windows, macOS, and Linux test VMs.
+- **Risks & Mitigations:** Python version incompatibilities in courts mitigated by standard library-only code (`hashlib`, `urllib`).
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFREDF-A9: Sandboxing, Security Hardening & Air-Gap Build
+
+- **Objective:** Execute strict security hardening across the report compilation pipeline, preventing Server-Side Template Injection (SSTI), enforcing memory quotas, and validating 100% air-gap execution.
+- **Prerequisites:** Phase UFREDF-A8.
+- **Scope:** Template engine sandboxing, resource cgroups, memory limits, and network isolation audits.
+- **Detailed Tasks:**
+  1. Audit template compilation engines, implementing strict sandboxing against SSTI, local file inclusion, and SSRF.
+  2. Implement worker resource limits (max $2\text{ GB}$ RAM, max $30\text{ s}$ CPU time) to defend against algorithmic complexity attacks.
+  3. Conduct packet capture audits to guarantee zero outbound network calls during report compilation.
+  4. Implement strict output encoding preventing XSS when report previews are rendered in the UFW web interface.
+- **Dependencies:** Phase UFREDF-A8.
+- **Deliverables:** Sandboxed Report Worker Environment, Resource Quota Enforcement Guard, Security Audit Report.
+- **Unit Tests:** `test_ssti_injection_payload_rejection()`, `test_memory_quota_enforcement()`.
+- **Integration Tests:** `test_worker_timeout_on_malformed_input()`, `test_report_preview_sanitization()`.
+- **Security Tests:** Full penetration testing suite against report generation API (0 High/Critical findings).
+- **Accessibility Tests:** Security alert accessibility announcements via `aria-live`.
+- **Performance Tests:** Compilation stress test under concurrent load (10 simultaneous report jobs).
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFREDF-CP-09-01` | Zero SSTI, path traversal, or file escape vulnerabilities verified in template engine | `PLANNED` |
+  | `UFREDF-CP-09-02` | Zero external network packets emitted during 100 consecutive report compilation runs | `PLANNED` |
+- **Acceptance Criteria:** Report compilation environment hardened against adversarial exhibit injection.
+- **Exit Criteria:** Security penetration audit passes with zero critical findings.
+- **Risks & Mitigations:** Complex document memory exhaustion mitigated by aggressive sub-process isolation.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFREDF-A10: End-to-End Validation & FSL Release Benchmark
+
+- **Objective:** Validate the complete UFREDF dossier compilation, review, signing, and verification pipeline across a 50-case benchmark suite, obtaining certified FSL forensic examiner acceptance.
+- **Prerequisites:** Phase UFREDF-A9, Platform Phase 9.
+- **Scope:** 50-case benchmark evaluation, courtroom admissibility audit, examiner usability evaluation, and release seal.
+- **Detailed Tasks:**
+  1. Execute automated compilation across 50 multi-modal test cases (audio, image, video, CCTV, network).
+  2. Verify that 100% of compiled PDF/A-1b dossiers achieve VeraPDF compliance and bit-identical determinism.
+  3. Conduct mock courtroom review sessions with certified FSL examiners evaluating clarity, methodology, and legal schedules.
+  4. Verify that issued report hashes anchor cleanly into the CEIPL immutable Merkle ledger.
+  5. Package production release assets and finalize canonical documentation.
+- **Dependencies:** Phase UFREDF-A9, Platform Phase 10.
+- **Deliverables:** 50-Case Validation Benchmark Report, FSL Examiner Acceptance Certificate, Production Release Bundle.
+- **Unit Tests:** `test_50_case_benchmark_runner()`.
+- **Integration Tests:** Full end-to-end investigation-to-dossier lifecycle test suite.
+- **Security Tests:** Re-validation of Merkle audit trail anchoring and dual-control sign-offs across all 50 cases.
+- **Accessibility Tests:** Final PDF/UA accessibility evaluation across sample dossiers.
+- **Performance Tests:** Batch compilation latency test ($\le 60\text{ s}$ for 50 dossiers).
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFREDF-CP-10-01` | 50 out of 50 test case dossiers compile successfully with 100% cryptographic integrity | `PLANNED` |
+  | `UFREDF-CP-10-02` | Formal acceptance sign-off obtained from certified state forensic examiners | `PLANNED` |
+- **Acceptance Criteria:** Full compliance with legal, scientific, and architectural specifications.
+- **Exit Criteria:** Production release bundle verified; canonical documentation finalized.
+- **Risks & Mitigations:** Production deployment regressions prevented via automated container smoke tests.
+- **Current Status:** `PLANNED`
+
+---
+
+## 24. UFREDF Master Requirement Traceability Matrix (REP-01 through REP-30)
+
+| Req ID | Requirement Focus | PRD Ref | TRD Ref | Planned Phase | Checkpoint ID | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :---: |
+| **REP-01** | Canonical Dossier Identity & URN Generation | PRD §21.3 | TRD §21.2 | `UFREDF-A1` | `UFREDF-CP-01-01` | Schema Validation | `PLANNED` |
+| **REP-02** | Multi-Modal Case Evidence Inventory | PRD §21.3 | TRD §21.2 | `UFREDF-A2` | `UFREDF-CP-02-01` | Inventory Cross-Check | `PLANNED` |
+| **REP-03** | CEIPL Immutable Chain-of-Custody Schedule | PRD §21.3 | TRD §21.2 | `UFREDF-A2` | `UFREDF-CP-02-01` | Merkle Proof Audit | `PLANNED` |
+| **REP-04** | Pre-Decode Dual-Digest Integrity Attestation | PRD §21.3 | TRD §21.2 | `UFREDF-A2` | `UFREDF-CP-02-01` | Dual-Hash Audit Test | `PLANNED` |
+| **REP-05** | Tool, Checkpoint & Dependency Provenance | PRD §21.3 | TRD §21.2 | `UFREDF-A3` | `UFREDF-CP-03-01` | Provenance Header Test | `PLANNED` |
+| **REP-06** | Mathematical Methodology Reproducibility | PRD §21.3 | TRD §21.2 | `UFREDF-A3` | `UFREDF-CP-03-01` | Re-Execution Audit | `PLANNED` |
+| **REP-07** | Modality-Specific Findings Integration | PRD §21.3 | TRD §21.1 | `UFREDF-A4` | `UFREDF-CP-04-01` | Ingestion Test | `PLANNED` |
+| **REP-08** | CDVF Cross-Modal Correlation Matrix Render | PRD §21.3 | TRD §21.2 | `UFREDF-A4` | `UFREDF-CP-04-01` | Matrix Mapping Test | `PLANNED` |
+| **REP-09** | Anti-Averaging Probability Presentation | PRD §21.3 | TRD §21.10 | `UFREDF-A4` | `UFREDF-CP-04-01` | DAG Representation Test| `PLANNED` |
+| **REP-10** | First-Class Inconclusive & OOD Disclosure | PRD §21.3 | TRD §21.2 | `UFREDF-A4` | `UFREDF-CP-04-01` | OOD Reporting Audit | `PLANNED` |
+| **REP-11** | Forensic Limitations & Competing Hypotheses | PRD §21.3 | TRD §21.2 | `UFREDF-A3` | `UFREDF-CP-03-02` | Limitation Header Audit| `PLANNED` |
+| **REP-12** | Examiner Annotations & Signed Adjudication | PRD §21.3 | TRD §21.2 | `UFREDF-A5` | `UFREDF-CP-05-01` | Signature Assertion Test| `PLANNED` |
+| **REP-13** | Two-Tier Independent Technical Review Gate | PRD §21.3 | TRD §21.4 | `UFREDF-A5` | `UFREDF-CP-05-01` | Review Workflow Test | `PLANNED` |
+| **REP-14** | Dual-Control Courtroom Dossier Issuance | PRD §21.3 | TRD §21.4 | `UFREDF-A5` | `UFREDF-CP-05-01` | Multi-Sig Challenge Test| `PLANNED` |
+| **REP-15** | Immutable Snapshots (Zero In-Place Overwrite)| PRD §21.3 | TRD §21.10 | `UFREDF-A6` | `UFREDF-CP-06-02` | Write-Once Audit Test | `PLANNED` |
+| **REP-16** | Formal Addenda & Supersession Lineage | PRD §21.3 | TRD §21.4 | `UFREDF-A6` | `UFREDF-CP-06-02` | Version Lineage Audit | `PLANNED` |
+| **REP-17** | Role-Authorized PII & Operational Redaction | PRD §21.3 | TRD §21.10 | `UFREDF-A7` | `UFREDF-CP-07-02` | Redaction Lineage Test | `PLANNED` |
+| **REP-18** | Archify RFC 8785 Canonical JSON IR Export | PRD §21.3 | TRD §21.2 | `UFREDF-A1` | `UFREDF-CP-01-01` | RFC 8785 JCS Compliance | `PLANNED` |
+| **REP-19** | Long-Term Archival ISO 19005-1 PDF/A-1b | PRD §21.3 | TRD §21.6 | `UFREDF-A6` | `UFREDF-CP-06-01` | VeraPDF Archival Audit | `PLANNED` |
+| **REP-20** | Detached Ed25519 vs Embedded PAdES Signatures| PRD §21.3 | TRD §21.5 | `UFREDF-A5` | `UFREDF-CP-05-02` | Signature Verification | `PLANNED` |
+| **REP-21** | Section 63 BSA Statutory Certificate Schedule| PRD §21.3 | TRD §21.3 | `UFREDF-A7` | `UFREDF-CP-07-01` | Legal Schedule Audit | `PLANNED` |
+| **REP-22** | Standalone Evidence Export Package Bundle | PRD §21.3 | TRD §21.8 | `UFREDF-A8` | `UFREDF-CP-08-01` | Export Package Integrity| `PLANNED` |
+| **REP-23** | Deterministic Compilation & Digest Guarantee | PRD §21.3 | TRD §21.10 | `UFREDF-A8` | `UFREDF-CP-08-01` | Determinism Test Suite | `PLANNED` |
+| **REP-24** | Sandboxed Template Engine Defense (Anti-SSTI)| PRD §21.3 | TRD §21.6 | `UFREDF-A9` | `UFREDF-CP-09-01` | Sandboxing Penetration | `PLANNED` |
+| **REP-25** | Offline Air-Gapped Zero-Egress Compilation | PRD §21.3 | TRD §21.6 | `UFREDF-A9` | `UFREDF-CP-09-02` | Zero-Egress Audit | `PLANNED` |
+| **REP-26** | CSTV Aligned Timebase & Clock Drift Annexure | PRD §21.3 | TRD §21.2 | `UFREDF-A4` | `UFREDF-CP-04-02` | Timeline Annexure Test | `PLANNED` |
+| **REP-27** | CMMS Normalized Metadata Annexure Binding | PRD §21.3 | TRD §21.2 | `UFREDF-A4` | `UFREDF-CP-04-01` | Metadata Annexure Test | `PLANNED` |
+| **REP-28** | Cryptographic Verification Receipt Generation| PRD §21.3 | TRD §21.2 | `UFREDF-A8` | `UFREDF-CP-08-01` | Receipt Validation Test | `PLANNED` |
+| **REP-29** | Bilingual Statutory Certificate Headers | PRD §21.3 | TRD §21.3 | `UFREDF-A7` | `UFREDF-CP-07-01` | Linguistic & Form Audit | `PLANNED` |
+| **REP-30** | CEIPL Immutable Merkle Ledger Anchoring | PRD §21.3 | TRD §21.10 | `UFREDF-A10` | `UFREDF-CP-10-01` | Merkle Inclusion Test | `PLANNED` |

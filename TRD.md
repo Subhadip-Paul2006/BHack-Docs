@@ -6692,7 +6692,7 @@ flowchart TD
     - Evaluates performance across demographic, device, and illumination subgroups; asserts maximum disparity ratio $\le 2.0\times$.
     - Compares candidate model against frozen baseline benchmark manifest; asserts $\Delta\operatorname{AUC} \ge -0.010$ and $\Delta\operatorname{ECE} \le +0.010$.
 11. **Scoped Model Approval Gate Review (`test_cdvf_model_approval_gates.py`):**
-    - Evaluates complete 12-gate release criteria; validates state transitions (`CANDIDATE` $\to$ `VALIDATED_FOR_DEFINED_SCOPE` or `REJECTED`).
+    - Evaluates complete 6-gate release criteria across 12 distinct verification checks; validates state transitions (`CANDIDATE` $\to$ `VALIDATED_FOR_DEFINED_SCOPE` or `REJECTED`).
     - Verifies Ed25519 digital signature and generates Section 65B/63 BSA certified evaluation dossier.
 
 ---
@@ -10435,3 +10435,415 @@ The workbench is strictly engineered to satisfy **W3C WCAG 2.2 Level AA**:
 | **UFD-88 to UFD-93** | TRD §20.15 (WCAG 2.2 AA Accessibility) | Frontend Shell & Overlays | Static Assets / CSS Tokens | Axe Core & Screen Reader Audit | `UFD-A10` | `PLANNED` |
 | **UFD-94 to UFD-97** | TRD §20.16 (Security & Air-Gap) | All API Endpoints & Auth Guard| `ufd_case_audit_events` | OWASP ASVS v4.0.3 L2 Security Audit | `UFD-A10` | `PLANNED` |
 | **UFD-98 to UFD-100**| TRD §20.17 (Performance & E2E Tests) | System-Wide Benchmark Suite | Benchmark Telemetry Logs | E2E Acceptance & Latency Tests | `UFD-A11` | `PLANNED` |
+---
+
+## 21. Unified Forensic Reporting & Evidence Dossier Framework (UFREDF) — Technical Architecture & Detailed Specification
+
+> **Document Status:** `CANONICAL TECHNICAL SPECIFICATION` — Canonical reporting architecture, RFC 8785 JSON Intermediate Representation (IR), long-term archival ISO 19005-1 PDF/A-1b compilation, detached Ed25519 digital signatures, statutory Section 65B IEA / Section 63 BSA certificate schedules, Pydantic v2 schemas, REST endpoints, database schemas, and verification requirements formally specified. Implementation mapped to Platform Phase 7 and engineering phases `UFREDF-A0` through `UFREDF-A10`.
+
+---
+
+### 21.1 System Context & Integration Architecture
+
+The **Unified Forensic Reporting & Evidence Dossier Framework (UFREDF)** is the shared reporting, dossier compilation, and legal attestation layer for the PS-05 platform. UFREDF is **not** an independent forensic detector or a replacement for the Archify visualization engine. Rather, UFREDF operates as a post-processing aggregation and legal synthesis service that consumes structured, authenticated outputs from all forensic subsystems, validates them against strict mathematical and evidentiary schemas, renders immutable RFC 8785 JSON IR snapshots, and compiles long-term archival PDF/A-1b dossiers with detached cryptographic signatures.
+
+```mermaid
+flowchart TD
+    subgraph EVIDENCE_PRODUCERS["Authoritative Forensic Subsystem Findings"]
+        PROD_CEIPL["CEIPL: Hashing, WORM Vault & Chain-of-Custody"]
+        PROD_CMMS["CMMS: Normalized Header & Sidecar Metadata"]
+        PROD_CSTV["CSTV: Clock Drift & Aligned Timelines"]
+        PROD_AIF["AIF: Image Tampering Masks & ELA Heatmaps"]
+        PROD_AURAS["AURAS: Audio Spectrograms & Splice Markers"]
+        PROD_VISTA["VISTA: Video Cadence & CCTV Frame Integrity"]
+        PROD_ONTF["ONTF: Offline PCAP Flow Summaries"]
+        PROD_GEO["AIF-GEO: Geospatial Coords & Bounding Ellipses"]
+        PROD_CDVF["CDVF: Model Validation Cards, ECE & OOD Alarms"]
+    end
+
+    subgraph UFREDF_CORE["UFREDF Compilation & Attestation Engine"]
+        SCHEMA_VAL["Schema Validator & Sanity Gatekeeper\n(Pydantic v2 / RFC 8785 JCS)"]
+        LEGAL_BUILDER["Section 63 BSA Statutory Schedule Builder\n(Device Condition & Operating Attestation)"]
+        CRYPTO_ATTEST["Cryptographic Attestation & Dual Signer\n(Detached Ed25519 / RFC 3161 TSA)"]
+        PDF_SANDBOX["Archival PDF/A-1b Compilation Sandbox\n(WeasyPrint / Typst Engine — Zero Cloud)"]
+    end
+
+    subgraph PRESENTATION_TIER["Presentation & Delivery Consumers"]
+        UFD_WORKBENCH["UFD / UFW Examiner Workbench\n(In-Browser PDF.js Preview & Review Lifecycle)"]
+        ARCHIFY_IR["Archify Visualization Pipeline\n(JSON IR Post-Processing & Graphs)"]
+        COURT_BUNDLE["Standalone Courtroom Evidence Package\n(Immutable Zip / Merkle Proof Manifest)"]
+    end
+
+    EVIDENCE_PRODUCERS --> SCHEMA_VAL
+    SCHEMA_VAL --> LEGAL_BUILDER
+    LEGAL_BUILDER --> CRYPTO_ATTEST
+    CRYPTO_ATTEST --> PDF_SANDBOX
+    PDF_SANDBOX --> UFD_WORKBENCH & ARCHIFY_IR & COURT_BUNDLE
+```
+
+---
+
+### 21.2 Canonical Dossier Data Model & RFC 8785 JSON IR
+
+UFREDF enforces that every dossier snapshot is first represented as a canonical JSON Intermediate Representation (IR) canonicalized via RFC 8785 (JSON Canonicalization Scheme - JCS). This guarantees deterministic byte serialization across all platforms:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "dossier_urn": "urn:ps05:dossier:CASE-2026-BH-0842:d7a8e1f2-9c3b-4a5e-8f1d-2b4c6e8a0f12",
+  "version": 1,
+  "compilation_timestamp": "2026-10-31T14:30:00Z",
+  "case_reference": {
+    "case_id": "8f1a2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+    "case_number": "FIR-2026-PAT-0042",
+    "jurisdiction": "Cyber Police Station, Patna Central, Bihar",
+    "investigating_officer": "Inspector Rajesh Kumar (ID: BH-POL-4892)"
+  },
+  "evidence_inventory": [
+    {
+      "evidence_id": "3b7f1a2e-5c4d-6e8a-9f0b-1c2d3e4f5a6b",
+      "original_filename": "cctv_export_cam04_20261025.mp4",
+      "category": "CCTV",
+      "mime_type": "video/mp4",
+      "file_size_bytes": 148920148,
+      "pre_decode_hashes": {
+        "SHA-256": "4a7b9c2e1f3a5b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c",
+        "SHA3-512": "9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b"
+      },
+      "acquisition_timestamp": "2026-10-25T18:42:10Z",
+      "fixity_status": "VERIFIED"
+    }
+  ],
+  "custody_ledger_summary": {
+    "total_events": 6,
+    "merkle_root": "7f8e9d0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e",
+    "chain_integrity": "UNBROKEN"
+  },
+  "methodology_and_tools": [
+    {
+      "subsystem": "VISTA",
+      "module": "CFITSA",
+      "algorithm": "PELT Piecewise Constant VFR Cadence & Farneback Optical Flow",
+      "software_version": "1.4.0",
+      "git_commit": "0cca1d392bcfbaaccadc072382cd200873d9c271"
+    }
+  ],
+  "technical_findings": [
+    {
+      "finding_id": "f1e2d3c4-b5a6-7e8f-9a0b-1c2d3e4f5a6b",
+      "evidence_id": "3b7f1a2e-5c4d-6e8a-9f0b-1c2d3e4f5a6b",
+      "modality": "CCTV",
+      "category": "DROPPED_FRAMES",
+      "severity": "HIGH",
+      "calibrated_probability": 0.942,
+      "ood_status": "IN_DISTRIBUTION",
+      "localization": {
+        "pts_interval": [14.200, 15.650],
+        "frame_range": [355, 391]
+      },
+      "competing_hypotheses": [
+        "Network transmission packet loss on RTSP stream",
+        "DVR storage disk write contention / IOPS bottleneck"
+      ]
+    }
+  ],
+  "cross_modal_synthesis": {
+    "conflict_taxonomy": "CORROBORATED",
+    "summary": "Audio ambient background noise discontinuity exactly coincides with optical flow disruption in PTS range [14.200, 15.650]."
+  },
+  "statutory_certifications": {
+    "section_63_bsa_schedule": {
+      "lawful_control_statement": "The computer system was operating properly during the relevant period.",
+      "device_custodian_name": "Sub-Inspector Alok Ranjan",
+      "examiner_name": "Dr. Subhadip Paul (Senior Forensic Scientist)",
+      "dual_control_verified": true
+    }
+  }
+}
+```
+
+---
+
+### 21.3 Statutory Section 65B IEA / Section 63 BSA Schedule Generation
+
+To satisfy statutory requirements under Section 65B of the Indian Evidence Act, 1872 and Section 63 of the Bharatiya Sakshya Adhiniyam, 2023, UFREDF compiles a dedicated, tamper-evident legal schedule detailing:
+1. **Device Operating Conditions:** Explicit attestation that the producing computer output was produced by the computer during the period over which the computer was used regularly to store or process information.
+2. **System Health & Integrity:** Confirmation that during the said period, the computer was operating properly or, if not, that any respect in which it was not operating properly did not affect the electronic record or the accuracy of its contents.
+3. **Pre-Decode Hash Attestation:** Exhaustive dual-hash schedules (`SHA-256` and `SHA3-512`) signed by the seizing officer and custodian.
+4. **Bilingual Statutory Headers:** Official headings rendered in both English and Hindi conforming to High Court electronic evidence practice directions.
+
+---
+
+### 21.4 Nine-State Report Lifecycle State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> DRAFT: Examiner Initiates Report
+    DRAFT --> GENERATED: Snapshot Compiled & JSON IR Validated
+    GENERATED --> UNDER_REVIEW: Assigned to Technical Reviewer
+
+    state UNDER_REVIEW {
+        [*] --> MethodologyAudit
+        MethodologyAudit --> BoundVerification: Check OOD & Calibration
+        BoundVerification --> AlternativeHypotheses: Verify Limitations
+    }
+
+    UNDER_REVIEW --> REVIEW_REJECTED: Technical Flaw / Incomplete Bound
+    REVIEW_REJECTED --> DRAFT: Examiner Modifies Snapshot
+
+    UNDER_REVIEW --> APPROVED_TECHNICAL: Technical Methodology Verified
+    APPROVED_TECHNICAL --> APPROVED: Legal Reviewer Approves Schedule
+
+    APPROVED --> SIGNED: Examiner & Reviewer Sign Ed25519
+    SIGNED --> ISSUED: Dual-Control Issuance Executed
+
+    ISSUED --> SUPERSEDED: Formal Addendum Issued
+    ISSUED --> WITHDRAWN: Retracted Due to Invalidity
+    SUPERSEDED --> [*]
+    WITHDRAWN --> [*]
+```
+
+---
+
+### 21.5 Cryptographic Attestation Architecture (Detached Ed25519 vs Embedded PAdES)
+
+UFREDF enforces a strict separation between two distinct cryptographic signing paradigms:
+1. **Detached RFC 8032 Ed25519 Signatures:**
+   - The compiled PDF/A-1b byte stream is digested with `SHA-256`.
+   - The 32-byte digest is signed using the authorized examiner's Ed25519 private key (RFC 8032).
+   - The 64-byte signature is encoded in Base64 and stored in a detached `.sig` file alongside the report.
+   - Enables lightweight, zero-dependency CLI verification without PDF parser overhead.
+2. **Embedded PAdES Signatures (PDF Advanced Electronic Signatures):**
+   - Implements ISO 32000-2 / ETSI EN 319 142 PAdES baseline signatures embedded directly into the PDF incremental update dictionary.
+   - Supports X.509 cryptographic certificates issued by Indian Certifying Authorities (CCA-approved).
+   - Allows judicial magistrates and advocates to verify signatures natively in Adobe Acrobat Reader and PDF viewers.
+
+---
+
+### 21.6 PDF/A-1b Archival Compilation Pipeline
+
+UFREDF enforces strict long-term preservation compliance under **ISO 19005-1 PDF/A-1b**:
+- **Offline Template Engine:** Uses Typst / WeasyPrint compiled against local fonts (Inter, Roboto, Devanagari Unicode for Hindi). Zero external font or CSS fetches.
+- **Embedded Color Profiles:** All raster heatmaps and visuals are tagged with DeviceRGB / sRGB ICC profiles (IEC 61966-2.1).
+- **Prohibition of Dynamic Content:** JavaScript, dynamic forms, external multimedia streams, and audio embeds are strictly prohibited in the PDF/A-1b output.
+- **VeraPDF Compliance Gate:** Every compiled PDF is audited against the official VeraPDF validator; any validation failure halts issuance.
+
+---
+
+### 21.7 Pydantic v2 Contract Schemas
+
+```python
+"""UFREDF Pydantic v2 Data Contracts & Dossier Schemas."""
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+from pydantic import BaseModel, Field, UUID4
+
+
+class ReportType(str, Enum):
+    SECTION_65B_IEA = "SECTION_65B_IEA"
+    SECTION_63_BSA = "SECTION_63_BSA"
+    TECHNICAL_EXAMINATION = "TECHNICAL_EXAMINATION"
+    PRELIMINARY_TRIAGE = "PRELIMINARY_TRIAGE"
+
+
+class ReportLifecycleState(str, Enum):
+    DRAFT = "DRAFT"
+    GENERATED = "GENERATED"
+    UNDER_REVIEW = "UNDER_REVIEW"
+    REVIEW_REJECTED = "REVIEW_REJECTED"
+    APPROVED_TECHNICAL = "APPROVED_TECHNICAL"
+    APPROVED = "APPROVED"
+    SIGNED = "SIGNED"
+    ISSUED = "ISSUED"
+    SUPERSEDED = "SUPERSEDED"
+    WITHDRAWN = "WITHDRAWN"
+
+
+class EvidenceScheduleItem(BaseModel):
+    evidence_id: UUID4
+    original_filename: str
+    category: str
+    mime_type: str
+    file_size_bytes: int
+    pre_decode_sha256: str = Field(..., regex="^[a-f0-9]{64}$")
+    pre_decode_sha3_512: str = Field(..., regex="^[a-f0-9]{128}$")
+    acquisition_timestamp: datetime
+    fixity_status: str
+
+
+class StatutorySection63Schedule(BaseModel):
+    court_name: str
+    case_fir_number: str
+    police_station: str
+    device_description: str
+    lawful_control_affirmation: str
+    operating_condition_affirmation: str
+    certifying_examiner_name: str
+    certifying_examiner_designation: str
+    certifying_examiner_id: str
+    dual_signoff_completed: bool
+
+
+class ReportSnapshot(BaseModel):
+    dossier_urn: str = Field(..., regex="^urn:ps05:dossier:.+$")
+    version: int = Field(default=1, ge=1)
+    report_type: ReportType
+    lifecycle_state: ReportLifecycleState
+    case_id: UUID4
+    case_number: str
+    compiled_at: datetime
+    evidence_items: List[EvidenceScheduleItem]
+    methodology_records: List[Dict[str, Any]]
+    finding_ids: List[UUID4]
+    cross_modal_summary: Optional[Dict[str, Any]]
+    statutory_schedule: StatutorySection63Schedule
+    pdf_sha256: Optional[str] = Field(None, regex="^[a-f0-9]{64}$")
+    detached_ed25519_sig: Optional[str] = None
+
+
+class DossierManifest(BaseModel):
+    package_urn: str
+    dossier_urn: str
+    pdf_filename: str
+    pdf_sha256: str
+    json_ir_filename: str
+    json_ir_sha256: str
+    signature_filename: str
+    signature_sha256: str
+    verification_script_filename: str
+    merkle_root: str
+```
+
+---
+
+### 21.8 REST API Specifications
+
+| Method | Route Path | Authorized Roles | Request Contract | Response Contract | Error Codes |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/cases/{case_id}/reports` | EXAMINER | `ReportCreateRequest` | `ReportSnapshot` | `400, 401, 403, 404` |
+| `GET` | `/api/v1/reports/{report_id}` | Assigned roles | Path `report_id` | `ReportSnapshot` | `401, 403, 404` |
+| `GET` | `/api/v1/reports/{report_id}/pdf` | Assigned roles | Path `report_id` | `application/pdf` | `401, 403, 404` |
+| `GET` | `/api/v1/reports/{report_id}/json-ir` | Assigned roles | Path `report_id` | `application/json` | `401, 403, 404` |
+| `POST` | `/api/v1/reports/{report_id}/submit-review` | EXAMINER | Empty body | `ReportSnapshot` | `400, 401, 403, 409` |
+| `POST` | `/api/v1/reports/{report_id}/technical-approve`| TECHREV | `ReviewApprovalRequest` | `ReportSnapshot` | `400, 401, 403, 409` |
+| `POST` | `/api/v1/reports/{report_id}/final-approve` | REPREV | `FinalApprovalRequest` | `ReportSnapshot` | `400, 401, 403, 409` |
+| `POST` | `/api/v1/reports/{report_id}/issue-initiate` | EXAMINER | `DualControlIssueRequest`| `DualControlResponse` | `400, 401, 403, 409` |
+| `POST` | `/api/v1/reports/{report_id}/issue-confirm` | REPREV | `DualControlIssueConfirm`| `ReportSnapshot` | `400, 401, 403, 409` |
+| `GET` | `/api/v1/reports/{report_id}/package` | CUSTODIAN, EXAMINER| Path `report_id` | `application/zip` | `401, 403, 404` |
+
+---
+
+### 21.9 Database & Persistence Model
+
+```sql
+-- UFREDF Reporting Persistence Tables (PostgreSQL 16+)
+
+-- 1. Reports Registry Table
+CREATE TABLE ufredf_reports (
+    report_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    dossier_urn VARCHAR(255) UNIQUE NOT NULL,
+    case_id UUID REFERENCES cases(id) ON DELETE RESTRICT,
+    version INT NOT NULL DEFAULT 1,
+    report_type VARCHAR(64) NOT NULL,
+    lifecycle_state VARCHAR(64) NOT NULL DEFAULT 'DRAFT',
+    title VARCHAR(255) NOT NULL,
+    compiled_by UUID NOT NULL,
+    technical_reviewer_id UUID,
+    legal_reviewer_id UUID,
+    pdf_sha256 CHAR(64),
+    pdf_storage_uri TEXT,
+    json_ir_sha256 CHAR(64),
+    json_ir_storage_uri TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    issued_at TIMESTAMPTZ
+);
+
+-- 2. Report Cryptographic Signatures Table
+CREATE TABLE ufredf_report_signatures (
+    signature_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    report_id UUID REFERENCES ufredf_reports(report_id) ON DELETE RESTRICT,
+    signer_user_id UUID NOT NULL,
+    signer_role VARCHAR(64) NOT NULL,
+    signature_type VARCHAR(32) NOT NULL, -- 'DETACHED_ED25519' or 'EMBEDDED_PADES'
+    signature_value TEXT NOT NULL,
+    certificate_fingerprint CHAR(64),
+    signed_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 3. Report Version Lineage & Supersession Table
+CREATE TABLE ufredf_report_lineage (
+    lineage_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    parent_report_id UUID REFERENCES ufredf_reports(report_id),
+    superseding_report_id UUID REFERENCES ufredf_reports(report_id),
+    amendment_reason TEXT NOT NULL,
+    authorized_by UUID NOT NULL,
+    amended_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_ufredf_case_id ON ufredf_reports(case_id);
+CREATE INDEX idx_ufredf_state ON ufredf_reports(lifecycle_state);
+CREATE INDEX idx_ufredf_urn ON ufredf_reports(dossier_urn);
+```
+
+---
+
+### 21.10 Twenty Scientific, Legal & Operational Safeguards
+
+1. **Reporting Layer Invariant:** UFREDF is strictly an attestation, synthesis, and reporting engine; it never computes detection algorithms or alters master evidence.
+2. **Backend Authority Invariant:** Backend subsystems remain the sole authoritative sources of truth for findings, timestamps, and fixity records.
+3. **Dual-Digest Integrity Invariant:** Reports must document both `SHA-256` and `SHA3-512` (or hardware-accelerated `SHA-512`) pre-decode digests for all referenced exhibits.
+4. **Immutable Snapshots Invariant:** Once a report snapshot is compiled, its contents and digests are frozen; in-place overwriting is strictly prohibited.
+5. **Anti-Averaging Invariant:** Multi-modal probabilities are presented as separate nodes in an evidence DAG; scalar score averaging is forbidden.
+6. **Mandatory Limitation Disclosure:** Every report must include competing technical hypotheses and physical limitations (e.g. compression, lighting, noise).
+7. **First-Class OOD & Inconclusive Disclosure:** Model abstentions, inconclusive outcomes, and OOD triggers must be clearly stated.
+8. **Dual-Control Courtroom Issuance:** Transitioning reports to `ISSUED` mandates two distinct cryptographic sign-offs from `ROLE-EXAMINER` and `ROLE-REPREV`.
+9. **Zero In-Browser PDF Compilation:** PDF rendering, signing, and hashing are strictly executed on the UFREDF backend; no client-side report assembly.
+10. **ISO 19005-1 PDF/A-1b Compliance:** All exported documents adhere strictly to PDF/A-1b archival standards with local fonts and embedded ICC profiles.
+11. **Separation of Ed25519 and PAdES:** Detached RFC 8032 Ed25519 signatures and embedded PAdES signatures are strictly differentiated.
+12. **Section 63 BSA Statutory Fidelity:** Schedules strictly reflect statutory affirmations regarding device lawful control and operating conditions.
+13. **Deterministic Output Guarantee:** Identical JSON IR and configuration compile to bit-identical PDF/A-1b documents.
+14. **Template Injection Defense:** Report template rendering engines are sandboxed, preventing filesystem access and code execution.
+15. **Air-Gap Operational Guarantee:** All PDF compilation executes 100% locally with zero external network calls or web font fetches.
+16. **Version Lineage Preservation:** Superseded reports remain permanently retrievable; historical records are never deleted.
+17. **Redaction Lineage Audit:** Redacted reports link directly to unredacted parent hashes and record the authorizing officer's credentials.
+18. **Bilingual Certification Headers:** Statutory headers are provided in both English and Hindi conforming to state court rules.
+19. **Merkle Audit Trail Anchoring:** Issued report hashes are anchored into the CEIPL immutable Merkle ledger.
+20. **Zero Cross-Case Data Leakage:** Case scoping and PostgreSQL RLS prevent inclusion of exhibits or findings across case boundaries.
+
+---
+
+### 21.11 Technical Traceability Matrix (REP-01 through REP-30)
+
+| Requirement ID | Technical Specification Section | Target API Route / Contract | Target Persistence Entity | Verification Method | Planned Phase | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **REP-01** | TRD §21.2 (Canonical Dossier Identity & URN) | `/api/v1/cases/{id}/reports` | `ufredf_reports` | URN Schema Validation Test | `UFREDF-A1` | `PLANNED` |
+| **REP-02** | TRD §21.2, §21.7 (Multi-Modal Inventory) | `ReportSnapshot.evidence_items` | `evidence`, `evidence_fixity` | Inventory Cross-Check Test | `UFREDF-A2` | `PLANNED` |
+| **REP-03** | TRD §21.2 (Chain-of-Custody Attestation) | `ReportSnapshot.custody_ledger` | `custody_events` | Merkle Proof Verification | `UFREDF-A2` | `PLANNED` |
+| **REP-04** | TRD §21.2, §21.10 (Dual-Digest Integrity) | `EvidenceScheduleItem.hashes` | `evidence_fixity` | Dual-Hash Audit Test | `UFREDF-A2` | `PLANNED` |
+| **REP-05** | TRD §21.2 (Tool & Checkpoint Provenance) | `ReportSnapshot.methodology` | `model_registry` | Provenance Header Test | `UFREDF-A3` | `PLANNED` |
+| **REP-06** | TRD §21.2 (Methodology Reproducibility) | `ReportSnapshot.methodology` | Algorithm Metadata | Re-Execution Audit | `UFREDF-A3` | `PLANNED` |
+| **REP-07** | TRD §21.1, §21.2 (Modality Findings Ingest)| `ReportSnapshot.findings` | Subsystem Tables | Multi-Modal Ingestion Test | `UFREDF-A4` | `PLANNED` |
+| **REP-08** | TRD §21.2 (Cross-Modal Correlation/CDVF) | `ReportSnapshot.cross_modal` | CDVF Correlation Tables | Correlation Matrix Test | `UFREDF-A4` | `PLANNED` |
+| **REP-09** | TRD §21.10 (Anti-Averaging Probability) | Evidence DAG Node Structure | CDVF DAG Artifacts | DAG Representation Test | `UFREDF-A4` | `PLANNED` |
+| **REP-10** | TRD §21.2, §21.10 (Inconclusive & OOD) | `FindingSnapshot.ood_status` | CDVF OOD Records | OOD Reporting Audit | `UFREDF-A4` | `PLANNED` |
+| **REP-11** | TRD §21.2, §21.10 (Forensic Limitations) | `ReportSnapshot.limitations` | Scientific Core Metadata | Limitation Header Audit | `UFREDF-A3` | `PLANNED` |
+| **REP-12** | TRD §21.2, §21.5 (Examiner Observations) | `ReportSnapshot.examiner_notes`| `ufd_examiner_annotations` | Signature Assertion Test | `UFREDF-A5` | `PLANNED` |
+| **REP-13** | TRD §21.4 (Technical Review Gate) | `/reports/{id}/technical-approve`| `ufredf_reports` | Review Workflow Test | `UFREDF-A5` | `PLANNED` |
+| **REP-14** | TRD §21.4, §21.8 (Dual-Control Issuance) | `/reports/{id}/issue-confirm` | `ufd_dual_control_requests` | Multi-Sig Challenge Test | `UFREDF-A5` | `PLANNED` |
+| **REP-15** | TRD §21.10 (Immutable Dossier Snapshots) | `ufredf_reports.lifecycle_state`| WORM Report Vault | Write-Once Audit Test | `UFREDF-A6` | `PLANNED` |
+| **REP-16** | TRD §21.4, §21.9 (Addenda & Supersession) | `ufredf_report_lineage` | `ufredf_report_lineage` | Version Chain Audit | `UFREDF-A6` | `PLANNED` |
+| **REP-17** | TRD §21.10 (PII & Operational Redaction) | Redaction Transform Pipeline | Redaction Audit Logs | Redaction Lineage Test | `UFREDF-A7` | `PLANNED` |
+| **REP-18** | TRD §21.2 (Archify RFC 8785 JSON IR) | `/reports/{id}/json-ir` | Canonical JSON Storage | RFC 8785 JCS Compliance | `UFREDF-A1` | `PLANNED` |
+| **REP-19** | TRD §21.6 (ISO 19005-1 PDF/A-1b Archival) | `/reports/{id}/pdf` | PDF/A Storage Partition | VeraPDF Archival Audit | `UFREDF-A6` | `PLANNED` |
+| **REP-20** | TRD §21.5 (Detached Ed25519 & PAdES Sign) | `ufredf_report_signatures` | `ufredf_report_signatures` | Signature Verification | `UFREDF-A5` | `PLANNED` |
+| **REP-21** | TRD §21.3 (Section 63 BSA Schedule) | `StatutorySection63Schedule` | Legal Schema Tables | Statutory Compliance Audit | `UFREDF-A7` | `PLANNED` |
+| **REP-22** | TRD §21.1, §21.8 (Standalone Evidence Pkg)| `/reports/{id}/package` | Zip Bundle Vault | Export Package Integrity | `UFREDF-A8` | `PLANNED` |
+| **REP-23** | TRD §21.10 (Deterministic Output Valid) | Compiler Pipeline Tests | Output Verification | Determinism Test Suite | `UFREDF-A8` | `PLANNED` |
+| **REP-24** | TRD §21.6, §21.10 (Sandboxed Rendering) | WeasyPrint Sandbox Environment| Worker Isolation | Sandboxing Penetration | `UFREDF-A9` | `PLANNED` |
+| **REP-25** | TRD §21.6, §21.10 (Air-Gap Local Build) | Offline Typst / Asset Bundle | Local File Partitions | Zero-Egress Network Audit | `UFREDF-A9` | `PLANNED` |
+| **REP-26** | TRD §21.2 (CSTV Timebase Annexure) | `ReportSnapshot.timeline` | CSTV Output Tables | Timeline Alignment Test | `UFREDF-A4` | `PLANNED` |
+| **REP-27** | TRD §21.2 (CMMS Metadata Annexure) | `ReportSnapshot.metadata` | CMMS Output Tables | Metadata Annexure Test | `UFREDF-A4` | `PLANNED` |
+| **REP-28** | TRD §21.2 (Verification Receipt) | Receipt Verification Schema | TSA Token Store | Receipt Validation Test | `UFREDF-A8` | `PLANNED` |
+| **REP-29** | TRD §21.3 (Bilingual Statutory Headers) | Localized Certificate Template| Legal Template Store | Linguistic & Form Audit | `UFREDF-A7` | `PLANNED` |
+| **REP-30** | TRD §21.10 (Merkle Audit Trail Anchor) | CEIPL Ledger Anchor Route | CEIPL Merkle Store | Merkle Inclusion Test | `UFREDF-A10` | `PLANNED` |
