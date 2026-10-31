@@ -4913,758 +4913,303 @@ All 14 ONTF phases completed and verified; benchmark report published; all 56 ch
 
 ## 8. Dedicated Cross-Modal Deepfake Validation Engineering Playbook (CDVF-A0 through CDVF-A11)
 
-The Cross-Modal Deepfake Validation Framework (CDVF) establishes a shared, scientifically defensible, statistically calibrated, and legally admissible evaluation backbone across image (AIF), audio (AURAS), and video/CCTV (VISTA) forensics engines. It provides twelve sequential engineering phases governing model checkpoint integrity, dataset quality tiers, leakage-proof source-group splits, 19-parameter benchmark execution, in-domain/cross-dataset/unseen-generator protocols (Modes A through G), Platt/temperature/isotonic calibration (ECE $\le 0.05$), Mahalanobis OOD gating, 7-state first-class abstention, manipulation localisation metrics (spatial IoU, audio/video tIoU), cross-modal DAG fusion with anti-averaging invariants, 12-gate scoped approval, continuous regression testing, and court-admissible 24-item WORM evaluation bundles conforming to Section 65B IEA and Section 63 BSA 2023:
+The Cross-Modal Deepfake Validation Framework (CDVF) executes across twelve sequential engineering phases (`CDVF-A0` through `CDVF-A11`). It provides shared validation, calibration, out-of-distribution (OOD) gating, and model-governance capabilities for the existing media forensic engines (AIF for images, AURAS for audio, VISTA for video/CCTV) without replacing their internal detection mechanisms.
+
+```mermaid
+flowchart TD
+    subgraph CDVF_PHASES["CDVF Implementation Roadmap (CDVF-A0 through CDVF-A11)"]
+        A0["Phase CDVF-A0: Repository Discovery & Validation Architecture\n(Detector inventory, capability reconciliation, boundary map)"]
+        A1["Phase CDVF-A1: Unified Finding & Model Registry Contracts\n(Pydantic schemas, SHA-256 weight hasher, 9-state lifecycle)"]
+        A2["Phase CDVF-A2: Dataset Registry & Leakage-Proof Splitting\n(Dataset cards, GroupKFold disjoint partitions, WORM manifests)"]
+        
+        subgraph BENCHMARK_SUITES["Per-Modality Evaluation Harnesses"]
+            A3["Phase CDVF-A3: Multi-Modal 19-Parameter Benchmark Runner\n(Bootstrap CIs, automated metrics, execution logs)"]
+            A4["Phase CDVF-A4: AIF Image Deepfake & Manipulation Suite\n(Pixel IoU, Dice, Boundary F1, image-level ROC-AUC)"]
+            A5["Phase CDVF-A5: AURAS Audio Deepfake & Splice Suite\n(EER, minDCF, temporal tIoU, speech spoofing vs ARE)"]
+            A6["Phase CDVF-A6: VISTA Video & CCTV Deepfake Suite\n(Video AUC, frame AUC, spatio-temporal localisation)"]
+        end
+
+        A7["Phase CDVF-A7: Cross-Dataset & Unseen-Generator Protocols\n(Modes A-G, transfer delta-AUC, UG-Score, perturbation grids)"]
+        A8["Phase CDVF-A8: Confidence Calibration & OOD Domain-Shift Gating\n(Platt/Temp/Isotonic, ECE <= 0.05, Mahalanobis OOD AUROC >= 0.85)"]
+        A9["Phase CDVF-A9: First-Class Abstention & Cross-Modal Fusion DAG\n(8 formal decision states, anti-averaging fusion, risk-coverage)"]
+        A10["Phase CDVF-A10: Subgroup Fairness, Robustness & 6-Gate Model Approval\n(Disparity audit, 6 release gates, Ed25519 scoped approval)"]
+        A11["Phase CDVF-A11: Continuous Regression, 24-Item WORM Bundle & Release\n(Deterministic regression suite, Section 65B/63 BSA dossier)"]
+    end
+
+    A0 --> A1
+    A1 --> A2
+    A2 --> A3
+    A3 --> A4 & A5 & A6
+    A4 & A5 & A6 --> A7
+    A7 --> A8
+    A8 --> A9
+    A9 --> A10
+    A10 --> A11
+```
 
 ---
 
-### Phase CDVF-A0: Repository Audit, Model Reconciliation & Validation Baseline
-
-**1. Phase ID & Title:** `CDVF-A0: Repository Audit, Model Reconciliation & Validation Baseline`
-**2. Current Status:** `IMPLEMENTED_AND_VERIFIED`
-**3. Purpose:** Execute comprehensive audit across existing repository architecture, dependency locks, and planned detection models in AIF, AURAS, and VISTA. Construct an internal multi-dimensional status gap matrix separating documentation from verified implementation and execution. Establish canonical terminology, mathematical invariants, and validation boundaries. Formulate the zero-implementation invariant ensuring documentation changes do not falsely claim code, weights, or datasets exist before engineering implementation.
-**4. Topics & Subtopics:**
-- Repository State Audit: Git tree inspection, dependency lockfile analysis (`pyproject.toml`), and existing subsystem boundaries.
-- Model Candidate Reconciliation: Audit candidate architectures across AIF (TruFor, multi-branch ViT/CNN, face-swap), AURAS (RawNet2, AASIST, WavLM Base+, LFCC/CQCC), and VISTA (Xception, EfficientNet, FTCN, VideoMAE, 3D FFT).
-- Multi-Dimensional Status Matrix: Independent tracking across `DOCUMENTATION_STATUS`, `IMPLEMENTATION_STATUS`, and `VALIDATION_STATUS`.
-- Canonical Forensic Terminology: Precise mathematical and legal definitions for Detection, Localisation, Calibration, OOD, Abstention, Scoped Approval, and Section 65B/63 BSA dossier integration.
-- Anti-Hallucination & Zero-Implementation Safety Rules: Strict separation of architecture specifications from runtime verification evidence.
-**5. Exact Tasks:**
-1. Inspect Git status, working directory changes, and package manifests to verify baseline integrity.
-2. Reconcile documented detection models across AIF, AURAS, and VISTA against practical forensic deployment constraints.
-3. Establish the CDVF cross-subsystem integration boundary preserving AIF, AURAS, and VISTA as independent domain engines.
-4. Formulate the canonical validation taxonomy and mathematical definitions across `README.md`, `PRD.md`, `TRD.md`, and `PHASES.md`.
-5. Execute multi-document verification confirming zero code modifications during documentation phases.
-**6. Detailed Execution Workflow:**
-```mermaid
-flowchart TD
-    AuditStart["Git Status & Tree Audit"] --> LockCheck["pyproject.toml Inspection"]
-    LockCheck --> ModelAudit["AIF / AURAS / VISTA Candidate Audit"]
-    ModelAudit --> GapMatrix["Construct Multi-Dimensional Gap Matrix"]
-    GapMatrix --> BoundaryContract["Define CDVF Shared Governance Boundary"]
-    BoundaryContract --> InvariantFormulation["Establish Anti-Averaging & Inconclusive Invariants"]
-    InvariantFormulation --> BaselineLocked["CDVF-A0 Baseline Verified & Locked"]
-```
-**7. Technologies, Tools & Frameworks:**
-Git, Python 3.12, Markdown, Mermaid, PowerShell.
-**8. Prerequisites & Dependencies:**
-Phase 0 platform architecture baseline completed; master repository documentation available.
-**9. Expected Files, Artifacts & Contracts:**
-- `README.md` (Updated with CDVF capabilities, architecture diagram, and status)
-- `PRD.md` (Updated with Section 12 CDVF requirements `CDVF-01` through `CDVF-20`)
-- `TRD.md` (Updated with Section 11.B architecture, Section 12 Pydantic contracts, and traceability)
-- `PHASES.md` (Updated with Section 8 engineering playbook and Section 11 traceability matrix)
-**10. Failure Cases & Risk Mitigations:**
-- Risk of conflating planned models with executed code: Mitigated by mandatory `PLANNED` status flags and explicit audit gap matrix.
-- Risk of breaking existing subsystem phase numbering: Mitigated by introducing dedicated `CDVF-A0` through `CDVF-A11` prefix.
-**11. Security & Privacy Considerations:**
-Pure documentation phase; zero external network calls, zero sensitive forensic data processed.
-**12. Acceptance Criteria:**
-- 100% agreement between PRD, TRD, PHASES, and README regarding CDVF scope and contracts.
-- Explicit status matrix distinguishing documented vs implemented capabilities.
-- Zero source-code, weight, or dataset modifications in this task.
-**13. Definition of Done:**
-All four canonical architecture documents updated, cross-referenced, verified, and locked.
-**14. Explicit Status:** `IMPLEMENTED_AND_VERIFIED`
-**15. Checkpoint Table:**
-
-| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
-| :--- | :--- | :--- | :--- | :--- |
-| **CDVF-CP-00-01** | Multi-Modal Model Architecture Audit & Gap Matrix | Documented gap matrix separating documentation, code, and test status across AIF, AURAS, and VISTA | `IMPLEMENTED_AND_VERIFIED` | Completed in master architecture task |
-| **CDVF-CP-00-02** | Canonical Terminology & Mathematical Invariants Contract | Unified mathematical formulations for ECE, Brier, IoU, tIoU, Mahalanobis OOD, and Selective Risk locked in TRD/PRD | `IMPLEMENTED_AND_VERIFIED` | Completed in master architecture task |
-| **CDVF-CP-00-03** | Zero-Implementation Safety Invariant Audit | Verification that no unverified source code, mock tests, or dummy weights are added to repository | `IMPLEMENTED_AND_VERIFIED` | Verified via git status check |
-| **CDVF-CP-00-04** | Multi-Document Architectural Consistency Verification | Exact traceability across `CDVF-01`..`CDVF-20` verified between PRD, TRD, PHASES, and README | `IMPLEMENTED_AND_VERIFIED` | Completed in master architecture task |
+### Phase CDVF-A0: Repository Discovery and Validation Architecture Baseline
+- **Objective:** Audit existing detector implementations across AIF, AURAS, and VISTA; reconcile duplicate model definitions and establish shared service boundaries.
+- **Prerequisites:** Phase 0 Gate (`IMPLEMENTED_AND_VERIFIED`).
+- **Scope:** Complete inventory of image, audio, and video checkpoints; mapping of input/output contracts and dependencies with CEIPL, CMMS, CSTV, and UFREDF.
+- **Detailed Tasks:**
+  1. Inspect existing checkpoint files in `models/` across all subsystems; compute baseline SHA-256 digests.
+  2. Map capability boundaries: verify that AIF retains image models, AURAS retains audio models, and VISTA retains video models.
+  3. Formalize integration interfaces with CEIPL (custody & lineage), CMMS (metadata context), and CSTV (timeline correlation).
+  4. Author `CDVF_ARCHITECTURE_BASELINE.md` documenting verified capabilities and deprecation roadmap for unverified heuristic thresholds.
+- **Dependencies:** Phase 0 platform standards.
+- **Deliverables:** Architectural baseline specification, subsystem boundary contracts, model inventory report.
+- **Dataset Requirements:** None (code and architecture audit).
+- **Tests:** Architectural boundary unit tests asserting zero duplicate detector implementations outside designated subsystems.
+- **Checkpoints:** `CDVF-CP-00-01` (Baseline architecture and model inventory signed off).
+- **Acceptance Criteria:** 100% of existing detection models inventoried with verified SHA-256 hashes and clear ownership boundaries.
+- **Exit Criteria:** Zero unresolved architectural collisions; formal sign-off from subsystem leads.
+- **Risks:** Unclear ownership of multimodal synchronization scripts (resolved by assigning lip-sync to VISTA and voice spoofing to AURAS).
+- **Current Status:** `PLANNED`
 
 ---
 
-### Phase CDVF-A1: Model Registry, Cryptographic Provenance & Licensing Contracts
-
-**1. Phase ID & Title:** `CDVF-A1: Model Registry, Cryptographic Provenance & Licensing Contracts`
-**2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the Pydantic v2 `ModelRegistryEntry` schema, local WORM-backed JSON registry storage, SHA-256 cryptographic weight hash verification, immutable model revision tracking, deployment license audit, and the 6-state model approval state machine (`CANDIDATE`, `EVALUATION_PENDING`, `VALIDATED_FOR_DEFINED_SCOPE`, `REJECTED`, `DEPRECATED`, `REVALIDATION_REQUIRED`). Formulate the 12 automated revalidation trigger monitors that lock down models against silent weight drift or dependency mutations.
-**4. Topics & Subtopics:**
-- Registry Data Schema: Implementation of `ModelRegistryEntry` under `src/ps05/cdvf/registry/model_card.py`.
-- Cryptographic Weight Verification: Streaming chunked SHA-256 hasher validating model checkpoints against immutable registry manifests prior to GPU loading.
-- Licensing Compliance Engine: Automated check enforcing Apache 2.0, MIT, or permissible research licenses; blocking non-commercial or proprietary checkpoints from judicial deployment.
-- 6-State Lifecycle Controller: State machine enforcing valid state transitions and audit logging.
-- 12 Revalidation Trigger Rules: Automated hash, dependency, and preprocessing diff detectors triggering re-evaluation.
-**5. Exact Tasks:**
-1. Create `src/ps05/cdvf/registry/` package and implement `ModelRegistryEntry` using Pydantic v2.
-2. Implement `CheckpointProvenanceVerifier` with streaming SHA-256 calculation and tamper gating.
-3. Implement `LicensePolicyEnforcer` checking license strings against permissible open forensic operational policies.
-4. Build `ModelLifecycleManager` supporting the 6 canonical approval states with JSON-backed audit logs.
-5. Implement `RevalidationTriggerDetector` inspecting git hashes, torch versions, preprocessing configs, and calibration artifacts.
-**6. Detailed Execution Workflow:**
-```mermaid
-flowchart TD
-    WeightPath["Candidate Weight File"] --> HashStream["Streaming SHA-256 Calculation"]
-    HashStream --> HashMatch{"Matches Registry Manifest?"}
-    HashMatch -- No --> TamperReject["Reject: CheckpointIntegrityError"]
-    HashMatch -- Yes --> LicenseCheck{"Permissible License?"}
-    LicenseCheck -- No --> LicenseReject["Reject: LicenseComplianceError"]
-    LicenseCheck -- Yes --> InitState["State: CANDIDATE"]
-    InitState --> EvalPending["State: EVALUATION_PENDING"]
-```
-**7. Technologies, Tools & Frameworks:**
-Python 3.12, Pydantic v2, hashlib, PyTorch 2.6+, pytest.
-**8. Prerequisites & Dependencies:**
-Phase CDVF-A0 verified; PyTorch installed; local WORM storage vault mounted.
-**9. Expected Files, Artifacts & Contracts:**
-- `src/ps05/cdvf/registry/__init__.py`
-- `src/ps05/cdvf/registry/model_card.py`
-- `src/ps05/cdvf/registry/verifier.py`
-- `src/ps05/cdvf/registry/lifecycle.py`
-- `tests/unit/cdvf/test_model_registry.py`
-**10. Failure Cases & Risk Mitigations:**
-- Hash mismatch on download: Immediate hard abort trapping corrupted or backdoored weights.
-- Ambiguous or dual-licensing clauses: Flagged for mandatory legal officer sign-off before state advancement.
-**11. Security & Privacy Considerations:**
-Weights must never be loaded into executable Python context prior to cryptographic hash validation.
-**12. Acceptance Criteria:**
-- 100% of candidate checkpoints validated for SHA-256 bitstream match before initialization.
-- Unauthorized license types automatically fail registration.
-- Any modification to preprocessing parameters transitions model status to `REVALIDATION_REQUIRED`.
-**13. Definition of Done:**
-Registry package implemented, 100% unit test pass rate, typing verified via `mypy --strict`.
-**14. Explicit Status:** `PLANNED`
-**15. Checkpoint Table:**
-
-| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
-| :--- | :--- | :--- | :--- | :--- |
-| **CDVF-CP-01-01** | Model Registry Schema & Serialization | `ModelRegistryEntry` passes bidirectional JSON round-trip validation with all 24 metadata fields | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-01-02** | Checkpoint SHA-256 Verification & Tamper Gating | `CheckpointProvenanceVerifier` aborts execution and raises `CheckpointIntegrityError` on single-bit weight mutation | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-01-03** | Licensing & Deployment Scope Compliance Guard | Automated rejection of restricted non-commercial model licenses during registration | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-01-04** | Revalidation Trigger Event Monitor | Automated detection of altered preprocessing parameters resulting in transition to `REVALIDATION_REQUIRED` | `NOT_STARTED` | Awaits phase activation |
+### Phase CDVF-A1: Unified Finding and Model Registry Contracts
+- **Objective:** Implement standardized Pydantic v2 data models for detector outputs, model provenance, and registry governance.
+- **Prerequisites:** `CDVF-CP-00-01`.
+- **Scope:** Pydantic v2 schemas for `DetectorResultContract`, `ModelProvenance`, `SpatialLocalisation`, `TemporalLocalisation`, and `ModelRegistryEntry`.
+- **Detailed Tasks:**
+  1. Implement `src/cdvf/schemas/contracts.py` with strict Pydantic v2 validation enforcing `ScoreSemantics`, `CalibrationStatus`, and `OODStatus`.
+  2. Implement Model Registry database schema and ORM models tracking checkpoint SHA-256, model cards, licenses, and tensor specifications.
+  3. Implement 9-state model lifecycle state machine (`REGISTERED` to `REVOKED`) with Ed25519 digital signature validation.
+  4. Implement streaming cryptographic checkpoint verifier checking weight integrity at load time.
+- **Dependencies:** `CDVF-A0`, Pydantic v2.7+.
+- **Deliverables:** Typed Pydantic v2 contract package, Model Registry database models, checkpoint SHA-256 verifier module.
+- **Dataset Requirements:** Synthetic dummy model weights and inference payloads.
+- **Tests:** Schema round-trip serialization tests, immutable property assertions, bit-flip rejection tests.
+- **Checkpoints:** `CDVF-CP-01-01` (Unified contracts validated across 50 simulated multi-modal detector outputs).
+- **Acceptance Criteria:** Strict rejection of un-attributed or uncalibrated detector outputs; bit-exact schema validation.
+- **Exit Criteria:** Core contracts published and imported into AIF, AURAS, and VISTA mock pipelines.
+- **Risks:** Schema overhead on high-frequency video frame prediction streams (mitigated via batch payload models).
+- **Current Status:** `PLANNED`
 
 ---
 
-### Phase CDVF-A2: Dataset Governance, Quality Tiers & Leakage Prevention
-
-**1. Phase ID & Title:** `CDVF-A2: Dataset Governance, Quality Tiers & Leakage Prevention`
-**2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the `DatasetCard` and `DatasetSplitManifest` schemas, 4-tier label provenance classification (`DIRECT_PHYSICAL`, `PIPELINE_GENERATED`, `HUMAN_VERIFIED`, `WEAK_DISPUTED`), dual-label normalization (preserving original dataset labels alongside standardized CDVF target labels), source-group splitting algorithms (`GroupShuffleSplit` on subject ID, source recording, camera device), and automated disjoint-set leak detection assertions ($G_{\text{train}} \cap G_{\text{cal}} \cap G_{\text{val}} \cap G_{\text{test}} = \emptyset$).
-**4. Topics & Subtopics:**
-- Dataset Governance Schema: Implementation of `DatasetCard` under `src/ps05/cdvf/datasets/card.py`.
-- 4-Tier Provenance Taxonomy: Classifying ground truth by generation and verification method.
-- Dual-Label Normalization Engine: Mapping diverse benchmark annotations to canonical task labels without losing raw metadata.
-- Group-Level Leakage-Proof Splitting: Partitioning datasets strictly by root source identity, recording session, or capture device.
-- Automated Disjoint-Set Leak Detection: Enforcing zero overlap between training, calibration, validation, and test splits.
-**5. Exact Tasks:**
-1. Create `src/ps05/cdvf/datasets/` package and implement `DatasetCard` and `DatasetSplitManifest`.
-2. Build `LabelNormalizationPipeline` mapping dataset-specific labels into standardized forensic states.
-3. Implement `SourceGroupSplitter` applying grouped stratification on subject identity and source capture hashes.
-4. Implement `LeakageAssertionHarness` calculating set intersections across all split group IDs and raising `DataLeakageError` on failure.
-5. Create split manifest generator producing deterministic, SHA-256 hashed split files.
-**6. Detailed Execution Workflow:**
-```mermaid
-flowchart TD
-    RawDataset["Raw Benchmark Dataset"] --> CardSpec["Compile DatasetCard"]
-    CardSpec --> TierAssign["Assign Provenance Tier 1-4"]
-    TierAssign --> DualLabel["Normalize Labels (Raw + Canonical)"]
-    DualLabel --> GroupExtract["Extract Root Group IDs (Subject, Device, File)"]
-    GroupExtract --> SplitGen["GroupShuffleSplit Partitioning"]
-    SplitGen --> LeakAssert{"Disjoint Set Intersection == Empty?"}
-    LeakAssert -- No --> FailSplit["Raise DataLeakageError & Abort"]
-    LeakAssert -- Yes --> ManifestLock["Generate SHA-256 Hashed Split Manifest"]
-```
-**7. Technologies, Tools & Frameworks:**
-Python 3.12, Pydantic v2, Scikit-learn (GroupShuffleSplit), NumPy, Pandas, hashlib.
-**8. Prerequisites & Dependencies:**
-Phase CDVF-A1 completed; benchmark corpus metadata accessible.
-**9. Expected Files, Artifacts & Contracts:**
-- `src/ps05/cdvf/datasets/__init__.py`
-- `src/ps05/cdvf/datasets/card.py`
-- `src/ps05/cdvf/datasets/splitter.py`
-- `src/ps05/cdvf/datasets/normalizer.py`
-- `tests/unit/cdvf/test_dataset_splitting.py`
-**10. Failure Cases & Risk Mitigations:**
-- Derivative media leakage across splits (e.g. video frames from same clip in train and test): Trapped by mandatory source-clip grouping keys.
-- Ambiguous ground truth in wild datasets: Relegated to `WEAK_DISPUTED` tier and excluded from core benchmark gates.
-**11. Security & Privacy Considerations:**
-Subject identity keys must be stored as one-way HMAC-SHA256 tokens to protect research subject privacy.
-**12. Acceptance Criteria:**
-- 100% of split manifests achieve zero group overlap ($G_i \cap G_j = \emptyset$).
-- Raw dataset annotations preserved unaltered in `DatasetSampleRecord.raw_dataset_label`.
-- Any detected cross-split contamination raises a fatal test failure.
-**13. Definition of Done:**
-Dataset governance schemas and splitting algorithms implemented, test suite verifying zero leakage passed.
-**14. Explicit Status:** `PLANNED`
-**15. Checkpoint Table:**
-
-| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
-| :--- | :--- | :--- | :--- | :--- |
-| **CDVF-CP-02-01** | Dataset Card Specification & Registration Harness | `DatasetCard` schema correctly captures all 24 metadata fields and passes validation | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-02-02** | Dual-Label Normalisation & Quality Tier Pipeline | Normalizer preserves raw label while mapping to canonical target classes with assigned provenance tier | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-02-03** | Source-Group Split Manifest Generator | Split manifest correctly partitions multi-frame videos and audio sessions by parent recording ID | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-02-04** | Automated Zero-Leakage Disjoint Set Assertion Suite | Pytest suite asserts zero intersection of source IDs across train/cal/val/test splits ($G \cap G' = \emptyset$) | `NOT_STARTED` | Awaits phase activation |
+### Phase CDVF-A2: Dataset Registry, Quality Tiers and Leakage-Proof Splitting
+- **Objective:** Implement dataset governance, cryptographic manifest hashing, and group-aware leakage-proof data partitioning.
+- **Prerequisites:** `CDVF-CP-01-01`.
+- **Scope:** Dataset Registry, 4 quality tiers, `GroupKFold` split engine, disjoint partition manifests.
+- **Detailed Tasks:**
+  1. Implement Dataset Registry tracking dataset versions, original vs manipulated sample counts, licenses, and quality tiers (Tier 1-4).
+  2. Implement group-aware dataset splitting engine in `src/cdvf/datasets/splitter.py` enforcing speaker-, actor-, and video-disjoint partitions.
+  3. Implement automated mathematical leakage audit asserting $\mathcal{G}_{\text{train}} \cap \mathcal{G}_{\text{cal}} \cap \mathcal{G}_{\text{val}} \cap \mathcal{G}_{\text{test}} = \emptyset$.
+  4. Generate and commit cryptographically sealed WORM manifests for benchmark datasets (FaceForensics++, Celeb-DF, ASVspoof 2019/2021).
+  5. Establish 10 standardized evaluation tracks covering in-domain, cross-dataset, cross-device, and cross-compression conditions.
+- **Dependencies:** `CDVF-A1`, Scikit-learn, Pandas.
+- **Deliverables:** Dataset Registry models, `GroupKFold` splitting pipeline, leakage audit engine, sealed split manifests.
+- **Dataset Requirements:** FaceForensics++ (1,000 videos), Celeb-DF v2 (590 original / 5,639 deepfake), ASVspoof 2019 LA partition.
+- **Tests:** Unit tests asserting zero group-key leakage across 10,000 generated splits; manifest hash verification tests.
+- **Checkpoints:** `CDVF-CP-02-01` (Leakage-proof partitions verified with zero group-key intersection on test corpora).
+- **Acceptance Criteria:** Automated leakage auditor terminates execution with `LEAKAGE_DETECTED` if any shared group key is found.
+- **Exit Criteria:** Certified dataset partition manifests committed to CEIPL WORM vault.
+- **Risks:** Incomplete actor annotations in web-scraped datasets (mitigated via automated face clustering and visual hashing).
+- **Current Status:** `PLANNED`
 
 ---
 
 ### Phase CDVF-A3: Unified 19-Parameter Benchmark Runner & Statistical Evaluation Harness
-
-**1. Phase ID & Title:** `CDVF-A3: Unified 19-Parameter Benchmark Runner & Statistical Evaluation Harness`
-**2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the deterministic `BenchmarkRunner` engine under `src/ps05/cdvf/runner/`, executing benchmark runs configured with the canonical 19-parameter execution context. Implement the complete metric computation library (Precision, Recall, Specificity, F1, Balanced Accuracy, ROC-AUC, PR-AUC, EER) with mathematical zero-division handling. Implement grouped bootstrap resampling ($B=2000$) for 95% confidence interval estimation, runtime memory/latency profiling, and JSON/WORM export.
-**4. Topics & Subtopics:**
-- 19-Parameter Execution Context: Full parameter encapsulation under `BenchmarkRunConfig`.
-- Deterministic Execution Engine: Seed fixing across NumPy, PyTorch, Python random, and CUDA deterministic flags.
-- Comprehensive Metric Suite: Exact implementations of TPR, FPR, Specificity, Balanced Accuracy, and EER.
-- Grouped Bootstrap Uncertainty: Stratified grouped bootstrap resampling ($B=2000$) computing empirical 95% CIs.
-- Execution Profiling & WORM Packaging: Recording peak VRAM, CPU utilization, wall-clock latency, and output hashing.
-**5. Exact Tasks:**
-1. Create `src/ps05/cdvf/runner/` package and implement `BenchmarkRunner` class.
-2. Build `MetricCalculator` implementing classification, ranking, and calibration metrics with safe zero-denominator handling.
-3. Implement `GroupedBootstrapEngine` executing $B=2000$ bootstrap iterations at the subject/source group level.
-4. Build runtime environment capture utility logging hardware IDs, OS kernel, GPU driver, CUDA version, and git commit.
-5. Implement JSON benchmark report serializer writing immutable run bundles into the platform WORM vault.
-**6. Detailed Execution Workflow:**
-```mermaid
-flowchart TD
-    Config["19-Parameter BenchmarkRunConfig"] --> EnvLock["Lock Deterministic Seeds & Environment"]
-    EnvLock --> ModelLoad["Load & Cryptographically Verify Model Checkpoint"]
-    ModelLoad --> SplitLoad["Load Validated Group Split Manifest"]
-    SplitLoad --> InferenceLoop["Execute Batch Inference & Measure Latency/VRAM"]
-    InferenceLoop --> MetricCompute["Compute Point Metrics (AUC, F1, EER, BalAcc)"]
-    MetricCompute --> BootstrapCI["Grouped Bootstrap Resampling (B=2000, 95% CI)"]
-    BootstrapCI --> WORMExport["Write Signed Benchmark Run Record to WORM Vault"]
-```
-**7. Technologies, Tools & Frameworks:**
-Python 3.12, PyTorch 2.6+, Scikit-learn, NumPy, SciPy, Pydantic v2.
-**8. Prerequisites & Dependencies:**
-Phase CDVF-A1 and CDVF-A2 completed; GPU acceleration environment configured.
-**9. Expected Files, Artifacts & Contracts:**
-- `src/ps05/cdvf/runner/__init__.py`
-- `src/ps05/cdvf/runner/benchmark.py`
-- `src/ps05/cdvf/runner/metrics.py`
-- `src/ps05/cdvf/runner/bootstrap.py`
-- `tests/unit/cdvf/test_metrics_and_bootstrap.py`
-**10. Failure Cases & Risk Mitigations:**
-- Zero division in degenerate test slices (e.g. zero positive predictions): Handled via explicit `ZeroDivisionError` fallback returning `0.0` or `NaN` with logged warning.
-- Bootstrapping individual dependent video frames: Trapped and rejected by mandatory grouping key requirement in bootstrap engine.
-**11. Security & Privacy Considerations:**
-Benchmark runner must execute with restricted filesystem write permissions, writing solely to the designated benchmark artifact directory.
-**12. Acceptance Criteria:**
-- All 19 configuration parameters strictly required and validated before run initiation.
-- Point metrics match Scikit-learn reference values to within $10^{-6}$ relative tolerance.
-- Bootstrap 95% confidence intervals properly bracket point estimates across 2000 iterations.
-**13. Definition of Done:**
-Benchmark runner and metric calculation engine implemented, unit and statistical property tests passed.
-**14. Explicit Status:** `PLANNED`
-**15. Checkpoint Table:**
-
-| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
-| :--- | :--- | :--- | :--- | :--- |
-| **CDVF-CP-03-01** | 19-Parameter Benchmark Runner Execution Core | `BenchmarkRunner` validates all 19 configuration fields and executes reproducible test pass | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-03-02** | Metric Calculation Engine with Zero-Division Traps | Precision, Recall, Specificity, F1, AUC, and EER calculate correctly without crashing on all-negative slices | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-03-03** | Grouped Bootstrap Confidence Interval Harness ($B=2000$) | Bootstrap engine generates valid 95% empirical percentile intervals grouped at subject/clip level | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-03-04** | Benchmark Output JSON Schema & WORM Vault Exporter | Evaluation run bundle serializes to valid `BenchmarkRun` schema with calculated manifest SHA-256 | `NOT_STARTED` | Awaits phase activation |
+- **Objective:** Implement an automated, deterministic benchmark runner executing standardized evaluation runs across all 19 parameters.
+- **Prerequisites:** `CDVF-CP-02-01`.
+- **Scope:** Multi-modal benchmark runner, grouped stratified bootstrap confidence interval engine, deterministic PRNG manager.
+- **Detailed Tasks:**
+  1. Implement `BenchmarkRunner` in `src/cdvf/benchmarks/runner.py` capturing model checkpoint, dataset split, seed, and execution parameters.
+  2. Implement grouped stratified bootstrap harness (1,000 iterations) computing 95% confidence intervals for all classification and localisation metrics.
+  3. Implement deterministic PRNG seed manager locking Python, NumPy, PyTorch, and CUDA random seeds.
+  4. Implement resource monitor enforcing worker memory ceilings ($\le 16\text{ GB}$ RAM, $\le 8\text{ GB}$ VRAM) and execution timeouts.
+- **Dependencies:** `CDVF-A2`, PyTorch 2.2+, SciPy.
+- **Deliverables:** 19-parameter benchmark execution engine, bootstrap statistical harness, deterministic seed lock.
+- **Dataset Requirements:** Certified benchmark manifests from `CDVF-A2`.
+- **Tests:** Determinism tests verifying identical metric outputs across repeated executions on frozen seeds.
+- **Checkpoints:** `CDVF-CP-03-01` (Benchmark runner executes full evaluation run yielding bit-identical outputs across 5 runs).
+- **Acceptance Criteria:** All 19 parameters captured in execution manifest; bootstrap confidence intervals reported for all metrics.
+- **Exit Criteria:** Benchmark runner ready to execute per-modality test suites.
+- **Risks:** Excessive execution time during 1,000-iteration bootstrap resampling (mitigated via vectorized NumPy operations).
+- **Current Status:** `PLANNED`
 
 ---
 
 ### Phase CDVF-A4: AIF Image Deepfake & Manipulation Detection Validation Suite
-
-**1. Phase ID & Title:** `CDVF-A4: AIF Image Deepfake & Manipulation Detection Validation Suite`
-**2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the image-forensic validation harness for AIF detection models across four explicit forensic tasks (IMG-1: Authentic vs AI-Generated, IMG-2: Authentic vs Manipulated, IMG-3: Face Swap/Morphing, IMG-4: Pixel Manipulation Localisation). Implement spatial mask metrics (pixel-level IoU, boundary F1, Dice coefficient). Build the 14-condition synthetic degradation engine simulating real-world forensic evidence conditions (JPEG recompression QF 30-95, Gaussian blur, additive noise, resizing, screenshot recapture, social recompression).
-**4. Topics & Subtopics:**
-- Task-Specific Protocols: Disaggregated evaluation suites for AI generation, splicing, and face morphing.
-- Spatial Localisation Metric Engine: Mask IoU, Dice coefficient, and contour boundary F1 score ($\tau=2\text{ px}$).
-- 14-Condition Image Degradation Engine: Parametric transformations under `ImageRobustnessGrid`.
-- Localisation vs Classification Consistency Check: Trapping cases where an image is classified as manipulated but localisation fails or indicates zero pixels.
-- Multi-Branch Model Integration: Adapting AIF TruFor and ViT feature extractors into standard CDVF input/output contracts.
-**5. Exact Tasks:**
-1. Create `src/ps05/cdvf/modality/image/` package and implement `ImageValidationProtocol`.
-2. Build `SpatialLocalizationMetrics` computing pixel IoU, Dice, and boundary F1 for binary masks.
-3. Implement `ImageDegradationEngine` providing parametric transforms (JPEG, blur, noise, crop, social media compression).
-4. Implement task-specific evaluation suites for IMG-1 through IMG-4.
-5. Create automated test verifying unlocalised manipulation handling (logging classification confidence without bogus mask generation).
-**6. Detailed Execution Workflow:**
-```mermaid
-flowchart TD
-    ImgExhibit["Image Input (RGB Tensor)"] --> TaskBranch{"Task Type"}
-    TaskBranch -- IMG-1/2/3 --> ClfPipeline["Classification Pipeline"]
-    TaskBranch -- IMG-4 --> LocPipeline["Localisation Pipeline"]
-    ClfPipeline --> ClfMetrics["Compute ROC-AUC, BalAcc, EER"]
-    LocPipeline --> MaskGen["Generate Predicted Manipulation Mask"]
-    MaskGen --> MaskMetrics["Compute Pixel IoU, Dice, Boundary F1"]
-    ClfPipeline & LocPipeline --> RobustGrid["14-Condition Robustness Perturbations"]
-    RobustGrid --> DegradeReport["Plot Performance vs Degradation Curves"]
-```
-**7. Technologies, Tools & Frameworks:**
-Python 3.12, PyTorch 2.6+, torchvision, Pillow, OpenCV, Albumentations, NumPy.
-**8. Prerequisites & Dependencies:**
-Phase CDVF-A3 completed; AIF model candidate interfaces documented.
-**9. Expected Files, Artifacts & Contracts:**
-- `src/ps05/cdvf/modality/image/__init__.py`
-- `src/ps05/cdvf/modality/image/protocol.py`
-- `src/ps05/cdvf/modality/image/localization.py`
-- `src/ps05/cdvf/modality/image/robustness.py`
-- `tests/unit/cdvf/test_image_validation.py`
-**10. Failure Cases & Risk Mitigations:**
-- Zero ground-truth mask for genuine images: IoU defined as $1.0$ if predicted mask is empty, $0.0$ if false-alarm mask predicted.
-- High classification confidence with unlocalised manipulation: Explicitly reported as `DETECTED_LOCALISATION_UNAVAILABLE`.
-**11. Security & Privacy Considerations:**
-Image decoding must be defended against decompression bombs (PIL `MAX_IMAGE_PIXELS` ceiling enforced).
-**12. Acceptance Criteria:**
-- Mask IoU and boundary F1 calculate accurately against synthetic geometric shapes with known overlap.
-- Robustness grid executes all 14 degradation conditions without runtime exceptions.
-- Detection and localisation metrics reported in separate, non-conflated report sections.
-**13. Definition of Done:**
-Image validation suite implemented, verified against synthetic test data, 100% pytest pass rate.
-**14. Explicit Status:** `PLANNED`
-**15. Checkpoint Table:**
-
-| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
-| :--- | :--- | :--- | :--- | :--- |
-| **CDVF-CP-04-01** | Image Classification Benchmark Protocol Harness | Clean execution of IMG-1, IMG-2, and IMG-3 evaluation pipelines on standardized image tensors | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-04-02** | Spatial Mask IoU & Boundary F1 Localisation Engine | `SpatialLocalizationMetrics` matches theoretical IoU on synthetic circle/square ground truth masks | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-04-03** | 14-Condition Image Degradation & Robustness Suite | Complete sweep over JPEG QF 30-95, blur, noise, and resizing producing performance degradation matrices | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-04-04** | Unlocalised Manipulation Fallback & Consistency Trap | Pipeline cleanly handles manipulated images lacking pixel-level masks without hallucinating contours | `NOT_STARTED` | Awaits phase activation |
+- **Objective:** Validate AIF image forensics models across classification, region localisation, and pixel-level segmentation.
+- **Prerequisites:** `CDVF-CP-03-01`.
+- **Scope:** TruFor, CAT-Net, CMFD, and splice localization models; synthetic image detection, face swaps, and inpainting.
+- **Detailed Tasks:**
+  1. Implement AIF benchmark adapter wrapping TruFor and CAT-Net inference APIs.
+  2. Execute image-level classification benchmark evaluating Precision, Recall, F1, Specificity, Balanced Accuracy, and ROC-AUC.
+  3. Execute spatial localisation benchmark evaluating pixel-level IoU, Dice coefficient, and Boundary F1 against ground-truth masks.
+  4. Disaggregate evaluation across manipulation types (synthetic diffusion, face swaps, retouching, local inpainting).
+  5. Assert decoupled reporting: image-level classification and spatial localisation must be evaluated and reported independently.
+- **Dependencies:** `CDVF-A3`, AIF engine.
+- **Deliverables:** AIF validation test suite, image localisation evaluation harness, benchmark performance report.
+- **Dataset Requirements:** FaceForensics++ c23/c40 image crops, NIST MFC2018, CASIA v2 image manipulation datasets.
+- **Tests:** Spatial IoU boundary edge-case tests (handling empty masks, full-image tampering, and zero-division safety).
+- **Checkpoints:** `CDVF-CP-04-01` (AIF models benchmarked with independent classification and localisation metric bundles).
+- **Acceptance Criteria:** Localisation IoU and classification ROC-AUC reported separately; zero unhandled division-by-zero errors.
+- **Exit Criteria:** AIF validation report certified and committed to benchmark registry.
+- **Risks:** High resolution images causing GPU VRAM exhaustion (mitigated via standardized tiling and overlap blending).
+- **Current Status:** `PLANNED`
 
 ---
 
 ### Phase CDVF-A5: AURAS Audio Deepfake & Speech Manipulation Validation Suite
-
-**1. Phase ID & Title:** `CDVF-A5: AURAS Audio Deepfake & Speech Manipulation Validation Suite`
-**2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the audio-forensic validation harness for AURAS detection models across four forensic tasks (AUD-1: Bona Fide vs Synthetic Speech, AUD-2: Voice Conversion / Cloning, AUD-3: Partial Splicing, AUD-4: Segment Localisation). Implement temporal interval metrics (temporal IoU [tIoU], boundary precision/recall, onset/offset timing error $\Delta t_{\text{boundary}} \le 50\text{ ms}$). Build the audio robustness engine evaluating lossy codecs (Opus, AAC, AMR, MP3 at 8-128 kbps), background acoustic noise (SNR 0-30 dB), reverberation, and sample-rate mismatches.
-**4. Topics & Subtopics:**
-- Audio Task Protocols: Independent evaluation protocols for synthetic speech, cloning, and partial splices.
-- Temporal Localisation Metric Engine: Temporal IoU, boundary tolerance matching, and segment-level F1.
-- Chunked Sliding Window Aggregation: Frame-level pooling ($p$-norm, max-pooling) from overlapping 3.0s windows.
-- Audio Degradation & Robustness Grid: Parametric perturbations under `AudioRobustnessGrid`.
-- Short-Segment Handling: Formal boundary behavior for clips $< 1.0\text{ s}$ duration.
-**5. Exact Tasks:**
-1. Create `src/ps05/cdvf/modality/audio/` package and implement `AudioValidationProtocol`.
-2. Build `TemporalLocalizationMetrics` computing tIoU and onset/offset boundary error against millisecond ground truth.
-3. Implement `AudioDegradationEngine` applying lossy transcoding, additive environmental noise, and reverberation.
-4. Build `WindowAggregationValidator` comparing max-pooling, mean-pooling, and soft-attention pooling across chunks.
-5. Create automated test verifying graceful degradation on short audio segments ($< 1.0\text{ s}$).
-**6. Detailed Execution Workflow:**
-```mermaid
-flowchart TD
-    AudioExhibit["Audio Input (16kHz PCM Waveform)"] --> Windowing["Sliding Window Chunker (3s, 50% hop)"]
-    Windowing --> ModelInference["Model Inference (RawNet2 / AASIST / WavLM)"]
-    ModelInference --> WindowScores["Extract Window Scores & Latent Vectors"]
-    WindowScores --> Aggregation["Window Aggregation (Max / p-Norm / Attention)"]
-    Aggregation --> RecordingScore["Recording-Level Classification Score"]
-    WindowScores --> TempLocalise["Temporal Segment Localisation (tIoU, Boundary Error)"]
-    RecordingScore & TempLocalise --> AudioRobust["Codec & Acoustic Robustness Sweep"]
-    AudioRobust --> AudioReport["Compile Audio Validation Report"]
-```
-**7. Technologies, Tools & Frameworks:**
-Python 3.12, PyTorch 2.6+, TorchAudio, Librosa, SoundFile, FFmpeg, NumPy.
-**8. Prerequisites & Dependencies:**
-Phase CDVF-A3 completed; AURAS model interfaces and audio preprocessing contracts available.
-**9. Expected Files, Artifacts & Contracts:**
-- `src/ps05/cdvf/modality/audio/__init__.py`
-- `src/ps05/cdvf/modality/audio/protocol.py`
-- `src/ps05/cdvf/modality/audio/localization.py`
-- `src/ps05/cdvf/modality/audio/robustness.py`
-- `tests/unit/cdvf/test_audio_validation.py`
-**10. Failure Cases & Risk Mitigations:**
-- Codec re-encoding introducing phase shifts: Mitigated via energy envelope alignment before boundary evaluation.
-- Silent or near-silent segments ($< -50\text{ dBFS}$): Trapped by VAD pre-filter and assigned `INSUFFICIENT_EVIDENCE`.
-**11. Security & Privacy Considerations:**
-Audio files must be parsed using defensive decoders (FFmpeg subprocess sandbox) trapping malformed headers.
-**12. Acceptance Criteria:**
-- Temporal IoU and boundary errors calculate correctly against millisecond timecode annotations.
-- Audio robustness engine executes Opus, AAC, and noise sweeps without pipeline interruption.
-- Audio segments $< 0.5\text{ s}$ cleanly return `INSUFFICIENT_EVIDENCE` without model NaN propagation.
-**13. Definition of Done:**
-Audio validation suite implemented, verified with synthetic multi-segment audio, 100% pytest pass rate.
-**14. Explicit Status:** `PLANNED`
-**15. Checkpoint Table:**
-
-| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
-| :--- | :--- | :--- | :--- | :--- |
-| **CDVF-CP-05-01** | Speech Synthesis & Cloning Evaluation Harness | Clean execution of AUD-1 and AUD-2 evaluation pipelines on 16kHz audio waveforms | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-05-02** | Temporal Segment Localisation (tIoU & Boundary Error) | `TemporalLocalizationMetrics` verifies boundary accuracy to within $\le 50\text{ ms}$ on spliced audio test set | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-05-03** | Lossy Codec & Acoustic Degradation Robustness Grid | Automated execution of Opus/AAC transcoding and SNR 0-30 dB sweeps producing robustness curves | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-05-04** | Sliding Window Aggregation & Window Hop Validation | Verification of recording-level aggregation stability under 10% to 75% window hop variations | `NOT_STARTED` | Awaits phase activation |
+- **Objective:** Validate AURAS audio forensic models, maintaining strict separation between speech spoofing and splice localization.
+- **Prerequisites:** `CDVF-CP-03-01`.
+- **Scope:** RawNet2, AASIST, WavLM Base+, and ARE splice localization models; AI-generated speech, voice cloning, and audio splicing.
+- **Detailed Tasks:**
+  1. Implement AURAS benchmark adapter wrapping ADDE voice cloning and ARE splice detection inference APIs.
+  2. Execute audio spoofing benchmark evaluating Equal Error Rate (EER), minimum Detection Cost Function (minDCF), and ROC-AUC.
+  3. Execute audio edit localisation benchmark evaluating temporal IoU (tIoU), start/end boundary errors (ms), and false alarms per hour.
+  4. Evaluate acoustic robustness across telephone codecs (AMR, G.711) and background noise variations (0dB to 20dB SNR).
+  5. Assert strict separation invariant: voice cloning scores and splice localization findings must never be combined into a single score.
+- **Dependencies:** `CDVF-A3`, AURAS engine.
+- **Deliverables:** AURAS validation test suite, temporal audio localisation harness, acoustic benchmark report.
+- **Dataset Requirements:** ASVspoof 2019/2021 Logical Access (LA), In-the-Wild Audio Deepfake Dataset, controlled audio splice corpus.
+- **Tests:** Temporal boundary metric unit tests (evaluating start/end offset precision against millisecond ground truth).
+- **Checkpoints:** `CDVF-CP-05-01` (AURAS ADDE and ARE models benchmarked with decoupled spoofing and splicing metrics).
+- **Acceptance Criteria:** EER and minDCF calculated strictly on spoofing sets; temporal tIoU calculated strictly on splice sets.
+- **Exit Criteria:** AURAS validation report certified and committed to benchmark registry.
+- **Risks:** Unseen audio codecs causing feature extractor failure (mitigated via robust multi-format audio decoder wrapper).
+- **Current Status:** `PLANNED`
 
 ---
 
 ### Phase CDVF-A6: VISTA Video & CCTV Deepfake Detection Validation Suite
-
-**1. Phase ID & Title:** `CDVF-A6: VISTA Video & CCTV Deepfake Detection Validation Suite`
-**2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the video-forensic validation harness for VISTA detection models across five forensic tasks (VID-1: Frame Deepfake, VID-2: Video Manipulated, VID-3: Synthetic Video, VID-4: Temporal Manipulation, VID-5: Spatial/Temporal Localisation). Enforce the fundamental video frame non-independence rule. Implement the dedicated CCTV evaluation domain capturing real-world investigative constraints (CIF/D1/720p resolution, IR night-vision, variable frame rates 5-15 fps, DVR H.264 macroblock compression, timestamp OSD overlays, camera vibration).
-**4. Topics & Subtopics:**
-- Video Task Protocols: Independent evaluation protocols for frame-level, temporal, and CCTV manipulation.
-- Frame Non-Independence Invariant: Grouped evaluation ensuring frames from one source video cannot bias metrics.
-- Video-Level Aggregation Strategies: Evaluating top-$k$ frame pooling, temporal convolutions, and LSTM/Transformer pooling.
-- Dedicated CCTV Domain Benchmark: Low-resolution, low-framerate, and night-vision CCTV test suite.
-- Spatio-Temporal Localisation: Combined bounding-box tracking and frame interval localization.
-**5. Exact Tasks:**
-1. Create `src/ps05/cdvf/modality/video/` package and implement `VideoValidationProtocol`.
-2. Build `VideoAggregationEvaluator` comparing frame-pooling strategies against video-level ground truth.
-3. Implement `CCTVDomainBenchmarkHarness` simulating low frame-rates (5-15 fps), IR noise, and DVR artifacts.
-4. Implement `SpatioTemporalLocalizationMetrics` calculating 3D bounding-box IoU across video frame sequences.
-5. Create automated test enforcing source-video grouping during video evaluation.
-**6. Detailed Execution Workflow:**
-```mermaid
-flowchart TD
-    VideoExhibit["Video Exhibit (.mp4, .avi, CCTV DVR)"] --> Demux["Demux Frames & Timestamps (FFmpeg)"]
-    Demux --> FaceDetect["Face Detection & Spatial Cropping"]
-    FaceDetect --> FrameInference["Spatial Frame Model Inference (Xception/EfficientNet)"]
-    Demux --> TempInference["Temporal Model Inference (FTCN / VideoMAE / 3D FFT)"]
-    FrameInference & TempInference --> VideoPool["Video-Level Aggregation (Top-k / Attention)"]
-    VideoPool --> VideoMetrics["Compute Video-Level AUC, BalAcc, EER"]
-    VideoPool --> CCTVSweep["Dedicated CCTV Domain Perturbation Sweep"]
-    CCTVSweep --> VideoReport["Compile Video & CCTV Validation Report"]
-```
-**7. Technologies, Tools & Frameworks:**
-Python 3.12, PyTorch 2.6+, torchvision, Decord, OpenCV, FFmpeg, NumPy.
-**8. Prerequisites & Dependencies:**
-Phase CDVF-A3 completed; VISTA video processing and frame demuxing engines available.
-**9. Expected Files, Artifacts & Contracts:**
-- `src/ps05/cdvf/modality/video/__init__.py`
-- `src/ps05/cdvf/modality/video/protocol.py`
-- `src/ps05/cdvf/modality/video/cctv.py`
-- `src/ps05/cdvf/modality/video/localization.py`
-- `tests/unit/cdvf/test_video_validation.py`
-**10. Failure Cases & Risk Mitigations:**
-- Video treated as independent frames inflating sample size $N$: Trapped by mandatory video-level sample grouping assertions.
-- Non-face CCTV footage fed to face-detector models: Trapped and diverted to `INCONCLUSIVE_OOD` or scene-level detector.
-**11. Security & Privacy Considerations:**
-Video demuxers must run in sandboxed worker processes with memory limits to prevent FFmpeg buffer overflows.
-**12. Acceptance Criteria:**
-- Video-level metrics calculate strictly over independent video entities ($N_{\text{videos}}$).
-- CCTV domain harness evaluates down to 5 fps and 352x288 resolution without pipeline crash.
-- Spatio-temporal bounding boxes evaluate accurately across synthetic moving objects.
-**13. Definition of Done:**
-Video and CCTV validation suite implemented, verified against synthetic test clips, 100% pytest pass rate.
-**14. Explicit Status:** `PLANNED`
-**15. Checkpoint Table:**
-
-| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
-| :--- | :--- | :--- | :--- | :--- |
-| **CDVF-CP-06-01** | Video-Level Aggregation & Frame Non-Independence Guard | Benchmark runner asserts video sample independence and evaluates top-$k$ frame pooling | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-06-02** | Spatio-Temporal Video Localisation Evaluation | Localisation engine correctly calculates 3D bounding-box IoU across multi-frame sequences | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-06-03** | Dedicated CCTV Domain Robustness Benchmark Suite | Validation suite successfully evaluates low-resolution (D1/CIF), 5-15 fps, and IR night-vision clips | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-06-04** | Lip-Sync & Audio-Visual Desynchronisation Verification | Validation suite verifies AV correlation and traps audio-visual timing misalignments | `NOT_STARTED` | Awaits phase activation |
+- **Objective:** Validate VISTA video forensic models, evaluating video-level, frame-level, and spatio-temporal continuity metrics.
+- **Prerequisites:** `CDVF-CP-03-01`.
+- **Scope:** XceptionNet, EfficientNet-B4 spatial heads, FTCN temporal network, and CFITSA temporal cadence models.
+- **Detailed Tasks:**
+  1. Implement VISTA benchmark adapter wrapping spatial face manipulation and temporal deepfake inference APIs.
+  2. Execute video-level deepfake benchmark evaluating video ROC-AUC, mean frame pooling, top-k pooling, and temporal attention.
+  3. Execute frame-level benchmark reporting frame-level AUC and correcting for correlated-frame statistical bias.
+  4. Evaluate spatial face mask IoU across face tracks and temporal interval IoU for manipulated video segments.
+  5. Evaluate CCTV surveillance profile under heavy H.264/H.265 compression (CRF 35-40), low resolution (360p), and VFR jitter.
+- **Dependencies:** `CDVF-A3`, VISTA engine.
+- **Deliverables:** VISTA validation test suite, video spatio-temporal metric harness, CCTV benchmark evaluation report.
+- **Dataset Requirements:** FaceForensics++ (Raw, c23, c40), Celeb-DF v2, DeeperForensics-1.0, controlled CCTV synthetic corpus.
+- **Tests:** Frame correlation bias tests; video temporal interval overlap tests; CCTV degradation sweep tests.
+- **Checkpoints:** `CDVF-CP-06-01` (VISTA video and CCTV profiles benchmarked with video-level, frame-level, and temporal metrics).
+- **Acceptance Criteria:** Correlated frame bias corrected via cluster bootstrap; CCTV performance profile documented with quality floors.
+- **Exit Criteria:** VISTA validation report certified and committed to benchmark registry.
+- **Risks:** Huge disk space required for uncompressed video frames (mitigated via on-the-fly streaming decode).
+- **Current Status:** `PLANNED`
 
 ---
 
-### Phase CDVF-A7: Cross-Dataset Generalisation & Unseen-Generator Protocols (Modes A–G)
-
-**1. Phase ID & Title:** `CDVF-A7: Cross-Dataset Generalisation & Unseen-Generator Protocols (Modes A–G)`
-**2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the generalisation evaluation matrix executing Modes A through G: Mode A (In-Domain), Mode B (Cross-Dataset), Mode C (Unseen-Generator), Mode D (Cross-Compression), Mode E (Cross-Source/Device), Mode F (Realistic Degraded Forensic Evidence), and Mode G (Temporal Holdout). Enforce the anti-hallucination invariant that prohibits models from claiming "generalises to unseen generators" unless validated under a strict leave-one-out generator protocol (Mode C).
-**4. Topics & Subtopics:**
-- 7-Mode Benchmark Matrix: Implementation of `GeneralizationMatrixRunner` under `src/ps05/cdvf/generalization/matrix.py`.
-- Leave-One-Out Generator Protocol (Mode C): Automated training/test generation partitioning (e.g. hold out StyleGAN3, Diffusion, or StarGAN).
-- Cross-Dataset Domain Shift (Mode B): Evaluating models trained on Dataset $X$ directly on Dataset $Y$ with zero tuning.
-- Cross-Compression Degradation Curves (Mode D): Measuring performance decay from pristine raw media to heavy recompression.
-- Automated Generalisation Gap Computation: Calculating $\Delta\operatorname{AUC}_{\text{gen}} = \operatorname{AUC}_{\text{in-domain}} - \operatorname{AUC}_{\text{unseen}}$ and flagging severe degradation ($> 0.15$).
-**5. Exact Tasks:**
-1. Create `src/ps05/cdvf/generalization/` package and implement `GeneralizationMatrixRunner`.
-2. Build `UnseenGeneratorProtocol` dynamically excluding selected generator architectures from training partitions.
-3. Build `CrossDatasetProtocol` automating cross-corpus evaluation pipelines.
-4. Implement `GeneralizationDegradationReporter` calculating degradation ratios and plotting performance delta bars.
-5. Create automated test asserting that generalisation claims fail if Mode C evaluation evidence is absent.
-**6. Detailed Execution Workflow:**
-```mermaid
-flowchart TD
-    ModeSelect["Select Evaluation Mode (A through G)"] --> SplitGen["Generate Mode-Specific Partition"]
-    SplitGen --> RunBench["Execute Benchmark Runner (CDVF-A3)"]
-    RunBench --> InDomainMetric["Record In-Domain Baseline (Mode A)"]
-    RunBench --> ShiftMetric["Record Shifted Metric (Mode B/C/D/E/F/G)"]
-    InDomainMetric & ShiftMetric --> GapCalc["Calculate Generalisation Gap (Delta-AUC, Delta-EER)"]
-    GapCalc --> GateCheck{"Generalisation Gap <= Allowable Ceiling?"}
-    GateCheck -- No --> ScopeLimit["Restrict Approved Scope to In-Domain Only"]
-    GateCheck -- Yes --> ScopeApprove["Permit Scoped Cross-Domain Approval"]
-```
-**7. Technologies, Tools & Frameworks:**
-Python 3.12, PyTorch 2.6+, Scikit-learn, NumPy, Pandas, Matplotlib.
-**8. Prerequisites & Dependencies:**
-Phases CDVF-A3, CDVF-A4, CDVF-A5, and CDVF-A6 completed; multi-generator corpora catalogued.
-**9. Expected Files, Artifacts & Contracts:**
-- `src/ps05/cdvf/generalization/__init__.py`
-- `src/ps05/cdvf/generalization/matrix.py`
-- `src/ps05/cdvf/generalization/unseen_generator.py`
-- `src/ps05/cdvf/generalization/cross_dataset.py`
-- `tests/unit/cdvf/test_generalization_matrix.py`
-**10. Failure Cases & Risk Mitigations:**
-- Severe performance collapse on unseen generators (AUC dropping from 0.98 to 0.52): System automatically restricts approval to known generator families.
-- Shared training identity across distinct datasets: Filtered via cross-dataset subject hash matching.
-**11. Security & Privacy Considerations:**
-Generalisation reports must clearly disclose tested vs untested generator families to prevent misleading judicial testimony.
-**12. Acceptance Criteria:**
-- Modes A through G execute deterministically from split manifests.
-- Generalisation gap $\Delta\operatorname{AUC}$ calculated accurately across all mode pairs.
-- Unseen-generator claims rejected unless backed by verified Mode C execution records.
-**13. Definition of Done:**
-Generalisation matrix runner implemented, tested across synthetic shifted distributions, 100% pytest pass rate.
-**14. Explicit Status:** `PLANNED`
-**15. Checkpoint Table:**
-
-| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
-| :--- | :--- | :--- | :--- | :--- |
-| **CDVF-CP-07-01** | Cross-Dataset Evaluation Protocol Engine (Mode B) | Automated pipeline executes cross-dataset evaluation across independent corpora | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-07-02** | Unseen-Generator Leave-One-Out Test Harness (Mode C) | Harness partitions generators and produces valid unseen-generator degradation report | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-07-03** | Cross-Compression & Forensic Export Grid (Mode D & F) | Evaluation sweep across multiple compression pipelines producing delta-performance curves | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-07-04** | Generalisation Degradation Reporting & Anti-Exaggeration Guard | System blocks generalisation claims in report when Mode C gap exceeds 0.20 AUC | `NOT_STARTED` | Awaits phase activation |
+### Phase CDVF-A7: Cross-Dataset Generalisation & Unseen-Generator Protocols (Modes A through G)
+- **Objective:** Quantify model transfer degradation across independent corpora and evaluate robustness against novel generative foundation models.
+- **Prerequisites:** `CDVF-CP-04-01`, `CDVF-CP-05-01`, `CDVF-CP-06-01`.
+- **Scope:** Modes A through G cross-dataset evaluation, transfer degradation metric ($\Delta\operatorname{AUC}_{\text{transfer}}$), $\operatorname{UG-Score}$.
+- **Detailed Tasks:**
+  1. Implement Mode B cross-dataset evaluation matrix: evaluate models trained on FF++ against Celeb-DF, DFDC, and In-the-Wild media.
+  2. Quantify transfer performance drop $\Delta\operatorname{AUC}_{\text{transfer}}$; enforce scope restriction if drop exceeds 15%.
+  3. Implement Mode C unseen-generator evaluation holding out novel synthesis foundations (Diffusion, StyleTTS2, Sora, Kling).
+  4. Compute Unseen-Generator Robustness Score ($\operatorname{UG-Score}$); flag generator families with accuracy $< 50\%$ as unsupported.
+  5. Execute Mode D perturbation grids: evaluate models under JPEG compression ($Q \in [20, 95]$), resizing, and video bit-rate throttling.
+- **Dependencies:** `CDVF-A4`, `CDVF-A5`, `CDVF-A6`.
+- **Deliverables:** Cross-dataset transfer matrix, unseen-generator evaluation report, robustness degradation curves.
+- **Dataset Requirements:** Multi-generator evaluation corpora (Celeb-DF, DFDC, DiffusionFace, WaveFake).
+- **Tests:** Automated assertion verifying transfer degradation calculations and unsupported generator tagging.
+- **Checkpoints:** `CDVF-CP-07-01` (Cross-dataset degradation matrices and UG-Scores generated across all registered models).
+- **Acceptance Criteria:** Transfer gap quantified for every model; zero models approved for unconstrained use without cross-dataset tests.
+- **Exit Criteria:** Cross-dataset and unseen-generator evaluation reports signed off.
+- **Risks:** Severe drop in performance on novel diffusion models (mitigated via explicit scope restriction and OOD gating).
+- **Current Status:** `PLANNED`
 
 ---
 
 ### Phase CDVF-A8: Confidence Calibration Engine & OOD Domain Shift Gating
-
-**1. Phase ID & Title:** `CDVF-A8: Confidence Calibration Engine & OOD Domain Shift Gating`
-**2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the confidence calibration pipeline under `src/ps05/cdvf/calibration/`, executing Platt scaling (logistic calibration), Temperature scaling, and Isotonic regression on strictly isolated calibration splits ($D_{\text{cal}}$). Implement 15-bin Expected Calibration Error (ECE $\le 0.05$), Brier score, and reliability diagram generation. Implement Out-of-Distribution (OOD) gating using Penultimate-Layer Mahalanobis distance with Ledoit-Wolf covariance shrinkage, Free Energy score, and Prediction Entropy. Enforce the OOD gating invariant: OOD samples trigger abstention rather than uncalibrated classification.
-**4. Topics & Subtopics:**
-- Calibration Data Isolation: Enforcing $D_{\text{cal}} \cap D_{\text{train}} = \emptyset$ and $D_{\text{cal}} \cap D_{\text{test}} = \emptyset$.
-- Calibration Algorithms: Platt scaling, Temperature scaling, and Isotonic regression.
-- Calibration Metrics: 15-bin ECE with adaptive/uniform binning, Brier score, and reliability diagrams.
-- OOD Scoring Algorithms: Mahalanobis distance on penultimate layer representations with Ledoit-Wolf shrinkage, Free Energy, and Entropy.
-- OOD Gating Policy: Intercepting inputs where $S_{\text{OOD}} > \tau_{\text{OOD}}$ and diverting to `INCONCLUSIVE_OOD`.
-**5. Exact Tasks:**
-1. Create `src/ps05/cdvf/calibration/` and `src/ps05/cdvf/ood/` packages.
-2. Build `ConfidenceCalibrator` implementing temperature scaling, Platt scaling, and isotonic regression.
-3. Build `CalibrationEvaluator` calculating 15-bin ECE and generating reliability diagram coordinate points.
-4. Build `MahalanobisOODDetector` fitting class-conditional Gaussian distributions with Ledoit-Wolf covariance shrinkage.
-5. Implement `OODDecisionGate` evaluating test embeddings against OOD thresholds and routing to abstention.
-**6. Detailed Execution Workflow:**
-```mermaid
-flowchart TD
-    TestInput["Test Sample (Image / Audio / Video)"] --> Preprocess["Frozen Preprocessor"]
-    Preprocess --> FeatureExtract["Extract Penultimate Layer Representation (z) & Logits (l)"]
-    FeatureExtract --> OODCheck["Compute Mahalanobis Distance / Free Energy"]
-    OODCheck --> OODThreshold{"OOD Score > Tau_OOD?"}
-    OODThreshold -- Yes --> OODAbstain["Emit INCONCLUSIVE_OOD (Zero Categorical Verdict)"]
-    OODThreshold -- No --> CalibrateScore["Apply Frozen Calibration (Temperature / Platt)"]
-    CalibrateScore --> ReliabilityCheck{"ECE <= 0.05 on Val Domain?"}
-    ReliabilityCheck -- No --> WarnUncalibrated["Emit Alert: Uncalibrated In-Domain Score"]
-    ReliabilityCheck -- Yes --> EmittedScore["Emit Calibrated Probability & 95% CI"]
-```
-**7. Technologies, Tools & Frameworks:**
-Python 3.12, PyTorch 2.6+, Scikit-learn (IsotonicRegression, LedoitWolf), SciPy, NumPy.
-**8. Prerequisites & Dependencies:**
-Phases CDVF-A1, CDVF-A2, and CDVF-A3 completed; frozen model checkpoints available.
-**9. Expected Files, Artifacts & Contracts:**
-- `src/ps05/cdvf/calibration/__init__.py`
-- `src/ps05/cdvf/calibration/calibrator.py`
-- `src/ps05/cdvf/calibration/metrics.py`
-- `src/ps05/cdvf/ood/__init__.py`
-- `src/ps05/cdvf/ood/mahalanobis.py`
-- `tests/unit/cdvf/test_calibration_and_ood.py`
-**10. Failure Cases & Risk Mitigations:**
-- Singular covariance matrix in Mahalanobis calculation: Mitigated via Ledoit-Wolf shrinkage ensuring positive-definite inversion.
-- Calibration fitted on test data: Trapped by split identity verification asserting $D_{\text{fit}} == D_{\text{cal}}$.
-**11. Security & Privacy Considerations:**
-Calibration parameters and covariance matrices must be saved as immutable, hashed artifacts linked to the model registry.
-**12. Acceptance Criteria:**
-- Post-calibration ECE $\le 0.05$ on in-domain validation split.
-- Mahalanobis OOD detector achieves AUROC $\ge 0.85$ distinguishing in-distribution from shifted distributions.
-- OOD gating intercept properly aborts classification when threshold is exceeded.
-**13. Definition of Done:**
-Calibration and OOD packages implemented, tested on synthetic and real embeddings, 100% pytest pass rate.
-**14. Explicit Status:** `PLANNED`
-**15. Checkpoint Table:**
-
-| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
-| :--- | :--- | :--- | :--- | :--- |
-| **CDVF-CP-08-01** | Calibration Fitting Pipeline on Disjoint Split ($D_{\text{cal}}$) | Calibrator fits temperature/Platt parameters on isolated calibration set without test data exposure | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-08-02** | 15-Bin ECE & Brier Score Validation Harness | Metrics engine correctly evaluates 15-bin ECE and Brier score before and after calibration | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-08-03** | Mahalanobis Covariance Shrinkage & Energy OOD Engine | OOD detector fits stable covariance matrices with Ledoit-Wolf shrinkage and scores test samples | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-08-04** | OOD Decision Gating Invariant & Threshold Locker | System intercepts OOD test samples and forces `INCONCLUSIVE_OOD` outcome without guessing | `NOT_STARTED` | Awaits phase activation |
+- **Objective:** Calibrate raw model scores into empirical probabilities and implement Out-of-Distribution gating to intercept unfamiliar inputs.
+- **Prerequisites:** `CDVF-CP-07-01`.
+- **Scope:** Platt scaling, temperature scaling, isotonic regression, 15-bin ECE ($\le 0.05$), Mahalanobis OOD gating (AUROC $\ge 0.85$).
+- **Detailed Tasks:**
+  1. Implement calibration engine in `src/cdvf/calibration/scaler.py` fitting Platt, temperature, and isotonic scaling on isolated calibration splits.
+  2. Implement ECE calculator evaluating Expected Calibration Error across 15 equal-width bins, Brier score, and negative log-likelihood.
+  3. Generate visual reliability diagrams plotting confidence vs empirical accuracy across all bins.
+  4. Implement OOD gating engine in `src/cdvf/ood/engine.py` calculating Mahalanobis distance, free energy, and predictive entropy on embeddings.
+  5. Calibrate OOD threshold $\tau_{\text{OOD}}$ on in-distribution validation vs synthetic shift data; assert OOD AUROC $\ge 0.85$.
+  6. Enforce OOD policy: high OOD score triggers mandatory abstention (`OUTSIDE_VALIDATED_SCOPE`); never cited as tampering evidence.
+- **Dependencies:** `CDVF-A7`, Scikit-learn, SciPy.
+- **Deliverables:** Calibration scaling pipeline, reliability diagram renderer, OOD gating engine, calibrated parameter records.
+- **Dataset Requirements:** Isolated calibration and validation partitions from `CDVF-A2`.
+- **Tests:** Zero test-set exposure assertions; 15-bin ECE calculation tests; OOD threshold trigger tests.
+- **Checkpoints:** `CDVF-CP-08-01` (Calibrated models achieve $\operatorname{ECE} \le 0.05$ on calibration split; OOD achieves AUROC $\ge 0.85$).
+- **Acceptance Criteria:** 100% of uncalibrated models emit warning watermark; OOD gate triggers abstention on 100% of shift fixtures.
+- **Exit Criteria:** Calibration parameters and OOD profiles committed to registry.
+- **Risks:** Miscalibration under severe domain shift (mitigated via cross-domain calibration testing and OOD intercept).
+- **Current Status:** `PLANNED`
 
 ---
 
 ### Phase CDVF-A9: First-Class Abstention Policy & Cross-Modal Fusion DAG
-
-**1. Phase ID & Title:** `CDVF-A9: First-Class Abstention Policy & Cross-Modal Fusion DAG`
-**2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the formal first-class abstention policy under `src/ps05/cdvf/decision/`, supporting the seven canonical forensic outcome states (`CLASSIFIED_WITHIN_VALIDATED_SCOPE`, `INCONCLUSIVE_OOD`, `INCONCLUSIVE_LOW_QUALITY`, `INCONCLUSIVE_MODEL_DISAGREEMENT`, `INSUFFICIENT_EVIDENCE`, `UNSUPPORTED_INPUT`, `ANALYSIS_FAILED`). Implement Selective Classification evaluation computing Coverage ($C$) and Selective Risk ($R(C)$). Implement the Cross-Modal Evidence Fusion Directed Acyclic Graph (DAG) that aggregates AIF, AURAS, and VISTA findings, enforces the anti-averaging invariant, exposes cross-engine disagreements, and tracks shared evidentiary lineage.
-**4. Topics & Subtopics:**
-- 7-State Abstention Engine: Complete state mapping and reasoning under `CDVFDecisionEngine`.
-- Selective Classification Analytics: Computing coverage vs selective risk curves across threshold sweeps.
-- Cross-Modal Fusion DAG: Dependency-aware aggregation of multi-modal evidence without naive score averaging.
-- Anti-Averaging Invariant: Prohibition against scalar arithmetic averaging of image, audio, and video scores.
-- Evidentiary Lineage & Disagreement Tracker: Highlighting conflicts (e.g. video face real, audio voice cloned) in judicial reports.
-**5. Exact Tasks:**
-1. Create `src/ps05/cdvf/decision/` and `src/ps05/cdvf/fusion/` packages.
-2. Build `AbstentionDecisionEngine` evaluating input quality, OOD scores, model agreement, and calibration scope.
-3. Build `SelectiveClassificationEvaluator` plotting coverage vs risk trade-off curves.
-4. Build `CrossModalFusionDAG` modeling multi-modal evidence dependencies and propagating uncertainty.
-5. Create automated test asserting that naive arithmetic score averaging raises an explicit `ArchitectureViolationError`.
-**6. Detailed Execution Workflow:**
-```mermaid
-flowchart TD
-    ModalityFindings["Modality Findings (AIF Image, AURAS Audio, VISTA Video)"] --> PreCheck["Pre-Flight Quality & Format Check"]
-    PreCheck -- Corrupted / Empty --> InconQuality["Emit INCONCLUSIVE_LOW_QUALITY"]
-    PreCheck -- Valid --> OODGate["Evaluate Modality OOD Scores"]
-    OODGate -- Any Out-of-Domain --> InconOOD["Emit INCONCLUSIVE_OOD"]
-    OODGate -- In-Domain --> DisagreementCheck{"Model Findings Conflict?"}
-    DisagreementCheck -- Conflicting Verdicts --> InconDisagree["Emit INCONCLUSIVE_MODEL_DISAGREEMENT"]
-    DisagreementCheck -- Consistent --> FusionDAG["Cross-Modal Dependency DAG (Anti-Averaging)"]
-    FusionDAG --> ScopedVerdict["Emit Scoped Structured Finding Dossier"]
-```
-**7. Technologies, Tools & Frameworks:**
-Python 3.12, NetworkX (DAG representation), Pydantic v2, NumPy, Matplotlib.
-**8. Prerequisites & Dependencies:**
-Phases CDVF-A4, CDVF-A5, CDVF-A6, and CDVF-A8 completed.
-**9. Expected Files, Artifacts & Contracts:**
-- `src/ps05/cdvf/decision/__init__.py`
-- `src/ps05/cdvf/decision/engine.py`
-- `src/ps05/cdvf/decision/selective_risk.py`
-- `src/ps05/cdvf/fusion/__init__.py`
-- `src/ps05/cdvf/fusion/dag.py`
-- `tests/unit/cdvf/test_decision_and_fusion.py`
-**10. Failure Cases & Risk Mitigations:**
-- Missing audio stream in video exhibit: System evaluates video independently and flags audio as `INSUFFICIENT_EVIDENCE` without penalizing video verdict.
-- Naive averaging attempts in presentation layer: Intercepted by DAG contract validating that fused output is a structured finding graph, not a single percentage.
-**11. Security & Privacy Considerations:**
-Abstention decisions must record complete technical rationales in the forensic audit log to justify non-classification under cross-examination.
-**12. Acceptance Criteria:**
-- All seven canonical states emitted correctly based on deterministic input conditions.
-- Coverage vs risk curves calculate monotonic risk reduction as coverage is restricted.
-- Cross-modal fusion DAG preserves individual modality findings and explicitly flags multi-modal conflicts.
-**13. Definition of Done:**
-Decision engine and fusion DAG implemented, verified with conflict test scenarios, 100% pytest pass rate.
-**14. Explicit Status:** `PLANNED`
-**15. Checkpoint Table:**
-
-| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
-| :--- | :--- | :--- | :--- | :--- |
-| **CDVF-CP-09-01** | 7-State Abstention & Selective Classification Evaluator | Decision engine outputs all 7 canonical states based on simulated threshold/quality triggers | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-09-02** | Coverage vs Selective Risk Curve Generator | Analytics engine computes empirical risk-coverage curves demonstrating error reduction under abstention | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-09-03** | Cross-Modal Dependency DAG & Lineage Tracker | Fusion DAG correctly models shared source relationships and prevents double-counting derived frames | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-09-04** | Anti-Averaging Invariant Enforcement & Disagreement Exposer | System blocks naive score averaging and emits explicit cross-engine conflict alerts | `NOT_STARTED` | Awaits phase activation |
+- **Objective:** Implement the formal 8-state decision taxonomy, selective prediction risk-coverage analysis, and evidence-aware fusion DAG.
+- **Prerequisites:** `CDVF-CP-08-01`.
+- **Scope:** 8 formal decision states, selective prediction risk-coverage trade-off, anti-averaging fusion DAG, 7 conflict taxonomy codes.
+- **Detailed Tasks:**
+  1. Implement formal 8-state decision taxonomy in `src/cdvf/decision/taxonomy.py` (`SUSPICIOUS_FINDING` to `PROCESSING_INCOMPLETE`).
+  2. Implement selective prediction engine evaluating risk-coverage trade-off curves and optimizing task-specific acceptance thresholds.
+  3. Implement evidence-aware fusion engine assembling multi-modal findings into an evidence DAG, tracing shared pixel/audio dependencies.
+  4. Enforce Anti-Averaging Invariant: prohibit naive scalar averaging; preserve independent modality nodes and highlight disagreements.
+  5. Implement inter-detector agreement analyzer evaluating Fleiss' kappa and classifying conflicts into 7 taxonomy codes.
+  6. Implement missing modality handler recording `MODALITY_ABSENT` without altering remaining score semantics.
+- **Dependencies:** `CDVF-A8`, NetworkX, Pydantic v2.
+- **Deliverables:** Selective prediction engine, evidence DAG fusion module, conflict classification engine, 8-state decision router.
+- **Dataset Requirements:** Multi-modal test exhibits with controlled manipulation combinations (Scenarios 1-10).
+- **Tests:** Anti-averaging assertion tests; selective risk-coverage curve tests; 7 conflict code assignment tests.
+- **Checkpoints:** `CDVF-CP-09-01` (Decision router abstains on 100% of corrupted/OOD fixtures; fusion DAG preserves independent nodes).
+- **Acceptance Criteria:** Naive scalar score averaging rejected with `FUSION_AVERAGING_PROHIBITED`; all conflicts assigned standard codes.
+- **Exit Criteria:** Decision and fusion engine operational and integrated with mock pipeline.
+- **Risks:** Deadlock when two independent models strongly contradict each other (resolved via `CONFLICTING_MODALITY_FINDINGS` and human review).
+- **Current Status:** `PLANNED`
 
 ---
 
-### Phase CDVF-A10: Subgroup Fairness, Robustness & 12-Gate Scoped Model Approval
-
-**1. Phase ID & Title:** `CDVF-A10: Subgroup Fairness, Robustness & 12-Gate Scoped Model Approval`
-**2. Current Status:** `PLANNED`
-**3. Purpose:** Implement multi-subgroup fairness and robustness evaluation under `src/ps05/cdvf/approval/`, stratifying performance across demographic, environmental, and capture conditions (image: face vs non-face, skin tone, resolution; audio: languages, accents, SNR, codecs; video: pose, lighting, CCTV DVR formats). Flag any subgroup performance disparity exceeding the $2.0\times$ threshold. Implement the 12-gate scoped model approval state machine enforcing all mandatory release gates, ensuring models receive `VALIDATED_FOR_DEFINED_SCOPE` rather than unwarranted universal approval.
-**4. Topics & Subtopics:**
-- Subgroup Stratification Engine: Segmenting test metrics by metadata attributes under `SubgroupFairnessEvaluator`.
-- Disparity Ratio Analytics: Calculating FPR/FNR disparity ratios across subgroups ($R_{\text{disp}} = \max(M_g) / \min(M_g)$).
-- 12-Gate Approval State Machine: Exhaustive verification across G-1 (Provenance) through G-12 (Judicial Readiness).
-- Scoped Operational Envelope: Restricting model deployment to validated domains (e.g. validated for speech $> 12\text{ kHz}$ only).
-- Examiner Interpretation Guide: Generating human-readable operating boundaries for forensic experts.
-**5. Exact Tasks:**
-1. Create `src/ps05/cdvf/approval/` package and implement `SubgroupFairnessEvaluator`.
-2. Build `ApprovalGateEngine` evaluating all 12 mandatory approval gates.
-3. Build `OperationalEnvelopeCompiler` defining valid deployment ranges (resolution, SNR, codec, generators).
-4. Implement automated alert when subgroup disparity exceeds $2.0\times$ ratio.
-5. Create examiner interpretation template generator translating technical gates into court-ready guidance.
-**6. Detailed Execution Workflow:**
-```mermaid
-flowchart TD
-    BenchResults["Benchmark & Calibration Results"] --> SubgroupStrat["Subgroup Stratification (Demographics, Codecs, CCTV)"]
-    SubgroupStrat --> DisparityCalc["Calculate Disparity Ratios across Subgroups"]
-    DisparityCalc --> DisparityCheck{"Disparity Ratio <= 2.0x?"}
-    DisparityCheck -- No --> FlagDisparity["Flag Disparity Alert & Restrict Operational Scope"]
-    DisparityCheck -- Yes --> GateSweep["Execute 12 Mandatory Approval Gates (G-1 to G-12)"]
-    GateSweep --> AllGatesPass{"All 12 Gates Passed?"}
-    AllGatesPass -- No --> RejectOrPending["State: REJECTED or REVALIDATION_REQUIRED"]
-    AllGatesPass -- Yes --> ScopedApproval["State: VALIDATED_FOR_DEFINED_SCOPE"]
-```
-**7. Technologies, Tools & Frameworks:**
-Python 3.12, Pydantic v2, Scikit-learn, Pandas, NumPy.
-**8. Prerequisites & Dependencies:**
-Phases CDVF-A1 through CDVF-A9 completed.
-**9. Expected Files, Artifacts & Contracts:**
-- `src/ps05/cdvf/approval/__init__.py`
-- `src/ps05/cdvf/approval/fairness.py`
-- `src/ps05/cdvf/approval/gates.py`
-- `src/ps05/cdvf/approval/envelope.py`
-- `tests/unit/cdvf/test_approval_gates.py`
-**10. Failure Cases & Risk Mitigations:**
-- Universal approval granted despite severe low-quality degradation: Prevented by mandatory operational envelope gating.
-- Insufficient subgroup sample size ($N_g < 30$): Flagged with wide confidence intervals and marked `INSUFFICIENT_SUBGROUP_POWER`.
-**11. Security & Privacy Considerations:**
-Demographic metadata must be strictly sourced from consented, anonymized research benchmark cards with zero PII retention.
-**12. Acceptance Criteria:**
-- Subgroup disparity ratios calculated accurately across all metadata slices.
-- Model cannot advance to `VALIDATED_FOR_DEFINED_SCOPE` if any of the 12 gates fail.
-- Operational envelope explicitly documents restricted conditions and unvalidated domains.
-**13. Definition of Done:**
-Fairness evaluator and 12-gate approval engine implemented, verified with passing/failing mock models, 100% pytest pass rate.
-**14. Explicit Status:** `PLANNED`
-**15. Checkpoint Table:**
-
-| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
-| :--- | :--- | :--- | :--- | :--- |
-| **CDVF-CP-10-01** | Multi-Subgroup Stratification & Disparity Ratio Engine | Evaluator segments benchmark metrics across subgroups and flags disparities $> 2.0\times$ | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-10-02** | 12-Gate Approval State Machine & Audit Trail | State machine executes all 12 gates and transitions model to `VALIDATED_FOR_DEFINED_SCOPE` | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-10-03** | Scoped Operational Envelope Enforcement Guard | System blocks inference requests falling outside approved operational envelope | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-10-04** | Forensic Examiner Interpretation Guide Generator | Automated compilation of human-readable operating limits and judicial caveats | `NOT_STARTED` | Awaits phase activation |
+### Phase CDVF-A10: Subgroup Fairness, Robustness & 6-Gate Scoped Model Approval
+- **Objective:** Disaggregate benchmark performance across demographic/device subgroups and implement the formal 6-gate model release process.
+- **Prerequisites:** `CDVF-CP-09-01`.
+- **Scope:** Subgroup disparity auditing, demographic/device fairness, 6 formal release gates, Ed25519-signed scoped model approval.
+- **Detailed Tasks:**
+  1. Implement subgroup evaluation engine auditing performance across language, audio quality, lighting, skin-tone, and device tiers.
+  2. Enforce minimum subgroup sample size ($N \ge 50$); quantify maximum performance disparity ($\Delta_{\text{group}}$).
+  3. Enforce disparity ceiling: restrict model approval if error rate disparity across evaluated subgroups exceeds $2.0\times$.
+  4. Implement formal 6-gate model approval workflow (Gate 1 Registration, Gate 2 Functional, Gate 3 Performance, Gate 4 Calibration/OOD, Gate 5 Forensic Review, Gate 6 Scoped Release).
+  5. Implement Ed25519 cryptographic approval records signing task scope, quality bounds, and thresholds into CEIPL WORM vault.
+- **Dependencies:** `CDVF-A9`, Fairlearn concepts, Ed25519 signer.
+- **Deliverables:** Subgroup disparity evaluation suite, 6-gate release governance pipeline, Ed25519 scoped approval records.
+- **Dataset Requirements:** Subgroup-annotated benchmark partitions with demographic, device, and environmental labels.
+- **Tests:** Subgroup disparity calculation tests; 6-gate release progression tests; cryptographic signature verification tests.
+- **Checkpoints:** `CDVF-CP-10-01` (Model evaluated across all 6 gates; scoped approval record generated and cryptographically signed).
+- **Acceptance Criteria:** Models failing any mandatory gate receive status `RESTRICTED` or `REJECTED`; zero blanket approvals.
+- **Exit Criteria:** Model governance pipeline ready for continuous release integration.
+- **Risks:** Unbalanced subgroup distributions in public datasets (mitigated via stratified reweighting and explicit scope bounds).
+- **Current Status:** `PLANNED`
 
 ---
 
 ### Phase CDVF-A11: Continuous Regression, 24-Item WORM Bundle & Release Readiness
-
-**1. Phase ID & Title:** `CDVF-A11: Continuous Regression, 24-Item WORM Bundle & Release Readiness`
-**2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the continuous regression harness under `src/ps05/cdvf/regression/`, evaluating candidate models and updated dependencies against immutable golden benchmark manifests. Enforce regression tolerance ceilings ($\Delta\operatorname{AUC} \ge -0.010$, $\Delta\operatorname{ECE} \le +0.010$). Build the automated 24-item WORM evaluation bundle packager compiling model cards, dataset cards, split manifests, metrics, calibration plots, and approval decisions into a cryptographically sealed ZIP/tarball. Generate the court-admissible Section 65B/63 BSA validation appendix.
-**4. Topics & Subtopics:**
-- Golden Manifest Regression Suite: Automated CI/CD regression harness executing fixed test slices.
-- Regression Tolerance Ceilings: Enforcing $\Delta\operatorname{AUC} \ge -0.010$ and $\Delta\operatorname{ECE} \le +0.010$ limits.
-- 24-Item WORM Evaluation Bundle: Automated packager compiling all 24 canonical evaluation artifacts.
-- Cryptographic Sealing & Manifest Hashing: SHA-256 manifest of manifests locked into WORM vault.
-- Section 65B/63 BSA Technical Calibration Dossier: Court-admissible certificate of forensic reliability.
-**5. Exact Tasks:**
-1. Create `src/ps05/cdvf/regression/` and `src/ps05/cdvf/bundle/` packages.
-2. Build `RegressionTestHarness` comparing new model outputs against golden baseline records.
-3. Build `WORMBundlePackager` assembling the complete 24-item artifact bundle with SHA-256 checksums.
-4. Build `LegalCalibrationDossierExporter` generating PDF/JSON technical calibration appendices.
-5. Create automated end-to-end smoke test validating the complete CDVF lifecycle from registry to legal dossier.
-**6. Detailed Execution Workflow:**
-```mermaid
-flowchart TD
-    ModelCandidate["Validated Model Candidate"] --> RegressHarness["Execute Golden Manifest Regression Suite"]
-    RegressHarness --> DeltaCheck{"Delta-AUC >= -0.010 and Delta-ECE <= +0.010?"}
-    DeltaCheck -- No --> RegressAlert["Fail CI/CD: RegressionExceededError"]
-    DeltaCheck -- Yes --> BundleAssembler["Assemble 24-Item WORM Evaluation Bundle"]
-    BundleAssembler --> ChecksumManifest["Compute Root SHA-256 Checksum Manifest"]
-    ChecksumManifest --> WORMVaultLock["Lock in POSIX 0400 WORM Vault"]
-    WORMVaultLock --> LegalDossier["Compile Section 65B/63 BSA Legal Calibration Dossier"]
-    LegalDossier --> ReleaseReady["Release Gate Passed: Ready for Production Deployment"]
-```
-**7. Technologies, Tools & Frameworks:**
-Python 3.12, WeasyPrint / ReportLab, Pydantic v2, hashlib, zipfile, pytest.
-**8. Prerequisites & Dependencies:**
-Phases CDVF-A1 through CDVF-A10 completed; WORM vault storage active.
-**9. Expected Files, Artifacts & Contracts:**
-- `src/ps05/cdvf/regression/__init__.py`
-- `src/ps05/cdvf/regression/harness.py`
-- `src/ps05/cdvf/bundle/__init__.py`
-- `src/ps05/cdvf/bundle/packager.py`
-- `src/ps05/cdvf/bundle/legal_dossier.py`
-- `tests/integration/cdvf/test_end_to_end_validation.py`
-**10. Failure Cases & Risk Mitigations:**
-- Silent model regression due to PyTorch dependency upgrade: Trapped by automated golden manifest regression check in CI/CD.
-- Tampering with evaluation bundle: Prevented by POSIX 0400 WORM vault locking and cryptographic manifest hashing.
-**11. Security & Privacy Considerations:**
-Evaluation bundles must be cryptographically signed with forensic examiner ed25519 keys prior to court submission.
-**12. Acceptance Criteria:**
-- Regression suite automatically blocks builds violating performance tolerance ceilings.
-- 24-item WORM bundle contains all required files and verifies with 100% checksum match.
-- Section 65B/63 BSA validation appendix renders accurately with legal disclaimers.
-**13. Definition of Done:**
-Continuous regression harness and bundle packager implemented, end-to-end integration test passed.
-**14. Explicit Status:** `PLANNED`
-**15. Checkpoint Table:**
-
-| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
-| :--- | :--- | :--- | :--- | :--- |
-| **CDVF-CP-11-01** | Golden Manifest Regression Suite & Delta Threshold Alerter | Regression harness detects performance drop and triggers build failure on $\Delta\operatorname{AUC} < -0.010$ | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-11-02** | 24-Item WORM Validation Bundle Packager & Checksum Vault | Bundle packager compiles all 24 artifacts into cryptographically sealed archive with SHA-256 root manifest | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-11-03** | Section 65B/63 BSA Technical Calibration Dossier Exporter | Exporter produces court-ready calibration certificate detailing validated scope and limitations | `NOT_STARTED` | Awaits phase activation |
-| **CDVF-CP-11-04** | End-to-End CDVF Lifecycle Smoke Test & Release Gate | Automated test suite verifies full pipeline from model registration to WORM legal dossier export | `NOT_STARTED` | Awaits phase activation |
-
-
----
-
-
-
----
-
+- **Objective:** Establish continuous automated regression testing, serialize complete 24-item WORM bundles, and compile Section 65B/63 BSA dossiers.
+- **Prerequisites:** `CDVF-CP-10-01`.
+- **Scope:** Continuous regression test runner, 24-item RFC 8785 canonical JSON bundle, Section 65B IEA / Section 63 BSA legal dossier export.
+- **Detailed Tasks:**
+  1. Implement automated continuous regression runner executing frozen 500-sample regression suite on every model revision or commit.
+  2. Enforce regression gates: fail promotion if $\Delta\operatorname{AUC} < -0.01$ or $\Delta\operatorname{ECE} > +0.01$; assert bit-identical outputs on fixed seeds.
+  3. Implement canonical evaluation artifact bundle serializer emitting all 24 mandatory artifacts in RFC 8785 canonical JSON.
+  4. Seal artifact bundle in CEIPL WORM vault; generate root SHA-256 bundle manifest and RFC 3161 timestamp token.
+  5. Implement UFREDF legal validation dossier generator rendering court-ready PDF with reliability curves, ROC plots, and examiner notes.
+  6. Finalize engineering documentation and execute formal release sign-off for Phase CDVF-A11.
+- **Dependencies:** `CDVF-A10`, CEIPL, UFREDF, WeasyPrint / Jinja2.
+- **Deliverables:** Continuous regression harness, 24-item WORM bundle builder, Section 65B/63 BSA validation dossier generator.
+- **Dataset Requirements:** Frozen 500-sample regression corpus with verified bit-exact metric expectations.
+- **Tests:** Automated regression tests; RFC 8785 canonical JSON hashing tests; PDF dossier compilation and digital signature verification.
+- **Checkpoints:** `CDVF-CP-11-01` (Complete CDVF framework validated; 24-item bundle sealed; court-admissible dossier exported).
+- **Acceptance Criteria:** 100% of regression assertions pass; legal dossier validated against Section 63 BSA evidentiary rules.
+- **Exit Criteria:** CDVF certified for production deployment across PS-05 forensic platform.
+- **Risks:** PDF rendering inconsistencies across platforms (mitigated via standardized WeasyPrint Docker environment).
+- **Current Status:** `PLANNED`
 ## 8.B Dedicated Cross-Media Metadata Service Engineering Playbook (CMMS-A0 through CMMS-A9)
 
 The Cross-Media Metadata Service (CMMS) is the shared, cross-cutting metadata extraction, normalization, consistency-analysis, and correlation engine of the PS-05 platform. It services all forensic modalities (AIF images, AURAS audio, VISTA video/CCTV, ONTF network captures, and AIF-GEO geospatial) without duplicating specialized detection logic.
@@ -6058,34 +5603,112 @@ gantt
 
 ---
 
-## 11. CDVF Master Requirement Traceability Matrix (CDVF-01 through CDVF-20)
+## 11. CDVF Master Requirement Traceability Matrix (CDVF-01 through CDVF-100)
 
-The following master traceability matrix maps every canonical Cross-Modal Deepfake Validation Framework requirement (`CDVF-01` through `CDVF-20`) to its authoritative specification in `PRD.md`, its technical contract in `TRD.md`, its designated implementation phase in `PHASES.md`, its primary verification checkpoint, and the mandatory empirical evidence required for approval:
+Every Cross-Modal Deepfake Validation Framework requirement (`CDVF-01` through `CDVF-100`) is mapped to its PRD specification, TRD technical architecture section, implementing engineering phase, verification checkpoint, expected validation evidence, execution status, and technical dependencies:
 
-| Requirement ID | Functional Requirement Summary | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Verification Evidence |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **CDVF-01** | Model Registry & Version Tracking | PRD §12.4, §12.19 | TRD §11.B.2, §12.3 | **CDVF-A1** | `CDVF-CP-01-01` | `ModelRegistryEntry` schema validation with all 24 fields, immutable revision IDs, and JSON WORM persistence. |
-| **CDVF-02** | Checkpoint SHA-256 Provenance & Tamper Gating | PRD §12.4, §12.19 | TRD §11.B.2, §11.B.19 | **CDVF-A1** | `CDVF-CP-01-02` | Automated streaming SHA-256 calculation raising `CheckpointIntegrityError` upon single-bit weight tampering. |
-| **CDVF-03** | Dataset Provenance, Quality Tiers & Cards | PRD §12.5, §12.19 | TRD §11.B.3, §12.3 | **CDVF-A2** | `CDVF-CP-02-01` | `DatasetCard` specification, 4 quality tiers, dual-label mapping (raw vs canonical), and license compliance flags. |
-| **CDVF-04** | Leakage-Resistant Source-Group Splitting | PRD §12.6, §12.19 | TRD §11.B.4, §12.3 | **CDVF-A2** | `CDVF-CP-02-03` | Grouped splitting on root identity/clip and pytest asserting zero group overlap ($G_i \cap G_j = \emptyset$). |
-| **CDVF-05** | Standardised 19-Parameter Benchmark Execution | PRD §12.7, §12.19 | TRD §11.B.5, §12.3 | **CDVF-A3** | `CDVF-CP-03-01` | Reproducible benchmark runner validating all 19 context parameters and fixed deterministic random seeds. |
-| **CDVF-06** | Image Forensic Detection & Localisation (AIF) | PRD §12.8, §12.19 | TRD §11.B.6, §11.B.17 | **CDVF-A4** | `CDVF-CP-04-01` | Evaluation suites for IMG-1..IMG-4, pixel IoU/boundary F1 for masks, and unlocalised manipulation fallbacks. |
-| **CDVF-07** | Audio Forensic Detection & Localisation (AURAS) | PRD §12.8, §12.19 | TRD §11.B.6, §11.B.17 | **CDVF-A5** | `CDVF-CP-05-01` | Evaluation suites for AUD-1..AUD-4, temporal IoU (tIoU), onset/offset timing error $\le 50\text{ ms}$, and window aggregation. |
-| **CDVF-08** | Video & CCTV Detection & Localisation (VISTA) | PRD §12.8, §12.19 | TRD §11.B.6, §11.B.17 | **CDVF-A6** | `CDVF-CP-06-01` | Video-level aggregation, frame non-independence assertion, 3D box IoU, and dedicated CCTV degradation suite. |
-| **CDVF-09** | Cross-Dataset Generalisation Benchmarking (Mode B) | PRD §12.9, §12.19 | TRD §11.B.7, §11.B.12 | **CDVF-A7** | `CDVF-CP-07-01` | Zero-shot evaluation across independent corpora measuring transfer performance drop $\Delta\operatorname{AUC}_{\text{cross}}$. |
-| **CDVF-10** | Unseen-Generator Leave-One-Out Evaluation (Mode C) | PRD §12.9, §12.19 | TRD §11.B.7, §11.B.12 | **CDVF-A7** | `CDVF-CP-07-02` | Leave-one-out generator isolation protocol with automated block on unsubstantiated generalisation claims. |
-| **CDVF-11** | Modality-Specific Robustness Grids (Modes D, E, F) | PRD §12.8, §12.9 | TRD §11.B.8, §11.B.12 | **CDVF-A4..A6**| `CDVF-CP-04-03` | 14-condition image perturbation, lossy audio codec sweeps, and CCTV video degradation matrices. |
-| **CDVF-12** | Confidence Calibration & ECE Thresholding | PRD §12.10, §12.19 | TRD §11.B.9, §12.3 | **CDVF-A8** | `CDVF-CP-08-01` | Temperature/Platt scaling fitted on disjoint $D_{\text{cal}}$, achieving 15-bin ECE $\le 0.05$ and Brier score validation. |
-| **CDVF-13** | Out-of-Distribution (OOD) Gating | PRD §12.11, §12.19 | TRD §11.B.10, §12.3 | **CDVF-A8** | `CDVF-CP-08-03` | Penultimate-layer Mahalanobis distance with Ledoit-Wolf shrinkage and Free Energy gating test samples. |
-| **CDVF-14** | First-Class Abstention & Selective Risk Analytics | PRD §12.12, §12.19 | TRD §11.B.11, §11.B.19 | **CDVF-A9** | `CDVF-CP-09-01` | 7 canonical outcome states, coverage $C$ vs selective risk $R(C)$ curves, and refusal to force binary verdicts. |
-| **CDVF-15** | Manipulation Localisation Metrics (IoU & tIoU) | PRD §12.13, §12.19 | TRD §11.B.13, §12.3 | **CDVF-A4..A6**| `CDVF-CP-04-02` | Mathematical IoU for spatial masks, tIoU for audio/video intervals, and strict separation from classification AUC. |
-| **CDVF-16** | Cross-Modal Fusion DAG & Anti-Averaging Invariant | PRD §12.14, §12.19 | TRD §11.B.14, §11.B.17 | **CDVF-A9** | `CDVF-CP-09-03` | Dependency DAG tracking evidence lineage, exposing cross-engine conflicts, and blocking naive score averaging. |
-| **CDVF-17** | Demographic, Quality & Subgroup Fairness | PRD §12.15, §12.19 | TRD §11.B.15, §11.B.18 | **CDVF-A10** | `CDVF-CP-10-01` | Subgroup stratification, disparity ratio alerts ($> 2.0\times$), and sample size power guards ($N_g \ge 30$). |
-| **CDVF-18** | 12-Gate Scoped Model Approval Workflow | PRD §12.17, §12.19 | TRD §11.B.15, §12.3 | **CDVF-A10** | `CDVF-CP-10-02` | 12 mandatory approval gates transitioning model to `VALIDATED_FOR_DEFINED_SCOPE` or `REJECTED`. |
-| **CDVF-19** | Standard 24-Item WORM Evaluation Bundle | PRD §12.18, §12.19 | TRD §11.B.16, §11.B.18 | **CDVF-A11** | `CDVF-CP-11-02` | Complete compilation of 24 evaluation artifacts with root SHA-256 manifest locked into POSIX 0400 WORM vault. |
-| **CDVF-20** | Continuous Regression Testing & BSA Calibration Dossier | PRD §12.16, §12.20 | TRD §11.B.16, §11.B.20 | **CDVF-A11** | `CDVF-CP-11-01` | Golden manifest regression suite ($\Delta\operatorname{AUC} \ge -0.010$) and Section 65B/63 BSA certified calibration dossier. |
----
-
+| Req ID | Requirement Title | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Validation Evidence | Status | Dependencies / Blockers |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **CDVF-01** | Shared Validation Architecture | PRD §12.6 | TRD §11.B.1 | **CDVF-A0** | `CDVF-CP-00-01` | Architecture boundary linting confirms single shared validation framework across engines | `PLANNED` | Phase 0 Gate |
+| **CDVF-02** | Preserve Detector Ownership | PRD §12.6 | TRD §11.B.1 | **CDVF-A0** | `CDVF-CP-00-01` | Subsystem routing interfaces enforce image in AIF, audio in AURAS, video in VISTA | `PLANNED` | `CDVF-A0` |
+| **CDVF-03** | CEIPL Custody Integration | PRD §12.6 | TRD §11.B.1, §11.B.15| **CDVF-A0** | `CDVF-CP-00-01` | CEIPL DAG manifest pointers assert pre-execution exhibit SHA-256 and lineage | `PLANNED` | Phase 0 Gate |
+| **CDVF-04** | CMMS Metadata Ingestion | PRD §12.6 | TRD §11.B.1 | **CDVF-A0** | `CDVF-CP-00-01` | Ingests `EvidenceMetadataSnapshot` for camera, codec, and structural context | `PLANNED` | `CMMS-A0` |
+| **CDVF-05** | CSTV Temporal Ingestion | PRD §12.6 | TRD §11.B.1 | **CDVF-A0** | `CDVF-CP-00-01` | Ingests `CrossSourceTimeline` and clock drift $\delta(t)$ for multi-source alignment | `PLANNED` | `CSTV-A0` |
+| **CDVF-06** | UFREDF Legal Reporting | PRD §12.6 | TRD §11.B.1, §11.B.16| **CDVF-A0** | `CDVF-CP-00-01` | Emits validated multi-modal findings into court-admissible Section 65B/63 BSA dossier | `PLANNED` | Phase 0 Gate |
+| **CDVF-07** | Standard Pydantic Contract | PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | `DetectorResultContract` schema validates 100% of simulated multi-modal outputs | `PLANNED` | `CDVF-A0` |
+| **CDVF-08** | Explicit Score Semantics | PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | Typed `ScoreSemantics` enum strictly distinguishes raw logits from calibrated probabilities | `PLANNED` | `CDVF-A0` |
+| **CDVF-09** | Cryptographic Model Provenance| PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | `ModelProvenance` sub-record asserts checkpoint SHA-256 and preprocessing version | `PLANNED` | `CDVF-A0` |
+| **CDVF-10** | Spatial Localisation Contract | PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | `SpatialLocalisation` preserves original image pixel coordinates without downsampling distortion | `PLANNED` | `CDVF-A0` |
+| **CDVF-11** | Temporal Localisation Contract| PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | `TemporalLocalisation` preserves start/end seconds, sample indices, and video PTS | `PLANNED` | `CDVF-A0` |
+| **CDVF-12** | OOD & Calibration Annotations | PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | Typed `OODStatus` and `CalibrationStatus` enums recorded on every generated finding | `PLANNED` | `CDVF-A0` |
+| **CDVF-13** | Activity ID & Limitation Logs | PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | Finding retains source exhibit UUID, activity UUID, and immutable limitation list | `PLANNED` | `CDVF-A0` |
+| **CDVF-14** | Centralized Model Registry | PRD §12.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | `ModelRegistryEntry` database models persist model architectures and target tasks | `PLANNED` | `CDVF-A0` |
+| **CDVF-15** | Checkpoint SHA-256 Assertion | PRD §12.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Streaming weight verifier aborts execution on single-bit corrupted checkpoint | `PLANNED` | `CDVF-A0` |
+| **CDVF-16** | Model Card Documentation | PRD §12.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Model card schema stores training datasets, licenses, tensor shapes, and limitations | `PLANNED` | `CDVF-A0` |
+| **CDVF-17** | Unique Validation Identity | PRD §12.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Weight, architecture, or threshold modification generates new versioned UUID | `PLANNED` | `CDVF-A0` |
+| **CDVF-18** | 9-State Model Lifecycle | PRD §12.6 | TRD §11.B.3.1 | **CDVF-A1** | `CDVF-CP-01-01` | State machine enforces valid transitions from `REGISTERED` to `REVOKED` | `PLANNED` | `CDVF-A0` |
+| **CDVF-19** | Ed25519 Promotion Signatures | PRD §12.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Model promotion requires valid Ed25519 signature from Forensic Governance Officer | `PLANNED` | `CDVF-A0` |
+| **CDVF-20** | Scoped Operating Boundaries | PRD §12.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Out-of-scope deployment triggers `UNVALIDATED_OPERATIONAL_DOMAIN` warning | `PLANNED` | `CDVF-A0` |
+| **CDVF-21** | Structured Dataset Registry | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | `DatasetRecord` database models persist dataset versions, sources, and quality tiers | `PLANNED` | `CDVF-A1` |
+| **CDVF-22** | Comprehensive Dataset Cards | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Dataset card documents sample counts, original vs manipulated splits, and label formats | `PLANNED` | `CDVF-A1` |
+| **CDVF-23** | Dataset Manifest Cryptography | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Manifest SHA-256 verifier confirms dataset file integrity prior to benchmark run | `PLANNED` | `CDVF-A1` |
+| **CDVF-24** | Image Benchmark Support | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Ingests FaceForensics++, Celeb-DF, DFDC, DeeperForensics-1.0, and ForgeryNet | `PLANNED` | `CDVF-A1` |
+| **CDVF-25** | Audio Spoofing Benchmarks | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Ingests ASVspoof 2019/2021, MLAAD, WaveFake, and In-the-Wild audio deepfakes | `PLANNED` | `CDVF-A1` |
+| **CDVF-26** | Decoupled Splice Benchmarks | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Ingests purpose-built audio splice and edit localization corpora separately from spoofing | `PLANNED` | `CDVF-A1` |
+| **CDVF-27** | Audiovisual Benchmark Support | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Ingests multi-modal benchmarks containing verified aligned AV ground truth | `PLANNED` | `CDVF-A1` |
+| **CDVF-28** | License Compatibility Gate | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Automated license checker rejects corpora incompatible with forensic law enforcement | `PLANNED` | `CDVF-A1` |
+| **CDVF-29** | Group-Aware Data Splitting | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | `GroupKFold` split engine partitions media at speaker, actor, and video group levels | `PLANNED` | `CDVF-A1` |
+| **CDVF-30** | Speaker-Disjoint Audio Splits | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Speaker key partitioner guarantees zero speaker overlap ($\mathcal{S}_{\text{train}} \cap \mathcal{S}_{\text{test}} = \emptyset$) | `PLANNED` | `CDVF-A1` |
+| **CDVF-31** | Subject-Disjoint Face Splits | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Actor key partitioner guarantees zero subject overlap ($\mathcal{I}_{\text{train}} \cap \mathcal{I}_{\text{test}} = \emptyset$) | `PLANNED` | `CDVF-A1` |
+| **CDVF-32** | Video-Disjoint Splits | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Root video ID partitioner guarantees zero video overlap ($\mathcal{V}_{\text{train}} \cap \mathcal{V}_{\text{test}} = \emptyset$) | `PLANNED` | `CDVF-A1` |
+| **CDVF-33** | Mathematical Leakage Audit | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Intersection auditor terminates execution with `LEAKAGE_DETECTED` on shared keys | `PLANNED` | `CDVF-A1` |
+| **CDVF-34** | 4-Way Disjoint Partitions | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Split manager establishes completely isolated Train, Calib, Val, and Test partitions | `PLANNED` | `CDVF-A1` |
+| **CDVF-35** | Generator-Disjoint Splits | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Generator partitioner holds out entire synthesis algorithms (e.g. Diffusion vs GAN) | `PLANNED` | `CDVF-A1` |
+| **CDVF-36** | 10 Evaluation Tracks | PRD §12.6 | TRD §11.B.5.1 | **CDVF-A2** | `CDVF-CP-02-01` | Benchmark runner executes 10 tracks (In-Domain, Cross-Dataset, Cross-Codec, etc.) | `PLANNED` | `CDVF-A1` |
+| **CDVF-37** | Independent Subsystem Testing | PRD §12.6 | TRD §11.B.6 | **CDVF-A3** | `CDVF-CP-03-01` | Multi-modal runner evaluates each subsystem independently prior to cross-modal fusion | `PLANNED` | `CDVF-A2` |
+| **CDVF-38** | Decoupled Image Classification| PRD §12.6 | TRD §11.B.6 | **CDVF-A4** | `CDVF-CP-04-01` | Evaluates synthetic image and face-swap classification separately from localisation | `PLANNED` | `CDVF-A3` |
+| **CDVF-39** | Image Localisation Metrics | PRD §12.6 | TRD §11.B.6.1 | **CDVF-A4** | `CDVF-CP-04-01` | Reports pixel-level IoU, Dice coefficient, and Boundary F1 against ground truth | `PLANNED` | `CDVF-A3` |
+| **CDVF-40** | Comprehensive Image Metrics | PRD §12.6 | TRD §11.B.6.1 | **CDVF-A4** | `CDVF-CP-04-01` | Reports Precision, Recall, F1, Specificity, Balanced Accuracy, and ROC-AUC | `PLANNED` | `CDVF-A3` |
+| **CDVF-41** | Decoupled Audio Spoof/Splice | PRD §12.6 | TRD §11.B.6 | **CDVF-A5** | `CDVF-CP-05-01` | Evaluates ADDE voice cloning and ARE splice localisation as distinct tasks | `PLANNED` | `CDVF-A3` |
+| **CDVF-42** | Audio Spoofing Metrics | PRD §12.6 | TRD §11.B.6.1 | **CDVF-A5** | `CDVF-CP-05-01` | Reports Equal Error Rate (EER), minimum Detection Cost Function (minDCF), and AUC | `PLANNED` | `CDVF-A3` |
+| **CDVF-43** | Audio Edit Localisation Metrics| PRD §12.6 | TRD §11.B.6.1 | **CDVF-A5** | `CDVF-CP-05-01` | Reports temporal IoU, boundary start/end error (ms), and false alarms per hour | `PLANNED` | `CDVF-A3` |
+| **CDVF-44** | Decoupled Video/Frame Metrics | PRD §12.6 | TRD §11.B.6 | **CDVF-A6** | `CDVF-CP-06-01` | Reports video-level ROC-AUC and frame-level AUC as independent metrics | `PLANNED` | `CDVF-A3` |
+| **CDVF-45** | Correct Correlated Frame Bias | PRD §12.6 | TRD §11.B.6 | **CDVF-A6** | `CDVF-CP-06-01` | Cluster bootstrap aggregates temporally adjacent frames to prevent statistical inflation | `PLANNED` | `CDVF-A3` |
+| **CDVF-46** | Individual/Joint VISTA Heads | PRD §12.6 | TRD §11.B.6 | **CDVF-A6** | `CDVF-CP-06-01` | Evaluates spatial face manipulation and temporal continuity models individually & jointly | `PLANNED` | `CDVF-A3` |
+| **CDVF-47** | Video Spatio-Temporal Metrics | PRD §12.6 | TRD §11.B.6.1 | **CDVF-A6** | `CDVF-CP-06-01` | Reports face track spatial mask IoU and temporal segment tIoU with frame indices | `PLANNED` | `CDVF-A3` |
+| **CDVF-48** | Cross-Dataset Transfer Testing | PRD §12.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Mode B runner evaluates model on $\ge 2$ independent corpora not seen during training | `PLANNED` | `CDVF-A4..A6` |
+| **CDVF-49** | Quantify Transfer Degradation | PRD §12.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Calculates transfer performance drop $\Delta\operatorname{AUC}_{\text{transfer}} = \operatorname{AUC}_{\text{in}} - \operatorname{AUC}_{\text{cross}}$ | `PLANNED` | `CDVF-A7` |
+| **CDVF-50** | Scope Ceiling on Transfer Drop | PRD §12.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Transfer drop $> 15\%$ automatically restricts model operational scope | `PLANNED` | `CDVF-A7` |
+| **CDVF-51** | Held-Out Generator Testing | PRD §12.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Mode C runner tests detection against held-out synthesis foundation models | `PLANNED` | `CDVF-A7` |
+| **CDVF-52** | Composite UG-Score Metric | PRD §12.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Calculates harmonic mean Unseen-Generator Robustness Score ($\operatorname{UG-Score}$) | `PLANNED` | `CDVF-A7` |
+| **CDVF-53** | Unsupported Generator Tag | PRD §12.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Novel generator with balanced accuracy $< 50\%$ tagged `UNSUPPORTED_GENERATOR_FAMILY` | `PLANNED` | `CDVF-A7` |
+| **CDVF-54** | Image Perturbation Grids | PRD §12.6 | TRD §11.B.7, §11.B.12| **CDVF-A7** | `CDVF-CP-07-01` | Evaluates image models under JPEG compression, resizing, blur, and noise | `PLANNED` | `CDVF-A7` |
+| **CDVF-55** | Audio Acoustic Degradation | PRD §12.6 | TRD §11.B.7, §11.B.12| **CDVF-A7** | `CDVF-CP-07-01` | Evaluates audio models under MP3/AAC/Opus lossy codecs, resampling, and noise | `PLANNED` | `CDVF-A7` |
+| **CDVF-56** | Video Transcoding Grids | PRD §12.6 | TRD §11.B.7, §11.B.12| **CDVF-A7** | `CDVF-CP-07-01` | Evaluates video models under H.264/H.265 compression, VFR jitter, and downscaling | `PLANNED` | `CDVF-A7` |
+| **CDVF-57** | Cross-Modal Evidence Correlator| PRD §12.6 | TRD §11.B.8 | **CDVF-A8** | `CDVF-CP-08-01` | `CrossModalCorrelationEngine` correlates multi-modal findings across case exhibits | `PLANNED` | `CDVF-A7` |
+| **CDVF-58** | Correlation Prerequisites | PRD §12.6 | TRD §11.B.8 | **CDVF-A8** | `CDVF-CP-08-01` | Asserts same case, documented relationship, and valid temporal alignment before fusion | `PLANNED` | `CDVF-A7` |
+| **CDVF-59** | Prerequisite Fallback Policy | PRD §12.6 | TRD §11.B.8 | **CDVF-A8** | `CDVF-CP-08-01` | Emits `CORRELATION_NOT_ESTABLISHED` when prerequisites fail; preserves independent findings | `PLANNED` | `CDVF-A7` |
+| **CDVF-60** | Scenario A: Lip-Sync Correlation| PRD §12.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Correlates VISTA lip-sync metrics with AURAS speech VAD without assuming which was altered | `PLANNED` | `CDVF-A7` |
+| **CDVF-61** | Scenario B: Speaker Corroboration| PRD §12.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Correlates speaking faces with audio diarization; face does not imply speaker identity | `PLANNED` | `CDVF-A7` |
+| **CDVF-62** | Scenario C: Image-Video Matching| PRD §12.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Correlates still photo exhibits with video surveillance frames based on facial similarity | `PLANNED` | `CDVF-A7` |
+| **CDVF-63** | Scenario D: AV Event Matching | PRD §12.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Correlates acoustic transients (gunshots, impacts) with video luminance changes via CSTV | `PLANNED` | `CDVF-A7` |
+| **CDVF-64** | Scenario E: Compound Tampering | PRD §12.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Detects compound manipulation (e.g. face swap + cloned voice) as distinct findings | `PLANNED` | `CDVF-A7` |
+| **CDVF-65** | Anti-Averaging DAG Invariant | PRD §12.6 | TRD §11.B.8, §11.B.9 | **CDVF-A9** | `CDVF-CP-09-01` | Prohibits scalar averaging; preserves separate modality nodes in evidence DAG | `PLANNED` | `CDVF-A8` |
+| **CDVF-66** | Missing Modality Neutrality | PRD §12.6 | TRD §11.B.9 | **CDVF-A9** | `CDVF-CP-09-01` | Flags missing media tracks as `MODALITY_ABSENT` without negative detection bias | `PLANNED` | `CDVF-A8` |
+| **CDVF-67** | Mandatory Confidence Calibration| PRD §12.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Calibrates detector raw scores before presenting as probabilities in court dossiers | `PLANNED` | `CDVF-A7` |
+| **CDVF-68** | Isolated Calibration Fitting | PRD §12.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Fits Platt, temperature, and isotonic scaling strictly on isolated calibration split | `PLANNED` | `CDVF-A7` |
+| **CDVF-69** | Zero Test-Set Calibration Leak | PRD §12.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Automated audit confirms calibration parameters never fitted on final test set | `PLANNED` | `CDVF-A7` |
+| **CDVF-70** | Quantify ECE across 15 Bins | PRD §12.6 | TRD §11.B.10.1 | **CDVF-A8** | `CDVF-CP-08-01` | Computes Expected Calibration Error across 15 equal-width bins, Brier score, and NLL | `PLANNED` | `CDVF-A7` |
+| **CDVF-71** | ECE <= 0.05 Calibration Ceiling | PRD §12.6 | TRD §11.B.10.1 | **CDVF-A8** | `CDVF-CP-08-01` | Model must achieve $\operatorname{ECE} \le 0.05$ on calibration split to pass Gate 4 | `PLANNED` | `CDVF-A7` |
+| **CDVF-72** | Visual Reliability Diagrams | PRD §12.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Renders reliability diagram SVG/PNG plotting confidence vs empirical accuracy | `PLANNED` | `CDVF-A7` |
+| **CDVF-73** | Cross-Domain Calibration Drift | PRD §12.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Evaluates calibration stability under dataset shift; documents cross-domain miscalibration | `PLANNED` | `CDVF-A7` |
+| **CDVF-74** | Uncalibrated Score Watermark | PRD §12.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Uncalibrated models trigger mandatory watermark: `CAUTION: UNCALIBRATED DETECTOR` | `PLANNED` | `CDVF-A7` |
+| **CDVF-75** | Out-of-Distribution Gating | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | `OODGatingEngine` computes distance to certified training manifold on embeddings | `PLANNED` | `CDVF-A7` |
+| **CDVF-76** | Multi-Method OOD Scoring | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Implements Mahalanobis distance, free energy, and predictive Shannon entropy | `PLANNED` | `CDVF-A7` |
+| **CDVF-77** | Calibrated OOD Thresholds | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Calibrates $\tau_{\text{OOD}}$ threshold on in-distribution vs synthetic shift validation sets | `PLANNED` | `CDVF-A7` |
+| **CDVF-78** | Standardized 6 OOD States | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Emits `IN_DISTRIBUTION`, `OOD_SUSPECTED`, `OUTSIDE_VALIDATED_SCOPE`, etc. | `PLANNED` | `CDVF-A7` |
+| **CDVF-79** | OOD Non-Tampering Invariant | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Policy linter asserts OOD finding is never cited as affirmative tampering evidence | `PLANNED` | `CDVF-A7` |
+| **CDVF-80** | Mandatory OOD Abstention | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Input exceeding $\tau_{\text{OOD}}$ triggers mandatory abstention with `OUTSIDE_VALIDATED_SCOPE` | `PLANNED` | `CDVF-A7` |
+| **CDVF-81** | OOD AUROC >= 0.85 Performance | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | OOD evaluation must achieve AUROC $\ge 0.85$ on distribution shift evaluation sets | `PLANNED` | `CDVF-A7` |
+| **CDVF-82** | Breakdown Threshold Detection | PRD §12.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Identifies critical quality thresholds where detector accuracy collapses $< 70\%$ | `PLANNED` | `CDVF-A9` |
+| **CDVF-83** | Recompression Robustness Sweeps| PRD §12.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Quantifies image detector degradation under multi-generational lossy recompression | `PLANNED` | `CDVF-A9` |
+| **CDVF-84** | Telephony Codec Robustness | PRD §12.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Quantifies audio detector degradation under AMR-WB, G.711, and cellular transcoding | `PLANNED` | `CDVF-A9` |
+| **CDVF-85** | Video Transcoding Robustness | PRD §12.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Quantifies video detector degradation under frame-rate jitter and bit-rate drops | `PLANNED` | `CDVF-A9` |
+| **CDVF-86** | Adversarial Perturbation Tests | PRD §12.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Evaluates model vulnerability against realistic manipulation-aware perturbations | `PLANNED` | `CDVF-A9` |
+| **CDVF-87** | Quality Breakdown Abstention | PRD §12.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Media falling below certified quality floors automatically receives `INSUFFICIENT_EVIDENCE` | `PLANNED` | `CDVF-A9` |
+| **CDVF-88** | Selective Prediction Framework | PRD §12.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | `SelectivePredictionEngine` allows platform to abstain when evidence is ambiguous | `PLANNED` | `CDVF-A8` |
+| **CDVF-89** | 8 Formal Decision States | PRD §12.6 | TRD §11.B.12 | **CDVF-A9** | `CDVF-CP-09-01` | Enforces 8 mutually exclusive states (`SUSPICIOUS_FINDING` to `PROCESSING_INCOMPLETE`) | `PLANNED` | `CDVF-A8` |
+| **CDVF-90** | Coverage-Risk Trade-Off Curve | PRD §12.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | Evaluates coverage-risk curve; asserts selective risk decreases as coverage is restricted | `PLANNED` | `CDVF-A8` |
+| **CDVF-91** | Task-Specific Decision Floors | PRD §12.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | Rejects arbitrary universal 0.5 threshold; enforces model- and task-specific thresholds | `PLANNED` | `CDVF-A8` |
+| **CDVF-92** | Valid Inconclusive Outcomes | PRD §12.6 | TRD §11.B.12 | **CDVF-A9** | `CDVF-CP-09-01` | Inconclusive outcomes formatted as scientifically valid, neutral legal determinations | `PLANNED` | `CDVF-A8` |
+| **CDVF-93** | 100% Corruption Abstention | PRD §12.6 | TRD §11.B.12 | **CDVF-A9** | `CDVF-CP-09-01` | Abstains on 100% of inputs with extreme corruption, missing modalities, or deadlock | `PLANNED` | `CDVF-A8` |
+| **CDVF-94** | Spatial Localisation Metrics | PRD §12.6 | TRD §11.B.6.1, §11.B.14| **CDVF-A4** | `CDVF-CP-04-01` | Evaluates spatial masks using IoU, Dice coefficient, and mean boundary distance | `PLANNED` | `CDVF-A3` |
+| **CDVF-95** | Temporal Localisation Metrics | PRD §12.6 | TRD §11.B.6.1, §11.B.14| **CDVF-A5** | `CDVF-CP-05-01` | Evaluates temporal intervals using temporal IoU (tIoU) and boundary start/end errors | `PLANNED` | `CDVF-A3` |
+| **CDVF-96** | Inter-Detector Agreement Matrix| PRD §12.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | Computes Fleiss' kappa and Cohen's kappa across paired and multi-model predictions | `PLANNED` | `CDVF-A8` |
+| **CDVF-97** | 7 Conflict Taxonomy Codes | PRD §12.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | Assigns conflicts to `MODALITY_RESULT_CONFLICT`, `DETECTOR_RESULT_CONFLICT`, etc. | `PLANNED` | `CDVF-A8` |
+| **CDVF-98** | Automated Regression Runner | PRD §12.6 | TRD §11.B.14 | **CDVF-A11** | `CDVF-CP-11-01` | Continuous regression runner blocks promotion if $\Delta\operatorname{AUC} < -0.01$ or $\Delta\operatorname{ECE} > +0.01$ | `PLANNED` | `CDVF-A10` |
+| **CDVF-99** | RFC 8785 24-Item WORM Bundle | PRD §12.6 | TRD §11.B.15 | **CDVF-A11** | `CDVF-CP-11-01` | Serializes complete benchmark execution into 24-item canonical JSON bundle in WORM vault | `PLANNED` | `CDVF-A10` |
+| **CDVF-100**| Section 65B/63 BSA Dossier | PRD §12.6 | TRD §11.B.16 | **CDVF-A11** | `CDVF-CP-11-01` | Generates court-ready PDF dossier with reliability diagrams, ROC curves, and examiner sign-off | `PLANNED` | `CDVF-A10` |
 ## 12. IMLF Master Requirement Traceability Matrix (IML-01 through IML-22)
 
 The following master traceability matrix maps every canonical Image Manipulation Localisation Framework requirement (`IML-01` through `IML-22`) to its authoritative specification in `PRD.md`, its technical contract in `TRD.md`, its designated implementation phase in `PHASES.md`, its primary verification checkpoint, and the mandatory empirical evidence required for approval:
