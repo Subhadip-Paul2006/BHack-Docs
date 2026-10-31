@@ -130,6 +130,21 @@ The **CSTV (Cross-Source Timestamp Verification & Evidence Timeline Reconstructi
 
 ---
 
+### 3.8 Dedicated Audio Edit and Splice Localisation (AESL) Product Objectives
+The **AESL (Audio Edit and Splice Localisation)** capability embedded within the **ARE (Audio Reverse Engineering Engine)** fulfills ten core forensic objectives:
+1. **OBJ-AESL-01 (Sample-Accurate Temporal Localisation):** Detect, isolate, and localise suspicious audio edit regions and candidate splice boundaries with exact sample coordinates ($t = n/f_s$) and quantified millisecond uncertainty intervals, rejecting bare binary classification.
+2. **OBJ-AESL-02 (Multi-Modal Manipulation Coverage):** Investigate six distinct audio forgery topologies: splicing, segment insertion, segment deletion, audio replacement, copy-move (repeated-segment) manipulation, and concealed edits (crossfaded, smoothed, or gain-matched).
+3. **OBJ-AESL-03 (Strict Three-Engine Boundary Invariant):** Operate strictly within the existing ARE engine, reusing MVSI for speaker diarization/VAD context and ADDE for independent AI-generated voice findings without creating an unnecessary fourth AURAS engine.
+4. **OBJ-AESL-04 (Multi-Resolution Analysis Framework):** Analyze audio signals across four concurrent temporal windowing scales (Short: 10-20ms, Medium: 20-50ms, Long: 50-200ms, Macro: 200-1000ms+) to capture both abrupt transient cuts and gradual ambient mismatches.
+5. **OBJ-AESL-05 (Acoustic Environment & Noise Inconsistency Verification):** Model background noise stationarity, Room Impulse Response (RIR), reverberation decay (RT60), and Direct-to-Reverberant Ratio (DRR) to detect splices across mismatched acoustic environments.
+6. **OBJ-AESL-06 (Multi-Channel Phase & Stereo Coherence):** Evaluate inter-channel cross-correlation ($R_{xy}(	au)$), Inter-channel Time Differences (ITD), and phase continuity in stereo/multichannel recordings to detect unilateral channel splicing.
+7. **OBJ-AESL-07 (Copy-Move & Repeated Audio Localisation):** Identify cloned or re-inserted acoustic sequences within the same recording via normalized cross-correlation and dynamic time warping, suppressing false alarms on natural speech repetition.
+8. **OBJ-AESL-08 (Multi-Branch Localisation & Anti-Black-Box Fusion):** Fuse five orthogonal forensic branches (Time, Spectral, Noise/Environment, Channel/Phase, Learned TCN/CRNN/ASLNet), preserving separate branch outputs and highlighting inter-detector disagreement.
+9. **OBJ-AESL-09 (Quality Control & Alternative Benign Explanations):** Systematically evaluate 18 benign explanations (speaker/mic movement, AGC pumping, legitimate DAW edits, natural silences) and 20 explicit forensic limitations before declaring manipulation.
+10. **OBJ-AESL-10 (Court-Certified Evidence Lineage & Section 65B/63 BSA Reporting):** Anchor all candidate regions and boundary parameters in CEIPL Merkle DAG manifests with dual SHA-256/SHA3-512 hashes, exporting court-admissible UFREDF dossiers.
+
+---
+
 ## 4. Target User Personas & User Journeys
 
 ### 4.1 Target Personas
@@ -3537,3 +3552,358 @@ INCONCLUSIVE                 NOT_ANALYSED
 | **CSTV-68 to CSTV-72** | Finding Taxonomy & Master Evidence Timeline | TRD §16.8, §16.9 | Phase CSTV-A3 / CSTV-A8 |
 | **CSTV-73 to CSTV-77** | CEIPL Provenance, WORM Vault & Legal Reporting | TRD §16.10, §15.6 | Phase CSTV-A9 |
 | **CSTV-78 to CSTV-84** | Security Invariants, PostgreSQL DDL & Benchmarks | TRD §16.10, §16.13 | Phase CSTV-A10 |
+
+---
+
+## 17. Audio Edit and Splice Localisation (AESL) — Product Requirements
+
+### 17.1 Problem Statement
+In audio forensic casework—including recorded extortion calls, disputed sting operations, courtroom voice evidence, and law enforcement bodycam audio—investigators frequently encounter recordings where specific words, phrases, or background noises have been selectively altered:
+1. **Insufficiency of Binary Classification:** Traditional forensic tools and deepfake classifiers output monolithic scalar labels (e.g., "78% Fake"). In judicial cross-examination under Section 65B of the Indian Evidence Act (IEA) or Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA), a court demands to know: *Where was the audio edited? Exactly which words or seconds were inserted or removed? Which channel was altered? What physical acoustic evidence supports the finding?*
+2. **Sophisticated Concealment Techniques:** Modern digital audio workstations (DAWs) and mobile editing apps permit sophisticated crossfading, background-noise blending, room-ambience equalization, and lossy recompression (e.g., WhatsApp Opus re-encoding at 16 kbps) that mask simple waveform hard cuts.
+3. **Natural vs. Manipulated Acoustic Discontinuities:** Novice automated tools generate excessive false positives by misidentifying natural speech plosives, microphone handling thumps, speaker head turns, room transitions, and automatic gain control (AGC) pumping as fraudulent splices.
+4. **Copy-Move & Cloning Inconsistencies:** Malicious actors frequently duplicate words, syllables, or background ambient noise loops to manufacture fake alibis or alter the meaning of recorded statements without introducing foreign voice material.
+5. **Multi-Speaker & Multilingual Conflation:** Existing audio tools frequently confuse speaker turn-taking or code-switching between regional Indian languages (e.g., Hindi to Bhojpuri or Maithili) with splicing.
+
+AESL resolves these challenges by providing an evidence-preserving, multi-branch temporal localisation engine embedded directly within ARE. It isolates suspicious temporal intervals, estimates sample-accurate boundary coordinates, and quantifies measurement uncertainty alongside structured alternative explanations.
+
+### 17.2 Goals and Non-Goals
+
+#### 17.2.1 Product Goals
+- **G-AESL-01 (Candidate Region Localisation):** Detect, bound, and output suspicious temporal intervals with exact start/end timestamps and sample-index coordinates ($t = n/f_s$).
+- **G-AESL-02 (Sample-Accurate Boundary Refinement):** Refine candidate edit boundaries using narrow-window time-domain and phase analysis, reporting millisecond-level boundary uncertainty intervals.
+- **G-AESL-03 (Six Manipulation Topologies):** Accurately detect splicing, segment insertion, segment deletion, audio replacement, copy-move repetition, and concealed edits.
+- **G-AESL-04 (Multi-Resolution Segmentation):** Concurrently analyze audio at short (10-20ms), medium (20-50ms), long (50-200ms), and macro (200-1000ms+) window scales.
+- **G-AESL-05 (Acoustic Environment Modeling):** Quantify background noise stationarity, RIR, RT60 reverberation decay, and DRR to identify splices across acoustic environments.
+- **G-AESL-06 (Multi-Branch Orthogonal Fusion):** Fuse time-domain, spectral, acoustic-environment, multi-channel, and learned temporal representations while preserving separate branch measurements.
+- **G-AESL-07 (Examiner Interactive Workbench):** Provide synchronized dual-waveform, spectrogram, noise-floor, and feature-curve inspection with sample-level zoom.
+- **G-AESL-08 (Court-Certified Dossier Export):** Compile Section 65B/63 BSA certified PDF dossiers with SHA-256 exhibit digests, sample coordinates, and examiner Ed25519 signatures.
+
+#### 17.2.2 Explicit Non-Goals
+- **NG-AESL-01 (Not a Fourth Engine):** AESL does not create a fourth AURAS engine. It resides entirely within ARE.
+- **NG-AESL-02 (No AI-Voice Cloning Duplication):** AESL does not detect synthetic text-to-speech (TTS) or cloned voices; that responsibility belongs exclusively to ADDE.
+- **NG-AESL-03 (No Diarization Duplication):** AESL does not perform speaker clustering or language identification; it consumes structured segment metadata from MVSI.
+- **NG-AESL-04 (No Generic Binary Classifier):** AESL never outputs an unlocalized scalar verdict such as "REAL" or "FAKE" without identifying specific time regions.
+- **NG-AESL-05 (No Destructive Signal Enhancement):** AESL never overwrites or destructively filters original evidence files. All enhanced or resampled representations are preserved as derived artifacts.
+- **NG-AESL-06 (No Automated Judicial Verdict):** AESL identifies technical signal anomalies; it never asserts criminal intent or legally proves who performed an edit.
+- **NG-AESL-07 (No Guaranteed Deletion Recovery):** Without an independent reference copy, deleted audio content cannot be reconstructed; AESL flags the discontinuity, not the lost content.
+
+### 17.3 Threat and Manipulation Model
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                          AESL THREAT & MANIPULATION TAXONOMY                           │
+├─────────────────────┬─────────────────────────────────┬────────────────────────────────┤
+│ Manipulation Class  │ Physical / Digital Mechanism    │ Primary Forensic Indicators    │
+├─────────────────────┼─────────────────────────────────┼────────────────────────────────┤
+│ Splicing            │ Segment from external recording │ Noise-floor mismatch, RIR      │
+│                     │ inserted into carrier audio.    │ shift, spectral discontinuity. │
+├─────────────────────┼─────────────────────────────────┼────────────────────────────────┤
+│ Deletion            │ Interval removed to alter       │ Abrupt envelope jump, broken   │
+│                     │ meaning or excise admissions.   │ cadence, room-tone step.       │
+├─────────────────────┼─────────────────────────────────┼────────────────────────────────┤
+│ Insertion           │ Foreign speech or sound added   │ Two splice boundaries, double  │
+│                     │ into legitimate pause.          │ compression, codec mismatch.   │
+├─────────────────────┼─────────────────────────────────┼────────────────────────────────┤
+│ Replacement         │ Legitimate word replaced with   │ Local acoustic mismatch,       │
+│                     │ different word or silence.      │ phase discontinuity, EQ shift. │
+├─────────────────────┼─────────────────────────────────┼────────────────────────────────┤
+│ Copy-Move           │ Segment duplicated from within  │ Near-identical waveform/pHash, │
+│                     │ the same recording.             │ exact pitch/formant match.     │
+├─────────────────────┼─────────────────────────────────┼────────────────────────────────┤
+│ Concealed Edit      │ Crossfading, noise blending,    │ Windowed spectral distortion,  │
+│                     │ EQ matching, recompression.     │ phase smear, quantization step.│
+└─────────────────────┴─────────────────────────────────┴────────────────────────────────┘
+```
+
+### 17.4 Target Personas & Seven Core Investigator User Journeys
+
+#### 17.4.1 Target Personas
+- **P-1 (Cyber Police Investigating Officer - IO):** Needs rapid triage of intercepted extortion call recordings to confirm whether an incriminating sentence was spliced together from separate calls.
+- **P-2 (Senior Audio Forensic Examiner):** Requires sample-accurate waveform zooming, spectral flux plots, RT60 curves, and residual noise distributions to defend findings in high-court cross-examination.
+- **P-3 (Public Prosecutor / Legal Counsel):** Requires defense-resilient Section 65B/63 BSA certified annexures detailing exact millisecond intervals, sample numbers, and supporting physical measurements.
+- **P-4 (Evidence Custodian):** Needs cryptographic assurance that original seized audio was preserved in WORM storage without bitstream modification.
+
+#### 17.4.2 Seven Core Investigator User Journeys
+
+##### Journey AESL-J01: Detecting a Possible Splice in a Speech Recording
+- **Context:** An extortion recording is submitted where the suspect allegedly demands a ransom. The defense claims two separate calls were spliced together.
+- **Workflow:**
+  1. The examiner ingests the 48 kHz WAV recording; CEIPL locks the exhibit with dual hashes (SHA-256 / SHA3-512).
+  2. ARE/AESL executes multi-resolution segmentation, evaluating time-domain slope and spectral flux across 20ms sliding windows.
+  3. At sample 482,400 ($t = 10.050	ext{ s}$), the system detects a simultaneous jump in spectral centroid ($\Delta f_c = +840	ext{ Hz}$) and noise-floor power ($\Delta P_N = +6.2	ext{ dB}$).
+  4. AESL bounds the region as `AESL-REG-001` ($[10.045	ext{ s}, 10.055	ext{ s}]$) with boundary uncertainty $\pm 4.2	ext{ ms}$.
+  5. The examiner inspects the zoomed waveform view; zero-crossing phase discontinuity confirms a hard edit boundary.
+
+##### Journey AESL-J02: Localising a Possible Deletion
+- **Context:** A witness statement recording contains a suspected deletion of an exculpatory phrase ("I did not see him").
+- **Workflow:**
+  1. AESL analyzes the ambient background room tone across a 30-second speech segment.
+  2. At sample 240,000 ($t = 5.000	ext{ s}$), the system identifies an abrupt drop in the room reverberation tail following a plosive consonant, with the decay slope severed prematurely ($RT60$ drop from $0.42	ext{ s}$ to $0.05	ext{ s}$).
+  3. The local noise-floor estimate drops discontinuously by $8.5	ext{ dB}$ across a single 10ms frame boundary.
+  4. AESL emits finding `AUDIO_EDIT_POSSIBLE_DELETION` at sample 240,000 with boundary uncertainty $\pm 2.1	ext{ ms}$.
+  5. The report notes that while deleted content cannot be recovered without a reference copy, the acoustic discontinuity is inconsistent with uninterrupted speech.
+
+##### Journey AESL-J03: Finding Repeated Segments (Copy-Move)
+- **Context:** In a suspected fraudulent alibi recording, background street traffic noise appears artificially continuous.
+- **Workflow:**
+  1. AESL computes sliding-window acoustic fingerprints and local self-similarity matrices across the 5-minute recording.
+  2. The system identifies a 4.2-second ambient traffic segment occurring at $t = 14.0	ext{ s}$ that repeats identically at $t = 142.5	ext{ s}$ with normalized cross-correlation $R_{xy} = 0.994$.
+  3. AESL cross-references the speech timeline from MVSI; the repeated audio occurs during a period where the suspect is allegedly speaking in one instance and silent in the other.
+  4. The system flags `AUDIO_EDIT_COPY_MOVE_CANDIDATE` with two bound intervals and a shared fingerprint hash.
+  5. The examiner verifies the duplicate planar waveform pattern, confirming artificial loop padding.
+
+##### Journey AESL-J04: Comparing Background Noise Before and After a Suspected Edit
+- **Context:** An investigative journalist audio clip contains an alleged confession recorded inside a vehicle.
+- **Workflow:**
+  1. AESL applies multi-resolution spectral entropy and minimum statistics noise tracking across the entire recording.
+  2. The examiner selects candidate boundary at $t = 45.2	ext{ s}$ for deep inspection.
+  3. AESL renders a dual noise-floor comparison: the 2.0-second interval prior to the boundary exhibits engine rumble concentrated at $120	ext{ Hz}$ ($SNR = 14	ext{ dB}$), while the 2.0-second interval following exhibits HVAC broadband noise at $2.4	ext{ kHz}$ ($SNR = 22	ext{ dB}$).
+  4. AESL computes the acoustic environment distance ($D_{	ext{env}} = 0.78$), issuing finding `AUDIO_EDIT_ENVIRONMENT_MISMATCH`.
+  5. The examiner exports the comparative spectral density curve directly into the courtroom report.
+
+##### Journey AESL-J05: Investigating a Cross-Recording Insertion
+- **Context:** A complainant alleges that a death threat phrase was inserted into an otherwise benign telephone conversation.
+- **Workflow:**
+  1. AESL extracts MP3 frame allocation side-information and MDCT coefficient distributions across the recording.
+  2. The baseline audio exhibits constant-bitrate (CBR) $128	ext{ kbps}$ frame structure encoded with LAME 3.99.
+  3. For a 3.1-second phrase ($t = 22.4	ext{ s}$ to $25.5	ext{ s}$), the system detects variable quantization scalefactor bands, high-frequency cutoff shifted from $16.5	ext{ kHz}$ to $11.0	ext{ kHz}$, and double-compression ghost peaks.
+  4. AESL bounds the interval as `AESL-REG-004` and issues finding `AUDIO_EDIT_CODEC_TRANSITION` and `AUDIO_EDIT_POSSIBLE_INSERTION`.
+  5. MVSI confirms the speaker voice in this segment has different pitch and vocal tract length parameters.
+
+##### Journey AESL-J06: Reviewing a Suspicious Interval in a Multi-Speaker Recording
+- **Context:** A four-person board meeting recording contains an alleged verbal agreement. One participant claims their agreement was spliced in from a different topic.
+- **Workflow:**
+  1. AESL ingests the audio and requests speaker diarization intervals from MVSI.
+  2. MVSI assigns Speaker 3 to interval $[112.0	ext{ s}, 115.4	ext{ s}]$ ("I accept the proposal").
+  3. AESL performs boundary-specific analysis at both ends ($112.0	ext{ s}$ and $115.4	ext{ s}$); both boundaries exhibit non-cadence zero-crossings, severed reverberation tails, and a $4.8	ext{ dB}$ step in ambient room noise.
+  4. AESL verifies that Speaker 3's acoustic room response matches a small office ($RT60 = 0.22	ext{ s}$), whereas the surrounding meeting audio was recorded in a large conference room ($RT60 = 0.68	ext{ s}$).
+  5. AESL generates a correlated finding binding Speaker 3's diarization segment to an environmental mismatch finding without making legal accusations.
+
+##### Journey AESL-J07: Exporting an Evidence-Linked Localisation Report
+- **Context:** A forensic lab must submit a Section 65B/63 BSA certified report to the trial court within 2 hours.
+- **Workflow:**
+  1. The examiner completes interactive review of all candidate regions in the AESL workbench.
+  2. The examiner approves two verified splice regions and dismisses one candidate as natural microphone handling noise with an audit explanation.
+  3. AESL compiles the formal result package, binding findings to parent exhibit SHA-256 digests, exact sample intervals, and parser versions.
+  4. UFREDF generates an 8-page court-certified PDF report containing high-resolution waveform/spectrogram figures, measurement tables, and examiner Ed25519 digital signatures.
+  5. The report explicitly documents 18 alternative benign explanations considered and the residual uncertainty bounds.
+
+### 17.5 Supported Audio Evidence & Ingestion Constraints
+
+| Evidence Category | File Formats / Encodings | Sample Rates Supported | Channel Layouts | Ingestion Engine |
+| :--- | :--- | :--- | :--- | :--- |
+| **Uncompressed PCM** | WAV, BWF, RF64, AIFF | 8 kHz to 192 kHz (native preserved) | Mono, Stereo, 5.1 Multichannel | ARE / SoundFile |
+| **Lossless Compressed** | FLAC, ALAC | 16 kHz to 96 kHz | Mono, Stereo | ARE / SoundFile |
+| **Lossy Mobile/Web Audio**| MP3, AAC, M4A, OGG, Opus | 8 kHz to 48 kHz (bitstream audited) | Mono, Stereo | ARE / PyAV / FFprobe |
+| **Extracted Video Audio** | MP4, MOV, MKV, AVI, TS | Preserved from container stream | Native stream layout | VISTA AFB Stream-Copy |
+
+*Ingestion Invariant:* Native sample rates and channel layouts must be preserved in Artifact A (`working_native.wav`). Resampling to 16 kHz mono for model inference is performed strictly as a derived working copy (`working_16k.wav`) with an explicit sample-index mapping matrix.
+
+### 17.6 Functional Requirements Inventory (AESL-01 through AESL-90)
+
+| Req ID | Requirement Title | Priority | Subsystem Owner | Verification Method | Planned Phase | Current Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **AESL-01** | ARE Embedded Architectural Boundary | P0 | ARE / AURAS | Architecture audit & contract check | AESL-A0 | `PLANNED` |
+| **AESL-02** | Three-Engine Subsystem Preservation | P0 | AURAS Core | Component isolation unit test | AESL-A0 | `PLANNED` |
+| **AESL-03** | Modality Specialist Delegation (MVSI & ADDE) | P0 | AURAS Core | Mock dispatch integration test | AESL-A0 | `PLANNED` |
+| **AESL-04** | Air-Gapped Offline Execution Safeguard | P0 | Core Platform | Network isolation audit | AESL-A0 | `PLANNED` |
+| **AESL-05** | Shared Infrastructure Reuse (CEIPL, CMMS, UFREDF)| P0 | Core Platform | Cross-service client test | AESL-A0 | `PLANNED` |
+| **AESL-06** | Original Evidence Bitstream Immutability | P0 | CEIPL / ARE | SHA-256 pre/post execution assert | AESL-A1 | `PLANNED` |
+| **AESL-07** | Non-Destructive Working Copy Factory | P0 | ARE Ingest | Derived artifact manifest check | AESL-A1 | `PLANNED` |
+| **AESL-08** | Multi-Format Defensive Decoding | P0 | ARE Ingest | 50-file corrupted format suite | AESL-A1 | `PLANNED` |
+| **AESL-09** | Technical Audio Metadata Preservation | P0 | CMMS / ARE | Metadata schema validation | AESL-A1 | `PLANNED` |
+| **AESL-10** | Native Channel Preservation Invariant | P0 | ARE Ingest | Multi-channel array shape test | AESL-A1 | `PLANNED` |
+| **AESL-11** | Derived 16 kHz Mono Normalization Contract | P0 | ARE Ingest | Sample mapping verification test | AESL-A1 | `PLANNED` |
+| **AESL-12** | Decompression Bomb & Resource Ceilings | P0 | Security / ARE | Bounded memory stress test | AESL-A1 | `PLANNED` |
+| **AESL-13** | Exact Integer Sample-Index Tracking ($t = n/f_s$) | P0 | ARE Core | Precision benchmark ($< 1\mu	ext{s}$) | AESL-A1 | `PLANNED` |
+| **AESL-14** | Multi-Resolution Segmentation Engine | P0 | ARE Core | 4-scale windowing unit test | AESL-A2 | `PLANNED` |
+| **AESL-15** | Short-Window Boundary Analysis (10-20ms) | P1 | ARE Core | Transient cut boundary test | AESL-A2 | `PLANNED` |
+| **AESL-16** | Medium-Window Spectral Analysis (20-50ms) | P1 | ARE Core | Spectral continuity test suite | AESL-A2 | `PLANNED` |
+| **AESL-17** | Long-Window Acoustic Environment (50-200ms) | P1 | ARE Core | Ambience shift detection test | AESL-A2 | `PLANNED` |
+| **AESL-18** | Macro-Window Contextual Analysis (200-1000ms+) | P1 | ARE Core | Macro noise stationarity test | AESL-A2 | `PLANNED` |
+| **AESL-19** | Dynamic Adaptive Windowing on Low SNR | P2 | ARE Core | Low-amplitude fixture benchmark | AESL-A2 | `PLANNED` |
+| **AESL-20** | Waveform Amplitude Discontinuity Inspection | P0 | ARE Signal | Step-jump detection unit test | AESL-A2 | `PLANNED` |
+| **AESL-21** | Root Mean Square (RMS) & Energy Contours | P0 | ARE Signal | Energy contour benchmark | AESL-A2 | `PLANNED` |
+| **AESL-22** | Crest Factor & Local Variance Analysis | P1 | ARE Signal | Dynamic range variance test | AESL-A2 | `PLANNED` |
+| **AESL-23** | Zero-Crossing Rate & Phase Discontinuity | P0 | ARE Signal | Phase inversion detection test | AESL-A2 | `PLANNED` |
+| **AESL-24** | First-Order Waveform Derivative Analysis | P1 | ARE Signal | Slope discontinuity unit test | AESL-A2 | `PLANNED` |
+| **AESL-25** | Local DC Offset Shift Detection | P1 | ARE Signal | DC bias step detection test | AESL-A2 | `PLANNED` |
+| **AESL-26** | Boundary-Specific Sample-Neighborhood Inspection| P0 | ARE Signal | Narrow-window sample delta test | AESL-A2 | `PLANNED` |
+| **AESL-27** | Natural Speech Plosive False-Positive Guard | P0 | ARE Signal | Natural plosive rejection suite | AESL-A2 | `PLANNED` |
+| **AESL-28** | Multi-Band Noise-Floor Energy Tracking | P0 | ARE Acoustic | Spectral noise tracker test | AESL-A3 | `PLANNED` |
+| **AESL-29** | Minimum Statistics Noise Estimation | P0 | ARE Acoustic | Stationary noise benchmark | AESL-A3 | `PLANNED` |
+| **AESL-30** | Spectral Flatness & Spectral Entropy Profiling | P1 | ARE Acoustic | Noise tonality transition test | AESL-A3 | `PLANNED` |
+| **AESL-31** | Room Impulse Response (RIR) Characteristic Modeling| P1 | ARE Acoustic | RIR parameter estimation test | AESL-A3 | `PLANNED` |
+| **AESL-32** | Reverberation Decay Time (RT60) Discontinuity | P0 | ARE Acoustic | Reverberation step jump test | AESL-A3 | `PLANNED` |
+| **AESL-33** | Direct-to-Reverberant Ratio (DRR) Tracking | P1 | ARE Acoustic | DRR distance transition test | AESL-A3 | `PLANNED` |
+| **AESL-34** | Ambient Background Signature Distance ($D_{	ext{env}}$)| P0 | ARE Acoustic | Environment mismatch fixtures | AESL-A3 | `PLANNED` |
+| **AESL-35** | Microphone Handling & Distance Shift Safeguard | P0 | ARE Acoustic | Natural movement rejection test | AESL-A3 | `PLANNED` |
+| **AESL-36** | High-Resolution Short-Time Fourier Transform (STFT)| P0 | ARE Spectral | Exact time-frequency STFT test | AESL-A2 | `PLANNED` |
+| **AESL-37** | Spectral Centroid & Bandwidth Tracking | P1 | ARE Spectral | Centroid step discontinuity test | AESL-A2 | `PLANNED` |
+| **AESL-38** | Spectral Flux & Onset Strength Modeling | P0 | ARE Spectral | Flux peak boundary test | AESL-A2 | `PLANNED` |
+| **AESL-39** | Spectral Rolloff Frequency Transition Detection | P1 | ARE Spectral | Low-pass filter cutoff test | AESL-A2 | `PLANNED` |
+| **AESL-40** | Linear Frequency Cepstral Coefficients (LFCC) | P1 | ARE Spectral | LFCC feature extraction test | AESL-A2 | `PLANNED` |
+| **AESL-41** | Mel-Frequency Cepstral Coefficients (MFCC) | P1 | ARE Spectral | MFCC distance matrix test | AESL-A2 | `PLANNED` |
+| **AESL-42** | Evidence-Linked Forensic Spectrogram Generation | P0 | ARE Spectral | Coordinate-linked visual render | AESL-A2 | `PLANNED` |
+| **AESL-43** | Multi-Channel Independent Signal Extraction | P0 | ARE Channel | Channel separation array test | AESL-A2 | `PLANNED` |
+| **AESL-44** | Inter-Channel Cross-Correlation ($R_{xy}(	au)$) | P0 | ARE Channel | Stereo coherence benchmark | AESL-A2 | `PLANNED` |
+| **AESL-45** | Inter-Channel Time Difference (ITD) Tracking | P1 | ARE Channel | Spatial acoustic angle test | AESL-A2 | `PLANNED` |
+| **AESL-46** | Stereo-Image & Phase Discontinuity Detection | P0 | ARE Channel | Unilateral splice detection test | AESL-A2 | `PLANNED` |
+| **AESL-47** | Channel Energy Distribution Discrepancy | P1 | ARE Channel | Channel dropout step test | AESL-A2 | `PLANNED` |
+| **AESL-48** | Unilateral Channel Edit Localisation | P0 | ARE Channel | Single-channel splice test | AESL-A2 | `PLANNED` |
+| **AESL-49** | MP3/AAC Frame Allocation & Header Continuity | P1 | ARE Codec | Frame padding & header test | AESL-A4 | `PLANNED` |
+| **AESL-50** | MDCT Quantization Scalefactor Band Inconsistency| P1 | ARE Codec | Quantization noise step test | AESL-A4 | `PLANNED` |
+| **AESL-51** | Bitrate & High-Frequency Cutoff Transition | P0 | ARE Codec | Cutoff shift detection test | AESL-A4 | `PLANNED` |
+| **AESL-52** | Double-Compression & Transcoding Trace Detection| P1 | ARE Codec | Ghost compression peak test | AESL-A4 | `PLANNED` |
+| **AESL-53** | Resampling & Sample-Rate Conversion Traces | P1 | ARE Codec | Anti-aliasing filter curve test | AESL-A4 | `PLANNED` |
+| **AESL-54** | Codec Artifact Forensic Limitation Disclaimers | P0 | ARE Codec | Report disclaimer audit test | AESL-A4 | `PLANNED` |
+| **AESL-55** | Self-Similarity Matrix Acoustic Fingerprinting | P0 | ARE CopyMove | Fingerprint collision test | AESL-A5 | `PLANNED` |
+| **AESL-56** | Normalized Cross-Correlation Template Matching | P0 | ARE CopyMove | Waveform template match test | AESL-A5 | `PLANNED` |
+| **AESL-57** | Dynamic Time Warping (DTW) Syllable Alignment | P1 | ARE CopyMove | Warped speech segment test | AESL-A5 | `PLANNED` |
+| **AESL-58** | Minimum Duration Threshold for Duplication | P1 | ARE CopyMove | Short transient noise rejection | AESL-A5 | `PLANNED` |
+| **AESL-59** | Natural Speech Repetition False-Positive Guard | P0 | ARE CopyMove | Natural repetition test suite | AESL-A5 | `PLANNED` |
+| **AESL-60** | Ambient Background Loop Duplication Detection | P0 | ARE CopyMove | Background loop cloning test | AESL-A5 | `PLANNED` |
+| **AESL-61** | Statistical Change-Point Detection (CUSUM) | P1 | ARE ChangePt | Cumulative sum shift test | AESL-A6 | `PLANNED` |
+| **AESL-62** | Pruned Exact Linear Time (PELT) Change Detection | P0 | ARE ChangePt | PELT segmentation benchmark | AESL-A6 | `PLANNED` |
+| **AESL-63** | Kernel-Based Non-Parametric Change-Point Detection| P1 | ARE ChangePt | Kernel MMD segmentation test | AESL-A6 | `PLANNED` |
+| **AESL-64** | Multi-Branch Feature Stacking for Segmentation | P0 | ARE ChangePt | Feature matrix builder test | AESL-A6 | `PLANNED` |
+| **AESL-65** | Learned Temporal Localisation Model (TCN/CRNN) | P1 | ARE Model | Temporal network forward test | AESL-A7 | `PLANNED` |
+| **AESL-66** | ASLNet Research Architecture Evaluation | P2 | ARE Model | ASLNet paper benchmark harness | AESL-A7 | `PLANNED` |
+| **AESL-67** | Time-Indexed Suspicion Curve Output | P0 | ARE Model | Frame-level score array test | AESL-A7 | `PLANNED` |
+| **AESL-68** | Candidate Boundary Generation at Native Resolution| P0 | ARE Region | Candidate interval constructor | AESL-A8 | `PLANNED` |
+| **AESL-69** | Dual-Threshold Hysteresis Region Aggregation | P0 | ARE Region | Hysteresis merging benchmark | AESL-A8 | `PLANNED` |
+| **AESL-70** | Micro-Interval Preservation Safeguard ($\ge 10	ext{ms}$)| P0 | ARE Region | Short-splice preservation test | AESL-A8 | `PLANNED` |
+| **AESL-71** | Sample-Level Narrow-Window Boundary Refinement | P0 | ARE Region | $\pm 500$-sample refinement test | AESL-A8 | `PLANNED` |
+| **AESL-72** | Boundary Uncertainty Interval Quantification | P0 | ARE Region | Millisecond confidence bands | AESL-A8 | `PLANNED` |
+| **AESL-73** | Multi-Branch Late Fusion & Disagreement Retention| P0 | ARE Fusion | Disagreement flag assert test | AESL-A8 | `PLANNED` |
+| **AESL-74** | MVSI Speaker Diarization Timeline Ingestion | P0 | ARE / MVSI | Diarization interval binding | AESL-A9 | `PLANNED` |
+| **AESL-75** | Voice Activity Detection (VAD) Speech Alignment | P0 | ARE / MVSI | Speech vs pause splice test | AESL-A9 | `PLANNED` |
+| **AESL-76** | Multilingual & Code-Switching Invariant Guard | P0 | ARE / MVSI | Language change rejection test | AESL-A9 | `PLANNED` |
+| **AESL-77** | Speaker Turn-Taking Discontinuity Disambiguation | P0 | ARE / MVSI | Natural turn-taking check | AESL-A9 | `PLANNED` |
+| **AESL-78** | Non-Speech Environmental Recording Analysis | P0 | ARE Core | Non-speech audio benchmark | AESL-A9 | `PLANNED` |
+| **AESL-79** | Twenty Machine-Readable Finding Taxonomy (`AUDIO_EDIT_*`)| P0 | ARE Findings | Finding serialization test | AESL-A8 | `PLANNED` |
+| **AESL-80** | Fourteen Canonical Temporal Decision States | P0 | ARE Findings | Decision state mapping test | AESL-A8 | `PLANNED` |
+| **AESL-81** | First-Class Inconclusive Outcome Policy | P0 | ARE Findings | Low-quality abstention test | AESL-A8 | `PLANNED` |
+| **AESL-82** | Synchronized Dual-Waveform Examiner Review UI | P1 | ARE UI | Canvas synchronized scrub test | AESL-A9 | `PLANNED` |
+| **AESL-83** | Quality Control & 18 Benign Alternative Explanations| P0 | ARE Findings | Alternative explanation checklist | AESL-A9 | `PLANNED` |
+| **AESL-84** | CEIPL Cryptographic Evidence Lineage Integration | P0 | CEIPL / ARE | Merkle DAG node parent check | AESL-A9 | `PLANNED` |
+| **AESL-85** | Derived Analysis Representation WORM Vault Locking| P0 | CEIPL / ARE | POSIX 0400 read-only check | AESL-A9 | `PLANNED` |
+| **AESL-86** | Tamper-Evident Examiner Override Audit Logging | P0 | Security / ARE | Append-only audit trail test | AESL-A9 | `PLANNED` |
+| **AESL-87** | Worker Timeout & Memory Cgroup Limits (4 GB) | P0 | Celery / ARE | Cgroup memory kill test | AESL-A1 | `PLANNED` |
+| **AESL-88** | Section 65B IEA / Section 63 BSA Certified PDF Dossier| P0 | UFREDF / ARE | Courtroom PDF export benchmark | AESL-A9 | `PLANNED` |
+| **AESL-89** | Controlled 500-Fixture Evaluation Dataset | P0 | ARE QA | Leakage-free benchmark corpus | AESL-A10 | `PLANNED` |
+| **AESL-90** | Region-Level IoU & Boundary MAE Metrics | P0 | ARE QA | $IoU \ge 0.75$, MAE $\le 20	ext{ms}$ | AESL-A10 | `PLANNED` |
+
+### 17.7 Multi-Resolution Segmentation & Sample-Index Coordinates
+1. **Coordinate Formulation:** Time $t$ is calculated from sample index $n$ and native sampling rate $f_s$:
+   $$t = rac{n}{f_s}$$
+   A candidate interval covering $[n_{	ext{start}}, n_{	ext{end}}]$ has duration:
+   $$\Delta t = rac{n_{	ext{end}} - n_{	ext{start}}}{f_s}$$
+2. **Four Concurrently Evaluated Window Scales:**
+   - **Scale 1 (Short: 10–20 ms, hop 5 ms):** Captures hard sample discontinuities, phase flips, and waveform clipping.
+   - **Scale 2 (Medium: 20–50 ms, hop 10 ms):** Analyzes STFT spectral flux, LFCC/MFCC coefficients, and pitch continuity.
+   - **Scale 3 (Long: 50–200 ms, hop 25 ms):** Tracks noise-floor minimum statistics, local SNR, and vocal tract formants.
+   - **Scale 4 (Macro: 200–1000 ms+, hop 100 ms):** Evaluates room reverberation decay ($RT60$), background ambience, and channel cross-correlation.
+
+### 17.8 Multi-Branch Signal Analysis Specifications
+
+#### 17.8.1 Branch A: Time-Domain Continuity
+- **Short-Time Energy:** $E[m] = rac{1}{N} \sum_{n=0}^{N-1} x[mH + n]^2$, $RMS[m] = \sqrt{E[m]}$.
+- **Crest Factor:** $C[m] = rac{\max |x[mH + n]|}{RMS[m]}$.
+- **Zero-Crossing Rate (ZCR):** $ZCR[m] = rac{1}{2N} \sum_{n=1}^{N-1} |\operatorname{sgn}(x[mH + n]) - \operatorname{sgn}(x[mH + n - 1])|$.
+- **First-Order Difference:** $d[n] = x[n] - x[n-1]$.
+
+#### 17.8.2 Branch B: Frequency-Domain & Spectral Forensics
+- **STFT Formulation:** $X(m,k) = \sum_{n=0}^{N-1} x[mH + n] w[n] e^{-j 2\pi k n / N}$.
+- **Spectral Flux:** $SF[m] = \sum_k (|X(m,k)| - |X(m-1,k)|)^2$.
+- **Spectral Centroid:** $f_c[m] = rac{\sum_k f_k |X(m,k)|}{\sum_k |X(m,k)|}$.
+- **Spectral Flatness:** $SFM[m] = rac{\exp\left(rac{1}{K} \sum_k \ln |X(m,k)|^2ight)}{rac{1}{K} \sum_k |X(m,k)|^2}$.
+
+#### 17.8.3 Branch C: Acoustic Environment & Noise Inconsistency
+- **Reverberation Decay ($RT60$):** Energy Decay Curve $EDC(t) = \int_t^\infty h^2(	au) d	au$, Schroeder integration.
+- **Direct-to-Reverberant Ratio:** $DRR = 10 \log_{10} rac{\int_0^{t_d} h^2(	au) d	au}{\int_{t_d}^\infty h^2(	au) d	au}$.
+- **Environment Distance:** $D_{	ext{env}}(A, B) = rac{1}{2} D_{	ext{KL}}(P_A \parallel P_B) + rac{1}{2} D_{	ext{KL}}(P_B \parallel P_A)$.
+
+#### 17.8.4 Branch D: Channel & Phase Consistency
+- **Cross-Channel Correlation:** $R_{xy}(	au) = \sum_n x[n] y[n + 	au]$.
+- **Normalized Peak Coherence:** $ho_{\max} = rac{\max_	au R_{xy}(	au)}{\sqrt{\sum x^2[n] \sum y^2[n]}}$.
+
+#### 17.8.5 Branch E: Learned Temporal Representation
+- Multi-scale Temporal Convolutional Network (TCN) or Bi-directional CRNN generating frame-level suspicion score $s[m] \in [0.0, 1.0]$.
+- Research evaluation candidate: ASLNet encoder-decoder network.
+
+### 17.9 Region Generation, Hysteresis & Boundary Refinement
+1. **Dual-Threshold Hysteresis:** An edit region triggers when suspicion score $s[m] \ge 	au_{	ext{high}} = 0.70$ and expands to contiguous frames where $s[m] \ge 	au_{	ext{low}} = 0.40$.
+2. **Short-Interval Preservation:** Minimum region duration is set to $10	ext{ ms}$; candidate cuts are never discarded merely because they represent brief word deletions.
+3. **Sample-Accurate Boundary Refinement:** For a candidate frame boundary $m^*$, AESL extracts a narrow window of $\pm 500$ samples around $n^* = m^* H$, computing zero-crossing phase alignment and waveform slope derivatives to pin the boundary to the exact sample index $n_{	ext{refined}}$ with uncertainty $\pm \sigma_n$.
+
+### 17.10 Quality Control & Eighteen Benign Alternative Explanations
+Every generated finding must evaluate whether the observed acoustic change can be explained by:
+1. Natural speaker movement or head rotation relative to the microphone.
+2. Physical movement of the recording device (handling noise, pocket rustle).
+3. Automatic Gain Control (AGC) pumping during speech pauses.
+4. Automatic Noise Suppression (ANS) or mobile noise cancellation algorithms.
+5. Environmental noise changes (passing vehicle, door closing, HVAC cycling).
+6. Legitimate recording interruption or pause by the device operator.
+7. Natural speech pause or acoustic silence between sentences.
+8. Simultaneous overlapping speech from secondary speakers.
+9. Background music loops or legitimate public announcement systems.
+10. Legitimate digital audio editing or broadcast mastering.
+11. Codec transcoding (e.g. cellular AMR-WB to WhatsApp Opus).
+12. Lossy re-encoding and bit-rate throttling during network transmission.
+13. Legitimate sample-rate conversion (e.g. 48 kHz studio to 16 kHz telephony).
+14. Channel downmixing (stereo to mono summing).
+15. Audio extraction from video containers (VISTA AFB demuxing).
+16. Hardware recorder battery drop or power-supply hum fluctuation.
+17. Smartphone operating system audio buffer underrun.
+18. Natural speaker code-switching between regional Indian languages.
+
+### 17.11 Twenty Explicit Scientific & Forensic Limitations
+1. An acoustic discontinuity does not independently prove fraudulent tampering.
+2. A continuous, smooth waveform does not prove that an audio recording is unedited.
+3. Background noise changes occur naturally in mobile and outdoor recording environments.
+4. Speaker head rotation alters room reverberation and high-frequency spectral rolloff.
+5. Microphone handling produces low-frequency thumps mimicking edit boundaries.
+6. Legitimate lossy compression introduces frame-boundary blocking and high-frequency cutoff artifacts.
+7. Professional crossfading ($\ge 50	ext{ ms}$) and noise-bed smoothing can conceal splice boundaries.
+8. Copy-move detection can flag naturally repeated speech words, refrains, or machine cycles.
+9. Neural network suspicion scores are uncalibrated heuristics, not mathematical probabilities of guilt.
+10. Reconstructed boundary intervals have finite temporal precision bounded by the sampling theorem.
+11. Content deletions cannot be recovered or proven without an independent authentic reference recording.
+12. A single forensic detector must never form the sole basis of an affirmative tampering verdict.
+13. Model generalisation degrades on unseen mobile codecs, low-quality microphones, or rare dialects.
+14. All forensic findings must document tested alternative explanations and unresolved hypotheses.
+15. Splicing indicators must be reported independently from AI-generated voice cloning indicators.
+16. Speaker diarization identifies vocal characteristics, not who performed an audio edit.
+17. Original evidence bitstreams must remain strictly immutable; enhancements are derived artifacts.
+18. Resampled or denoised audio files represent derived working copies, not original evidence.
+19. Inconclusive outcomes are legally and scientifically valid forensic determinations.
+20. Final courtroom interpretations require evaluation by a certified forensic human examiner.
+
+### 17.12 Security, Provenance & Legal Invariants (Section 65B/63 BSA)
+1. **Bitstream Immutability:** Original audio files stored in the CEIPL WORM vault with POSIX `0400` read-only mode are never modified.
+2. **Derived Artifact Registration:** All resampled representations, extracted feature matrices, and region tables are registered in the CEIPL Merkle DAG with parent SHA-256 links.
+3. **Audit Logging:** Every examiner manual override (accepting, modifying, or rejecting candidate regions) is recorded in an append-only audit trail with cryptographic timestamps.
+4. **Court Certification:** Automated generation of Section 65B IEA / Section 63 BSA certified PDF dossiers with software commit hashes, mathematical parameter tables, and examiner Ed25519 digital signatures.
+
+### 17.13 Requirement Traceability Matrix (AESL-01 through AESL-90)
+
+| ID Range | Functional Requirement Group | Technical Section | Implementation Phase |
+| :--- | :--- | :--- | :--- |
+| **AESL-01 to AESL-05** | ARE Architecture & Subsystem Boundaries | TRD §18.1 | Phase AURAS-AESL-00 |
+| **AESL-06 to AESL-12** | Evidence Intake, WORM Custody & Preprocessing | TRD §18.2 | Phase AURAS-AESL-01 |
+| **AESL-13 to AESL-19** | Multi-Resolution Segmentation & Sample Mapping | TRD §18.3 | Phase AURAS-AESL-01 / AESL-02 |
+| **AESL-20 to AESL-27** | Waveform & Time-Domain Discontinuity Analysis | TRD §18.4 | Phase AURAS-AESL-02 |
+| **AESL-28 to AESL-35** | Noise Floor & Acoustic Environment Signatures | TRD §18.5 | Phase AURAS-AESL-03 |
+| **AESL-36 to AESL-42** | STFT Spectral & Cepstral Forensics | TRD §18.6 | Phase AURAS-AESL-02 |
+| **AESL-43 to AESL-48** | Phase, Multi-Channel & Stereo Consistency | TRD §18.7 | Phase AURAS-AESL-02 |
+| **AESL-49 to AESL-54** | Codec, Compression & Re-Encoding Analysis | TRD §18.8 | Phase AURAS-AESL-04 |
+| **AESL-55 to AESL-60** | Copy-Move & Repeated-Segment Localisation | TRD §18.9 | Phase AURAS-AESL-05 |
+| **AESL-61 to AESL-67** | Change-Point Detection & Learned Localisation | TRD §18.10, §18.11 | Phase AURAS-AESL-06 / AESL-07 |
+| **AESL-68 to AESL-73** | Region Generation, Boundary Refinement & Fusion | TRD §18.12 | Phase AURAS-AESL-08 |
+| **AESL-74 to AESL-78** | Multi-Speaker & Language Context (MVSI Reuse) | TRD §18.13 | Phase AURAS-AESL-09 |
+| **AESL-79 to AESL-83** | Finding Taxonomy, 14 Decision States & UI | TRD §12.9, §18.19 | Phase AURAS-AESL-08 / AESL-09 |
+| **AESL-84 to AESL-87** | CEIPL Provenance, WORM Vault & Security Limits| TRD §15.7, §18.14 | Phase AURAS-AESL-01 / AESL-09 |
+| **AESL-88 to AESL-90** | UFREDF Legal Reporting & 500-Fixture Benchmark | TRD §18.18, §18.19 | Phase AURAS-AESL-09 / AESL-10 |
+

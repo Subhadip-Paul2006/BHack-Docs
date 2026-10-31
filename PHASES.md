@@ -20,6 +20,7 @@ The PS-05 development lifecycle is structured into eleven platform-level phases 
 - **ONTF Network Traffic Forensics Subsystem:** Fourteen engineering phases (**ONTF-A0 through ONTF-A13**).
 - **Cross-Modal Deepfake Validation Framework (CDVF):** Twelve engineering phases (**CDVF-A0 through CDVF-A11**), providing a shared scientific benchmarking, empirical calibration, OOD gating, and model-governance backbone governing AIF, AURAS, and VISTA detection engines.
 - **CCTV Frame Integrity & Temporal Sequence Analysis (CFITSA):** Ten dedicated engineering phases (**VISTA-CFI-00 through VISTA-CFI-09**), providing specialized temporal sequence, variable-frame-rate cadence, motion continuity, and CCTV clock integrity validation embedded within VRE and the CCTV Forensic Profile.
+- **Audio Edit and Splice Localisation (AESL):** Eleven dedicated engineering phases (**AURAS-AESL-00 through AURAS-AESL-10**), providing sample-accurate boundary localisation, multi-resolution segmentation, time/spectral/noise/channel signal analysis, copy-move detection, change-point analysis, learned localisation (TCN/CRNN/ASLNet), and Section 65B/63 BSA certified reporting embedded within the Audio Reverse Engineering Engine (ARE).
 - **Cross-Source Timestamp Verification (CSTV):** Eleven dedicated engineering phases (**CSTV-A0 through CSTV-A10**), providing platform-wide temporal evidence contracts, timezone/GPS leap-second normalization, relative clock offset & robust drift modeling, piecewise clock reset segmentation, cross-source event anchor matching, Allen's interval algebra, sequence conflict graph analysis, and case-wide timeline reconstruction.
 - **Shared Platform Layer:** Common pre-decode dual-hashing, WORM vault persistence, Celery worker orchestration, and Section 65B/63 BSA legal reporting infrastructure.
 
@@ -6678,3 +6679,454 @@ Every Cross-Source Timestamp Verification requirement (`CSTV-01` through `CSTV-8
 | **CSTV-82** | Controlled Synthetic & Ground-Truth Test Benchmarks | PRD §16.5 | TRD §17.13 | **CSTV-A10** | `CSTV-CP-10-01` | 500-fixture validation suite executes cleanly | `PLANNED` |
 | **CSTV-83** | False-Positive Suppression on Legitimate Media | PRD §16.5, §16.10 | TRD §17.13 | **CSTV-A10** | `CSTV-CP-10-03` | Zero false tampering findings on authentic controls | `PLANNED` |
 | **CSTV-84** | Deterministic Repeatability & Release Validation | PRD §16.5 | TRD §17.13 | **CSTV-A10** | `CSTV-CP-10-04` | 5-run bit-exact parameter hash consistency | `PLANNED` |
+
+---
+
+## 16. Dedicated Audio Edit and Splice Localisation Engineering Playbook (AURAS-AESL-00 through AURAS-AESL-10)
+
+The Audio Edit and Splice Localisation (AESL) capability embedded within ARE executes across eleven disciplined, sequential engineering phases:
+
+```mermaid
+flowchart TD
+    AESL_00["AURAS-AESL-00: Discovery & ARE Baseline\n(Audit ARE signal stack, define AESL boundaries)"] --> AESL_01["AURAS-AESL-01: Evidence & Sample-Index Contracts\n(Artifact A/B, exact n/fs mapping, Pydantic v2)"]
+    AESL_01 --> AESL_02["AURAS-AESL-02: Multi-Resolution Signal Analysis\n(Waveform RMS, STFT Flux, Stereo Coherence)"]
+    AESL_02 --> AESL_03["AURAS-AESL-03: Noise Floor & Acoustic Environment\n(Minimum Statistics, RIR, RT60, DRR Shifts)"]
+    AESL_02 --> AESL_04["AURAS-AESL-04: Compression & Codec Forensics\n(MP3/AAC MDCT scalefactors, double-compression)"]
+    AESL_02 --> AESL_05["AURAS-AESL-05: Copy-Move & Repeated-Segment Engine\n(Acoustic Fingerprints, DTW Syllable Matching)"]
+    
+    AESL_02 & AESL_03 & AESL_04 & AESL_05 --> AESL_06["AURAS-AESL-06: Statistical Boundary Detection\n(PELT Change-Point Search, Multi-Branch Stacking)"]
+    AESL_01 & AESL_06 --> AESL_07["AURAS-AESL-07: Learned Temporal Localisation\n(TCN / CRNN Suspicion Curves, ASLNet Evaluation)"]
+    
+    AESL_06 & AESL_07 --> AESL_08["AURAS-AESL-08: Boundary Refinement & Branch Fusion\n(Zero-crossing sample snap, Hysteresis, 20 Findings)"]
+    AESL_08 --> AESL_09["AURAS-AESL-09: CEIPL, MVSI & Legal Reporting\n(WORM 0400 Vault, Section 65B/63 BSA Dossier)"]
+    AESL_09 --> AESL_10["AURAS-AESL-10: Benchmarking & Release Readiness\n(500 Fixtures, tIoU >= 0.75, Boundary MAE <= 15ms)"]
+```
+
+---
+
+### Phase AURAS-AESL-00: Repository and Architecture Discovery
+- **1. Phase Overview & Goals:** Audit existing ARE signal processing and spectral functions. Map dependencies (`soundfile`, `scipy.signal`, `librosa`, `ruptures`), confirm three-engine boundary invariant, and establish interface stubs without duplicating MVSI or ADDE.
+- **2. Scope & Target Components:** `src/auras/are/`, `src/auras/contracts/`, `src/cmms/audio/`.
+- **3. Prerequisites & Invariants:** Platform Phase 0 standards verified; CEIPL WORM vault accessible; zero duplicate diarization code.
+- **4. Detailed Engineering Tasks:**
+  1. Audit existing `ARE` signal modules in `src/auras/are/` for spectral and envelope capabilities.
+  2. Validate Python third-party dependencies for offline air-gapped compatibility.
+  3. Formalize interfaces between ARE/AESL and consuming services (MVSI, ADDE, CEIPL, UFREDF).
+  4. Author architectural baseline document defining AESL as an ARE sub-engine.
+- **5. Unit & Integration Test Specifications:**
+  - `test_aesl_three_engine_boundary()`: Asserts AESL is housed inside ARE, not as a 4th engine.
+  - `test_aesl_airgap_dependencies()`: Verifies zero runtime socket calls during initialization.
+- **6. Performance & Benchmark Targets:** Architectural discovery completed; zero conflicting contracts identified.
+- **7. Expected Deliverables & Artifacts:** `docs/auras/aesl_architecture_baseline.md`, interface stubs in `src/auras/are/aesl/`.
+- **8. Verifiable Checkpoints:**
+  - `AESL-CP-00-01`: ARE signal capabilities fully audited and cataloged.
+  - `AESL-CP-00-02`: Offline dependency compatibility confirmed for `soundfile` and `scipy.signal`.
+  - `AESL-CP-00-03`: Three-engine boundary invariant strictly verified across codebase.
+  - `AESL-CP-00-04`: Contract stubs between ARE/AESL and MVSI/ADDE approved by lead architect.
+- **9. Acceptance Criteria:** Subsystem boundaries strictly conform to TRD §18.1.
+- **10. Exit Criteria:** Approval of baseline architecture by lead forensic audio architect.
+- **11. Forensic & Legal Safeguards:** Enforces original audio exhibit bitstream immutability.
+- **12. Risk Mitigation & Edge Cases:** Fallback stubs for optional GPU-accelerated modules.
+- **13. Deferred Work:** Feature extraction logic implemented in AESL-02.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase AURAS-AESL-01: Evidence and Sample-Index Contracts
+- **1. Phase Overview & Goals:** Formulate typed data contracts and Pydantic v2 schemas for suspicious regions and boundaries. Build the non-destructive working copy factory (Artifact A and B) and exact sample-index tracking engine ($t = n/f_s$). Author PostgreSQL relational tables.
+- **2. Scope & Target Components:** `src/auras/are/aesl/contracts/`, `src/db/models/audio_temporal.py`.
+- **3. Prerequisites & Invariants:** AESL-00 completed; Pydantic v2 and PostgreSQL 16 operational.
+- **4. Detailed Engineering Tasks:**
+  1. Implement `SuspiciousRegionObservation`, `EditBoundaryCandidate`, and `AudioSpliceFinding` Pydantic v2 schemas.
+  2. Implement `WorkingArtifactFactory` generating Artifact A (native) and Artifact B (16k mono).
+  3. Author exact sample-coordinate mapping matrix between resampled and native domains.
+  4. Author Alembic database migration for 4 relational tables (`audio_analysis_sessions`, `suspicious_audio_regions`, `audio_edit_boundaries`, `audio_splice_findings`).
+- **5. Unit & Integration Test Specifications:**
+  - `test_sample_index_coordinate_math()`: Asserts $t = n/f_s$ with $< 1\mu\text{s}$ float error.
+  - `test_working_copy_factory_lineage()`: Verifies Artifact A/B parent SHA-256 binding.
+  - `test_audio_temporal_tables_ddl()`: Verifies database migration execution and foreign keys.
+- **6. Performance & Benchmark Targets:** Pydantic serialization latency $< 0.1\text{ ms}$; sample math $< 10\text{ ns}$/call.
+- **7. Expected Deliverables & Artifacts:** `src/auras/are/aesl/contracts/schemas.py`, `alembic/versions/*_aesl_tables.py`.
+- **8. Verifiable Checkpoints:**
+  - `AESL-CP-01-01`: Pydantic v2 contracts pass strict typing tests.
+  - `AESL-CP-01-02`: Artifact A (native) and B (16k) generated non-destructively with CEIPL lineage.
+  - `AESL-CP-01-03`: Sample-to-time conversion maintains exact unrounded integer indices.
+  - `AESL-CP-01-04`: PostgreSQL DDL migration runs cleanly with indexes on `(session_id, start_time_seconds)`.
+- **9. Acceptance Criteria:** 100% test pass rate across schema serialization and database DDL tests.
+- **10. Exit Criteria:** Schema contracts committed and verified in test harness.
+- **11. Forensic & Legal Safeguards:** Original audio exhibits mounted strictly with POSIX `0400` read-only mode.
+- **12. Risk Mitigation & Edge Cases:** Support for 8-channel surround audio via explicit channel indexing.
+- **13. Deferred Work:** Signal processing features implemented in AESL-02.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase AURAS-AESL-02: Multi-Resolution Signal Analysis
+- **1. Phase Overview & Goals:** Build the multi-resolution segmentation orchestrator (10ms, 20ms, 50ms, 200ms). Implement Branch A (time-domain envelope, RMS, zero-crossing, slope derivative), Branch B (STFT spectral flux, centroid, bandwidth, LFCC/MFCC), and Branch D (multi-channel cross-correlation $R_{xy}(\tau)$, ITD, phase continuity).
+- **2. Scope & Target Components:** `src/auras/are/aesl/signal/`, `src/auras/are/aesl/spectral/`, `src/auras/are/aesl/channel/`.
+- **3. Prerequisites & Invariants:** AESL-01 completed; native audio buffers accessible.
+- **4. Detailed Engineering Tasks:**
+  1. Implement multi-resolution windowing engine supporting Short, Medium, Long, and Macro scales.
+  2. Implement Branch A: short-time energy, RMS, crest factor, ZCR, and first-order difference $d[n]$.
+  3. Implement Branch B: Hann-windowed STFT ($N=1024, H=256$), spectral flux $SF[m]$, centroid $f_c[m]$.
+  4. Implement Branch D: inter-channel cross-correlation $R_{xy}(\tau)$, normalized peak coherence $\rho_{\max}$.
+- **5. Unit & Integration Test Specifications:**
+  - `test_multiresolution_window_shapes()`: Verifies 4 concurrent analysis window grids.
+  - `test_branch_a_step_jump()`: Flags hard cut with $\Delta E > 12\text{ dB}$.
+  - `test_branch_b_spectral_flux()`: Flags spectral discontinuity at splice boundary.
+  - `test_branch_d_stereo_coherence()`: Flags unilateral channel splice with $\rho_{\max} < 0.3$.
+- **6. Performance & Benchmark Targets:** Signal analysis throughput $\ge 50\times$ realtime on single CPU core.
+- **7. Expected Deliverables & Artifacts:** `src/auras/are/aesl/signal/time_domain.py`, `src/auras/are/aesl/spectral/stft.py`.
+- **8. Verifiable Checkpoints:**
+  - `AESL-CP-02-01`: Multi-resolution segmentation extracts concurrent feature matrices across 4 scales.
+  - `AESL-CP-02-02`: Branch A accurately detects waveform hard cuts and zero-crossing phase flips.
+  - `AESL-CP-02-03`: Branch B STFT spectral flux accurately identifies sudden frequency transitions.
+  - `AESL-CP-02-04`: Branch D inter-channel cross-correlation isolates unilateral channel edits.
+- **9. Acceptance Criteria:** Detects hard cuts with zero false negatives on uncompressed test audio.
+- **10. Exit Criteria:** Feature vectors ready for change-point engine consumption.
+- **11. Forensic & Legal Safeguards:** Plosive consonants flagged to prevent natural speech false alarms.
+- **12. Risk Mitigation & Edge Cases:** Fallback to mono analysis when audio has only 1 channel.
+- **13. Deferred Work:** Noise floor modeling implemented in AESL-03.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase AURAS-AESL-03: Noise and Acoustic Signature Analysis
+- **1. Phase Overview & Goals:** Build Branch C (acoustic environment & noise analysis). Implement minimum statistics noise-floor tracking, Room Impulse Response (RIR) modeling, reverberation decay ($RT60$) step detection, Direct-to-Reverberant Ratio (DRR), and environment distance $D_{\text{env}}$.
+- **2. Scope & Target Components:** `src/auras/are/aesl/acoustic/`, `src/auras/are/aesl/acoustic/noise_tracker.py`.
+- **3. Prerequisites & Invariants:** AESL-02 completed; STFT spectrograms available.
+- **4. Detailed Engineering Tasks:**
+  1. Implement minimum statistics noise-floor estimator tracking $P_N(m,k)$.
+  2. Implement spectral flatness (SFM) and spectral entropy (SE) to capture noise tonality shifts.
+  3. Implement blind RIR parameter estimation and Schroeder energy decay integration for $RT60$.
+  4. Compute symmetric Kullback-Leibler environment distance $D_{\text{env}}(A, B)$.
+- **5. Unit & Integration Test Specifications:**
+  - `test_noise_power_step_jump()`: Detects $6\text{ dB}$ noise floor shift across spliced segments.
+  - `test_reverberation_rt60_drop()`: Flags $0.4\text{ s} \to 0.1\text{ s}$ room transition.
+  - `test_environment_distance_threshold()`: Validates $D_{\text{env}} > 0.65$ on cross-room splices.
+- **6. Performance & Benchmark Targets:** Noise-floor and $RT60$ tracking completes in $< 500\text{ ms}$ for 1-minute audio.
+- **7. Expected Deliverables & Artifacts:** `src/auras/are/aesl/acoustic/noise.py`, `src/auras/are/aesl/acoustic/reverb.py`.
+- **8. Verifiable Checkpoints:**
+  - `AESL-CP-03-01`: Minimum statistics noise tracker accurately bounds stationary background floor.
+  - `AESL-CP-03-02`: Reverberation decay engine reliably estimates $RT60$ steps across boundaries.
+  - `AESL-CP-03-03`: Acoustic environment distance $D_{\text{env}}$ flags cross-room splicing.
+  - `AESL-CP-03-04`: Natural microphone handling shifts suppressed via low-frequency energy gating.
+- **9. Acceptance Criteria:** Identifies acoustic environment mismatches with $F_1 \ge 0.85$ on cross-room corpus.
+- **10. Exit Criteria:** Acoustic features integrated into composite feature matrix.
+- **11. Forensic & Legal Safeguards:** Documented disclaimers regarding speaker movement effects on $RT60$.
+- **12. Risk Mitigation & Edge Cases:** Robust noise estimation under non-stationary speech using VAD masks.
+- **13. Deferred Work:** Codec analysis in AESL-04.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase AURAS-AESL-04: Compression and Encoding Forensics
+- **1. Phase Overview & Goals:** Build the compression and codec integrity inspection engine. Detect MP3/AAC scalefactor band irregularities, high-frequency cutoff shifts, double-compression ghost peaks, and resampling anti-aliasing traces.
+- **2. Scope & Target Components:** `src/auras/are/aesl/codec/`, `src/auras/are/aesl/codec/mp3_parser.py`.
+- **3. Prerequisites & Invariants:** AESL-01 completed; original container bitstream accessible.
+- **4. Detailed Engineering Tasks:**
+  1. Inspect MP3 frame header sequence, padding bits, and frame duration cadence.
+  2. Analyze MDCT coefficient distribution across scalefactor bands to detect quantization anomalies.
+  3. Detect sharp high-frequency cutoff transitions (e.g. $16.5\text{ kHz} \to 11.0\text{ kHz}$).
+  4. Identify double-compression artifacts via periodicity in DCT/MDCT coefficient histogram peaks.
+  5. Identify resampling filter roll-off traces inconsistent with reported native sample rate.
+- **5. Unit & Integration Test Specifications:**
+  - `test_mp3_scalefactor_band_transition()`: Detects spliced segment with different quantization.
+  - `test_cutoff_frequency_drop()`: Flags $16\text{ kHz} \to 11\text{ kHz}$ cutoff drop.
+  - `test_double_compression_detection()`: Flags recompressed MP3 with secondary quantization peaks.
+- **6. Performance & Benchmark Targets:** Codec bitstream parsing executes in $< 200\text{ ms}$ for 5-minute file.
+- **7. Expected Deliverables & Artifacts:** `src/auras/are/aesl/codec/bitstream.py`, `src/auras/are/aesl/codec/transcoding.py`.
+- **8. Verifiable Checkpoints:**
+  - `AESL-CP-04-01`: Frame header allocation parser flags missing or non-cadence MP3 headers.
+  - `AESL-CP-04-02`: High-frequency spectral cutoff detector flags localized re-encoding.
+  - `AESL-CP-04-03`: Double-compression detector identifies multi-generation encoding traces.
+  - `AESL-CP-04-04`: Resampling trace detector flags anti-aliasing ripples from rate conversion.
+- **9. Acceptance Criteria:** Correctly identifies transcoded and spliced MP3/AAC segments on test corpus.
+- **10. Exit Criteria:** Codec findings serializable to `AudioSpliceFinding` schema.
+- **11. Forensic & Legal Safeguards:** Explicit disclaimers separating legitimate export from tampering.
+- **12. Risk Mitigation & Edge Cases:** Graceful fallback to spectral-only analysis for uncompressed WAV.
+- **13. Deferred Work:** Copy-move analysis in AESL-05.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase AURAS-AESL-05: Repeated-Segment and Copy-Move Analysis
+- **1. Phase Overview & Goals:** Build the copy-move and repeated audio sequence detection engine. Implement sliding-window acoustic fingerprinting, self-similarity matrix calculation, Dynamic Time Warping (DTW) verification, and natural speech repetition false-positive guards.
+- **2. Scope & Target Components:** `src/auras/are/aesl/copymove/`, `src/auras/are/aesl/copymove/fingerprint.py`.
+- **3. Prerequisites & Invariants:** AESL-02 completed; feature representations available.
+- **4. Detailed Engineering Tasks:**
+  1. Implement 64-bit sub-band energy acoustic fingerprint extractor across 50ms frames.
+  2. Implement self-similarity distance matrix using Euclidean and cosine distances.
+  3. Implement DTW syllable alignment to match time-stretched or slightly warped copied segments.
+  4. Enforce minimum duration threshold ($\Delta t \ge 100\text{ ms}$) to reject brief transient sound matches.
+  5. Author natural repetition filter: evaluate pitch micro-jitter to distinguish real speech repetition.
+- **5. Unit & Integration Test Specifications:**
+  - `test_exact_copymove_detection()`: Flags duplicated 3-second segment with $R_{xy} \ge 0.99$.
+  - `test_natural_speech_repetition_suppression()`: Passes natural "no, no, no" without false alarm.
+  - `test_dtw_time_warped_copymove()`: Matches slightly time-stretched duplicate segment.
+- **6. Performance & Benchmark Targets:** Computes self-similarity matrix for 5-minute file in $< 2.0\text{ s}$.
+- **7. Expected Deliverables & Artifacts:** `src/auras/are/aesl/copymove/detector.py`, `src/auras/are/aesl/copymove/dtw.py`.
+- **8. Verifiable Checkpoints:**
+  - `AESL-CP-05-01`: Acoustic fingerprint extractor achieves zero collision rate on unique audio.
+  - `AESL-CP-05-02`: Self-similarity matrix reliably isolates off-diagonal duplicate blocks.
+  - `AESL-CP-05-03`: DTW alignment accurately tracks cloned segments despite minor pitch variations.
+  - `AESL-CP-05-04`: Natural speech repetition filter suppresses false alarms on repeated words.
+- **9. Acceptance Criteria:** $F_1 \ge 0.90$ on controlled copy-move benchmark dataset.
+- **10. Exit Criteria:** Copy-move candidates feed into candidate region aggregator.
+- **11. Forensic & Legal Safeguards:** Duplication findings report both source and target intervals.
+- **12. Risk Mitigation & Edge Cases:** Memory-bounded tiling for audio files exceeding 30 minutes.
+- **13. Deferred Work:** Boundary detection in AESL-06.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase AURAS-AESL-06: Statistical Boundary Detection
+- **1. Phase Overview & Goals:** Build the statistical change-point detection engine. Stack multi-branch feature vectors into a composite representation and apply Pruned Exact Linear Time (PELT) and CUSUM algorithms to detect candidate edit boundaries.
+- **2. Scope & Target Components:** `src/auras/are/aesl/changepoint/`, `src/auras/are/aesl/changepoint/pelt.py`.
+- **3. Prerequisites & Invariants:** AESL-02 through AESL-05 completed; feature vectors available.
+- **4. Detailed Engineering Tasks:**
+  1. Author composite feature matrix constructor stacking time, spectral, noise, and channel vectors.
+  2. Implement PELT change-point detection with $L_2$ cost function and Bayesian Information Criterion (BIC) penalty.
+  3. Implement CUSUM cumulative sum detector to identify gradual drift in noise characteristics.
+  4. Implement kernel change-point detection using Maximum Mean Discrepancy (MMD) for non-linear shifts.
+- **5. Unit & Integration Test Specifications:**
+  - `test_pelt_splice_boundary_detection()`: Accurately locates synthetic splice boundary within 1 frame.
+  - `test_cusum_noise_drift_detection()`: Identifies gradual change in environmental noise bed.
+  - `test_feature_stack_normalization()`: Asserts zero-mean, unit-variance scaling across feature columns.
+- **6. Performance & Benchmark Targets:** PELT change-point segmentation executes in $< 150\text{ ms}$ for 1-minute audio.
+- **7. Expected Deliverables & Artifacts:** `src/auras/are/aesl/changepoint/engine.py`, `src/auras/are/aesl/changepoint/stacker.py`.
+- **8. Verifiable Checkpoints:**
+  - `AESL-CP-06-01`: Multi-branch feature stacker normalizes diverse signal metrics into unified matrix.
+  - `AESL-CP-06-02`: PELT segmentation accurately identifies discrete change-points in linear time $O(N)$.
+  - `AESL-CP-06-03`: CUSUM detector reliably flags persistent shifts in background noise statistics.
+  - `AESL-CP-06-04`: Kernel MMD detector handles non-linear acoustic boundary transitions.
+- **9. Acceptance Criteria:** Boundary detection recall $\ge 0.90$ across controlled splicing test suite.
+- **10. Exit Criteria:** Candidate change-points available for boundary refinement.
+- **11. Forensic & Legal Safeguards:** Change-points labeled as statistical anomalies, not definitive cuts.
+- **12. Risk Mitigation & Edge Cases:** Adaptive penalty tuning based on audio length and SNR.
+- **13. Deferred Work:** Learned neural model in AESL-07.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase AURAS-AESL-07: Learned Splice Localisation
+- **1. Phase Overview & Goals:** Build Branch E (learned temporal localisation model). Evaluate multi-scale Temporal Convolutional Networks (TCN) or bi-directional CRNNs generating time-indexed suspicion curves $s[m] \in [0.0, 1.0]$. Establish an evaluation harness for research candidate ASLNet.
+- **2. Scope & Target Components:** `src/auras/are/aesl/models/`, `src/auras/are/aesl/models/tcn_localiser.py`.
+- **3. Prerequisites & Invariants:** AESL-01 completed; Artifact B (16 kHz mono) available.
+- **4. Detailed Engineering Tasks:**
+  1. Implement PyTorch TCN/CRNN temporal encoder-decoder network for frame-level suspicion inference.
+  2. Implement time-indexed suspicion curve output generator ($s[m]$ at 10ms frame resolution).
+  3. Build research evaluation harness for ASLNet encoder-decoder architecture.
+  4. Implement Out-of-Distribution (OOD) gating to flag inputs outside the model's certified acoustic manifold.
+- **5. Unit & Integration Test Specifications:**
+  - `test_tcn_forward_pass()`: Validates tensor shape $(B, T, 1)$ and output range $[0.0, 1.0]$.
+  - `test_suspicion_curve_time_indexing()`: Verifies frame-to-second coordinate alignment.
+  - `test_ood_detection_on_extreme_noise()`: Asserts OOD flag when SNR $< -5\text{ dB}$.
+- **6. Performance & Benchmark Targets:** Neural inference latency $< 100\text{ ms}$ for 10-second audio clip on GPU.
+- **7. Expected Deliverables & Artifacts:** `src/auras/are/aesl/models/tcn.py`, `src/auras/are/aesl/models/aslnet_eval.py`.
+- **8. Verifiable Checkpoints:**
+  - `AESL-CP-07-01`: Learned temporal model outputs calibrated frame-level suspicion curves.
+  - `AESL-CP-07-02`: Receptive field covers $\ge 2.0\text{ s}$ of acoustic context.
+  - `AESL-CP-07-03`: ASLNet research harness benchmarked on controlled splice corpus.
+  - `AESL-CP-07-04`: OOD detector gates inference on severely degraded audio files.
+- **9. Acceptance Criteria:** Model achieves frame-level AUC $\ge 0.88$ on unseen evaluation corpus.
+- **10. Exit Criteria:** Neural suspicion curves ready for multi-branch fusion.
+- **11. Forensic & Legal Safeguards:** Neural outputs strictly treated as heuristic suspicion curves, not facts.
+- **12. Risk Mitigation & Edge Cases:** Fallback to classical signal branches when PyTorch is unavailable.
+- **13. Deferred Work:** Multi-branch fusion in AESL-08.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase AURAS-AESL-08: Multi-Branch Fusion and Boundary Refinement
+- **1. Phase Overview & Goals:** Build the late-fusion engine and dual-threshold hysteresis region generator. Implement sample-accurate narrow-window boundary refinement, compute boundary uncertainty intervals ($\pm \sigma_{\text{ms}}$), and emit 20 machine-readable finding codes (`AUDIO_EDIT_*`).
+- **2. Scope & Target Components:** `src/auras/are/aesl/fusion/`, `src/auras/are/aesl/fusion/refinement.py`.
+- **3. Prerequisites & Invariants:** AESL-02 through AESL-07 completed; all branch vectors available.
+- **4. Detailed Engineering Tasks:**
+  1. Implement dual-threshold hysteresis bounding ($\tau_{\text{high}} = 0.70$, $\tau_{\text{low}} = 0.40$).
+  2. Implement sample-level narrow-window boundary refinement ($\pm 500$ native samples around cut).
+  3. Align refined boundaries with nearest zero-crossing and first-order slope peak $|d[n]|$.
+  4. Calculate boundary uncertainty intervals ($\pm \sigma_{\text{ms}}$) based on local SNR and sample rate.
+  5. Implement multi-branch late fusion preserving individual branch measurements and inter-branch disagreement.
+  6. Serialize findings into 20 machine-readable `AUDIO_EDIT_*` codes.
+- **5. Unit & Integration Test Specifications:**
+  - `test_hysteresis_region_generation()`: Binds contiguous high-suspicion frames into single region.
+  - `test_sample_level_zero_crossing_refinement()`: Pins boundary to exact zero-crossing index.
+  - `test_boundary_uncertainty_bounds()`: Calculates valid millisecond confidence interval.
+  - `test_twenty_finding_codes_serialization()`: Serializes all 20 finding types with complete schema.
+- **6. Performance & Benchmark Targets:** Fusion and refinement execute in $< 100\text{ ms}$ for 1-minute audio.
+- **7. Expected Deliverables & Artifacts:** `src/auras/are/aesl/fusion/engine.py`, `src/auras/are/aesl/fusion/refiner.py`.
+- **8. Verifiable Checkpoints:**
+  - `AESL-CP-08-01`: Dual-threshold hysteresis reliably bounds candidate regions without fragmentation.
+  - `AESL-CP-08-02`: Sample-level refinement pins boundary to native sample index with $\le 5\text{ ms}$ error.
+  - `AESL-CP-08-03`: Boundary uncertainty intervals rigorously calculated and reported.
+  - `AESL-CP-08-04`: 20 machine-readable finding codes (`AUDIO_EDIT_*`) serialized with full provenance.
+- **9. Acceptance Criteria:** Refined boundary MAE $\le 15\text{ ms}$ on controlled uncompressed splices.
+- **10. Exit Criteria:** Refined candidate regions available for MVSI and CEIPL integration.
+- **11. Forensic & Legal Safeguards:** Inter-branch disagreement preserved; blind probability averaging forbidden.
+- **12. Risk Mitigation & Edge Cases:** Short-interval preservation safeguard prevents dropping $\ge 10\text{ ms}$ cuts.
+- **13. Deferred Work:** Reporting and CEIPL integration in AESL-09.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase AURAS-AESL-09: CEIPL, MVSI and Reporting Integration
+- **1. Phase Overview & Goals:** Integrate AESL with MVSI (speaker diarization, VAD, language identification), CEIPL (WORM vault locking, Merkle DAG provenance), and UFREDF (Section 65B/63 BSA certified PDF reporting). Implement the examiner interactive review workbench.
+- **2. Scope & Target Components:** `src/auras/are/aesl/integration/`, `src/auras/are/aesl/ui/`, `src/ufredf/audio/`.
+- **3. Prerequisites & Invariants:** AESL-08 completed; MVSI and UFREDF client libraries operational.
+- **4. Detailed Engineering Tasks:**
+  1. Ingest MVSI speaker diarization intervals and bind speaker IDs to candidate edit regions.
+  2. Cross-reference VAD speech/non-speech boundaries to distinguish speech cuts from ambient edits.
+  3. Register analysis sessions, derived feature matrices, and findings in CEIPL Merkle DAG.
+  4. Lock derived visual spectrograms and masks in CEIPL WORM vault with POSIX `0400` mode.
+  5. Build interactive examiner review canvas with synchronized dual-waveform and sample-level scrub.
+  6. Author UFREDF Section 65B/63 BSA certified PDF report template with audit trails and Ed25519 signatures.
+- **5. Unit & Integration Test Specifications:**
+  - `test_mvsi_speaker_binding()`: Binds Speaker 1 ID to candidate splice region without causal blame.
+  - `test_ceipl_merkle_dag_lineage()`: Asserts parent exhibit SHA-256 link in finding DAG node.
+  - `test_ufredf_section65b_pdf_generation()`: Exports court-admissible PDF dossier with figures.
+  - `test_examiner_override_audit_trail()`: Asserts append-only audit record on examiner confirmation.
+- **6. Performance & Benchmark Targets:** PDF dossier generation $< 2.5\text{ s}$; UI scrub latency $< 16\text{ ms}$ (60 fps).
+- **7. Expected Deliverables & Artifacts:** `src/auras/are/aesl/integration/mvsi_bridge.py`, `src/ufredf/templates/aesl_dossier.html`.
+- **8. Verifiable Checkpoints:**
+  - `AESL-CP-09-01`: MVSI speaker intervals and language context correctly bound to suspicious regions.
+  - `AESL-CP-09-02`: Findings and derived masks cryptographically anchored in CEIPL Merkle DAG.
+  - `AESL-CP-09-03`: Section 65B IEA / Section 63 BSA certified PDF dossier generated with Ed25519 signatures.
+  - `AESL-CP-09-04`: Examiner interactive review workbench operational with audit-logged overrides.
+- **9. Acceptance Criteria:** Complete courtroom-ready dossier compiled with 100% cryptographic traceability.
+- **10. Exit Criteria:** Full integration pipeline operational and validated.
+- **11. Forensic & Legal Safeguards:** Section 65B/63 BSA certificate binds to commit hash and exhibit digests.
+- **12. Risk Mitigation & Edge Cases:** Fallback to text-only report if PDF rendering engine fails.
+- **13. Deferred Work:** Final release benchmark in AESL-10.
+- **14. Status:** `PLANNED`
+
+---
+
+### Phase AURAS-AESL-10: Benchmarking and Release Readiness
+- **1. Phase Overview & Goals:** Execute comprehensive benchmark validation across a 500-fixture synthetic and real-world ground-truth test corpus. Evaluate region-level tIoU, boundary MAE, false alarm rates, and release gates.
+- **2. Scope & Target Components:** `tests/auras/aesl/benchmarks/`, `scripts/benchmark_aesl.py`.
+- **3. Prerequisites & Invariants:** AESL-00 through AESL-09 completed; benchmark corpus assembled.
+- **4. Detailed Engineering Tasks:**
+  1. Construct 500 controlled ground-truth fixtures covering splicing, deletion, insertion, copy-move, and WhatsApp recompression.
+  2. Execute automated regression benchmark evaluating tIoU, boundary start/end MAE, and false alarm rates.
+  3. Validate negative controls: verify zero false tampering alerts on authentic speech and nature recordings.
+  4. Perform 5-run bit-exact deterministic repeatability test.
+  5. Compile final release evaluation dossier.
+- **5. Unit & Integration Test Specifications:**
+  - `test_benchmark_tiou_accuracy()`: Asserts $\text{tIoU} \ge 0.75$ across uncompressed test corpus.
+  - `test_benchmark_boundary_mae()`: Asserts boundary $\text{MAE} \le 15\text{ ms}$ on hard cuts.
+  - `test_negative_controls_false_alarms()`: Asserts $\le 0.05$ false alarms per hour on authentic controls.
+  - `test_deterministic_reproducibility()`: Asserts 100% bit-exact parameter reproduction across 5 runs.
+- **6. Performance & Benchmark Targets:** 100% release gate pass rate; $\text{tIoU} \ge 0.75$; boundary $\text{MAE} \le 15\text{ ms}$.
+- **7. Expected Deliverables & Artifacts:** `reports/aesl_benchmark_release_dossier.pdf`, benchmark test suite.
+- **8. Verifiable Checkpoints:**
+  - `AESL-CP-10-01`: 500-fixture synthetic and real-world ground-truth corpus fully evaluated.
+  - `AESL-CP-10-02`: Benchmark confirms $\text{tIoU} \ge 0.75$ and boundary $\text{MAE} \le 15\text{ ms}$.
+  - `AESL-CP-10-03`: False-positive suppression verified on authentic speech, music, and nature controls.
+  - `AESL-CP-10-04`: 5-run repeatability test confirms 100% bit-exact parameter reproducibility under identical inputs.
+- **9. Acceptance Criteria:** All 44 checkpoints across AURAS-AESL-00 through AURAS-AESL-10 fully satisfied.
+- **10. Exit Criteria:** AESL capability officially approved and signed off for PS-05 release.
+- **11. Forensic & Legal Safeguards:** Complete benchmark reproducibility dossier archived in WORM vault.
+- **12. Risk Mitigation & Edge Cases:** Continuous regression testing integrated into CI/CD pipeline.
+- **13. Deferred Work:** Post-hackathon real-time stream splicing inspection.
+- **14. Status:** `PLANNED`
+
+---
+
+## 17. AESL Master Requirement Traceability Matrix (AESL-01 through AESL-90)
+
+Every Audio Edit and Splice Localisation requirement (`AESL-01` through `AESL-90`) is mapped to its PRD specification, TRD technical section, implementing engineering phase, verification checkpoint, expected evidence, and execution status:
+
+| Req ID | Requirement Title | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Validation Evidence | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **AESL-01** | ARE Embedded Architectural Boundary | PRD §17.1, §17.6 | TRD §18.1 | **AURAS-AESL-00** | `AESL-CP-00-01` | Architecture audit confirms ARE ownership | `PLANNED` |
+| **AESL-02** | Three-Engine Subsystem Preservation | PRD §17.2.2, §17.6 | TRD §18.1 | **AURAS-AESL-00** | `AESL-CP-00-03` | Verifies AURAS retains exactly 3 engines | `PLANNED` |
+| **AESL-03** | Modality Specialist Delegation (MVSI & ADDE) | PRD §17.2.2, §17.6 | TRD §18.1 | **AURAS-AESL-00** | `AESL-CP-00-04` | Reuses MVSI diarization and ADDE voice flags | `PLANNED` |
+| **AESL-04** | Air-Gapped Offline Execution Safeguard | PRD §17.2.2, §17.6 | TRD §15.7, §18.1 | **AURAS-AESL-00** | `AESL-CP-00-02` | Zero external network calls in sandbox audit | `PLANNED` |
+| **AESL-05** | Shared Infrastructure Reuse (CEIPL, CMMS, UFREDF)| PRD §17.6 | TRD §18.1 | **AURAS-AESL-00** | `AESL-CP-00-04` | Shared service interface client test | `PLANNED` |
+| **AESL-06** | Original Evidence Bitstream Immutability | PRD §17.6, §17.12 | TRD §15.7, §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Exhibit SHA-256 assert pre/post execution | `PLANNED` |
+| **AESL-07** | Non-Destructive Working Copy Factory | PRD §17.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Artifact A and B manifest validation | `PLANNED` |
+| **AESL-08** | Multi-Format Defensive Decoding | PRD §17.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | 50-file corrupted audio format suite | `PLANNED` |
+| **AESL-09** | Technical Audio Metadata Preservation | PRD §17.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | CMMS metadata schema validation | `PLANNED` |
+| **AESL-10** | Native Channel Preservation Invariant | PRD §17.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Preserves multi-channel layout in Artifact A | `PLANNED` |
+| **AESL-11** | Derived 16 kHz Mono Normalization Contract | PRD §17.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Sinc resampled Artifact B with mapping | `PLANNED` |
+| **AESL-12** | Decompression Bomb & Resource Ceilings | PRD §17.6 | TRD §15.7, §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Cgroup memory kill test at 4 GB ceiling | `PLANNED` |
+| **AESL-13** | Exact Integer Sample-Index Tracking ($t = n/f_s$) | PRD §17.6, §17.7 | TRD §15.7, §18.3 | **AURAS-AESL-01** | `AESL-CP-01-03` | Precision benchmark ($< 1\mu\text{s}$ float error)| `PLANNED` |
+| **AESL-14** | Multi-Resolution Segmentation Engine | PRD §17.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | 4-scale windowing grid unit test | `PLANNED` |
+| **AESL-15** | Short-Window Boundary Analysis (10-20ms) | PRD §17.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Captures hard waveform cuts | `PLANNED` |
+| **AESL-16** | Medium-Window Spectral Analysis (20-50ms) | PRD §17.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Analyzes STFT flux and LFCC/MFCC | `PLANNED` |
+| **AESL-17** | Long-Window Acoustic Environment (50-200ms) | PRD §17.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Tracks noise floor stationarity | `PLANNED` |
+| **AESL-18** | Macro-Window Contextual Analysis (200-1000ms+) | PRD §17.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Evaluates RT60 and room ambience | `PLANNED` |
+| **AESL-19** | Dynamic Adaptive Windowing on Low SNR | PRD §17.6 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Adaptive window expansion benchmark | `PLANNED` |
+| **AESL-20** | Waveform Amplitude Discontinuity Inspection | PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Flags step jump with $\Delta E > 12\text{ dB}$ | `PLANNED` |
+| **AESL-21** | Root Mean Square (RMS) & Energy Contours | PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Short-time energy calculation test | `PLANNED` |
+| **AESL-22** | Crest Factor & Local Variance Analysis | PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Dynamic range peak-to-RMS variance test | `PLANNED` |
+| **AESL-23** | Zero-Crossing Rate & Phase Discontinuity | PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Flags phase inversion zero-crossing | `PLANNED` |
+| **AESL-24** | First-Order Waveform Derivative Analysis | PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Slope peak $|d[n]|$ discontinuity test | `PLANNED` |
+| **AESL-25** | Local DC Offset Shift Detection | PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Flags localized DC bias step | `PLANNED` |
+| **AESL-26** | Boundary-Specific Sample-Neighborhood Inspection| PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Narrow-window sample delta assert | `PLANNED` |
+| **AESL-27** | Natural Speech Plosive False-Positive Guard | PRD §17.6, §17.10 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Natural plosive rejection test suite | `PLANNED` |
+| **AESL-28** | Multi-Band Noise-Floor Energy Tracking | PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-01` | Spectral noise-floor energy test | `PLANNED` |
+| **AESL-29** | Minimum Statistics Noise Estimation | PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-01` | Minimum tracking noise benchmark | `PLANNED` |
+| **AESL-30** | Spectral Flatness & Spectral Entropy Profiling | PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-01` | Tonality transition detection test | `PLANNED` |
+| **AESL-31** | Room Impulse Response (RIR) Characteristic Modeling| PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-02` | Blind RIR parameter estimation test | `PLANNED` |
+| **AESL-32** | Reverberation Decay Time (RT60) Discontinuity | PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-02` | Flags RT60 step jump $> 0.2\text{s}$ | `PLANNED` |
+| **AESL-33** | Direct-to-Reverberant Ratio (DRR) Tracking | PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-02` | DRR distance transition test | `PLANNED` |
+| **AESL-34** | Ambient Background Signature Distance ($D_{\text{env}}$)| PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-03` | Validates $D_{\text{env}} > 0.65$ on splices | `PLANNED` |
+| **AESL-35** | Microphone Handling & Distance Shift Safeguard | PRD §17.6, §17.10 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-04` | Suppresses handling noise false alarms | `PLANNED` |
+| **AESL-36** | High-Resolution Short-Time Fourier Transform (STFT)| PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Hann-windowed STFT unit test | `PLANNED` |
+| **AESL-37** | Spectral Centroid & Bandwidth Tracking | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Centroid step discontinuity test | `PLANNED` |
+| **AESL-38** | Spectral Flux & Onset Strength Modeling | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Half-wave rectified flux peak test | `PLANNED` |
+| **AESL-39** | Spectral Rolloff Frequency Transition Detection | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Low-pass filter rolloff drop test | `PLANNED` |
+| **AESL-40** | Linear Frequency Cepstral Coefficients (LFCC) | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | LFCC feature extraction test | `PLANNED` |
+| **AESL-41** | Mel-Frequency Cepstral Coefficients (MFCC) | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | MFCC distance matrix calculation test | `PLANNED` |
+| **AESL-42** | Evidence-Linked Forensic Spectrogram Generation | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Exact coordinate visual render test | `PLANNED` |
+| **AESL-43** | Multi-Channel Independent Signal Extraction | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Multi-channel array extraction test | `PLANNED` |
+| **AESL-44** | Inter-Channel Cross-Correlation ($R_{xy}(\tau)$) | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Normalized peak coherence $\rho_{\max}$ | `PLANNED` |
+| **AESL-45** | Inter-Channel Time Difference (ITD) Tracking | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | ITD spatial angle consistency test | `PLANNED` |
+| **AESL-46** | Stereo-Image & Phase Discontinuity Detection | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Flags stereo image collapse/inversion | `PLANNED` |
+| **AESL-47** | Channel Energy Distribution Discrepancy | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Localized channel energy step test | `PLANNED` |
+| **AESL-48** | Unilateral Channel Edit Localisation | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Isolates splice on single channel | `PLANNED` |
+| **AESL-49** | MP3/AAC Frame Allocation & Header Continuity | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-01` | Frame header sequence audit test | `PLANNED` |
+| **AESL-50** | MDCT Quantization Scalefactor Band Inconsistency| PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-01` | Quantization step discrepancy test | `PLANNED` |
+| **AESL-51** | Bitrate & High-Frequency Cutoff Transition | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-02` | Flags $16\text{ kHz} \to 11\text{ kHz}$ cutoff drop | `PLANNED` |
+| **AESL-52** | Double-Compression & Transcoding Trace Detection| PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-03` | MDCT histogram ghost peak test | `PLANNED` |
+| **AESL-53** | Resampling & Sample-Rate Conversion Traces | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-04` | Anti-aliasing filter ripple test | `PLANNED` |
+| **AESL-54** | Codec Artifact Forensic Limitation Disclaimers | PRD §17.6, §17.11 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-04` | Report disclaimer inclusion audit | `PLANNED` |
+| **AESL-55** | Self-Similarity Matrix Acoustic Fingerprinting | PRD §17.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-01` | 64-bit sub-band energy hash test | `PLANNED` |
+| **AESL-56** | Normalized Cross-Correlation Template Matching | PRD §17.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-02` | Identifies duplicate with $R_{xy} \ge 0.99$ | `PLANNED` |
+| **AESL-57** | Dynamic Time Warping (DTW) Syllable Alignment | PRD §17.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-03` | Matches warped cloned segment | `PLANNED` |
+| **AESL-58** | Minimum Duration Threshold for Duplication | PRD §17.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-04` | Gated on $\Delta t \ge 100\text{ ms}$ duration | `PLANNED` |
+| **AESL-59** | Natural Speech Repetition False-Positive Guard | PRD §17.6, §17.10 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-04` | Pitch micro-jitter check passes | `PLANNED` |
+| **AESL-60** | Ambient Background Loop Duplication Detection | PRD §17.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-02` | Flags cloned ambient traffic loop | `PLANNED` |
+| **AESL-61** | Statistical Change-Point Detection (CUSUM) | PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-06** | `AESL-CP-06-03` | Cumulative sum shift test | `PLANNED` |
+| **AESL-62** | Pruned Exact Linear Time (PELT) Change Detection | PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-06** | `AESL-CP-06-02` | PELT $O(N)$ segmentation benchmark | `PLANNED` |
+| **AESL-63** | Kernel-Based Non-Parametric Change-Point Detection| PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-06** | `AESL-CP-06-04` | Kernel MMD segmentation test | `PLANNED` |
+| **AESL-64** | Multi-Branch Feature Stacking for Segmentation | PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-06** | `AESL-CP-06-01` | Normalized composite matrix test | `PLANNED` |
+| **AESL-65** | Learned Temporal Localisation Model (TCN/CRNN) | PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-07** | `AESL-CP-07-01` | Frame-level suspicion inference test | `PLANNED` |
+| **AESL-66** | ASLNet Research Architecture Evaluation | PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-07** | `AESL-CP-07-03` | ASLNet benchmark evaluation harness | `PLANNED` |
+| **AESL-67** | Time-Indexed Suspicion Curve Output | PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-07** | `AESL-CP-07-01` | Frame-to-second score array test | `PLANNED` |
+| **AESL-68** | Candidate Boundary Generation at Native Resolution| PRD §17.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-01` | Candidate interval constructor test | `PLANNED` |
+| **AESL-69** | Dual-Threshold Hysteresis Region Aggregation | PRD §17.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-01` | $\tau_{\text{high}}=0.70, \tau_{\text{low}}=0.40$ | `PLANNED` |
+| **AESL-70** | Micro-Interval Preservation Safeguard ($\ge 10\text{ms}$)| PRD §17.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-01` | Preserves brief word deletion intervals | `PLANNED` |
+| **AESL-71** | Sample-Level Narrow-Window Boundary Refinement | PRD §17.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-02` | Refines boundary to exact zero-crossing | `PLANNED` |
+| **AESL-72** | Boundary Uncertainty Interval Quantification | PRD §17.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-03` | Computes $\pm \sigma_{\text{ms}}$ confidence bands | `PLANNED` |
+| **AESL-73** | Multi-Branch Late Fusion & Disagreement Retention| PRD §17.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-04` | Preserves inter-branch disagreement | `PLANNED` |
+| **AESL-74** | MVSI Speaker Diarization Timeline Ingestion | PRD §17.6, §17.10 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Binds speaker IDs to edit regions | `PLANNED` |
+| **AESL-75** | Voice Activity Detection (VAD) Speech Alignment | PRD §17.6, §17.10 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Differentiates speech vs pause edits | `PLANNED` |
+| **AESL-76** | Multilingual & Code-Switching Invariant Guard | PRD §17.6, §17.10 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Rejects language change false alarm | `PLANNED` |
+| **AESL-77** | Speaker Turn-Taking Discontinuity Disambiguation | PRD §17.6, §17.10 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Natural turn-taking check passes | `PLANNED` |
+| **AESL-78** | Non-Speech Environmental Recording Analysis | PRD §17.6 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Non-speech audio benchmark passes | `PLANNED` |
+| **AESL-79** | Twenty Machine-Readable Finding Taxonomy (`AUDIO_EDIT_*`)| PRD §17.6 | TRD §12.9, §18.12| **AURAS-AESL-08** | `AESL-CP-08-04` | Serializes 20 typed finding records | `PLANNED` |
+| **AESL-80** | Fourteen Canonical Temporal Decision States | PRD §17.6 | TRD §12.9, §18.12| **AURAS-AESL-08** | `AESL-CP-08-04` | Maps findings to 14 canonical states | `PLANNED` |
+| **AESL-81** | First-Class Inconclusive Outcome Policy | PRD §17.6 | TRD §15.7, §18.12| **AURAS-AESL-08** | `AESL-CP-08-04` | Abstains on severe low-quality audio | `PLANNED` |
+| **AESL-82** | Synchronized Dual-Waveform Examiner Review UI | PRD §17.6 | TRD §18.11 | **AURAS-AESL-09** | `AESL-CP-09-04` | Interactive sample-accurate review UI | `PLANNED` |
+| **AESL-83** | Quality Control & 18 Benign Alternative Explanations| PRD §17.6, §17.10 | TRD §15.7, §18.11| **AURAS-AESL-09** | `AESL-CP-09-04` | Checklist audit in all findings | `PLANNED` |
+| **AESL-84** | CEIPL Cryptographic Evidence Lineage Integration | PRD §17.6, §17.12 | TRD §15.7, §18.10| **AURAS-AESL-09** | `AESL-CP-09-02` | Merkle DAG registers all findings | `PLANNED` |
+| **AESL-85** | Derived Analysis Representation WORM Vault Locking| PRD §17.6, §17.12 | TRD §15.7, §18.10| **AURAS-AESL-09** | `AESL-CP-09-02` | POSIX 0400 read-only mode verified | `PLANNED` |
+| **AESL-86** | Tamper-Evident Examiner Override Audit Logging | PRD §17.6, §17.12 | TRD §15.7, §18.11| **AURAS-AESL-09** | `AESL-CP-09-04` | Immutable log records examiner edits | `PLANNED` |
+| **AESL-87** | Worker Timeout & Memory Cgroup Limits (4 GB) | PRD §17.6 | TRD §15.7, §18.13| **AURAS-AESL-01** | `AESL-CP-01-02` | Cgroup memory kill test at 4 GB | `PLANNED` |
+| **AESL-88** | Section 65B IEA / Section 63 BSA Certified PDF Dossier| PRD §17.6, §17.12 | TRD §15.7, §18.11| **AURAS-AESL-09** | `AESL-CP-09-03` | Generates court-certified PDF report | `PLANNED` |
+| **AESL-89** | Controlled 500-Fixture Evaluation Dataset | PRD §17.6 | TRD §18.15 | **AURAS-AESL-10** | `AESL-CP-10-01` | 500 ground-truth fixtures evaluated | `PLANNED` |
+| **AESL-90** | Region-Level IoU & Boundary MAE Metrics | PRD §17.6 | TRD §18.15 | **AURAS-AESL-10** | `AESL-CP-10-02` | $\text{tIoU} \ge 0.75$, $\text{MAE} \le 15\text{ms}$ | `PLANNED` |
+

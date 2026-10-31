@@ -6186,6 +6186,137 @@ class TimelineEvent(BaseModel):
     finding_ids: List[str] = Field(default_factory=list)
 ```
 
+### 12.9 Audio Edit and Splice Localisation (AESL) Pydantic v2 Contract Schemas
+
+```python
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+from pydantic import BaseModel, Field, ConfigDict
+
+
+class AudioEditFindingCodeEnum(str, Enum):
+    AUDIO_EDIT_WAVEFORM_DISCONTINUITY = "AUDIO_EDIT_WAVEFORM_DISCONTINUITY"
+    AUDIO_EDIT_NOISE_INCONSISTENCY = "AUDIO_EDIT_NOISE_INCONSISTENCY"
+    AUDIO_EDIT_SPECTRAL_DISCONTINUITY = "AUDIO_EDIT_SPECTRAL_DISCONTINUITY"
+    AUDIO_EDIT_ENVIRONMENT_MISMATCH = "AUDIO_EDIT_ENVIRONMENT_MISMATCH"
+    AUDIO_EDIT_CHANNEL_INCONSISTENCY = "AUDIO_EDIT_CHANNEL_INCONSISTENCY"
+    AUDIO_EDIT_PHASE_INCONSISTENCY = "AUDIO_EDIT_PHASE_INCONSISTENCY"
+    AUDIO_EDIT_CODEC_TRANSITION = "AUDIO_EDIT_CODEC_TRANSITION"
+    AUDIO_EDIT_COMPRESSION_ANOMALY = "AUDIO_EDIT_COMPRESSION_ANOMALY"
+    AUDIO_EDIT_POSSIBLE_SPLICE = "AUDIO_EDIT_POSSIBLE_SPLICE"
+    AUDIO_EDIT_POSSIBLE_INSERTION = "AUDIO_EDIT_POSSIBLE_INSERTION"
+    AUDIO_EDIT_POSSIBLE_DELETION = "AUDIO_EDIT_POSSIBLE_DELETION"
+    AUDIO_EDIT_POSSIBLE_REPLACEMENT = "AUDIO_EDIT_POSSIBLE_REPLACEMENT"
+    AUDIO_EDIT_COPY_MOVE_CANDIDATE = "AUDIO_EDIT_COPY_MOVE_CANDIDATE"
+    AUDIO_EDIT_REPEATED_SEGMENT = "AUDIO_EDIT_REPEATED_SEGMENT"
+    AUDIO_EDIT_BOUNDARY_CANDIDATE = "AUDIO_EDIT_BOUNDARY_CANDIDATE"
+    AUDIO_EDIT_BOUNDARY_LOCALISED = "AUDIO_EDIT_BOUNDARY_LOCALISED"
+    AUDIO_EDIT_MODEL_DISAGREEMENT = "AUDIO_EDIT_MODEL_DISAGREEMENT"
+    AUDIO_EDIT_INSUFFICIENT_EVIDENCE = "AUDIO_EDIT_INSUFFICIENT_EVIDENCE"
+    AUDIO_EDIT_OOD_INPUT = "AUDIO_EDIT_OOD_INPUT"
+    AUDIO_EDIT_INCONCLUSIVE = "AUDIO_EDIT_INCONCLUSIVE"
+
+
+class EditCandidateTypeEnum(str, Enum):
+    POSSIBLE_SPLICE = "POSSIBLE_SPLICE"
+    POSSIBLE_INSERTION = "POSSIBLE_INSERTION"
+    POSSIBLE_DELETION = "POSSIBLE_DELETION"
+    POSSIBLE_REPLACEMENT = "POSSIBLE_REPLACEMENT"
+    COPY_MOVE_CANDIDATE = "COPY_MOVE_CANDIDATE"
+    CONCEALED_CROSSFADE = "CONCEALED_CROSSFADE"
+    UNVERIFIED_ANOMALY = "UNVERIFIED_ANOMALY"
+
+
+class EditBoundaryCandidate(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    boundary_id: str = Field(..., description="Unique UUID for this boundary candidate")
+    sample_index: int = Field(..., ge=0, description="Exact integer sample index on native timeline")
+    timestamp_seconds: float = Field(..., ge=0.0, description="n / fs")
+    channel: int = Field(0, description="0 for mono/all, 1..N for specific channels")
+    uncertainty_samples: int = Field(..., ge=0, description="+/- sample bound")
+    uncertainty_ms: float = Field(..., ge=0.0, description="Uncertainty in milliseconds")
+    trigger_detector: str = Field(..., description="WAVEFORM, SPECTRAL_FLUX, NOISE_FLOOR, PELT, TCN")
+    discontinuity_magnitude: float = Field(..., description="Signal jump metric")
+    zero_crossing_aligned: bool = Field(False)
+    examiner_override: Optional[str] = Field(None, description="CONFIRMED, REJECTED, ADJUSTED")
+
+
+class SuspiciousRegionObservation(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    region_id: str = Field(..., description="Unique UUID for candidate region")
+    evidence_id: str = Field(..., description="CEIPL exhibit identifier")
+    channel: int = Field(0, description="0 for mono/all, 1..N for specific channel")
+    start_sample: int = Field(..., ge=0)
+    end_sample: int = Field(..., ge=0)
+    sample_rate: int = Field(..., ge=8000)
+    start_time_seconds: float = Field(..., ge=0.0)
+    end_time_seconds: float = Field(..., ge=0.0)
+    start_boundary_uncertainty_ms: float = Field(..., ge=0.0)
+    end_boundary_uncertainty_ms: float = Field(..., ge=0.0)
+    candidate_type: EditCandidateTypeEnum = Field(...)
+    suspicion_score: float = Field(..., ge=0.0, le=1.0)
+    detection_status: str = Field("UNDER_REVIEW", description="UNDER_REVIEW, EXAMINER_CONFIRMED, DISMISSED")
+    start_boundary: EditBoundaryCandidate = Field(...)
+    end_boundary: EditBoundaryCandidate = Field(...)
+    supporting_detectors: List[str] = Field(default_factory=list)
+    contradictory_detectors: List[str] = Field(default_factory=list)
+    spectral_flux_max: Optional[float] = Field(None)
+    noise_power_step_db: Optional[float] = Field(None)
+    reverberation_rt60_step_s: Optional[float] = Field(None)
+    diarization_speaker_ids: List[str] = Field(default_factory=list)
+    vad_speech_present: bool = Field(True)
+    alternative_explanations_evaluated: List[str] = Field(default_factory=list)
+    limitations: List[str] = Field(default_factory=list)
+
+
+class AudioSpliceFinding(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    finding_id: str = Field(..., description="Unique UUID")
+    finding_code: AudioEditFindingCodeEnum = Field(...)
+    case_id: str = Field(...)
+    evidence_id: str = Field(...)
+    parent_evidence_hash: str = Field(..., description="SHA-256 exhibit digest")
+    region: SuspiciousRegionObservation = Field(...)
+    severity: str = Field("INFO", description="INFO, LOW, MEDIUM, HIGH, CRITICAL")
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    explanation: str = Field(...)
+    tested_alternative_explanations: List[str] = Field(default_factory=list)
+    residual_hypotheses: List[str] = Field(default_factory=list)
+    provenance_hash: str = Field(...)
+    examiner_review_status: str = Field("PENDING", description="PENDING, ACCEPTED, MODIFIED, REJECTED")
+
+
+class AESLAnalysisConfig(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    window_short_ms: float = Field(20.0, ge=5.0, le=50.0)
+    window_medium_ms: float = Field(50.0, ge=20.0, le=100.0)
+    window_long_ms: float = Field(200.0, ge=100.0, le=500.0)
+    hop_length_ms: float = Field(10.0, ge=1.0, le=50.0)
+    hysteresis_high: float = Field(0.70, ge=0.50, le=0.95)
+    hysteresis_low: float = Field(0.40, ge=0.20, le=0.70)
+    min_region_duration_ms: float = Field(10.0, ge=1.0)
+    enable_learned_model: bool = Field(True)
+    enable_noise_tracking: bool = Field(True)
+    enable_copy_move_detection: bool = Field(True)
+
+
+class AESLAnalysisResult(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    analysis_id: str = Field(...)
+    evidence_id: str = Field(...)
+    sample_rate: int = Field(...)
+    total_samples: int = Field(...)
+    duration_seconds: float = Field(...)
+    channels: int = Field(...)
+    preliminary_audio_verdict: str = Field(..., description="NO_SPLICE_DETECTED, CANDIDATE_EDITS_IDENTIFIED, INCONCLUSIVE")
+    candidate_regions_count: int = Field(...)
+    suspicious_regions: List[SuspiciousRegionObservation] = Field(default_factory=list)
+    findings: List[AudioSpliceFinding] = Field(default_factory=list)
+    processing_time_ms: float = Field(...)
+    software_commit_hash: str = Field(...)
+```
+
 ## 13. Testing, Benchmark & Validation Architecture
 
 The PS-05 testing framework enforces strict separation between software reliability, mathematical correctness, and machine learning generalization across both audio and video forensic domains:
@@ -6495,6 +6626,19 @@ All temporal analysis, clock calibration, and evidence timeline reconstruction p
 6. **Anti-Extrapolation Invariant:** A fitted clock drift model is forensically valid only within the temporal convex hull $[T_{\min}, T_{\max}]$ established by its calibration anchors. Projecting clock corrections outside this interval without explicit examiner warnings and confidence band expansion is prohibited.
 7. **Prohibition of Causal Assertion Invariant:** Temporal consistency, temporal ordering, and cross-source correlation provide evidence of chronological relationship only. CSTV is strictly barred from stating or implying physical causation solely based on temporal proximity.
 8. **Section 65B IEA / Section 63 BSA Traceability Invariant:** Every reconstructed timeline, clock correction curve, and finding must bind cryptographically to the source exhibit hashes, parser versions, mathematical model parameters, and software environment commit hashes to ensure complete courtroom admissibility.
+
+### 15.7 Audio Edit and Splice Localisation Security & Forensic Invariants
+
+All signal analysis, candidate boundary generation, and suspicious region reporting within AESL are governed by eight immutable legal and technical invariants:
+
+1. **Original Audio Bitstream Immutability Invariant:** Original audio evidence exhibits stored in the CEIPL WORM repository are mounted with POSIX `0400` read-only mode and S3 Object Lock. Reading, decoding, or inspecting signals must NEVER alter the original evidence file in place.
+2. **Derived Working Copy Lineage Invariant:** All resampled representations (e.g. 16 kHz mono), STFT matrices, and filtered signals must be created as derived working artifacts registered in the CEIPL Merkle DAG, bound to the parent exhibit SHA-256 digest.
+3. **Exact Sample-Index Preservation Invariant:** Every candidate boundary, detected edit, and suspicious region must preserve and report its coordinates in exact native integer sample indices ($n_{\text{start}}, n_{\text{end}}$) alongside calculated time in seconds ($t = n/f_s$). Unrounded sample tracking is legally mandatory.
+4. **Three-Engine Boundary Invariant:** AESL must operate strictly within the architectural boundaries of the Audio Reverse Engineering Engine (ARE). It must not instantiate a fourth AURAS engine and must not duplicate voice cloning classification (ADDE) or speaker diarization (MVSI).
+5. **Anti-Black-Box Multi-Branch Fusion Invariant:** Localisation decisions must preserve and report individual measurements from all five forensic branches (Time, Spectral, Noise/Environment, Channel/Phase, Learned Model). Inter-branch disagreement must be explicitly highlighted rather than averaged into a monolithic scalar score.
+6. **Mandatory Alternative Explanation Audit Invariant:** Under no circumstances may AESL output a definitive "Tampered" finding without programmatically auditing and documenting 18 benign alternative explanations (speaker movement, AGC pumping, legitimate lossy compression, etc.).
+7. **Non-Destructive Deletion Reporting Invariant:** A detected deletion indicates an observed signal discontinuity; it does not claim to recover or reconstruct lost audio content without an authentic reference recording.
+8. **Section 65B IEA / Section 63 BSA Traceability Invariant:** Every generated finding, boundary interval, spectrogram plot, and report annexure must bind cryptographically to the master exhibit SHA-256 digest, parser versions, software commit hash, and examiner digital signature.
 
 ## 16. Cross-Media Metadata Service (CMMS) — Technical Architecture & Specification
 
@@ -7961,3 +8105,406 @@ def estimate_clock_drift(self, source_clock_id: str, anchor_ids: List[str]) -> D
    - **Drift Rate Accuracy:** Drift estimation error $\le 0.5\text{ ppm}$ over recording durations $\ge 1\text{ hour}$.
    - **False Alarm Rate:** Zero false tampering findings on authentic VFR streams, legitimate DST shifts, or valid NTP step logs.
    - **Reproducibility:** 100% bit-exact parameter reproduction across five consecutive execution runs.
+
+---
+
+## 18. Audio Edit and Splice Localisation (AESL) — Technical Architecture & Specification
+
+### 18.1 ARE/AESL Module Boundaries & Subsystem Context
+
+The Audio Edit and Splice Localisation (AESL) capability is a specialized temporal-integrity sub-engine embedded directly within the **Audio Reverse Engineering Engine (ARE)** of the AURAS subsystem.
+
+AESL is **not** a fourth AURAS engine. It reuses the core audio ingestion, metadata parsing, and cryptographic storage pipelines of AURAS, while drawing contextual support from MVSI, ADDE, CEIPL, CSTV, and UFREDF:
+
+```mermaid
+flowchart TD
+    subgraph INTAKE["1. CEIPL Evidence Intake & WORM Custody"]
+        SEIZED_AUD["Original Audio Exhibit (WAV, FLAC, MP3, AAC, M4A)"]
+        CEIPL_HASH["Dual Hash Engine (SHA-256 / SHA3-512)"]
+        WORM_STORE["WORM Immutable Vault (POSIX 0400 Read-Only)"]
+        SEIZED_AUD --> CEIPL_HASH --> WORM_STORE
+    end
+
+    subgraph WORKING_COPIES["2. Non-Destructive Working Copy Factory"]
+        NATIVE_WAV["Artifact A: Native Sample-Rate Working WAV (Channel-Preserved)"]
+        DERIVED_16K["Artifact B: Derived 16 kHz Mono WAV (Model Normalization)"]
+        WORM_STORE --> NATIVE_WAV --> DERIVED_16K
+    end
+
+    subgraph AURAS_SUBSYSTEM["3. AURAS Forensic Subsystem (Three Strict Engines)"]
+        direction TB
+        subgraph ARE_ENGINE["ARE: Audio Reverse Engineering Engine (Primary AESL Owner)"]
+            direction TB
+            subgraph AESL_SUBENGINE["AESL: Audio Edit & Splice Localisation Capability"]
+                MULTI_RES["Multi-Resolution Windowing (10ms, 20ms, 50ms, 200ms)"]
+                BRANCH_TIME["Branch A: Time-Domain Envelope & Discontinuity"]
+                BRANCH_SPEC["Branch B: STFT Spectral Flux & Cepstral Features"]
+                BRANCH_NOISE["Branch C: Noise-Floor Stationarity & Acoustic RIR"]
+                BRANCH_CHAN["Branch D: Multi-Channel Cross-Correlation & Phase"]
+                BRANCH_MODEL["Branch E: Learned Temporal Localisation (TCN / ASLNet)"]
+                CHANGE_PT["Change-Point Engine (PELT / CUSUM)"]
+                REFINE_ENG["Boundary Refinement (Sample-Level Zero-Crossing)"]
+            end
+        end
+
+        subgraph MVSI_ENGINE["MVSI: Voice & Speaker Intelligence"]
+            MV_VAD["Silero VAD Speech Segments"]
+            MV_DIAR["Speaker Diarization Intervals"]
+            MV_LANG["Indian Language Identification"]
+        end
+
+        subgraph ADDE_ENGINE["ADDE: Audio Deepfake Detection"]
+            AD_RAW["RawNet2 Time-Domain Inference"]
+            AD_GRAPH["AASIST Graph Attention"]
+            AD_VOICE["Independent Cloned-Voice Findings"]
+        end
+    end
+
+    NATIVE_WAV --> MULTI_RES
+    MULTI_RES --> BRANCH_TIME & BRANCH_SPEC & BRANCH_NOISE & BRANCH_CHAN
+    DERIVED_16K --> BRANCH_MODEL
+    BRANCH_TIME & BRANCH_SPEC & BRANCH_NOISE & BRANCH_CHAN & BRANCH_MODEL --> CHANGE_PT --> REFINE_ENG
+
+    MV_VAD & MV_DIAR & MV_LANG -.->|Speaker / Speech Context| REFINE_ENG
+    AD_VOICE -.->|Independent AI-Voice Flags| FUSION_LAYER
+
+    subgraph FUSION_LAYER["4. Multi-Branch Fusion & Quality Control"]
+        FUSE_LOGIC["Anti-Black-Box Late Fusion (Preserve Separate Branch Disagreements)"]
+        QC_CHECK["18 Benign Alternative Explanations Evaluator"]
+        REFINE_ENG --> FUSE_LOGIC --> QC_CHECK
+    end
+
+    subgraph OUTPUT_REPORTS["5. Court-Certified Evidentiary Deliverables"]
+        WORKBENCH["Examiner Interactive Workbench (Sample-Accurate Scrubbing Canvas)"]
+        UFREDF_PDF["UFREDF Section 65B/63 BSA Certified PDF Dossier"]
+        QC_CHECK --> WORKBENCH --> UFREDF_PDF
+    end
+```
+
+### 18.2 Ingestion, Preprocessing & Canonical Analysis Representation
+
+#### 18.2.1 Audio Forensic Ingestion & Preprocessing Sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant EVID as Seized Audio Exhibit
+    participant CEIPL as CEIPL Custody Vault
+    participant CMMS as CMMS Metadata Parser
+    participant ARE as ARE Ingest Pipeline
+    participant FACTORY as Working Artifact Factory
+    participant AESL as AESL Localisation Engine
+
+    EVID->>CEIPL: Ingest file & compute streaming SHA-256 / SHA3-512 dual hash
+    CEIPL->>CEIPL: Lock original file in WORM vault (POSIX 0400 mode)
+    CEIPL->>CMMS: Extract technical metadata (sample rate, channels, codec, duration)
+    CMMS-->>ARE: Return MetadataRecord (unaltered field provenance)
+    ARE->>FACTORY: Instantiate Artifact A (native format, uncompressed WAV, all channels)
+    FACTORY->>FACTORY: Generate Artifact B (derived 16 kHz mono WAV for neural branch)
+    FACTORY->>CEIPL: Register Artifact A and B in Merkle DAG with parent SHA-256
+    FACTORY->>AESL: Dispatch Artifact A (native) and B (16k) for multi-resolution analysis
+```
+
+#### 18.2.2 Canonical Representation Invariant
+- **Artifact A (`working_native.wav`):** Uncompressed PCM WAV at original sample rate $f_s \in [8000, 192000]\text{ Hz}$ and original channel count $C \in [1, 8]$. Used for time-domain, spectral flux, phase, and sample-accurate boundary refinement.
+- **Artifact B (`working_16k.wav`):** High-quality resampled 16 kHz mono float32 WAV, derived using bandlimited sinc interpolation (`librosa.resample` / `soxr_vhq`). Used strictly by Branch E (learned temporal models) and MVSI/ADDE engines.
+- **Sample Coordinate Mapping Matrix:** For any frame index $m$ on Artifact B ($16\text{ kHz}$), the corresponding native sample index on Artifact A is:
+  $$n_{\text{native}} = \operatorname{round}\left( m \times \frac{f_{s,\text{native}}}{16000} \right)$$
+
+### 18.3 Multi-Resolution Audio Segmentation & Exact Sample-Index Math
+
+```mermaid
+flowchart TD
+    AUDIO_STREAM["Native Audio Stream x[n], n = 0..N-1, fs"] --> SEG_ORCH["Multi-Resolution Segmentation Orchestrator"]
+
+    SEG_ORCH --> SCALE1["Scale 1: Short Windows\nLength: 10-20 ms (Hop: 5 ms)\nTarget: Hard Cuts, Phase Inversion, Waveform Jumps"]
+    SEG_ORCH --> SCALE2["Scale 2: Medium Windows\nLength: 20-50 ms (Hop: 10 ms)\nTarget: STFT Spectral Flux, LFCC/MFCC, Pitch Jumps"]
+    SEG_ORCH --> SCALE3["Scale 3: Long Windows\nLength: 50-200 ms (Hop: 25 ms)\nTarget: Noise Floor Stationarity, Local SNR, Formants"]
+    SEG_ORCH --> SCALE4["Scale 4: Macro Windows\nLength: 200-1000 ms+ (Hop: 100 ms)\nTarget: Reverberation Decay (RT60), RIR, Background Ambience"]
+
+    SCALE1 & SCALE2 & SCALE3 & SCALE4 --> COORD_MAP["Sample-Index Preservation Engine\nt_start = n_start / fs,  t_end = n_end / fs\nPreserve exact integer tick indices: [n_start, n_end]"]
+```
+
+### 18.4 Time-Domain Forensic Analysis (Branch A)
+
+```mermaid
+flowchart LR
+    PCM_IN["Artifact A: PCM Samples x[n]"] --> TIME_METRICS["Time-Domain Feature Extraction"]
+
+    TIME_METRICS --> RMS_CALC["Short-Time Energy & RMS:\nE[m] = (1/N) * sum(x[n]^2)\nRMS[m] = sqrt(E[m])"]
+    TIME_METRICS --> CREST_CALC["Crest Factor & Dynamic Range:\nC[m] = max(|x[n]|) / RMS[m]"]
+    TIME_METRICS --> ZCR_CALC["Zero-Crossing Rate (ZCR):\nDiscontinuous Phase Detection"]
+    TIME_METRICS --> DERIV_CALC["First-Order Difference:\nd[n] = x[n] - x[n-1]\nSlope Discontinuity at Cuts"]
+
+    RMS_CALC & CREST_CALC & ZCR_CALC & DERIV_CALC --> TIME_ANOMALY{"Threshold Gating & Anomaly Check"}
+    TIME_ANOMALY -->|Discontinuity Detected| TIME_CAND["Emit Candidate: AUDIO_EDIT_WAVEFORM_DISCONTINUITY\nSample Index n*, Jump Magnitude Delta_E"]
+    TIME_ANOMALY -->|Smooth Envelope| TIME_PASS["Pass: Continuous Waveform Envelope"]
+```
+
+### 18.5 Background Noise & Acoustic Environment Analysis (Branch C)
+
+```mermaid
+flowchart TD
+    STFT_IN["STFT Spectrogram X(m,k)"] --> NOISE_TRACK["Minimum Statistics Noise Floor Tracking\nP_N(m,k) = min_{m' in [m-D, m]} |X(m',k)|^2"]
+    
+    NOISE_TRACK --> NOISE_DIFF["Noise Power Step Calculation:\nDelta P_N[m] = |P_N[m] - P_N[m-1]|"]
+    NOISE_DIFF --> FLAT_ENTROPY["Spectral Flatness (SFM) & Spectral Entropy (SE)\nIdentify Noise Tonality Shifts"]
+    
+    STFT_IN --> RIR_MODEL["Room Impulse Response (RIR) Estimation\nEnergy Decay Curve: EDC(t) = integral_t^inf h^2(tau) dtau"]
+    RIR_MODEL --> RT60_CALC["Reverberation Decay Time (RT60):\nSchroeder Integration from -5 dB to -35 dB"]
+    RIR_MODEL --> DRR_CALC["Direct-to-Reverberant Ratio (DRR):\n10 * log10(E_direct / E_reverb)"]
+    
+    NOISE_DIFF & FLAT_ENTROPY & RT60_CALC & DRR_CALC --> ENV_DIST["Acoustic Environment Distance D_env(A, B)\nSymmetric Kullback-Leibler Divergence"]
+    
+    ENV_DIST --> ENV_DECISION{"D_env > tau_env ?\n(tau_env = 0.65)"}
+    ENV_DECISION -->|Yes: Significant Shift| ENV_FIND["Emit Finding: AUDIO_EDIT_ENVIRONMENT_MISMATCH\nDelta RT60, Delta P_N, D_env Score"]
+    ENV_DECISION -->|No: Consistent Room| ENV_PASS["Pass: Stationarity Confirmed"]
+```
+
+### 18.6 Frequency-Domain, Phase & Codec Analysis (Branches B & D)
+
+1. **Short-Time Fourier Transform (STFT):**
+   $$X(m,k) = \sum_{n=0}^{N-1} x[mH + n] w[n] e^{-j 2\pi k n / N}$$
+   where $N = 1024$ ($21.3\text{ ms}$ at $48\text{ kHz}$), $H = 256$ ($5.3\text{ ms}$ hop), and $w[n]$ is a periodic Hann window.
+2. **Spectral Flux Discontinuity Metric:**
+   $$SF[m] = \sum_{k=0}^{K-1} H(|X(m,k)| - |X(m-1,k)|)^2$$
+   where $H(v) = \frac{v + |v|}{2}$ is the half-wave rectifier isolating energy onsets.
+3. **Cross-Channel Correlation (Multi-Channel Recordings):**
+   $$R_{xy}(\tau) = \sum_{n=0}^{N-1} x[n] y[n + \tau]$$
+   Normalized peak coherence $\rho_{\max} = \frac{\max_\tau R_{xy}(\tau)}{\sqrt{\sum x^2[n] \sum y^2[n]}}$ tracks stereo image stability. A sharp drop in $\rho_{\max}$ while audio amplitude remains continuous indicates unilateral channel splicing.
+4. **MP3/AAC Quantization & Frame Boundary Forensics:**
+   Inspects MDCT coefficient distributions across scale factor bands. A sudden shift in the high-frequency cutoff (e.g. from $16.5\text{ kHz}$ to $11.0\text{ kHz}$) or an isolated non-cadence frame header identifies recompressed or spliced content.
+
+### 18.7 Copy-Move and Repeated-Segment Detection
+
+1. **Sliding-Window Acoustic Fingerprinting:** For each frame $m$, extracts a 64-bit sub-band energy hash:
+   $$h_m[b] = \begin{cases} 1, & \text{if } E(m, b) - E(m, b+1) - (E(m-1, b) - E(m-1, b+1)) > 0 \\ 0, & \text{otherwise} \end{cases}$$
+2. **Dynamic Time Warping (DTW) Distance:** For candidate matching intervals $[A, B]$, evaluates normalized alignment cost $d_{\text{DTW}}(A, B)$.
+3. **Natural Speech Repetition Safeguard:** Natural verbal repetition (e.g. "no, no, no" or repeated song refrains) exhibits pitch micro-jitter and varying room reverberation tails. Exact waveform correlation ($R_{xy} \ge 0.98$) across intervals $> 100\text{ ms}$ confirms copy-move cloning.
+
+### 18.8 Change-Point Detection & Learned Localisation (Branch E)
+
+#### 18.8.1 Learned Localisation & Branch Fusion Architecture
+
+```mermaid
+flowchart TD
+    subgraph FEATURE_STACK["Multi-Branch Feature Extraction"]
+        F_TIME["Branch A: Time Energy & Derivative Vector"]
+        F_SPEC["Branch B: STFT Flux, LFCC, Spectral Centroid"]
+        F_NOISE["Branch C: Noise Floor, RT60, DRR Profiles"]
+        F_CHAN["Branch D: Cross-Channel Coherence & ITD"]
+        F_DEEP["Branch E: Deep Temporal Encoder (TCN / CRNN / ASLNet)"]
+    end
+
+    subgraph CHANGE_POINT["Change-Point & Segmentation Engine"]
+        STACK_MAT["Composite Feature Matrix Z in R^(M x D)"]
+        F_TIME & F_SPEC & F_NOISE & F_CHAN --> STACK_MAT
+        STACK_MAT --> PELT_RUN["PELT Algorithm (Optimal Change-Point Search)\nCost: C(y_{s:t}) = sum ||y_i - mu||^2 + beta * K"]
+        PELT_RUN --> CAND_PTS["Candidate Change Points: {m_1*, m_2*, ...}"]
+    end
+
+    subgraph DEEP_PREDICT["Learned Suspicion Curve"]
+        F_DEEP --> FRAME_SCORE["Frame Suspicion Scores: s[m] in [0.0, 1.0]"]
+    end
+
+    subgraph FUSION["Multi-Branch Late Fusion Layer"]
+        CAND_PTS & FRAME_SCORE --> HYSTERESIS["Dual-Threshold Hysteresis Bounding\nTrigger: s[m] >= 0.70, Expand: s[m] >= 0.40"]
+        HYSTERESIS --> RAW_REGIONS["Candidate Region Intervals: [n_start_raw, n_end_raw]"]
+    end
+```
+
+### 18.9 Suspicious Boundary Generation & Boundary Refinement
+
+```mermaid
+flowchart TD
+    RAW_REGION["Coarse Candidate Region [n_start_raw, n_end_raw]\n(Resolution: 10-20ms Frame Level)"] --> REFINE_ORCH["Boundary Refinement Orchestrator"]
+
+    REFINE_ORCH --> EXTRACT_WINDOW["Extract High-Resolution Window:\n[n_start_raw - 500, n_start_raw + 500] Native Samples"]
+    
+    EXTRACT_WINDOW --> STEP1["1. Zero-Crossing Alignment:\nLocate nearest zero-crossing index n_zc"]
+    EXTRACT_WINDOW --> STEP2["2. First-Order Derivative Peak:\nLocate max |d[n]| = |x[n] - x[n-1]|"]
+    EXTRACT_WINDOW --> STEP3["3. Phase Inversion Check:\nExamine sign change in short-time autocorrelation"]
+    
+    STEP1 & STEP2 & STEP3 --> OPT_BOUNDARY["Refined Boundary Coordinate: n_refined\nt_refined = n_refined / fs\nUncertainty: +/- sigma_n samples (+/- sigma_ms ms)"]
+    
+    OPT_BOUNDARY --> EMIT_OBJ["Construct EditBoundaryCandidate Object\n- boundary_id, sample_index, uncertainty_ms\n- trigger_detector, discontinuity_magnitude"]
+```
+
+### 18.10 CEIPL Provenance & WORM Vault Workflow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant WORKER as AESL Analysis Worker
+    participant CEIPL as CEIPL Client
+    participant WORM as WORM Storage (POSIX 0400)
+    participant DAG as Merkle DAG Provenance Registry
+    participant UFREDF as UFREDF Dossier Generator
+
+    WORKER->>CEIPL: Register Analysis Session (Parent Exhibit SHA-256)
+    WORKER->>WORKER: Execute Multi-Branch Localisation & Boundary Refinement
+    WORKER->>CEIPL: Submit Derived Spectrograms & Regional Mask Matrices
+    CEIPL->>WORM: Lock derived visual artifacts in WORM vault (read-only)
+    WORKER->>CEIPL: Register AudioSpliceFinding records in Merkle DAG
+    CEIPL->>DAG: Link Finding Node -> Derived Artifact Node -> Parent Exhibit Node
+    DAG-->>WORKER: Return cryptographic inclusion proof & DAG node hash
+    WORKER->>UFREDF: Transmit verified findings and Merkle proof for legal certification
+```
+
+### 18.11 Examiner Review Workflow & Interactive Canvas
+
+```mermaid
+flowchart TD
+    START["Examiner Opens AESL Investigation Canvas"] --> LOAD["Load Synchronized Dual Waveform & Spectrogram"]
+    
+    LOAD --> REGIONS["Render Suspicious Region Overlays (AESL-REG-001..N)\nColour-coded by Confidence: High (Red), Med (Amber), Low (Yellow)"]
+    
+    REGIONS --> SELECT["Examiner Clicks Candidate Region"]
+    
+    SELECT --> ZOOM["Zoom to Native Sample-Level View (+/- 200ms)"]
+    ZOOM --> INSPECT["Inspect Multi-Modal Diagnostic Curves:\n- Waveform Amplitude Derivative d[n]\n- STFT Spectral Flux & Spectrogram Slice\n- Pre/Post Noise-Floor Power Delta P_N\n- RT60 Reverberation Decay Curves\n- Inter-Channel Phase Coherence rho_max"]
+    
+    INSPECT --> QC_PANEL["Evaluate 18 Benign Alternative Explanations Checklist"]
+    
+    QC_PANEL --> DECISION{"Examiner Action"}
+    DECISION -->|Confirm Splice| CONFIRM["Set Status: EXAMINER_CONFIRMED\nRecord mandatory justification note"]
+    DECISION -->|Dismiss False Alarm| REJECT["Set Status: DISMISSED_NATURAL_EVENT\nRecord rationale (e.g. plosive consonant)"]
+    DECISION -->|Adjust Boundaries| ADJUST["Drag boundary marker to refine sample coordinate\nUpdate n_refined and uncertainty bounds"]
+    
+    CONFIRM & REJECT & ADJUST --> AUDIT["Append-Only Audit Log: Examiner ID, Timestamp, Signature"]
+    AUDIT --> EXPORT["Export Court-Certified Section 65B/63 BSA Dossier"]
+```
+
+### 18.12 PostgreSQL Relational Persistence Schema
+
+```sql
+-- 1. Audio Analysis Sessions
+CREATE TABLE IF NOT EXISTS audio_analysis_sessions (
+    session_id VARCHAR(64) PRIMARY KEY,
+    case_id VARCHAR(64) NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    evidence_id VARCHAR(64) NOT NULL,
+    parent_evidence_hash VARCHAR(128) NOT NULL,
+    sample_rate INTEGER NOT NULL,
+    total_samples BIGINT NOT NULL,
+    duration_seconds DOUBLE PRECISION NOT NULL,
+    channels INTEGER NOT NULL,
+    preliminary_verdict VARCHAR(64) NOT NULL DEFAULT 'INCONCLUSIVE',
+    candidate_regions_count INTEGER NOT NULL DEFAULT 0,
+    software_commit_hash VARCHAR(64) NOT NULL,
+    ceipl_session_hash VARCHAR(128) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_audio_sess_case ON audio_analysis_sessions(case_id);
+
+-- 2. Suspicious Audio Regions
+CREATE TABLE IF NOT EXISTS suspicious_audio_regions (
+    region_id VARCHAR(64) PRIMARY KEY,
+    session_id VARCHAR(64) NOT NULL REFERENCES audio_analysis_sessions(session_id) ON DELETE CASCADE,
+    channel INTEGER NOT NULL DEFAULT 0,
+    start_sample BIGINT NOT NULL,
+    end_sample BIGINT NOT NULL,
+    start_time_seconds DOUBLE PRECISION NOT NULL,
+    end_time_seconds DOUBLE PRECISION NOT NULL,
+    start_uncertainty_ms DOUBLE PRECISION NOT NULL,
+    end_uncertainty_ms DOUBLE PRECISION NOT NULL,
+    candidate_type VARCHAR(64) NOT NULL,
+    suspicion_score DOUBLE PRECISION NOT NULL,
+    detection_status VARCHAR(32) NOT NULL DEFAULT 'UNDER_REVIEW',
+    spectral_flux_max DOUBLE PRECISION,
+    noise_power_step_db DOUBLE PRECISION,
+    reverberation_rt60_step_s DOUBLE PRECISION,
+    diarization_speaker_ids JSONB DEFAULT '[]'::jsonb,
+    alternative_explanations JSONB DEFAULT '[]'::jsonb,
+    limitations JSONB DEFAULT '[]'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_audio_reg_time ON suspicious_audio_regions(session_id, start_time_seconds);
+
+-- 3. Audio Edit Boundaries
+CREATE TABLE IF NOT EXISTS audio_edit_boundaries (
+    boundary_id VARCHAR(64) PRIMARY KEY,
+    region_id VARCHAR(64) NOT NULL REFERENCES suspicious_audio_regions(region_id) ON DELETE CASCADE,
+    boundary_type VARCHAR(16) NOT NULL, -- START or END
+    sample_index BIGINT NOT NULL,
+    timestamp_seconds DOUBLE PRECISION NOT NULL,
+    uncertainty_samples INTEGER NOT NULL,
+    uncertainty_ms DOUBLE PRECISION NOT NULL,
+    trigger_detector VARCHAR(64) NOT NULL,
+    discontinuity_magnitude DOUBLE PRECISION NOT NULL,
+    zero_crossing_aligned BOOLEAN NOT NULL DEFAULT FALSE,
+    examiner_override VARCHAR(32),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. Audio Splice Findings
+CREATE TABLE IF NOT EXISTS audio_splice_findings (
+    finding_id VARCHAR(64) PRIMARY KEY,
+    session_id VARCHAR(64) NOT NULL REFERENCES audio_analysis_sessions(session_id) ON DELETE CASCADE,
+    region_id VARCHAR(64) NOT NULL REFERENCES suspicious_audio_regions(region_id) ON DELETE CASCADE,
+    finding_code VARCHAR(64) NOT NULL,
+    severity VARCHAR(16) NOT NULL,
+    confidence DOUBLE PRECISION NOT NULL,
+    explanation TEXT NOT NULL,
+    details JSONB NOT NULL,
+    provenance_hash VARCHAR(128) NOT NULL,
+    examiner_review_status VARCHAR(32) NOT NULL DEFAULT 'PENDING',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_splice_finding_code ON audio_splice_findings(session_id, finding_code);
+```
+
+### 18.13 REST API and Celery Worker Signatures
+
+#### 18.13.1 REST API Routes
+```text
+POST /api/v1/cases/{case_id}/audio/{evidence_id}/aesl/analyse   # Trigger asynchronous splice localisation
+GET  /api/v1/cases/{case_id}/audio/{evidence_id}/aesl/regions   # List localized suspicious regions
+GET  /api/v1/cases/{case_id}/audio/{evidence_id}/aesl/regions/{region_id} # Detailed region inspection
+POST /api/v1/cases/{case_id}/audio/{evidence_id}/aesl/regions/{region_id}/review # Examiner confirmation/override
+GET  /api/v1/cases/{case_id}/audio/{evidence_id}/aesl/spectrogram # Render coordinate-bound spectrogram
+GET  /api/v1/cases/{case_id}/audio/{evidence_id}/aesl/report    # Export Section 65B/63 BSA certified PDF
+```
+
+#### 18.13.2 Celery Worker Task Signatures
+```python
+@celery_app.task(bind=True, name="tasks.auras.are.run_splice_localisation", queue="audio_heavy")
+def run_splice_localisation(self, evidence_id: str, config_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """Execute multi-resolution segmentation, multi-branch analysis, PELT change-point detection, and boundary refinement."""
+    ...
+
+@celery_app.task(bind=True, name="tasks.auras.are.refine_boundaries", queue="audio_cpu")
+def refine_boundaries(self, evidence_id: str, candidate_samples: List[int]) -> List[Dict[str, Any]]:
+    """Execute narrow-window zero-crossing alignment and sample-level slope analysis."""
+    ...
+```
+
+### 18.14 Technology Selection & Evaluation Matrix
+
+| Subsystem Module | Evaluated Technology | Selection Status | Forensic & Engineering Rationale |
+| :--- | :--- | :--- | :--- |
+| **Audio I/O** | `soundfile` (`libsndfile`) | **SELECTED** | Preserves exact 24/32-bit PCM raster, zero destructive dithering on decode |
+| **Spectral Transforms**| `scipy.signal` (`stft`, `istft`) | **SELECTED** | Exact invertible short-time Fourier transforms, strict energy conservation |
+| **Audio Feature Stack**| `librosa` (0.10+) | **SELECTED** | Standardized MFCC, LFCC, spectral centroid, spectral flatness, and chroma |
+| **Change-Point Search**| `ruptures` (PELT algorithm) | **SELECTED** | Linear time $O(N)$ change-point segmentation with $L_2$ and kernel cost functions |
+| **Copy-Move Matching** | `scipy.spatial.distance.cdist` + DTW | **SELECTED** | Efficient self-similarity matrix computation with dynamic time warping |
+| **Learned Localisation**| PyTorch (TCN / ASLNet candidate) | **SELECTED** | Multi-scale temporal receptive fields for contextual suspicion curve inference |
+| **Persistence** | PostgreSQL 16 + JSONB | **SELECTED** | Indexed sample range queries, JSONB storage for multi-detector feature arrays |
+| **Data Contracts** | Pydantic v2 | **SELECTED** | Sub-millisecond serialization, frozen immutable models, strict validation |
+| **Legal PDF Dossier** | `weasyprint` + Jinja2 | **SELECTED** | High-fidelity Section 65B/63 BSA certified PDF generation with vector graphics |
+
+### 18.15 Evaluation Dataset Strategy, Metrics & Acceptance Criteria
+
+1. **Dedicated Splice & Edit Evaluation Corpus:**
+   - **Authentic Control Set (300 recordings):** Uncut interviews, continuous courtroom proceedings, single-take ambient nature recordings, and broadcast news.
+   - **Controlled Spliced Set (300 recordings):** Spliced across same-speaker/same-room, same-speaker/different-room, different-speaker/different-room, crossfaded edits ($5\text{ ms}$ to $100\text{ ms}$), and WhatsApp Opus re-encoded files.
+   - **Zero Leakage Invariant:** Training and testing partitions must remain strictly disjoint at the speaker identity, recording device, and physical room levels.
+2. **Localisation Metrics Formulation:**
+   - **Temporal Intersection over Union (tIoU):**
+     $$\text{tIoU} = \frac{|P \cap G|}{|P \cup G|}$$
+     where $P$ is predicted candidate interval and $G$ is ground-truth edit interval.
+   - **Boundary Mean Absolute Error (MAE):**
+     $$\text{MAE}_{\text{boundary}} = \frac{1}{2K} \sum_{k=1}^K \left( |n_{\text{start},k} - n^*_{\text{start},k}| + |n_{\text{end},k} - n^*_{\text{end},k}| \right) \times \frac{1}{f_s}$$
+3. **Acceptance Targets:**
+   - Region-level $\text{tIoU} \ge 0.75$ on clean uncompressed splices.
+   - Boundary $\text{MAE} \le 15\text{ ms}$ on hard cuts; $\le 35\text{ ms}$ on concealed crossfades.
+   - False alarm rate $\le 0.05$ false regions per audio hour on authentic speech controls.
