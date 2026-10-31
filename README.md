@@ -18,7 +18,7 @@ In contemporary cyber-crime investigations, extortion cases, surveillance review
 
 Manual forensic examination is time-consuming, requires scarce specialized expertise, and struggles with complex multi-modal manipulations. The **PS-05 Platform** is an enterprise-grade, modular, explainable, and auditable digital forensics system engineered for law enforcement agencies (state police departments, Bihar Police cyber cells) and Forensic Science Laboratories (FSLs). It provides:
 
-1. **Cryptographic Chain of Custody (CEIPL):** Write-Once-Read-Many (WORM) storage, instant raw-byte dual-hashing (SHA-256 and SHA3-512), RFC 8785 canonical manifests, Ed25519 signatures, RFC 3161 timestamps, and an append-only Merkle tree audit log.
+1. **Cryptographic Chain of Custody & Evidence Integrity Verification (CEIPL / EIV):** End-to-end evidence integrity verification, Write-Once-Read-Many (WORM) storage, pre-decode streaming dual-hashing (SHA-256 and SHA-512 / SHA3-256), RFC 8785 canonical manifests, detached Ed25519 signatures, RFC 3161 trusted timestamps, append-only hash-chained custody ledgers, derivative Merkle DAG lineage, and standalone offline verification.
 2. **AIF Advanced Image Forensics Subsystem:** High-resolution image understanding (IVE), physics/frequency reverse engineering (IRE), AI generation/steganography detection (AIM), and judicial biometric comparison (FPA).
 3. **AURAS Audio Forensics Subsystem:** Deep electroacoustic signal analysis and Audio Edit & Splice Localisation (ARE/AESL), multilingual voice and overlap-aware diarization (MVSI), and calibrated multi-branch audio deepfake detection (ADDE).
 4. **VISTA Video & CCTV Forensics Subsystem:** Modular five-engine video forensics architecture:
@@ -52,6 +52,7 @@ Manual forensic examination is time-consuming, requires scarce specialized exper
 - **G-9:** Extract, preserve, normalise and cross-correlate technical metadata from all evidence modalities through a shared CMMS service, eliminating duplicate extraction implementations and providing structured, field-level provenance to every forensic subsystem.
 
 - **G-10:** Verify, correlate, and reconstruct temporal sequences across all seized digital evidence sources through CSTV, estimating clock offset and drift parameters, detecting sudden clock resets, validating causal ordering via conflict graphs, and compiling defense-resilient multi-tier case timelines.
+- **G-11 (Evidence Integrity Verification):** Formally verify digital evidence across its entire lifecycle—from pre-decode streaming acquisition through WORM preservation, fixity audits, derivative lineage, and independent air-gapped verification—without declaring real-world factual truth or relying on external cloud trust.
 
 ### Non-Goals
 - **NG-1:** The platform is not an automated judicial judge. It outputs probabilistic evidence, anomaly heatmaps, and confidence intervals to assist certified human forensic examiners.
@@ -60,6 +61,8 @@ Manual forensic examination is time-consuming, requires scarce specialized exper
 - **NG-4:** It does not claim that a PCAP capture proves an endpoint's entire communication history or decrypts modern end-to-end encrypted payloads without authorized private keys.
 - **NG-5:** It does not claim 100% detection of unseen zero-day generative architectures or encrypted evasion techniques without explicit uncertainty bounds.
 - **NG-6:** It does not claim that extracting an EXIF GPS coordinate or matching an online reverse-geocoding place proves that an image was captured there, nor does it send sensitive evidence images or confidential coordinates to unauthorized external cloud APIs.
+- **NG-7 (Integrity != Authenticity):** The platform does NOT claim that a cryptographic hash match proves that an acquired piece of evidence is authentic in the real world, that an officer's seizure was lawful, or that a recorded event occurred; it mathematically certifies that the stored bytes remain bit-for-bit identical to the acquired baseline.
+- **NG-8 (No Standalone Engine Duplication):** EIV is NOT a new forensic analysis engine, a 6th VISTA engine, or a 4th AURAS engine. It operates within CEIPL as a shared platform integrity layer.
 
 ---
 
@@ -1597,6 +1600,134 @@ UFD is engineered to comply with **W3C WCAG 2.2 Level AA** standards:
 Source code implementation is **explicitly out of scope** for this documentation release.
 See `PRD.md Section 19`, `TRD.md Section 19`, and `PHASES.md Section 19` for full specifications.
 
+## 4.31 Evidence Integrity Verification (EIV)
+
+> **Shared Cryptographic Evidence Integrity, Immutability & Provenance Layer — Residing Inside CEIPL**
+
+The **Evidence Integrity Verification (EIV)** subsystem is an enterprise-grade cryptographic integrity and provenance assurance capability embedded directly within the **Cryptographic Evidence Integrity and Provenance Layer (CEIPL)**—the shared platform foundation of the PS-05 forensic architecture.
+
+EIV is **not** an independent forensic detection engine, a sixth VISTA engine, or a fourth AURAS engine. It does not evaluate deepfakes or perform signal reverse engineering. Rather, its singular mission is to ensure that original digital evidence, derived forensic representations, metadata snapshots, and chain-of-custody ledgers remain cryptographically verifiable, bit-for-bit immutable, and defense-resilient throughout their entire legal lifecycle.
+
+```mermaid id="eivarchreadme"
+flowchart TD
+    subgraph INTAKE["1. Pre-Decode Ingestion & Streaming Dual-Hash"]
+        RAW["Seized Media Exhibit<br/>(CCTV, Image, Audio, PCAP)"]
+        HASHER["Streaming Dual-Hasher<br/>(NIST FIPS 180-4 SHA-256 + SHA-512)"]
+        STAGING["Secure Ephemeral Staging<br/>(POSIX 0600, Max RAM <= 64MB)"]
+        RAW --> HASHER & STAGING
+    end
+
+    subgraph ATTESTATION["2. Canonical Manifest & Cryptographic Sealing"]
+        JCS["RFC 8785 Canonical Serialization (JCS)"]
+        ED25519["Detached Ed25519 Digital Signature<br/>(OS Keystore / PKCS#11 HSM)"]
+        TSA["RFC 3161 Trusted Timestamp Token<br/>(X.509 TSA Certificate Chain)"]
+        HASHER --> JCS --> ED25519 & TSA
+    end
+
+    subgraph VAULT["3. WORM Preservation & Post-Write Readback"]
+        GATE{"Readback Gate<br/>Vault Bytes == Intake Hash?"}
+        WORM["WORM Evidence Vault<br/>(POSIX 0400 Read-Only / S3 Object Lock)"]
+        QRNT["Quarantine Isolation Vault<br/>(HTTP 423 Locked + Incident Log)"]
+        STAGING --> GATE
+        GATE -->|Match| WORM
+        GATE -->|Mismatch| QRNT
+    end
+
+    subgraph LIFECYCLE["4. Append-Only Custody & Derivative Lineage"]
+        LEDGER["Hash-Chained Custody Ledger<br/>E_i = H(Canonical(Event_i) || E_i-1)"]
+        DAG["Merkle DAG Lineage Registry<br/>(Parent Hash, Tool Version, Execution Command)"]
+        WORM --> LEDGER & DAG
+    end
+
+    subgraph VERIFICATION["5. Independent Offline Verifier & Court Dossier"]
+        CLI["Standalone Offline Verifier CLI<br/>(verify_evidence.py, Zero PyPI Dependencies)"]
+        DOSSIER["UFREDF Section 63 BSA / 65B IEA Certified Dossier"]
+        LEDGER & DAG & ED25519 & TSA --> CLI & DOSSIER
+    end
+```
+
+### 4.31.1 The Ten Core Evidentiary Questions Answered by EIV
+1. **Acquisition Identity:** What exact file or evidence object was acquired, under what initial parameters, and by whom?
+2. **Intake Digest:** What cryptographic digests (SHA-256 and SHA-512 / SHA3-256) were computed over the raw bitstream prior to decoding?
+3. **Post-Acquisition Immutability:** Was the original evidence modified, truncated, or substituted in any way after acquisition?
+4. **Storage Fixity:** Does the stored physical file in the vault match its original baseline integrity reference?
+5. **Transfer Fidelity:** Does the evidence object match bit-for-bit after network transfer or inter-agency retrieval?
+6. **Derivative Traceability:** Can every derived audio snippet, video frame, face crop, or report be mathematically traced back to its parent exhibit?
+7. **Custody Auditability:** Can the complete handling history be independently inspected without sequence gaps or backdated entries?
+8. **Attestation Validity:** Are the digital signatures and trusted timestamp tokens cryptographically valid and unexpired?
+9. **Storage Immutability:** Has the storage subsystem actively maintained its promised Write-Once Read-Many (WORM) retention locks?
+10. **Independent Verifiability:** Can a complete evidence package be independently verified by defense counsel on an air-gapped machine without trusting the platform software?
+
+### 4.31.2 Core Architectural Principles & Invariants
+1. **Pre-Decode Streaming Dual-Hashing:** Ingested media is piped directly into streaming SHA-256 and SHA-512 hashers before any decoder, demuxer, or metadata parser opens the file. Peak memory is bounded to $\le 64 \text{ MB}$ even for 50 GB exhibits.
+2. **Decoupled 10-Entity Identity Model:** Evidence identity is completely decoupled from filenames, directory paths, storage keys, and algorithms across 10 distinct entities (`case_id`, `evidence_id`, `acquisition_id`, `file_id`, `hash_id`, `metadata_snapshot_id`, `derivative_id`, `custody_event_id`, `manifest_id`, `verification_id`).
+3. **Duplicate Provenance Preservation:** Distinct seizures of identical files retain independent `evidence_id`, `acquisition_id`, and custody ledgers; storage-level deduplication never merges legal provenance.
+4. **RFC 8785 Canonical Manifests:** Metadata and hash references are sealed into versioned JSON manifests canonicalized via RFC 8785 (JCS) for cross-platform deterministic byte reproducibility.
+5. **Detached Ed25519 Signatures & RFC 3161 TSA:** Manifests are sealed with detached Ed25519 signatures (RFC 8032) and RFC 3161 trusted timestamp tokens, providing non-repudiation and proof-of-existence.
+6. **WORM Storage Enforcement:** Exhibits are preserved in hardware-enforced or filesystem-enforced Write-Once Read-Many vaults (POSIX `0400` read-only mode, Linux `chattr +i`, S3 Object Lock Compliance Mode).
+7. **Twelve-Gate Verification Lifecycle & Continuous Fixity:** Hash checks execute at 12 mandatory lifecycle gates, backed by automated Celery rolling 30-day fixity audits ($\ge 200 \text{ MB/s}$ throughput).
+8. **Fail-Closed Quarantine & Zero Silent Repair:** Corrupted files immediately transition to `QUARANTINED` (HTTP 423 Locked); automatic digest recalculation or overwriting is strictly blocked by database constraints.
+9. **Append-Only Hash-Chained Custody Ledger:** Every custody event cryptographically chains to its predecessor ($E_i = H(\text{Canonical}(Event_i) \parallel E_{i-1})$) with strictly monotonic sequence numbers.
+10. **Multi-Generational Merkle Lineage DAG:** Every output artifact references its parent exhibit ID, pre-transformation parent hash, execution command string, and software commit hash.
+11. **Standalone Portable Offline Verifier:** Export packages include `verify_evidence.py`—a self-contained, zero-dependency Python script executing 14 sequential integrity checks in air-gapped environments.
+
+### 4.31.3 Ten-Dimension Verification Result Model & Eleven Outcome States
+EIV rejects monolithic `authentic: true/false` flags, evaluating ten distinct dimensions:
+- `BYTE_INTEGRITY`: Current vault bytes match intake SHA-256 and SHA-512 baseline digests.
+- `MANIFEST_INTEGRITY`: Canonical JCS bytes match manifest SHA-256 fingerprint.
+- `SIGNATURE_VALIDITY`: Detached Ed25519 digital signature is mathematically valid.
+- `SIGNER_TRUST`: Signer key recognized, authorized, and unrevoked in KMS.
+- `TIMESTAMP_VALIDITY`: RFC 3161 TSA token valid and matches message imprint.
+- `CUSTODY_CONTINUITY`: Hash-chained custody ledger is unbroken with monotonic sequence numbers.
+- `STORAGE_IMMUTABILITY`: POSIX `0400` / S3 Object Lock retention locks actively enforced.
+- `DERIVATIVE_LINEAGE`: Derived artifacts cryptographically trace to parent exhibit hashes.
+- `PACKAGE_INTEGRITY`: All files in multi-file package match manifest paths and digests.
+- `VERIFICATION_SCOPE`: All requested verification checks completed without skips.
+
+Synthesis yields eleven canonical outcome states:
+`VERIFIED`, `VERIFIED_WITH_WARNINGS`, `PARTIALLY_VERIFIED`, `INTEGRITY_MISMATCH`, `SIGNATURE_FAILURE`, `CUSTODY_GAP`, `LINEAGE_FAILURE`, `REFERENCE_MISSING`, `UNVERIFIABLE`, `QUARANTINED`, `UNDER_EXAMINER_REVIEW`.
+
+### 4.31.4 Explicit Forensic & Cryptographic Limitations
+1. A hash match confirms byte-level consistency relative to intake; it does *not* prove that recorded real-world events occurred.
+2. Hashing cannot detect manipulations executed on the recording medium *prior* to forensic acquisition.
+3. An Ed25519 signature confirms the signing key; it does *not* prove the operator personally witnessed the incident.
+4. An RFC 3161 TSA token proves existence no later than the token time; it does *not* prove the real-world capture time.
+5. WORM storage prevents unauthorized modification within the vault; it does *not* prevent capture-stage tampering.
+6. A custody ledger verifies recorded actions; it cannot automatically record physical unmonitored handling outside the system.
+7. Technical integrity verification does *not* automatically confer judicial admissibility under Section 63 BSA / 65B IEA.
+8. Dual hashes from the same family (SHA-256 / SHA-512) share Merkle-Damgard structural assumptions.
+9. Merkle inclusion proofs certify specific chunk slices; they never replace whole-file digests as the primary legal reference.
+10. A valid hash of a derived artifact confirms byte integrity of the output; it does *not* certify that the transformation was scientifically valid.
+11. A successful storage backup operation is meaningless without verified post-backup restoration readback.
+12. Under no circumstances may a newly computed hash of a corrupted file overwrite the established baseline hash reference.
+13. Cryptographic security collapses if private signing keys are compromised, shared, or stored insecurely.
+14. Migrating to newer hash algorithms must preserve historical digest records for ongoing verification.
+15. Local hardware clocks in air-gapped deployments lack independent trust and must be labeled `LOCAL_UNTRUSTED_CLOCK`.
+16. Damaged evidence must never be silently healed, interpolated, or replaced without an auditable recovery incident.
+17. Storage deduplication must never collapse independent chain-of-custody ledgers into a single provenance history.
+18. Statutory forensic certificates must be issued by authorized human examiners, never autonomously by platform software.
+19. TLS transport security does not guarantee evidence integrity if server endpoint memory is unverified.
+20. All mathematical outputs, hashes, and verification outcomes must be accompanied by plain-language explanations in court dossiers.
+
+### 4.31.5 Implementation Status
+
+| Capability / Module | Implementation Phase | Current Status |
+| :--- | :--- | :--- |
+| CEIPL Architecture Baseline & Boundary Mapping (`EIV-01`..`06`) | CEIPL-EIV-00 | `PLANNED` |
+| Decoupled 10-Entity Identity & Ingestion Contracts (`EIV-07`..`14`) | CEIPL-EIV-01 | `PLANNED` |
+| Pre-Decode Streaming Dual-Hasher & Chunk Merkle Trees (`EIV-15`..`29`) | CEIPL-EIV-02 | `PLANNED` |
+| RFC 8785 Manifests, Ed25519 Signatures & RFC 3161 TSA (`EIV-30`..`52`) | CEIPL-EIV-03 | `PLANNED` |
+| WORM Storage Vault, POSIX 0400 & S3 Object Lock (`EIV-53`..`61`) | CEIPL-EIV-04 | `PLANNED` |
+| 12-Gate Verification Lifecycle, Fixity & Quarantine Engine (`EIV-62`..`78`) | CEIPL-EIV-05 | `PLANNED` |
+| Tamper-Evident Append-Only Custody Ledger & Triggers (`EIV-79`..`85`) | CEIPL-EIV-06 | `PLANNED` |
+| Derivative Merkle Lineage DAG & Multi-File Packages (`EIV-86`..`91`) | CEIPL-EIV-07 | `PLANNED` |
+| Standalone Zero-PyPI Offline Verifier CLI & REST APIs (`EIV-92`..`96`) | CEIPL-EIV-08 | `PLANNED` |
+| Cross-Subsystem Engine Adapters & Section 63 BSA PDF (`EIV-97`..`98`) | CEIPL-EIV-09 | `PLANNED` |
+| 16-Mutation Suite, 500-Fixture Benchmark & Air-Gap Image (`EIV-99`..`100`) | CEIPL-EIV-10 | `PLANNED` |
+
+Source code implementation is **explicitly out of scope** for this documentation release.
+See `PRD.md Section 18`, `TRD.md Section 19`, and `PHASES.md Section 18` for full specifications.
+
 ## 5. Implementation Status
 
 The project architecture is finalized; core foundation artifacts and behavioral specifications have been authored, with engine implementations planned across structured engineering phases:
@@ -1795,6 +1926,18 @@ Refer to [PHASES.md](PHASES.md) for full phase gates and definitions of done:
   - **AIF-A12:** Steganalysis & Image-File Security (AIM-04/05)
   - **AIF-A14:** Evidence Fusion, Reporting & Reviewer Workflow
   - **AIF-A15:** End-to-End Image Validation & Release Readiness
+- **CEIPL-EIV Evidence Integrity Verification Workstream:**
+  - **CEIPL-EIV-00:** Repository and Integrity Architecture Discovery (`PLANNED`)
+  - **CEIPL-EIV-01:** Evidence Identity, Ingestion Contracts & Decoupled Model (`PLANNED`)
+  - **CEIPL-EIV-02:** Pre-Decode Streaming Dual-Hashing & Chunk Merkle Trees (`PLANNED`)
+  - **CEIPL-EIV-03:** Canonical Manifests (RFC 8785), Ed25519 Signatures & RFC 3161 TSA (`PLANNED`)
+  - **CEIPL-EIV-04:** WORM Vault, POSIX 0400 & S3 Object Lock Compliance Mode (`PLANNED`)
+  - **CEIPL-EIV-05:** Twelve-Gate Verification Lifecycle, Fixity & Quarantine Engine (`PLANNED`)
+  - **CEIPL-EIV-06:** Append-Only Hash-Chained Custody Ledger & Daily Anchors (`PLANNED`)
+  - **CEIPL-EIV-07:** Derivative Merkle Lineage DAG & Multi-File Package Manifests (`PLANNED`)
+  - **CEIPL-EIV-08:** Standalone Zero-PyPI Offline Verifier CLI & 15 REST APIs (`PLANNED`)
+  - **CEIPL-EIV-09:** Cross-Subsystem Engine Adapters & Section 63 BSA PDF Dossier (`PLANNED`)
+  - **CEIPL-EIV-10:** 16-Case Mutation Testing, 500-Fixture Benchmark & Air-Gap Image (`PLANNED`)
 - **AIF-IML Image Manipulation Localisation Workstream:**
   - **AIF-IML-00:** Repository Audit, Localisation Contracts & Baseline Gap Matrix (`IMPLEMENTED_AND_VERIFIED`)
   - **AIF-IML-01:** Classical Copy-Move Forgery Localisation Engine (SIFT/RootSIFT/RANSAC)

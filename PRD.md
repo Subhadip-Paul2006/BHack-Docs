@@ -4417,3 +4417,397 @@ Based on the synthesis of the 10 dimensions, the evaluation returns one of eleve
 | **EIV-92 to EIV-96** | Standalone Offline Verifier, REST APIs & Worker Jobs | TRD §19.12, §19.15 | CEIPL-EIV-08 |
 | **EIV-97 to EIV-100**| RBAC Security, Section 63 BSA Dossier & Benchmarks | TRD §19.14, §19.17 | CEIPL-EIV-09 / EIV-10 |
 
+
+---
+
+## 19. Unified Forensic Evidence Dashboard & Examiner Workbench (UFD / UFW) — Product Requirements
+
+> **Document Status:** `CANONICAL SPECIFICATION` — Product vision, functional requirements, navigation architecture, examiner workspaces, and governance workflows formally established. Implementation planned across engineering phases `UFD-A0` through `UFD-A11`.
+
+### 19.1 Product Vision & Problem Statement
+
+#### 19.1.1 The Forensic Workflow Fragmentation Problem
+In cyber forensic operations across state police departments, special investigation teams (SITs), and Forensic Science Laboratories (FSLs), examiners face an operational bottleneck: while individual analysis algorithms exist for images, audio, video, CCTV, and network captures, examiners are forced to manually juggle disconnected command-line scripts, separate research viewers, standalone hex editors, and ad-hoc spreadsheets.
+
+This fragmentation introduces severe evidentiary and operational risks:
+1. **Broken Chain of Context:** Evidence items originating from the same criminal incident (e.g. suspect smartphone photos, CCTV exports, seized body-worn audio, network PCAPs) are examined in isolation, concealing crucial cross-modal corroborations and temporal contradictions.
+2. **Deceptive Over-Simplification:** Many commercial tools collapse intricate forensic probabilities into a single "Authentic vs. Fake" badge, stripping away calibration curves, out-of-distribution (OOD) warnings, and alternative technical explanations required in judicial testimony.
+3. **Audibility & Reproducibility Gaps:** When an examiner annotates an image or flags an audio splice, the manual observation is rarely bound cryptographically to the master exhibit bitstream, creating admissibility vulnerabilities under Section 65B of the Indian Evidence Act (IEA) and Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA).
+4. **Disjointed Custody Visibility:** Evidence integrity checks are often executed as an afterthought at the time of intake, with zero real-time visibility into post-write fixity status or derivative artefact DAG lineage during active examination.
+
+#### 19.1.2 The Unified Solution (UFD / UFW)
+The **Unified Forensic Evidence Dashboard (UFD)** and its practitioner user interface, the **Unified Forensic Workbench (UFW)**, establish a single, secure, local-first, role-aware presentation and examiner workflow tier for the entire PS-05 platform. UFD bridges the end-to-end investigation lifecycle:
+
+$$\text{Case Creation} \longrightarrow \text{Evidence Registration} \longrightarrow \text{Integrity Verification} \longrightarrow \text{Forensic Processing} \longrightarrow \text{Findings Review} \longrightarrow \text{Cross-Modal Correlation} \longrightarrow \text{Examiner Assessment} \longrightarrow \text{Report Issuance}$$
+
+UFD is **strictly a presentation and workflow layer**; it does not compute detection algorithms or alter master evidence. It securely consumes authoritative records from **CEIPL**, **CMMS**, **CSTV**, **AIF**, **AURAS**, **VISTA**, **ONTF**, **AIF-GEO**, **CDVF**, and **UFREDF**, providing examiners with a coherent, court-admissible operational workspace.
+
+---
+
+### 19.2 Goals & Non-Goals
+
+#### Core Goals
+- **UFD-G-01 (Coherent Investigation Lifecycle):** Unify case management, evidence intake, integrity verification, multi-engine analysis, finding review, and reporting into a single seamless workflow.
+- **UFD-G-02 (Zero Evidence Alteration):** Guarantee that all dashboard viewports, overlays, filters, and annotations execute non-destructively without modifying underlying WORM bitstreams.
+- **UFD-G-03 (Modality-Specific Fidelity):** Provide dedicated, rich workspaces tailored to each medium (AIF dual-canvas, AURAS interactive spectrogram, VISTA frame scrubber, ONTF flow table, AIF-GEO map canvas).
+- **UFD-G-04 (Traceable Finding Lineage):** Ensure every displayed finding, heatmap, and temporal marker links directly to its source exhibit SHA-256 and analysis activity UUID.
+- **UFD-G-05 (Unified Temporal Scrubber):** Visualize multi-source CSTV event intervals and clock drift models without premature causal assumptions.
+- **UFD-G-06 (Cross-Modal Disagreement Transparency):** Highlight inter-detector conflicts and cross-modal discrepancies prominently, preventing deceptive score averaging.
+- **UFD-G-07 (First-Class Inconclusive & OOD States):** Display uncalibrated scores, OOD triggers, and inconclusive outcomes honestly with full diagnostic context.
+- **UFD-G-08 (Real-Time Integrity & Fixity Alarms):** Instantly alert examiners to CEIPL fixity failures with prominent, un-dismissible quarantine lockouts.
+- **UFD-G-09 (Air-Gapped Local-First Execution):** Operate 100% locally with zero external network calls, hosted cloud dependencies, or unmonitored telemetry.
+- **UFD-G-10 (WCAG 2.2 AA Accessibility):** Guarantee complete keyboard operability, high text contrast, screen-reader compatibility, and non-colour status indicators.
+- **UFD-G-11 (Auditable Examiner Actions):** Record all examiner annotations, review state transitions, and export actions into immutable, append-only audit trails.
+- **UFD-G-12 (UFREDF Report Sovereignty):** Integrate report drafting, review, and issuance strictly within UFREDF cryptographic lifecycle controls.
+
+#### Non-Goals
+- **UFD-NG-01 (Not a Forensic Detection Engine):** UFD does not implement image, audio, video, or network forensic algorithms; it presents findings produced by backend engines.
+- **UFD-NG-02 (Not an Authoritative Storage Vault):** UFD does not store or manage master evidence files; CEIPL remains the sole authoritative system of record.
+- **UFD-NG-03 (No Autonomous Judicial Verdicts):** UFD never generates automated "Guilty", "Innocent", "Fake", or "Genuine" verdicts; it provides objective technical findings for certified examiner evaluation.
+- **UFD-NG-04 (No Direct Database Mutation):** The frontend never writes directly to backend database tables; all mutations execute via authorized, audited REST APIs.
+- **UFD-NG-05 (No Cloud Streaming Dependencies):** UFD does not require external cloud map tile servers, web fonts, CDN libraries, or hosted AI APIs.
+
+---
+
+### 19.3 Stakeholders & User Roles
+
+UFD enforces fine-grained Role-Based Access Control (RBAC) across nine formal practitioner roles:
+
+| Role ID | Role Title | Primary Functional Responsibilities | Default Case Scope |
+| :--- | :--- | :--- | :--- |
+| **ROLE-SYSADMIN** | System Administrator | Platform configuration, worker cgroup quotas, service health, air-gap network policy. | Global system level (no direct evidence viewing). |
+| **ROLE-CASEADMIN**| Case Administrator | Case creation, jurisdictional assignment, officer allocation, case access policy. | Assigned police station / FSL unit cases. |
+| **ROLE-IO** | Investigating Officer | Evidence intake registration, acquisition context, case diary notes, status tracking. | Assigned cases only. |
+| **ROLE-EXAMINER** | Forensic Examiner | In-depth technical analysis, tool invocation, finding review, examiner annotation. | Assigned examination work packages. |
+| **ROLE-CUSTODIAN**| Evidence Custodian | Intake hashing, WORM vault verification, fixity audits, physical custody tracking. | Custody vault exhibits across assigned cases. |
+| **ROLE-TECHREV** | Technical Reviewer | Independent peer review of examiner methodology, calibration bounds, and findings. | Assigned peer review queue. |
+| **ROLE-REPREV** | Report Reviewer | Formal review, verification, and legal sign-off on Section 65B/63 BSA draft dossiers. | Assigned report review queue. |
+| **ROLE-AUDITOR** | Independent Auditor | Read-only inspection of tamper-evident custody ledgers, access logs, and certificates. | Audited cases and compliance logs. |
+| **ROLE-MODELADMIN**| Model Administrator | Model registry management, checkpoint SHA-256 validation, 6-gate release review. | Platform model registry. |
+
+#### 19.3.1 Dual-Control Operational Invariants
+To prevent unilateral tampering, collusion, or accidental missteps, the following sensitive actions mandate **Dual-Control Authorization** requiring independent cryptographic sign-offs from two distinct authorized roles:
+1. **Evidence Quarantine Override:** Releasing an exhibit quarantined due to a CEIPL fixity mismatch requires dual sign-off from `ROLE-CUSTODIAN` and `ROLE-CASEADMIN`.
+2. **Chain-of-Custody Incident Resolution:** Closing an active chain-of-custody discrepancy requires dual sign-off from `ROLE-CUSTODIAN` and `ROLE-TECHREV`.
+3. **Courtroom Report Issuance:** Transitioning a Section 63 BSA dossier from `APPROVED` to `ISSUED` requires dual sign-off from `ROLE-EXAMINER` and `ROLE-REPREV`.
+4. **Permanent Evidence Expungement:** Where legally mandated by court order, physical bitstream purging requires dual sign-off from `ROLE-SYSADMIN` and `ROLE-CASEADMIN`.
+
+---
+
+### 19.4 End-to-End User Journeys (UFD-J01 through UFD-J10)
+
+#### Journey UFD-J01: Case Creation & Evidence Registration
+A Case Administrator creates Case `CASE-BIHAR-2026-PS05-042` with jurisdictional references and assigns Investigating Officer `IO-KUMAR` and Examiner `EX-SHARMA`. The IO registers three exhibits: a smartphone JPEG photo, a seized MP3 phone call, and an MP4 surveillance export. The workbench streams the files directly to CEIPL, computes streaming SHA-256/SHA3-512 hashes, issues an RFC 8785 intake receipt, and initiates asynchronous CMMS metadata extraction.
+
+#### Journey UFD-J02: Evidence Fixity & Integrity Review
+The Evidence Custodian opens the Evidence Integrity Workspace. The system displays the CEIPL WORM fixity verification status, confirming that post-write bitstreams match intake hashes. A simulated bit-flip on a test exhibit immediately triggers an un-dismissible red banner `FIXITY_CHECK_FAILED`, isolates the file into `QUARANTINED` state, and locks out analysis tools until formal dual-control resolution.
+
+#### Journey UFD-J03: Image Examination & Manipulation Localisation (AIF)
+Examiner `EX-SHARMA` opens the Image Forensic Workspace for Exhibit `IMG-001`. The synchronized dual-canvas renders the original image alongside an Error Level Analysis (ELA) map and a CAT-Net deep inpainting mask. The examiner zooms to $400\%$ on a suspicious head region, adjusts the threshold slider, inspects JPEG Quantization Tables (DQT), and pins an annotation linking finding `FIND-AIF-084` to the suspect's collar boundary.
+
+#### Journey UFD-J04: Audio Examination & Splice Analysis (AURAS)
+The examiner navigates to the Audio Forensic Workspace for Exhibit `AUD-002`. The WebAudio player renders a synchronized dual-view of the raw waveform and mel-spectrogram. The examiner reviews Silero VAD speech intervals, ECAPA-TDNN speaker diarization tracks, and an ARE acoustic discontinuity marker at $t = 14.2\text{ s}$. The examiner loops the 500ms candidate cut window, evaluates the $18\text{ dB}$ noise floor step jump, and records methodology notes.
+
+#### Journey UFD-J05: Video/CCTV Frame Scrubbing & Sequence Review (VISTA)
+The examiner opens the Video Workspace for CCTV Exhibit `VID-003`. The frame-accurate scrubber displays presentation timestamps (PTS), frame indices, and GOP structure. The CFITSA panel flags a 12-frame gap between PTS `144000` and `147600`. The examiner inspects the companion NVR export XML sidecar, verifies the burned-in on-screen display (OSD) clock jump, and corroborates the missing frame sequence.
+
+#### Journey UFD-J06: Offline Network Capture Analysis (ONTF)
+The examiner opens the Network Workspace for Exhibit `NET-004`. The packet timeline displays protocol distribution and flow bursts. The examiner filters by target IP `192.168.1.45`, inspects Zeek DNS query summaries, flags an anomalous DNS tunneling burst, and verifies that sensitive HTTP application payload bodies are omitted from general viewports.
+
+#### Journey UFD-J07: Geospatial Evidence Mapping (AIF-GEO)
+The examiner opens the Geospatial Workspace. The offline Leaflet map canvas plots extracted GPS coordinates from Exhibit `IMG-001` alongside a mobile photo track. The map renders an uncertainty bounding circle of $\pm 15\text{ m}$. The system displays an explicit disclaimer: *"Map marker reflects self-reported EXIF metadata claims, not verified ground truth capture location"*.
+
+#### Journey UFD-J08: Cross-Source Temporal Investigation (CSTV)
+The examiner opens the Unified Timeline Workspace. CSTV compiles event intervals across the CCTV video, mobile photo, and body-worn audio. The timeline highlights a $4.2\text{ s}$ clock drift between the mobile camera clock and the CCTV master clock, plotting the robust linear regression line $\delta(t)$ alongside raw and corrected timestamps.
+
+#### Journey UFD-J09: Cross-Modal Disagreement & Fusion Review (CDVF)
+The examiner reviews multi-modal findings for Exhibit `VID-003`. AIF flags facial reenactment ($p=0.92$), AURAS detects authentic human speech ($p=0.08$), and VISTA flags a lip-sync mismatch ($p=0.89$). The CDVF panel presents an evidence DAG preserving separate modality nodes, highlights conflict code `MODALITY_RESULT_CONFLICT`, and blocks naive score averaging.
+
+#### Journey UFD-J10: Courtroom Report Compilation & Signing (UFREDF)
+The examiner initiates Section 63 BSA dossier generation. The report preview dynamically renders the evidence inventory, cryptographic hashes, reliability diagrams, CSTV timeline charts, and examiner notes. Examiner `EX-SHARMA` signs the draft with their Ed25519 private key. Report Reviewer `REV-VERMA` conducts peer review and co-signs, transitioning the dossier to `ISSUED` state.
+
+---
+
+### 19.5 Information Architecture & Navigation Hierarchy
+
+```mermaid
+flowchart TD
+    SHELL["UFW Application Shell (Global Header & Case Switcher)"]
+
+    SHELL --> M01["1. Global Overview (Platform Health & Workload)"]
+    SHELL --> M02["2. Case Management (Directory, Creation, Assignment)"]
+    SHELL --> M03["3. Evidence Inventory (Multi-Modal Registry & Fixity)"]
+    SHELL --> M04["4. Modality Workspaces (AIF, AURAS, VISTA, ONTF, GEO)"]
+    SHELL --> M05["5. Unified Findings (Aggregator, Review Lifecycle)"]
+    SHELL --> M06["6. Unified Timeline (CSTV Multi-Source Temporal Engine)"]
+    SHELL --> M07["7. Evidence Integrity (CEIPL Fixity, WORM Custody)"]
+    SHELL --> M08["8. Cross-Modal Analysis (CDVF DAG & Disagreement)"]
+    SHELL --> M09["9. Reports & Dossiers (UFREDF Section 65B/63 BSA)"]
+    SHELL --> M10["10. Review Queue (Prioritized Examiner Tasking)"]
+    SHELL --> M11["11. Audit & Activity (Tamper-Evident Access Logs)"]
+    SHELL --> M12["12. System Administration (Workers, Cgroups, Security)"]
+```
+
+---
+
+### 19.6 Detailed Functional Requirements Register (UFD-01 through UFD-100)
+
+#### Architecture & Subsystem Boundaries (UFD-01 to UFD-06)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-01** | UFD must operate strictly as a shared presentation and workflow tier, consuming backend APIs without computing forensic algorithms. | Must Have | All Roles | UFD Core | Subsystem API responses | Rendered responsive UI views | `PLANNED` |
+| **UFD-02** | UFD must preserve backend authority: CEIPL for custody/hashes, CMMS for metadata, CSTV for timelines, CDVF for model validation, UFREDF for reports. | Must Have | All Roles | Subsystem Clients| Backend authority records | Authoritative UI representation | `PLANNED` |
+| **UFD-03** | UFD must guarantee zero bitstream alteration: master evidence exhibits are mounted read-only (`POSIX 0400`) and never mutated by UI actions. | Must Have | Custodian / Examiner| CEIPL / Storage | File descriptor access | 100% bitstream immutability | `PLANNED` |
+| **UFD-04** | UFD must display honest data states: service outages, failed jobs, and missing findings must never be represented as passed verifications. | Must Have | All Roles | UFD Shell | Subsystem health states | Typed status indicators | `PLANNED` |
+| **UFD-05** | UFD must support graceful subsystem degradation: an outage in one subsystem (e.g. ONTF) must not disable the broader case workbench. | Must Have | Examiner | UFD Shell | Partial API responses | Localized error boundaries | `PLANNED` |
+| **UFD-06** | UFD must operate 100% locally in air-gapped forensic environments with zero external network calls or cloud telemetry. | Must Have | SysAdmin | DevOps / Security | Network policy audit | Zero outbound socket connections | `PLANNED` |
+
+#### User Roles & Access Control (UFD-07 to UFD-13)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-07** | UFD must enforce Role-Based Access Control (RBAC) across nine formal practitioner roles with cryptographically signed JWT sessions. | Must Have | SysAdmin | Auth / RBAC | User credentials | Scoped role authorization context | `PLANNED` |
+| **UFD-08** | Case-level authorization must be enforced on every API query; cross-case data leakage via IDOR is strictly prevented via PostgreSQL RLS. | Must Have | All Roles | Auth / Database | Case authorization token | Strictly filtered case records | `PLANNED` |
+| **UFD-09** | Dual-control authorization must be enforced on sensitive actions: quarantine release, custody incident closure, and report issuance. | Must Have | CaseAdmin / Reviewer| Auth / Audit | Dual Ed25519 signatures | Validated dual-control execution | `PLANNED` |
+| **UFD-10** | Administrative users must not automatically possess evidence viewing permissions unless explicitly assigned to the case. | Must Have | SysAdmin | Auth / RBAC | Admin session context | Separation of administration from evidence | `PLANNED` |
+| **UFD-11** | Read-only auditor roles must be restricted from invoking analysis tools, modifying annotations, or creating cases. | Must Have | Auditor | Auth / RBAC | Auditor session token | Disabled write controls | `PLANNED` |
+| **UFD-12** | Inactive sessions must automatically terminate after 15 minutes of inactivity, locking the screen and requiring re-authentication. | Must Have | All Roles | Security | Session timer | Session expiration lock screen | `PLANNED` |
+| **UFD-13** | All failed authentication attempts and permission denials must be logged immediately to the append-only security audit trail. | Must Have | Security | Audit Logger | Security event context | Security incident log entry | `PLANNED` |
+
+#### Global Overview & Dashboard Metrics (UFD-14 to UFD-20)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-14** | Global overview must display assigned case counts categorized by status: Open, In Examination, Under Review, and Closed. | Must Have | CaseAdmin / IO | Case Service | Case query payload | Live case distribution cards | `PLANNED` |
+| **UFD-15** | Overview metrics must be calculated strictly from live database records; hardcoded demonstration numbers are strictly prohibited. | Must Have | All Roles | Metrics Engine | Live database aggregates | Verified dynamic metrics | `PLANNED` |
+| **UFD-16** | The dashboard must display a centralized Workload Summary showing queued, processing, completed, and failed analysis jobs. | Must Have | Examiner / IO | Celery / Redis | Job queue state | Dynamic job processing table | `PLANNED` |
+| **UFD-17** | The dashboard must prominently display an Urgent Integrity Alert banner whenever any exhibit in assigned cases fails fixity verification. | Must Have | Custodian | CEIPL Client | Fixity failure records | High-visibility red alert banner | `PLANNED` |
+| **UFD-18** | Clicking any overview summary metric card must navigate the examiner directly to the corresponding filtered record list. | Should Have | All Roles | UFD Shell | UI click event | Contextually filtered view | `PLANNED` |
+| **UFD-19** | The overview must include a chronological Recent Activity Feed tracking case creation, evidence registration, and report events. | Should Have | All Roles | Audit Logger | Audit event stream | Scrollable activity feed | `PLANNED` |
+| **UFD-20** | Sensitive evidence titles and thumbnails must be redacted in global activity feeds for users lacking explicit case clearance. | Must Have | Security | Auth / Privacy | Activity payload + role | Redacted public activity view | `PLANNED` |
+
+#### Case Management Workspace (UFD-21 to UFD-28)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-21** | UFD must provide a Case Creation wizard capturing unique Case ID, title, description, requesting unit, and legal references. | Must Have | CaseAdmin | Case Service | `CaseCreateRequest` | Persistent `CaseRecord` | `PLANNED` |
+| **UFD-22** | The system must validate Case ID formats and reject duplicate identifiers with an explicit validation error. | Must Have | CaseAdmin | Case Service | Case identifier string | Uniqueness validation assertion | `PLANNED` |
+| **UFD-23** | Case Administrators must be able to assign and reassign Investigating Officers and Forensic Examiners with audit logging. | Must Have | CaseAdmin | Case Service | Assignment update request | Updated assignment manifest | `PLANNED` |
+| **UFD-24** | The Case Detail page must display an Evidence Summary table broken down by modality, storage status, and verification state. | Must Have | All Roles | Case Service | Case evidence query | Structured evidence breakdown | `PLANNED` |
+| **UFD-25** | The Case Detail page must aggregate forensic processing status across all associated exhibits (completed, failed, pending). | Must Have | Examiner / IO | Orchestrator | Subsystem job queries | Composite processing progress bar | `PLANNED` |
+| **UFD-26** | The Case Detail page must summarize total findings, flagged suspicious anomalies, and unresolvable cross-modal conflicts. | Must Have | Examiner | Finding Service | Finding aggregate queries | Findings triage matrix | `PLANNED` |
+| **UFD-27** | Authorized examiners must be able to log structured case notes and examination hypotheses with immutable authorship timestamps. | Must Have | Examiner | Case Service | Note text payload | Append-only case note record | `PLANNED` |
+| **UFD-28** | Closing a case must require formal sign-off confirming that all reports are issued and all evidence custody holds are released. | Must Have | CaseAdmin | Case Service | Case closure request | Formal case closure certificate | `PLANNED` |
+
+#### Evidence Inventory & Detail (UFD-29 to UFD-36)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-29** | UFD must provide a unified Evidence Inventory displaying Exhibit ID, original filename, modality, format, size, and hash status. | Must Have | All Roles | Evidence Service | Evidence list query | Paginated evidence table | `PLANNED` |
+| **UFD-30** | The inventory must distinguish acquisition timestamp from filesystem modification time, showing explicit timestamp semantics. | Must Have | Examiner / IO | CMMS / CEIPL | Timestamp metadata | Semantically labeled timestamps | `PLANNED` |
+| **UFD-31** | The inventory must support multi-facet filtering: by modality, format, acquisition date, verification state, and examiner assignment. | Must Have | All Roles | Evidence Service | Filter criteria payload | Filtered inventory subset | `PLANNED` |
+| **UFD-32** | Inventory pagination and sorting must execute via server-side database queries; loading entire case histories into DOM is prohibited. | Must Have | SysAdmin | Database / API | Pagination parameters | Bounded JSON page payloads | `PLANNED` |
+| **UFD-33** | The Evidence Detail workspace must display verified SHA-256 and SHA3-512 digests alongside post-write readback verification dates. | Must Have | Custodian / Examiner| CEIPL Client | Fixity query payload | Verified cryptographic digest card | `PLANNED` |
+| **UFD-34** | The Evidence Detail page must render the complete, immutable CEIPL Chain-of-Custody event timeline from acquisition to present. | Must Have | Custodian / Auditor | CEIPL Client | Custody ledger query | Chronological custody timeline | `PLANNED` |
+| **UFD-35** | The Evidence Detail page must list all derived analysis artefacts (crops, audio demuxes, masks) linked via Merkle DAG nodes. | Must Have | Examiner | CEIPL Client | DAG lineage query | Derivative artefact tree view | `PLANNED` |
+| **UFD-36** | Downloading master evidence bitstreams must require explicit permissions, generating an immutable audit log with cryptographic hash. | Must Have | Security | Storage / Audit | Download request | Authorized stream + audit log | `PLANNED` |
+
+#### Modality-Specific Workspaces (UFD-37 to UFD-48)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-37** | The Image Workspace (AIF) must provide a synchronized dual-canvas viewer rendering original media, ELA, and inpainting masks. | Must Have | Examiner | AIF Subsystem | Image exhibit + mask arrays | Synchronized dual-viewport canvas | `PLANNED` |
+| **UFD-38** | Image spatial overlays (masks, bounding boxes, heatmaps) must bind strictly to the original pixel coordinate space. | Must Have | Examiner | AIF Subsystem | Coordinate metadata | Resolution-accurate vector overlays | `PLANNED` |
+| **UFD-39** | The Image Workspace must include an interactive metadata panel displaying complete EXIF, XMP, IPTC, and DQT quantization tables. | Must Have | Examiner | CMMS Subsystem | Metadata snapshot | Structured EXIF tag tree | `PLANNED` |
+| **UFD-40** | The Audio Workspace (AURAS) must render an interactive waveform and mel-spectrogram with pan, zoom, and time-selection tools. | Must Have | Examiner | AURAS Subsystem | Audio stream + STFT array | WebAudio interactive canvas | `PLANNED` |
+| **UFD-41** | The Audio Workspace must display Silero VAD speech intervals, ECAPA diarization speaker tracks, and ARE splice boundary markers. | Must Have | Examiner | AURAS Subsystem | Diarization & splice tracks | Multi-track audio timeline | `PLANNED` |
+| **UFD-42** | Audio playback autoplay is strictly prohibited; playback requires explicit user action, and derived audio must be clearly flagged. | Must Have | Examiner | AURAS Subsystem | User playback trigger | Controlled audio output stream | `PLANNED` |
+| **UFD-43** | The Video Workspace (VISTA) must provide frame-accurate scrubbing with presentation timestamp (PTS) and frame index mapping. | Must Have | Examiner | VISTA Subsystem | Video stream + packet index | Frame-accurate video scrubber | `PLANNED` |
+| **UFD-44** | The Video Workspace must decouple presentation order (PTS) from decode order (DTS), ensuring B-frames do not trigger false alarms. | Must Have | Examiner | VISTA Subsystem | PTS/DTS packet streams | Dual decode/presentation tracks | `PLANNED` |
+| **UFD-45** | The Video Workspace must support CCTV surveillance exports, binding companion XML/JSON sidecars and OSD clock overlays. | Must Have | Examiner | VISTA / CMMS | Video + sidecar manifests | Composite CCTV review panel | `PLANNED` |
+| **UFD-46** | The Network Workspace (ONTF) must display offline PCAP packet timelines, protocol distributions, and IP 5-tuple flow summaries. | Must Have | Examiner | ONTF Subsystem | PCAP flow summary payload | Structured network flow table | `PLANNED` |
+| **UFD-47** | Sensitive application layer payload bytes in the Network Workspace must be excluded from general views by default. | Must Have | Security | ONTF Subsystem | Packet header filter | Sanitized packet header view | `PLANNED` |
+| **UFD-48** | The Geospatial Workspace (AIF-GEO) must render extracted GPS coordinates on an offline map canvas with uncertainty ellipses. | Must Have | Examiner | AIF-GEO Subsystem | Coordinate metadata payload | Leaflet/MapLibre offline map view | `PLANNED` |
+
+#### Findings & Examiner Review (UFD-49 to UFD-55)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-49** | UFD must provide a centralized Findings Inventory aggregating technical findings across AIF, AURAS, VISTA, ONTF, and CDVF. | Must Have | Examiner | Finding Service | Finding query stream | Unified finding list view | `PLANNED` |
+| **UFD-50** | Every displayed finding must link directly to its parent evidence exhibit UUID, source engine, detector ID, and model checkpoint SHA-256. | Must Have | Examiner | Finding Service | Finding provenance payload | Clickable finding provenance card | `PLANNED` |
+| **UFD-51** | UFD must enforce a 10-state formal review lifecycle: `NEW`, `UNASSIGNED`, `ASSIGNED`, `UNDER_REVIEW`, `CORROBORATED`, `CONTRADICTED`, `INCONCLUSIVE`, `REQUIRES_FURTHER_ANALYSIS`, `REVIEW_COMPLETED`, `SUPERSEDED`. | Must Have | Examiner / Reviewer| Review Engine | State transition request | Updated finding review state | `PLANNED` |
+| **UFD-52** | Authorized examiners must be able to record observations, methodology notes, and alternative explanations on candidate findings. | Must Have | Examiner | Finding Service | Annotation payload | Append-only examiner annotation | `PLANNED` |
+| **UFD-53** | Overwriting or deleting previously submitted examiner annotations is strictly prohibited; all revisions create versioned audit records. | Must Have | Security | Audit Logger | Edit annotation request | Versioned annotation entry | `PLANNED` |
+| **UFD-54** | Model confidence scores must strictly display their semantic type; raw uncalibrated logits must be watermarked with an explicit warning. | Must Have | Examiner | CDVF Subsystem | Model score payload | Watermarked uncalibrated badge | `PLANNED` |
+| **UFD-55** | Findings must display calibrated probabilities, OOD distance metrics, and 95% bootstrap confidence intervals where available. | Must Have | Examiner | CDVF Subsystem | Calibrated finding schema | Diagnostic metric breakdown | `PLANNED` |
+
+#### Unified Timeline Workspace (UFD-56 to UFD-62)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-56** | The Unified Timeline Workspace must aggregate multi-source event observations across images, audio, video, CCTV, and network captures. | Must Have | Examiner | CSTV Subsystem | Multi-modal timeline stream | Interactive case Gantt/timeline view | `PLANNED` |
+| **UFD-57** | Each timeline event must display raw timestamp, normalized UTC timestamp, timezone offset status, and uncertainty bounds ($\pm \Delta t$). | Must Have | Examiner | CSTV Subsystem | Event timing schema | Annotated temporal interval marker | `PLANNED` |
+| **UFD-58** | The timeline must visualize clock drift regression models $\delta(t)$ calculated by CSTV, showing clock skew across unsynchronized recorders. | Must Have | Examiner | CSTV Subsystem | Clock drift model payload | Clock skew regression curve | `PLANNED` |
+| **UFD-59** | Silently replacing raw timestamps with corrected estimates is strictly prohibited; corrected values must be presented alongside raw values. | Must Have | Examiner | CSTV Subsystem | Dual timestamp payload | Side-by-side timestamp comparison | `PLANNED` |
+| **UFD-60** | The timeline must highlight Allen interval algebra conflicts (e.g. video capture predating camera boot sequence) with prominent flags. | Must Have | Examiner | CSTV Subsystem | Temporal conflict records | Visual conflict interval highlight | `PLANNED` |
+| **UFD-61** | Clicking an event marker on the timeline must scrub the associated media player (audio/video) to the exact presentation timestamp. | Should Have | Examiner | UFD Shell | Timeline click event | Synchronized media player jump | `PLANNED` |
+| **UFD-62** | The timeline must include an explicit evidentiary disclaimer: *"Temporal proximity does not establish physical causality or co-presence"*. | Must Have | Legal / Security | UFD Shell | Viewport render event | Static legal disclaimer watermark | `PLANNED` |
+
+#### Cross-Modal Investigation Workspace (UFD-63 to UFD-69)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-63** | The Cross-Modal Workspace must visualize CDVF evidence correlation results across paired image, audio, and video exhibits. | Must Have | Examiner | CDVF Subsystem | Cross-modal correlation schema | Multi-modal correlation matrix | `PLANNED` |
+| **UFD-64** | The workspace must evaluate and present the five standard scenarios: Lip-Sync (A), Speaker Diarization (B), Photo-to-Video (C), AV Events (D), Compound Tampering (E). | Must Have | Examiner | CDVF Subsystem | Scenario evaluation stream | Scenario-specific diagnostic panels | `PLANNED` |
+| **UFD-65** | When correlation prerequisites fail, the system must display `CORRELATION_NOT_ESTABLISHED` and decouple modality views. | Must Have | Examiner | CDVF Subsystem | Prerequisite validation state | Decoupled independent modality view | `PLANNED` |
+| **UFD-66** | The workspace must classify inter-detector conflicts into the 7 standard taxonomy codes (`MODALITY_RESULT_CONFLICT`, etc.). | Must Have | Examiner | CDVF Subsystem | Conflict classification schema | Structured conflict alert card | `PLANNED` |
+| **UFD-67** | The Anti-Averaging Invariant must be enforced: multi-modal scores must never be averaged into a single monolithic percentage. | Must Have | Examiner | CDVF Subsystem | Multi-modal finding records | Directed Acyclic Graph (DAG) view | `PLANNED` |
+| **UFD-68** | Missing media tracks must be labeled `MODALITY_ABSENT` and must never be represented as authentic or negative forensic findings. | Must Have | Examiner | CDVF Subsystem | Single-track exhibit | Transparent missing-modality tag | `PLANNED` |
+| **UFD-69** | The workspace must display an explicit non-authenticity disclaimer: *"Cross-modal consistency does not autonomously prove evidence authenticity"*. | Must Have | Legal / Security | UFD Shell | Viewport render event | Permanent legal caveat notice | `PLANNED` |
+
+#### Evidence Integrity & Custody Workspace (UFD-70 to UFD-76)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-70** | The Integrity Workspace must display real-time fixity status across all 12 CEIPL verification gates (intake, readback, routine audit). | Must Have | Custodian | CEIPL Client | 12-gate verification stream | 12-gate fixity status checklist | `PLANNED` |
+| **UFD-71** | Any exhibit failing fixity verification must trigger an un-dismissible red banner and display current vs expected SHA-256 digests. | Must Have | Custodian / Examiner| CEIPL Client | Fixity failure payload | High-priority quarantine lockout UI | `PLANNED` |
+| **UFD-72** | Quarantined exhibits must be completely blocked from forensic processing tools until formal dual-control resolution. | Must Have | Security | Orchestrator | Tool dispatch request | Operation rejected: exhibit quarantined | `PLANNED` |
+| **UFD-73** | The workspace must render an interactive Merkle DAG lineage tree tracing master exhibits to derived crops, spectrograms, and masks. | Must Have | Examiner / Auditor | CEIPL Client | Merkle DAG query payload | Interactive node-link DAG graph | `PLANNED` |
+| **UFD-74** | The workspace must display RFC 3161 Trusted Timestamp tokens, Ed25519 digital signatures, and KMS key IDs for verified manifests. | Must Have | Custodian / Auditor | CEIPL Client | Signature verification payload| Verified cryptographic seal card | `PLANNED` |
+| **UFD-75** | Evidence Custodians must be able to initiate on-demand background fixity sweeps across selected case exhibits. | Should Have | Custodian | CEIPL Client | Fixity sweep trigger | Asynchronous sweep task + log | `PLANNED` |
+| **UFD-76** | All custody transfers, physical relocations, and digital access events must be committed directly to the CEIPL WORM ledger. | Must Have | Custodian | CEIPL Client | Custody transfer request | Signed custody transfer receipt | `PLANNED` |
+
+#### Reports & Dossier Workspace (UFD-77 to UFD-82)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-77** | The Report Workspace must provide an interactive review interface for Section 65B IEA / Section 63 BSA draft forensic dossiers. | Must Have | Examiner / Reviewer| UFREDF Subsystem | Dossier preview JSON payload | Courtroom report preview viewport | `PLANNED` |
+| **UFD-78** | Report generation must execute strictly via UFREDF backend services; client-side HTML-to-PDF assembly is strictly prohibited. | Must Have | SysAdmin | UFREDF Subsystem | Report compile request | Backend-generated signed PDF | `PLANNED` |
+| **UFD-79** | The workspace must enforce the formal report lifecycle: `DRAFT`, `GENERATED`, `UNDER_REVIEW`, `APPROVED`, `SIGNED`, `ISSUED`, `SUPERSEDED`, `WITHDRAWN`. | Must Have | Reviewer | UFREDF Subsystem | Lifecycle transition request | Validated report state transition | `PLANNED` |
+| **UFD-80** | Examiners must be able to select specific validated findings, reliability diagrams, and timeline charts for annexure inclusion. | Must Have | Examiner | UFREDF Subsystem | Annexure selection payload | Customized report manifest | `PLANNED` |
+| **UFD-81** | Bypassing formal review via an arbitrary "Mark as Issued" button is strictly prohibited; issuance requires valid dual digital signatures. | Must Have | Security | UFREDF Subsystem | Issuance attempt | Dual-signature verification check | `PLANNED` |
+| **UFD-82** | Issued reports must be committed to the CEIPL WORM vault with an immutable SHA-256 digest and downloadable verification receipt. | Must Have | Custodian | CEIPL / UFREDF | Sealed PDF bitstream | WORM-locked report artifact | `PLANNED` |
+
+#### Search, Notifications & Review Queue (UFD-83 to UFD-87)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-83** | UFD must provide a unified case-scoped search engine indexing Case IDs, Exhibit IDs, filenames, finding codes, and annotations. | Must Have | All Roles | Search Engine | Search query string | Scoped search result set | `PLANNED` |
+| **UFD-84** | Search indexing must strictly respect case RBAC; search autocomplete must never reveal filenames of restricted cases. | Must Have | Security | Search / RBAC | User session + query | Filtered zero-leakage search results | `PLANNED` |
+| **UFD-85** | The workbench must provide a real-time Notification Drawer alerting examiners to completed analyses, failures, and review assignments. | Must Have | Examiner / Reviewer| WebSocket / Polling | Event notification stream | Actionable notification cards | `PLANNED` |
+| **UFD-86** | The Notification Drawer must indicate backend data freshness and show the timestamp of the last successful synchronization. | Should Have | All Roles | UFD Shell | Sync status payload | Freshness indicator badge | `PLANNED` |
+| **UFD-87** | UFD must provide a prioritized Review Queue consolidating unassigned evidence, pending findings, and report approval tasks. | Must Have | Examiner / Reviewer| Task Service | Review queue query | Prioritized examiner task table | `PLANNED` |
+
+#### Accessibility & Usability (UFD-88 to UFD-93)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-88** | All workbench components must comply with W3C WCAG 2.2 Level AA accessibility standards, verified via automated and manual audits. | Must Have | All Roles | Frontend UI | Accessibility audit harness | Zero WCAG 2.2 AA violations | `PLANNED` |
+| **UFD-89** | All status badges and anomaly indicators must pair colour with explicit textual labels and distinct geometric iconography. | Must Have | All Roles | Frontend Design | Status property | Multi-modal accessible badge | `PLANNED` |
+| **UFD-90** | The entire workbench (including media scrubbers, zoom canvases, and modals) must be 100% operable via keyboard navigation. | Must Have | All Roles | Frontend UI | Keyboard event sequences | Visible focus indicators & navigation | `PLANNED` |
+| **UFD-91** | Media visualisations (waveforms, spectrograms, cadence plots) must provide alternative tabular data views accessible to screen readers. | Must Have | Examiner | Frontend UI | Chart data payload | Screen-reader accessible data table | `PLANNED` |
+| **UFD-92** | The UI must maintain a minimum contrast ratio of $4.5:1$ for normal text and $3:1$ for graphical UI components. | Must Have | All Roles | Frontend Design | Theme tokens | Contrast ratio compliance assertion | `PLANNED` |
+| **UFD-93** | The workbench layout must remain fully readable and functional under browser zoom up to $200\%$ without horizontal clipping. | Must Have | All Roles | Frontend UI | Responsive layout CSS | Non-clipped responsive layout | `PLANNED` |
+
+#### Security, Audit & Offline Operation (UFD-94 to UFD-97)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-94** | Media previews and streaming must execute via authorized backend proxies with time-limited tokens; internal paths are never exposed. | Must Have | Security | Media Proxy | Streaming request token | Secure, sanitized media stream | `PLANNED` |
+| **UFD-95** | All user inputs (case notes, annotations, search queries) must undergo strict HTML escaping to neutralize XSS injection attacks. | Must Have | Security | Input Sanitizer | Raw text input | Sanitized safe string | `PLANNED` |
+| **UFD-96** | Every state-changing user action (login, annotation, assignment, review, export) must emit an immutable audit event to CEIPL ledger. | Must Have | Security | Audit Logger | User action payload | Tamper-evident audit log record | `PLANNED` |
+| **UFD-97** | The dashboard must operate 100% locally in air-gapped environments; all UI assets, fonts, icons, and map tiles must be bundled locally. | Must Have | SysAdmin | Build Pipeline | Offline deployment bundle | Zero external asset network requests | `PLANNED` |
+
+#### Performance, Testing & Release Validation (UFD-98 to UFD-100)
+
+| ID | Requirement Description | Priority | User Role | Owning Subsystem | Input Contract | Expected Output | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-98** | Dashboard initial page load must complete in $\le 1.8\text{ s}$; Case Overview rendering across 500 exhibits must complete in $\le 500\text{ ms}$. | Must Have | All Roles | Frontend / API | Benchmark timing harness | Latency SLA compliance assertion | `PLANNED` |
+| **UFD-99** | The automated test suite must achieve $\ge 85\%$ code coverage across all frontend components, routing guards, and API clients. | Must Have | Dev Team | Test Harness | `npm run test:coverage` | Verified code coverage report | `PLANNED` |
+| **UFD-100**| End-to-end acceptance testing must pass 100% of the 7 core forensic investigation scenarios without unhandled exceptions. | Must Have | QA / Examiner | Test Harness | End-to-end Cypress test suite | 100% scenario clearance sign-off | `PLANNED` |
+
+---
+
+### 19.7 Non-Functional Requirements (UFD-NFR)
+- **UFD-NFR-01 (Initial Load Latency):** Workbench initial DOM load $\le 1.8\text{ s}$ over local gigabit LAN; time-to-interactive $\le 2.2\text{ s}$.
+- **UFD-NFR-02 (Case Overview Latency):** Rendering Case Overview with 500 exhibits and 2,000 findings $\le 500\text{ ms}$.
+- **UFD-NFR-03 (Scrubber Response Time):** Frame-by-frame video scrub latency $\le 50\text{ ms}$ for local video streams.
+- **UFD-NFR-04 (Browser Memory Ceiling):** Client-side browser tab memory footprint must not exceed $512\text{ MB}$ during 8-hour continuous examination sessions.
+- **UFD-NFR-05 (Concurrent Examiner Sessions):** Backend API gateway must support $\ge 50$ concurrent examiner sessions on standard 8-core server without degradation.
+- **UFD-NFR-06 (Air-Gapped Asset Bundling):** 100% of frontend JavaScript, CSS, typography (Inter font), Lucide icons, and map tiles must be bundled offline.
+- **UFD-NFR-07 (Data Freshness Polling):** Background task status polling must operate on an adaptive interval ($3\text{ s}$ active, $15\text{ s}$ idle) or local WebSocket.
+- **UFD-NFR-08 (Zero Client-Side Calculation):** All mathematical metrics, confidence intervals, and drift regression slopes must be computed by backend services.
+- **UFD-NFR-09 (Session Guard):** Inactive sessions terminate after $15\text{ minutes}$; unsaved form inputs are preserved in encrypted session storage.
+- **UFD-NFR-10 (WCAG 2.2 AA Certification):** Automated Lighthouse accessibility score $\ge 95/100$; zero critical Axe-core violations.
+
+---
+
+### 19.8 Acceptance Criteria & Verification Mapping (UFD-AC-01 through UFD-AC-20)
+
+| Criteria ID | Verification Topic | Success Metric / Verification Rule |
+| :--- | :--- | :--- |
+| **UFD-AC-01** | Non-Destructive Invariant | 100% of exhibit bitstreams retain identical SHA-256 before and after extensive UI examination. |
+| **UFD-AC-02** | Case Isolation Assertion | User assigned to Case A receives HTTP 403 Forbidden when requesting Case B endpoints via direct URL. |
+| **UFD-AC-03** | Dual-Control Override Gate | Quarantined exhibit cannot be released by a single user; second cryptographic signature required. |
+| **UFD-AC-04** | Fixity Alarm Trigger | Corrupted test bitstream triggers un-dismissible red quarantine banner in $< 500\text{ ms}$. |
+| **UFD-AC-05** | Honest Outage Presentation | Simulated outage of VISTA renders localized error card; AIF and AURAS modules remain fully functional. |
+| **UFD-AC-06** | Synchronized Image Zoom | Dual-canvas viewport pans and zooms synchronously; pixel coordinates match within $\pm 0.0$ pixels. |
+| **UFD-AC-07** | Audio Playback Guard | Zero automated audio playback on exhibit selection; explicit user click required. |
+| **UFD-AC-08** | Decoupled Video PTS/DTS | Video scrubber displays separate PTS and DTS tracks; B-frame reordering displays without alarm. |
+| **UFD-AC-09** | Offline Network Header Filter | General network view excludes raw HTTP payload bodies; headers and flow statistics only. |
+| **UFD-AC-10** | Offline Map Rendering | Map canvas renders offline vector tiles with bounding circles; zero outbound tile requests. |
+| **UFD-AC-11** | Uncalibrated Score Watermark | Model with `NOT_CALIBRATED` status renders prominent yellow watermark: `CAUTION: UNSCALED SCORE`. |
+| **UFD-AC-12** | CSTV Dual Timestamp Display | Corrected timestamp displayed alongside exact raw timestamp with explicit offset $\delta(t)$. |
+| **UFD-AC-13** | Anti-Averaging Fusion Invariant | Cross-modal finding displays independent DAG nodes; arithmetic mean percentage is strictly absent. |
+| **UFD-AC-14** | Missing Modality Transparency | Exhibit lacking audio track displays explicit tag `MODALITY_ABSENT` with zero negative scoring bias. |
+| **UFD-AC-15** | Append-Only Examiner Notes | Editing an examiner annotation appends a versioned record; previous text remains in audit history. |
+| **UFD-AC-16** | Backend Report Sovereignty | Report "Issue" action invokes UFREDF backend; client-side generated PDFs are rejected. |
+| **UFD-AC-17** | Air-Gap Network Audit | Automated packet inspection confirms zero outbound network sockets during 60-minute test run. |
+| **UFD-AC-18** | Keyboard-Only Navigation | Complete investigation workflow (Case -> Evidence -> Findings -> Report) operable via keyboard alone. |
+| **UFD-AC-19** | Non-Colour Status Verification | Monochrome screen test confirms all status states remain identifiable via text and icons. |
+| **UFD-AC-20** | Latency SLA Compliance | Case Overview renders in $\le 500\text{ ms}$; initial dashboard load completes in $\le 1.8\text{ s}$. |
+
+---
+
+### 19.9 Dependency & Risk Register
+
+| Risk ID | Risk Description | Severity | Likelihood | Mitigation Strategy |
+| :--- | :--- | :--- | :--- | :--- |
+| **UFD-RSK-01** | High-resolution video or large PCAP files exhaust client browser RAM | HIGH | HIGH | Implement server-side pagination, video chunk streaming, and virtualized list DOM recycling. |
+| **UFD-RSK-02** | Cross-case data leakage via direct ID manipulation (IDOR) | CRITICAL | LOW | Enforce strict case-token verification in FastAPI dependency injection and PostgreSQL RLS. |
+| **UFD-RSK-03** | Examiner mistakes temporary client-side form state for persisted findings | HIGH | MEDIUM | Provide clear dirty-form indicators, explicit save buttons, and autosave reconciliation drafts. |
+| **UFD-RSK-04** | Misleading green checkmark leads judge to assume complete authenticity | CRITICAL | MEDIUM | Codify semantic visual language: green indicates "Verified Integrity", never "Proven Authentic". |
+| **UFD-RSK-05** | Complex multi-modal timelines cause UI clutter and examiner confusion | MEDIUM | HIGH | Implement collapsible modality tracks, timeline search filters, and progressive disclosure. |
+| **UFD-RSK-06** | Browser zoom breaks accessibility compliance on dense forensic tables | MEDIUM | MEDIUM | Adopt responsive CSS flex/grid layouts with relative rem units; test zoom up to $200\%$. |
+
+---
+
+### 19.10 Security, Privacy & Air-Gap Compliance Requirements
+1. **Zero Outbound Asset Loading:** All web scripts, CSS stylesheets, UI icons, and WebAssembly decoders must be packaged inside the self-contained deployment bundle.
+2. **Context-Aware XSS Defense:** All dynamic text rendered in examiner notes, finding descriptions, or metadata tables must be HTML-escaped via React/Vue DOM binding or secure templates.
+3. **Secure Ephemeral Streaming:** Media exhibits are streamed via authenticated chunk proxies issuing short-lived ($60\text{ s}$) signed URLs; master WORM paths are never exposed.
+4. **Content Security Policy (CSP):** Enforce strict CSP headers: `default-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none';`.
+5. **OWASP ASVS Level 2 Verification:** Authentication, session management, access control, and input validation must satisfy OWASP ASVS v4.0.3 Level 2 requirements.
+
+---
+
+### 19.11 Requirement Traceability Summary
+
+| ID Range | Functional Requirement Group | Technical Section | Implementation Phase |
+| :--- | :--- | :--- | :--- |
+| **UFD-01 to UFD-06** | Architecture and Subsystem Boundaries | TRD §19.1 | Phase UFD-A0 / UFD-A1 |
+| **UFD-07 to UFD-13** | User Roles and Access Control | TRD §19.2 | Phase UFD-A2 |
+| **UFD-14 to UFD-20** | Global Overview and Dashboard Metrics | TRD §19.3 | Phase UFD-A2 |
+| **UFD-21 to UFD-28** | Case Management Workspace | TRD §19.4 | Phase UFD-A2 |
+| **UFD-29 to UFD-36** | Evidence Inventory and Detail | TRD §19.5 | Phase UFD-A3 |
+| **UFD-37 to UFD-48** | Modality-Specific Workspaces | TRD §19.6 | Phase UFD-A4 |
+| **UFD-49 to UFD-55** | Findings and Examiner Review | TRD §19.7 | Phase UFD-A5 |
+| **UFD-56 to UFD-62** | Unified Timeline Workspace | TRD §19.8 | Phase UFD-A6 |
+| **UFD-63 to UFD-69** | Cross-Modal Investigation Workspace | TRD §19.9 | Phase UFD-A7 |
+| **UFD-70 to UFD-76** | Evidence Integrity and Custody Workspace | TRD §19.10 | Phase UFD-A7 |
+| **UFD-77 to UFD-82** | Reports and Dossier Workspace | TRD §19.11 | Phase UFD-A8 |
+| **UFD-83 to UFD-87** | Search, Notifications and Review Queue | TRD §19.12 | Phase UFD-A9 |
+| **UFD-88 to UFD-93** | Accessibility and Usability | TRD §19.13 | Phase UFD-A10 |
+| **UFD-94 to UFD-97** | Security, Audit and Offline Operation | TRD §19.14 | Phase UFD-A10 |
+| **UFD-98 to UFD-100**| Performance, Testing and Release Validation | TRD §19.15 | Phase UFD-A11 |

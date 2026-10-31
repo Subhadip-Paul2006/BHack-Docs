@@ -138,8 +138,22 @@ flowchart TD
         CA10 --> CA11["CDVF-A11: Continuous Regression, 24-Item Bundle & Release Readiness"]
     end
 
+    subgraph EIV_WORKSTREAM["🔒 CEIPL-EIV Evidence Integrity Verification Playbook"]
+        direction TB
+        EA0["CEIPL-EIV-00: Repo & Integrity Architecture Discovery"] --> EA1["CEIPL-EIV-01: Evidence Identity & Ingestion Contract"]
+        EA1 --> EA2["CEIPL-EIV-02: Pre-Decode Dual-Hashing Pipeline"]
+        EA2 --> EA3["CEIPL-EIV-03: Manifest & Cryptographic Attestation"]
+        EA3 --> EA4["CEIPL-EIV-04: WORM Vault & Immutable Storage"]
+        EA4 --> EA5["CEIPL-EIV-05: Integrity Verification Lifecycle"]
+        EA5 --> EA6["CEIPL-EIV-06: Tamper-Evident Custody Ledger"]
+        EA6 --> EA7["CEIPL-EIV-07: Derivative Lineage & Package Integrity"]
+        EA7 --> EA8["CEIPL-EIV-08: Independent Verification & Recovery"]
+        EA8 --> EA9["CEIPL-EIV-09: Cross-Subsystem & UFREDF Integration"]
+        EA9 --> EA10["CEIPL-EIV-10: Security, Performance & Release Readiness"]
+    end
+
     subgraph PLATFORM_DELIVERY["🚀 Platform Delivery & Legal Certification"]
-        A10 & VA13 & IA15 & NA13 & GA10 & CA11 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
+        A10 & VA13 & IA15 & NA13 & GA10 & CA11 & EA10 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
         P7 --> P8["Phase 8: Web Dashboard & Examiner Workbench"]
         P8 --> P9["Phase 9: Security Hardening & Air-Gapped Packaging"]
         P9 --> P10["Phase 10: Final Hackathon Demonstration & Release"]
@@ -262,6 +276,17 @@ flowchart TD
 | **CMMS-A7** | Rule-Based Consistency Analysis & Cross-Evidence Correlation | CMMS Consistency | `PLANNED` | CMMS-A6 Gate | 18-finding code engine, multi-source candidate timeline, CCTV recording window containment |
 | **CMMS-A8** | CEIPL Provenance Lineage, UFREDF Reporting & Sandbox Security | CMMS Core/Sec | `PLANNED` | CMMS-A7 Gate | RFC 8785 snapshot hashing, CEIPL DAG registration, Linux cgroup sandbox, Sec 63 BSA annexure |
 | **CMMS-A9** | Testing Suite, Adversarial Fixtures, Benchmarking & Release | Validation/Release | `PLANNED` | CMMS-A8 Gate | 500-fixture corpus, malformed file fuzzing suite, latency SLAs, air-gap packet audit |
+| **CEIPL-EIV-00** | Repo & Integrity Architecture Discovery | CEIPL / EIV | `PLANNED` | Phase 0 Gate | Architectural gap analysis, boundary specs |
+| **CEIPL-EIV-01** | Evidence Identity & Acquisition Contract | CEIPL / EIV | `PLANNED` | EIV-00 Gate | Decoupled 10-entity UUIDs, Pydantic v2 contracts |
+| **CEIPL-EIV-02** | Pre-Decode Dual-Hashing Pipeline | CEIPL / EIV | `PLANNED` | EIV-01 Gate | Streaming SHA-256 + SHA-512, 4MB Merkle trees |
+| **CEIPL-EIV-03** | Manifest & Cryptographic Attestation | CEIPL / EIV | `PLANNED` | EIV-02 Gate | RFC 8785 JCS, Ed25519 signer, RFC 3161 TSA |
+| **CEIPL-EIV-04** | WORM Vault & Immutable Storage | CEIPL / EIV | `PLANNED` | EIV-03 Gate | POSIX 0400, S3 Object Lock Compliance Mode |
+| **CEIPL-EIV-05** | Integrity Verification Lifecycle | CEIPL / EIV | `PLANNED` | EIV-04 Gate | Readback gate, Celery fixity, quarantine engine |
+| **CEIPL-EIV-06** | Tamper-Evident Custody Ledger | CEIPL / EIV | `PLANNED` | EIV-05 Gate | Append-only hash chain, DB triggers, daily anchors |
+| **CEIPL-EIV-07** | Derivative Lineage & Package Integrity | CEIPL / EIV | `PLANNED` | EIV-06 Gate | Merkle DAG, multi-file manifests, traversal defense |
+| **CEIPL-EIV-08** | Independent Verification & Recovery | CEIPL / EIV | `PLANNED` | EIV-07 Gate | Standalone zero-PyPI CLI, 15 REST APIs, restore runbook |
+| **CEIPL-EIV-09** | Cross-Subsystem & UFREDF Integration | CEIPL / EIV | `PLANNED` | EIV-08 Gate | Engine intake adapters, Section 63 BSA PDF dossier |
+| **CEIPL-EIV-10** | Security, Performance & Release Readiness | CEIPL / EIV | `PLANNED` | EIV-09 Gate | 16-mutation test suite, 500 fixtures, air-gap Docker |
 | **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15, NA13, GA10, CDVF-A11 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
 | **Phase 8** | Web Dashboard & Examiner Workbench | UI / Presentation | `PLANNED` | Phase 7 Gate | Next.js interactive UI, multi-modal waveform viewer |
 | **Phase 9** | Security Hardening & Air-Gapped Packaging | DevOps / Security | `PLANNED` | Phase 8 Gate | Offline Docker containers, POSIX 0400 WORM scripts |
@@ -6753,3 +6778,435 @@ Every Audio Edit and Splice Localisation requirement (`AESL-01` through `AESL-90
 | **AESL-89** | Controlled 500-Fixture Evaluation Dataset | PRD §17.6 | TRD §18.15 | **AURAS-AESL-10** | `AESL-CP-10-01` | 500 ground-truth fixtures evaluated | `PLANNED` |
 | **AESL-90** | Region-Level IoU & Boundary MAE Metrics | PRD §17.6 | TRD §18.15 | **AURAS-AESL-10** | `AESL-CP-10-02` | $\text{tIoU} \ge 0.75$, $\text{MAE} \le 15\text{ms}$ | `PLANNED` |
 
+## 18. Dedicated Evidence Integrity Verification Engineering Playbook (CEIPL-EIV-00 through CEIPL-EIV-10)
+
+```mermaid id="eivroadmap"
+flowchart TD
+    E0["CEIPL-EIV-00: Repo & Integrity Architecture Discovery"] --> E1["CEIPL-EIV-01: Evidence Identity & Ingestion Contract"]
+    E1 --> E2["CEIPL-EIV-02: Pre-Decode Dual-Hashing Pipeline"]
+    E2 --> E3["CEIPL-EIV-03: Manifest & Cryptographic Attestation"]
+    E3 --> E4["CEIPL-EIV-04: WORM Vault & Immutable Storage"]
+    E4 --> E5["CEIPL-EIV-05: Integrity Verification Lifecycle"]
+    E5 --> E6["CEIPL-EIV-06: Tamper-Evident Custody Ledger"]
+    E6 --> E7["CEIPL-EIV-07: Derivative Lineage & Package Integrity"]
+    E7 --> E8["CEIPL-EIV-08: Independent Verification & Recovery"]
+    E8 --> E9["CEIPL-EIV-09: Cross-Subsystem & UFREDF Integration"]
+    E9 --> E10["CEIPL-EIV-10: Security, Performance & Release Readiness"]
+```
+
+---
+
+### Phase CEIPL-EIV-00: Repository and Integrity Architecture Discovery
+- **Objective:** Audit existing CEIPL hashing, custody, and storage implementations across the repository; map architectural boundaries and prevent redundant hashing service duplication in engine layers.
+- **Prerequisites:** Completion of Phase 0 platform architecture baseline; access to all current ingestion code and database migrations.
+- **Scope:** Repository-wide audit of hash functions, storage drivers, database tables, and Celery tasks related to evidence intake.
+- **Detailed Tasks:**
+  1. Inspect existing `src/core/crypto/` and `src/core/storage/` modules for current SHA-256 and SHA3-512 implementations.
+  2. Map intake paths across AIF, AURAS, VISTA, and ONTF to verify whether any engine decodes media before initial hashing.
+  3. Validate database models (`evidence_items`, `hash_records`, `custody_events`) against decoupled 10-entity identity architecture.
+  4. Formulate gap analysis report between current implementation and EIV requirements register (`EIV-01` to `EIV-100`).
+- **Dependencies:** Platform core repository structure.
+- **Deliverables:** Architectural gap analysis document; component boundary specification; technical discovery report.
+- **Unit Tests:** `tests/test_eiv_discovery.py` asserting all ingestion entry points use CEIPL.
+- **Integration Tests:** Repository-wide import linter asserting zero standalone hashlib usage in engine routers.
+- **Security & Invariant Tests:** Verify no hardcoded cryptographic keys exist in source tree.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :--- |
+  | `EIV-CP-00-01` | CEIPL Service Mapping | 100% of engine ingestion paths trace to CEIPL | Re-route non-compliant intake routes | `PLANNED` |
+  | `EIV-CP-00-02` | Pre-Decode Verification | 0 media decoders invoked prior to intake hashing | Block engine intake until refactored | `PLANNED` |
+  | `EIV-CP-00-03` | Identity Decoupling Audit | Identification independent of physical storage URN | Refactor database schemas | `PLANNED` |
+  | `EIV-CP-00-04` | Secret Scan Audit | 0 plaintext private keys or API tokens in codebase | Immediate key revocation and purge | `PLANNED` |
+- **Acceptance Criteria:** Architectural gap analysis signed off; zero duplicate hashing logic in AIF, AURAS, or VISTA.
+- **Exit Criteria:** Clear development path established for Phase `CEIPL-EIV-01`.
+- **Risks & Mitigations:** Hidden direct disk writes in external libraries (e.g. OpenCV / FFmpeg). *Mitigation:* Sandbox file access with read-only file descriptors.
+- **Current Status:** `NOT_STARTED`
+
+---
+
+### Phase CEIPL-EIV-01: Evidence Identity and Acquisition Contract
+- **Objective:** Implement the decoupled 10-entity evidence identity model, Pydantic v2 registration contracts, and duplicate evidence handling logic.
+- **Prerequisites:** Phase `CEIPL-EIV-00` sign-off.
+- **Scope:** Ingestion request handling, UUIDv7 assignment, case scoping, and database registration schemas.
+- **Detailed Tasks:**
+  1. Implement `EvidenceRegistrationRequest` and `EvidenceRegistrationResponse` in Pydantic v2 with strict validation.
+  2. Implement decoupled UUIDv7 generators for `evidence_id`, `acquisition_id`, `file_id`, and `manifest_id`.
+  3. Implement case scoping validation ensuring all registered evidence binds strictly to an active `case_id`.
+  4. Implement duplicate evidence handling preserving independent acquisition IDs and custody contexts for identical files.
+- **Dependencies:** PostgreSQL database, Pydantic v2.
+- **Deliverables:** `src/core/eiv/identity.py`, `src/core/eiv/contracts.py`, PostgreSQL registration migrations.
+- **Unit Tests:** `test_evidence_identity_decoupling.py`, `test_uuidv7_generation.py`.
+- **Integration Tests:** `test_duplicate_intake_preserves_distinct_provenance.py`.
+- **Security & Invariant Tests:** Enforce cross-case tenant isolation; assert cross-case queries return 403 Forbidden.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :--- |
+  | `EIV-CP-01-01` | UUIDv7 Uniqueness | 1,000,000 generated IDs exhibit 0 collisions | Halt intake registration engine | `PLANNED` |
+  | `EIV-CP-01-02` | Storage Key Decoupling | Renaming/relocating storage object leaves ID intact | Database schema refactoring | `PLANNED` |
+  | `EIV-CP-01-03` | Duplicate Ingestion Isolation| Identical files receive distinct `evidence_id` | Fix deduplication logic | `PLANNED` |
+  | `EIV-CP-01-04` | Case Scoping Enforcement | Rejects registration requests lacking valid `case_id` | HTTP 422 Unprocessable Entity | `PLANNED` |
+- **Acceptance Criteria:** Full 10-entity identity model validated; duplicate files preserve separate provenance.
+- **Exit Criteria:** Ingestion contracts ready for streaming hashing integration.
+- **Risks & Mitigations:** High UUID generation load during bulk seizures. *Mitigation:* High-performance C-accelerated UUIDv7 library.
+- **Current Status:** `NOT_STARTED`
+
+---
+
+### Phase CEIPL-EIV-02: Pre-Decode Dual-Hashing Pipeline
+- **Objective:** Construct the streaming dual-hashing pipeline (SHA-256 + SHA-512 / SHA3-256) with bounded memory buffers and chunk Merkle tree construction.
+- **Prerequisites:** Phase `CEIPL-EIV-01` contracts.
+- **Scope:** Core cryptographic hashing, bounded memory streaming buffer ($\le 64 \text{ MB}$), chunk partitioning (4 MB), and binary Merkle tree generator.
+- **Detailed Tasks:**
+  1. Implement `StreamingDualHasher` consuming chunked byte streams via 64 KB buffers with NIST FIPS 180-4 algorithms.
+  2. Implement secondary algorithm agility supporting NIST FIPS 202 SHA3-256 Keccak sponge.
+  3. Implement stream interruption handling with clean temporary file purge and failure logging.
+  4. Implement `ChunkMerkleTreeBuilder` generating RFC 6962 compliant Merkle trees and $O(\log N)$ inclusion proofs.
+- **Dependencies:** OpenSSL, Python `hashlib` / `cryptography`.
+- **Deliverables:** `src/core/eiv/hasher.py`, `src/core/eiv/merkle.py`, streaming hash benchmark suite.
+- **Unit Tests:** `test_known_answer_vectors_fips180_4.py`, `test_merkle_tree_construction.py`.
+- **Integration Tests:** `test_streaming_throughput_large_file.py` (50 GB test file).
+- **Security & Invariant Tests:** Memory profiling asserting RAM stays $\le 64 \text{ MB}$ across 50 GB stream.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :--- |
+  | `EIV-CP-02-01` | NIST FIPS KAT Vectors | 100% pass rate on NIST CAVP known-answer vectors | Invalidate and rebuild hasher | `PLANNED` |
+  | `EIV-CP-02-02` | Bounded Memory Footprint | Peak RAM $\le 64 \text{ MB}$ during 50 GB hashing | Profile and eliminate memory leaks | `PLANNED` |
+  | `EIV-CP-02-03` | Streaming Throughput SLA | Sustained throughput $\ge 150 \text{ MB/s}$ on NVMe | Optimize chunk buffer size | `PLANNED` |
+  | `EIV-CP-02-04` | Merkle Proof Verification | 100% valid proofs on randomized chunk slices | Fix leaf/parent prefix hashing | `PLANNED` |
+- **Acceptance Criteria:** Dual hashes computed strictly before decoding; throughput $\ge 150 \text{ MB/s}$; memory bounded $\le 64 \text{ MB}$.
+- **Exit Criteria:** Hasher outputs ready for manifest binding and cryptographic signing.
+- **Risks & Mitigations:** CPU throttling during simultaneous multi-file intake. *Mitigation:* Multi-process worker pool for hashing.
+- **Current Status:** `NOT_STARTED`
+
+---
+
+### Phase CEIPL-EIV-03: Manifest and Cryptographic Attestation
+- **Objective:** Implement RFC 8785 JSON Canonicalization, detached Ed25519 digital signing, and RFC 3161 trusted timestamp attestation.
+- **Prerequisites:** Phase `CEIPL-EIV-02` hashing outputs.
+- **Scope:** Canonical serialization, detached manifest signatures, KMS lifecycle management, and online/offline TSA client.
+- **Detailed Tasks:**
+  1. Implement RFC 8785 JSON Canonicalization Scheme (JCS) serializer with deterministic key sorting and UTF-8 encoding.
+  2. Implement detached Ed25519 signer integration backed by OS credential store / PKCS#11 hardware keystore.
+  3. Implement RFC 3161 TSA client building ASN.1 `TimeStampReq` and validating `TimeStampResp` tokens.
+  4. Implement air-gapped field mode with local hardware clock attestation and deferred TSA stamping.
+- **Dependencies:** `cryptography`, ASN.1 parser (`pyasn1`), RFC 8785 library.
+- **Deliverables:** `src/core/eiv/manifest.py`, `src/core/eiv/signer.py`, `src/core/eiv/tsa.py`.
+- **Unit Tests:** `test_rfc8785_canonicalization.py`, `test_ed25519_detached_signing.py`.
+- **Integration Tests:** `test_tsa_token_verification_end_to_end.py`.
+- **Security & Invariant Tests:** Secret leakage scanner verifying 0 private keys present in manifests or logs.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :--- |
+  | `EIV-CP-03-01` | RFC 8785 Test Vectors | Deterministic canonical bytes match RFC 8785 test suite | Fix key sorting / number formatting | `PLANNED` |
+  | `EIV-CP-03-02` | Ed25519 Detached Signature | OpenSSL CLI independently verifies detached signature | Debug signature algorithm / padding | `PLANNED` |
+  | `EIV-CP-03-03` | RFC 3161 Imprint Match | TSA message imprint matches exact manifest SHA-256 | Reject invalid timestamp response | `PLANNED` |
+  | `EIV-CP-03-04` | Air-Gap Clock Fallback | Successful offline intake marked `LOCAL_UNTRUSTED_CLOCK`| Prevent unflagged local time use | `PLANNED` |
+- **Acceptance Criteria:** Manifests canonicalized deterministically; detached signatures verifiable; TSA tokens validated.
+- **Exit Criteria:** Manifests ready for WORM storage commitment.
+- **Risks & Mitigations:** TSA server unreachable in field operations. *Mitigation:* Graceful offline mode with deferred queuing.
+- **Current Status:** `NOT_STARTED`
+
+---
+
+### Phase CEIPL-EIV-04: WORM Vault and Immutable Storage
+- **Objective:** Deploy and enforce storage-level Write-Once Read-Many (WORM) preservation across local filesystems and S3-compatible object storage.
+- **Prerequisites:** Phase `CEIPL-EIV-03` sealed manifests.
+- **Scope:** POSIX `0400` read-only locking, Linux `chattr +i` immutability, S3 Object Lock (Compliance/Governance mode), and 7-zone storage layout.
+- **Detailed Tasks:**
+  1. Implement storage zone directory manager enforcing strict segregation across 7 logical zones.
+  2. Implement local POSIX WORM adapter applying read-only attributes (`0400`) and immutable flags.
+  3. Implement MinIO / S3 Object Lock adapter configuring Compliance Mode retention periods.
+  4. Implement legal hold management API applying indefinite retention locks to active litigation exhibits.
+  5. Build automated penetration test harness attempting unauthorized file overwrites and deletions.
+- **Dependencies:** Linux filesystem utilities, MinIO / AWS S3 SDK (`boto3`).
+- **Deliverables:** `src/core/storage/worm_vault.py`, `src/core/storage/zones.py`, WORM security harness.
+- **Unit Tests:** `test_worm_storage_permissions.py`, `test_storage_zone_isolation.py`.
+- **Integration Tests:** `test_s3_object_lock_compliance_mode.py`.
+- **Security & Invariant Tests:** Execute penetration suite attempting `rm`, `unlink`, and `open(..., 'w')` on vault exhibits; assert 100% rejection.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :--- |
+  | `EIV-CP-04-01` | Overwrite Rejection | 100% of write attempts on stored exhibits raise error | Halt storage service deployment | `PLANNED` |
+  | `EIV-CP-04-02` | Deletion Rejection | 100% of delete attempts during retention period fail | Fix POSIX / S3 Object Lock config | `PLANNED` |
+  | `EIV-CP-04-03` | Storage Zone Isolation | Zero cross-zone file leakage between raw and derived | Enforce strict folder permissions | `PLANNED` |
+  | `EIV-CP-04-04` | Legal Hold Enforcement | Retention lock non-expiring while legal hold active | Debug retention timer logic | `PLANNED` |
+- **Acceptance Criteria:** Storage-enforced immutability proven via automated penetration testing; legal hold verified.
+- **Exit Criteria:** Vault ready for post-write readback and lifecycle verification.
+- **Risks & Mitigations:** Storage admin root credentials used maliciously. *Mitigation:* Dual-custody administrative approval and remote audit logging.
+- **Current Status:** `NOT_STARTED`
+
+---
+
+### Phase CEIPL-EIV-05: Integrity Verification Lifecycle
+- **Objective:** Implement the 12 mandatory lifecycle verification gates, automated post-write readback, continuous fixity scheduling, and quarantine workflows.
+- **Prerequisites:** Phase `CEIPL-EIV-04` WORM storage vault.
+- **Scope:** Readback verification gate, retrieval verification, Celery beat fixity scheduler, quarantine state machine, and incident logging.
+- **Detailed Tasks:**
+  1. Implement synchronous post-write readback worker verifying raw vault bytes against intake `HashRecord`.
+  2. Implement Celery beat periodic fixity task auditing archived evidence on a 30-day rolling cycle.
+  3. Implement `VerificationRunResult` structured logger emitting 10-dimension evaluation outcomes.
+  4. Implement fail-closed quarantine state machine locking corrupted objects and returning HTTP 423 Locked.
+  5. Implement `IntegrityIncident` logger capturing expected vs observed digests and byte discrepancy offsets.
+- **Dependencies:** Celery, Redis, PostgreSQL.
+- **Deliverables:** `src/core/eiv/verifier.py`, `src/core/eiv/fixity_tasks.py`, `src/core/eiv/quarantine.py`.
+- **Unit Tests:** `test_post_write_readback_gate.py`, `test_quarantine_state_transition.py`.
+- **Integration Tests:** `test_scheduled_fixity_audit_batch.py`, `test_incident_logging.py`.
+- **Security & Invariant Tests:** Verify database constraint prohibits updating reference hash with corrupted value.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :--- |
+  | `EIV-CP-05-01` | Readback Gate Gating | 100% of mismatched uploads quarantined before analysis | Block downstream engine pipeline | `PLANNED` |
+  | `EIV-CP-05-02` | Fixity Throughput SLA | Fixity worker audits $\ge 200 \text{ MB/s}$ on NVMe | Parallelize worker threads | `PLANNED` |
+  | `EIV-CP-05-03` | Quarantine Lockout | Quarantined exhibits return HTTP 423 on all read APIs | Fix API authorization middleware | `PLANNED` |
+  | `EIV-CP-05-04` | In-Place Preservation | Corrupted bytes retained with `.corrupt` extension | Fix deletion bug in error handler | `PLANNED` |
+  | `EIV-CP-05-05` | Zero Silent Repair | 0 instances of automatic digest overwriting | Assert hard database constraint | `PLANNED` |
+- **Acceptance Criteria:** All 12 lifecycle verification gates operational; fixity audit sustained $\ge 200 \text{ MB/s}$; quarantine isolation proven.
+- **Exit Criteria:** System ready for custody ledger integration.
+- **Risks & Mitigations:** Fixity job saturating disk I/O during business hours. *Mitigation:* Nice-level disk I/O scheduling and off-peak execution.
+- **Current Status:** `NOT_STARTED`
+
+---
+
+### Phase CEIPL-EIV-06: Tamper-Evident Custody Ledger
+- **Objective:** Implement the append-only, hash-chained chain-of-custody ledger with monotonic sequence numbers and daily Merkle root anchoring.
+- **Prerequisites:** Phase `CEIPL-EIV-05` lifecycle events.
+- **Scope:** Custody event dispatcher, hash chaining algorithm ($E_i = H(\text{Event}_i \parallel E_{i-1})$), database immutability triggers, and chain auditor.
+- **Detailed Tasks:**
+  1. Implement `CustodyLedgerService` tracking 21 defined evidence lifecycle events.
+  2. Implement cryptographic event chaining binding canonical RFC 8785 event representations to predecessor digests.
+  3. Implement PostgreSQL trigger `trg_custody_immutable` blocking `UPDATE` and `DELETE` on `eiv_custody_events`.
+  4. Implement `CustodyChainAuditor` rapidly validating complete chain continuity and detecting gaps or modifications.
+  5. Implement periodic Merkle root anchoring job creating signed daily custody blocks.
+- **Dependencies:** PostgreSQL triggers, RFC 8785 serializer, Ed25519 signer.
+- **Deliverables:** `src/core/eiv/custody_ledger.py`, `src/core/eiv/custody_auditor.py`, database triggers.
+- **Unit Tests:** `test_custody_event_chaining.py`, `test_custody_sequence_monotonicity.py`.
+- **Integration Tests:** `test_custody_chain_tamper_detection.py`, `test_daily_anchor_signing.py`.
+- **Security & Invariant Tests:** Attempt direct SQL `UPDATE` and `DELETE` on custody table; assert database exception raised.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :--- |
+  | `EIV-CP-06-01` | Chained Hash Accuracy | Recalculated event hashes match 100% across chain | Fix canonical event serialization | `PLANNED` |
+  | `EIV-CP-06-02` | Monotonic Sequence | Zero sequence number gaps under 200 concurrent writes | Refactor atomic sequence counter | `PLANNED` |
+  | `EIV-CP-06-03` | Tamper Detection Rate | 100% detection rate when any historical event is edited | Invalidate custody audit status | `PLANNED` |
+  | `EIV-CP-06-04` | DB Immutability Trigger| SQL UPDATE and DELETE operations raise hard error | Re-apply database trigger | `PLANNED` |
+- **Acceptance Criteria:** Custody ledger completely append-only; tampering detected with 100% accuracy; sequence gaps impossible.
+- **Exit Criteria:** Ledger ready for derivative artifact lineage binding.
+- **Risks & Mitigations:** Database sequence contention under high concurrent writes. *Mitigation:* Advisory locks and batch sequence reservation.
+- **Current Status:** `NOT_STARTED`
+
+---
+
+### Phase CEIPL-EIV-07: Derivative Lineage and Package Integrity
+- **Objective:** Construct the Merkle Directed Acyclic Graph (DAG) for derivative artifact provenance and implement multi-file evidence package verification.
+- **Prerequisites:** Phase `CEIPL-EIV-06` custody ledger.
+- **Scope:** Derivative registration API, parent-child cryptographic binding, multi-file package manifests, and path traversal defense.
+- **Detailed Tasks:**
+  1. Implement `DerivativeRegistry` binding output artifacts to parent exhibit IDs and pre-transformation parent hashes.
+  2. Implement execution command and tool version tracking (FFmpeg, OpenCV, PyAV commit hashes).
+  3. Implement `PackageManifestBuilder` calculating top-level Merkle roots over multi-file export collections.
+  4. Implement strict path normalization blocking directory traversal (`../`) and unsafe symbolic links.
+- **Dependencies:** `src/core/eiv/merkle.py`, PostgreSQL lineage tables.
+- **Deliverables:** `src/core/eiv/lineage.py`, `src/core/eiv/package.py`, path sanitization middleware.
+- **Unit Tests:** `test_derivative_parent_hash_binding.py`, `test_package_path_traversal_defense.py`.
+- **Integration Tests:** `test_multi_generational_lineage_traversal.py`.
+- **Security & Invariant Tests:** Penetration tests injecting malicious symlinks and traversal payloads into ZIP/TAR packages.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :--- |
+  | `EIV-CP-07-01` | Parent Hash Binding | 100% of derivative rows verify against parent exhibit | Halt derivative registration | `PLANNED` |
+  | `EIV-CP-07-02` | Traversal Defense | 100% of path traversal payloads rejected with error | Block archive extraction | `PLANNED` |
+  | `EIV-CP-07-03` | Package Merkle Root | Standalone calculation matches package manifest root | Invalidate package manifest | `PLANNED` |
+  | `EIV-CP-07-04` | Lineage Graph Integrity | Recursive graph traversal back to original exhibit passes | Reject orphaned derivative | `PLANNED` |
+- **Acceptance Criteria:** Multi-generational Merkle DAG operational; multi-file package manifests verified; path traversal eliminated.
+- **Exit Criteria:** Evidence packages ready for standalone offline verification.
+- **Risks & Mitigations:** Complex deep lineage graphs causing slow report queries. *Mitigation:* Indexed recursive CTEs in PostgreSQL.
+- **Current Status:** `NOT_STARTED`
+
+---
+
+### Phase CEIPL-EIV-08: Independent Verification and Recovery
+- **Objective:** Build the standalone portable offline verifier CLI, disaster recovery workflow, and core REST API endpoints.
+- **Prerequisites:** Phase `CEIPL-EIV-07` packages and manifests.
+- **Scope:** Standalone zero-dependency Python verifier, 14 sequential audit checks, backup restoration validation, and 15 FastAPI routes.
+- **Detailed Tasks:**
+  1. Build self-contained standalone CLI script `verify_evidence.py` requiring zero external PyPI packages.
+  2. Implement 14 sequential integrity checks in the verifier (hashes, Merkle, Ed25519, TSA, custody, lineage).
+  3. Implement disaster recovery workflow restoring validated backup replicas following storage incidents.
+  4. Expose complete EIV capabilities via 15 versioned FastAPI endpoints with OpenAPI 3.1 documentation.
+- **Dependencies:** FastAPI, Python standard library (CLI).
+- **Deliverables:** `tools/verify_evidence.py`, `src/api/routes/eiv.py`, disaster recovery runbook.
+- **Unit Tests:** `test_standalone_verifier_checks.py`, `test_eiv_rest_api_endpoints.py`.
+- **Integration Tests:** `test_air_gapped_verification_execution.py`, `test_backup_restoration_workflow.py`.
+- **Security & Invariant Tests:** Run standalone verifier on air-gapped machine with network interfaces disabled (`ip link set down`).
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :--- |
+  | `EIV-CP-08-01` | Standalone Zero-PyPI | CLI executes successfully on clean Python 3.10+ install | Remove non-standard dependencies | `PLANNED` |
+  | `EIV-CP-08-02` | 14-Check Coverage | CLI catches all 16 mutation test cases with precision | Debug audit check logic | `PLANNED` |
+  | `EIV-CP-08-03` | Backup Restore Gate | Restoring unverified backup raises hard validation error | Abort restoration job | `PLANNED` |
+  | `EIV-CP-08-04` | REST API Conformance | All 15 endpoints return typed Pydantic v2 schemas | Fix OpenAPI / Pydantic mismatches | `PLANNED` |
+- **Acceptance Criteria:** Standalone verifier runs air-gapped; backup restoration verified; all 15 REST endpoints operational.
+- **Exit Criteria:** Subsystem ready for cross-engine forensic integration.
+- **Risks & Mitigations:** OpenSSL version drift across Linux distributions affecting CLI. *Mitigation:* Use pure Python Ed25519/SHA implementations as fallback.
+- **Current Status:** `NOT_STARTED`
+
+---
+
+### Phase CEIPL-EIV-09: Cross-Subsystem and UFREDF Integration
+- **Objective:** Integrate EIV across all forensic engines (AIF, AURAS, VISTA, ONTF, CMMS, CSTV) and bind verification records into court-admissible UFREDF reports.
+- **Prerequisites:** Phase `CEIPL-EIV-08` APIs and verifier.
+- **Scope:** Engine intake wrappers, metadata binding, and automated assembly of Section 63 BSA / 65B IEA certified technical dossiers.
+- **Detailed Tasks:**
+  1. Refactor AIF, AURAS, VISTA, and ONTF intake pipelines to consume CEIPL evidence references.
+  2. Integrate CMMS metadata snapshot hashing and CSTV timeline conflict graph provenance into CEIPL.
+  3. Implement UFREDF evidence schedule generator rendering Section 63 BSA compliance certificates.
+  4. Implement visual evidence annexures embedding QR codes linking to standalone offline verifier packages.
+- **Dependencies:** UFREDF reporting subsystem, WeasyPrint, Jinja2.
+- **Deliverables:** `src/reporting/eiv_schedule.py`, engine integration adapters, sample Section 63 BSA PDF dossier.
+- **Unit Tests:** `test_engine_ceipl_integration.py`, `test_ufredf_evidence_schedule_generation.py`.
+- **Integration Tests:** `test_end_to_end_multimodal_case_report.py`.
+- **Security & Invariant Tests:** Assert report compilation fails if any linked derivative hash fails validation.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :--- |
+  | `EIV-CP-09-01` | Cross-Engine Adoption | 100% of forensic engines register derived artifacts in EIV | Reject unregistered outputs | `PLANNED` |
+  | `EIV-CP-09-02` | Section 63 BSA Schedule| PDF evidence schedule contains full hash tables and keys | Legal dossier rejected | `PLANNED` |
+  | `EIV-CP-09-03` | Report Gate Validation | Mismatched derivative halts report compilation | Flag integrity exception in UI | `PLANNED` |
+  | `EIV-CP-09-04` | QR Code Offline Linkage| Scanning QR code launches verification of export package| Regenerate QR code payload | `PLANNED` |
+- **Acceptance Criteria:** All forensic engines integrated; court-certified Section 63 BSA dossiers generated with cryptographic audit annexures.
+- **Exit Criteria:** System ready for release security hardening and performance benchmarking.
+- **Risks & Mitigations:** Large PDF dossier size due to extensive hash tables. *Mitigation:* Compact tabular formatting and vector annexures.
+- **Current Status:** `NOT_STARTED`
+
+---
+
+### Phase CEIPL-EIV-10: Security, Performance and Release Readiness
+- **Objective:** Execute full 16-case mutation test harness, 500-fixture evaluation benchmark, 7-tier RBAC security audit, and air-gapped container packaging.
+- **Prerequisites:** Phase `CEIPL-EIV-09` complete integration.
+- **Scope:** Adversarial testing, hardware throughput benchmarking, RBAC privilege matrix enforcement, and final release packaging.
+- **Detailed Tasks:**
+  1. Execute automated 16-case mutation test suite; verify 100% detection rate across all mutation topologies.
+  2. Execute 500-fixture evaluation benchmark with diverse media files, CCTV exports, and corrupted streams.
+  3. Conduct penetration test on 7-tier RBAC system ensuring Operators cannot alter WORM retention or custody records.
+  4. Build air-gapped Docker Compose release bundle verified with zero outbound network traffic.
+- **Dependencies:** Docker, Docker Compose, benchmark fixtures.
+- **Deliverables:** Comprehensive EIV security audit report; benchmark validation dossier; air-gapped release image.
+- **Unit Tests:** `tests/benchmarks/test_eiv_500_fixtures.py`.
+- **Integration Tests:** `tests/security/test_rbac_privilege_escalation.py`.
+- **Security & Invariant Tests:** Run air-gapped sandbox deployment with network egress blocked via iptables; verify 100% functionality.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :--- |
+  | `EIV-CP-10-01` | 16-Mutation Suite Pass | 100% detection rate on 16 mutation test cases | Release gate blocked | `PLANNED` |
+  | `EIV-CP-10-02` | 500-Fixture Benchmark | 0 false passes on corrupted files across 500 fixtures | Debug verification sensitivity | `PLANNED` |
+  | `EIV-CP-10-03` | RBAC Isolation Gate | 0 unauthorized state changes across 7 defined roles | Fix role permission matrix | `PLANNED` |
+  | `EIV-CP-10-04` | Air-Gap Deployment | Complete platform operates with 0 outbound network bytes | Release packaging rejected | `PLANNED` |
+- **Acceptance Criteria:** 100% pass on mutation and benchmark suites; RBAC security validated; air-gapped container verified.
+- **Exit Criteria:** Production-ready EIV capability integrated into PS-05 platform release.
+- **Risks & Mitigations:** Hardware differences in field workstations affecting throughput. *Mitigation:* Auto-tuning chunk buffers based on system RAM.
+- **Current Status:** `NOT_STARTED`
+
+## 19. EIV Master Requirement Traceability Matrix (EIV-01 through EIV-100)
+
+| Req ID | Requirement Summary | PRD Reference | TRD Reference | Implementation Phase | Checkpoint ID | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **EIV-01** | CEIPL Platform Ownership: Primary ownership in CEIPL shared platform layer | PRD §18.7 | TRD §19.1 | **CEIPL-EIV-00** | `EIV-CP-00-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-02** | Non-Destructive Raw Bitstream Preservation: Zero alteration upon intake | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-03** | Engine-Independent Execution: Runs without media decoder dependencies | PRD §18.7 | TRD §19.1 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-04** | Separation of Integrity from Authenticity: Distinct semantic output states | PRD §18.7 | TRD §18.9, §19.8 | **CEIPL-EIV-00** | `EIV-CP-00-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-05** | Zero Silent Repair: Rejection of automatic rehashing or silent overwriting | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-04** | `EIV-CP-05-05` | Automated Test / Audit | `PLANNED` |
+| **EIV-06** | Universal Modality Support: Uniform intake of image, video, audio, PCAP | PRD §18.7 | TRD §19.1 | **CEIPL-EIV-01** | `EIV-CP-01-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-07** | Permanent UUIDv7 Evidence Identification: Time-sortable unique Evidence ID | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-08** | Name & Path Independence: Identity invariant to filename or folder changes | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-09** | Storage Key Decoupling: Identity decoupled from physical storage URN | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-10** | Algorithm-Independent Identity: Identity unaffected by algorithm upgrades | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-11** | Ten-Entity Entity Separation: Distinct IDs across Case, Evidence, File, etc. | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-12** | Duplicate Evidence Provenance Preservation: Separate custody for duplicate files | PRD §18.7 | TRD §18.5, §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-13** | Storage-Level Deduplication Isolation: Shared blocks without merging metadata | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-04** | `EIV-CP-04-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-14** | Case Scoping & Tenant Isolation: Evidence strictly scoped to authorized Case ID | PRD §18.7 | TRD §19.14 | **CEIPL-EIV-01** | `EIV-CP-01-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-15** | Pre-Decode Streaming Hashing: Stream bytes to hasher before decoding | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-16** | Mandatory Dual-Hashing Pipeline: Concurrent SHA-256 and SHA-512 calculation | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-17** | Secondary Algorithm Agility (SHA3-256): Configurable Keccak sponge digest | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-18** | Legacy Hash Segregation: MD5/SHA-1 barred as primary integrity references | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-19** | Bounded Memory Streaming Buffer: Memory consumption bounded to <= 64 MB | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-20** | Byte-Count Verification: Exact byte length verified against content-length | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-21** | Stream Interruption & Abort Cleanup: Safe cleanup on aborted network streams | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-22** | Hash Computation Performance SLA: Sustained throughput >= 150 MB/s | PRD §18.7 | TRD §19.17 | **CEIPL-EIV-02** | `EIV-CP-02-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-23** | Strongly Typed Hash Result Contract: Pydantic v2 HashRecord serialization | PRD §18.7 | TRD §12.10, §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-24** | Configurable Chunking Engine: Fixed-size 4MB or 16MB chunk slicing | PRD §18.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-25** | Deterministic Chunk Hashing: SHA-256 computed for each indexed chunk | PRD §18.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-26** | Merkle Tree Construction: Balanced binary tree with RFC 6962 prefixes | PRD §18.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-27** | Merkle Inclusion Proof Generation: Verifiable O(log N) inclusion proofs | PRD §18.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-28** | Partial File & Segment Verification: Verify specific byte ranges of CCTV/PCAP | PRD §18.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-29** | Whole-File Primacy Rule: Merkle trees supplement, never replace whole-file digest | PRD §18.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-30** | Versioned Evidence Manifest Schema: Comprehensive JSON manifest model | PRD §18.7 | TRD §12.10, §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-31** | RFC 8785 Canonical JSON Representation: JCS deterministic serialization | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-32** | Deterministic Key Ordering & UTF-8 Encoding: Standardized code-point sorting | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-33** | IEEE 754 Number Representation: Cross-platform floating point consistency | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-34** | Sensitive Data Exclusion Invariant: Zero private keys or passwords in manifests | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-35** | Manifest Versioning & Evolution: Backward-compatible schema evolution | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-36** | Manifest Immutability Post-Sealing: Sealed manifests permanently locked | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-37** | Manifest Fingerprint Computation: SHA-256 over canonical JCS bytes | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-38** | Detached Manifest Digital Signing: 64-byte Ed25519 signature over manifest | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-39** | Standards-Compliant Signature Algorithms: RFC 8032 Ed25519 support | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-40** | Secure Private Key Storage: OS Keystore (DPAPI/Keyring) or HSM integration | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-41** | Cryptographic Key Lifecycle Records: Immutable key registry and rotation logs | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-42** | Historical Signature Verification: Verification preserved across rotated keys | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-43** | Signer Authorization Verification: Key mapping to authorized officer roles | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-44** | Public Key & Certificate Embedding: Inclusion of public keys in export packages | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-08** | `EIV-CP-08-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-45** | Separation of Document vs Manifest Signatures: PAdES PDF vs Ed25519 distinct | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-46** | Key Revocation Enforcement: Immediate CRL check and signature invalidation | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-47** | RFC 3161 Timestamp Protocol Support: TSA client requesting TimeStampResp | PRD §18.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-48** | Message Imprint Verification: Assertion that token matches manifest digest | PRD §18.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-49** | TSA Certificate Chain & Policy Validation: Trust anchor and OID validation | PRD §18.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-50** | Seven-Tier Timestamp Disambiguation: Strict semantic separation of timestamps | PRD §18.7 | TRD §18.6, §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-51** | Air-Gapped Offline Timestamp Mode: Local hardware clock labeled untrusted | PRD §18.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-52** | Deferred Timestamp Attestation: Queued TSA stamping upon station docking | PRD §18.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-53** | True WORM Storage Enforcement: Storage-enforced Write-Once vaults | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-54** | POSIX Local Filesystem WORM: 0400 read-only mode and chattr +i attribute | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-55** | S3 Object Lock Compliance Mode: Retention locked against deletion | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-56** | S3 Object Lock Governance Mode: Privileged bypass with audit logging | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-57** | Legal Hold Support: Indefinite retention locking for active litigation | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-58** | Seven Logical Storage Zones: Rigorous folder/bucket tier segregation | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-59** | Storage Administrator Misuse Mitigation: Audited storage command execution | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-60** | At-Rest Storage Encryption: AES-256-GCM encryption for stored exhibits | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-61** | Storage Immutability Verification Suite: Automated penetration test suite | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-62** | Twelve Lifecycle Verification Checkpoints: Mandatory hash checks across stages | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-63** | Post-Write Readback Gate: Mandatory readback before unblocking downstream | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-64** | Retrieval Verification Gate: In-memory hash check before passing to engines | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-65** | Continuous Fixity Scheduling: Automated Celery rolling 30-day fixity audit | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-66** | Fixity Job Throughput SLA: Background fixity auditing >= 200 MB/s | PRD §18.7 | TRD §19.17 | **CEIPL-EIV-05** | `EIV-CP-05-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-67** | Typed Verification Result Record: Pydantic v2 VerificationRunResult logging | PRD §18.7 | TRD §12.10, §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-68** | Export Manifest Verification: Full package hash recalculation prior to export | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-08** | `EIV-CP-08-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-69** | Final Report Linkage Verification: Validate hashes in UFREDF certificates | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-09** | `EIV-CP-09-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-70** | Asynchronous Non-Blocking Fixity: Audits execute without UI degradation | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-71** | Automated Quarantine State Transition: Instant quarantine on hash mismatch | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-05** | `EIV-CP-05-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-72** | Fail-Closed Downstream Blocking: HTTP 423 Locked for quarantined items | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-05** | `EIV-CP-05-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-73** | Conflicting Version In-Place Preservation: Corrupted file kept as .corrupt | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-05** | `EIV-CP-05-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-74** | Automated Integrity Incident Logging: Structured IntegrityIncident records | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-05** | `EIV-CP-05-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-75** | Independent Backup Replica Verification: Validate replica against baseline | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-08** | `EIV-CP-08-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-76** | Verified Recovery Copy Deployment: Restored replica committed with audit log | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-08** | `EIV-CP-08-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-77** | Unrecoverable Corruption Escalation: Formal loss declaration if backups fail | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-08** | `EIV-CP-08-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-78** | Prohibition of Digest Inversion: Database constraints forbid overwriting hash | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-04** | `EIV-CP-05-05` | Automated Test / Audit | `PLANNED` |
+| **EIV-79** | Twenty-One Mandatory Custody Events: Full lifecycle event tracking | PRD §18.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-80** | Strongly Typed Custody Event Schema: Pydantic v2 CustodyEventRecord | PRD §18.7 | TRD §12.10, §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-81** | Hash-Chained Event History: Cryptographic link E_i = H(Ev_i || E_i-1) | PRD §18.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-82** | Strictly Monotonic Sequence Numbers: Gaps prohibited under concurrency | PRD §18.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-83** | Tamper-Evident Ledger Auditing: Instant detection of edited historical rows | PRD §18.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-84** | User Description vs Machine Data Separation: Examiner notes isolated from telemetry | PRD §18.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-85** | Periodic Merkle Root Anchoring: Signed daily custody anchor blocks | PRD §18.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-86** | Distinct Derivative Artifact Identity: Unique UUIDv7 and hash per output | PRD §18.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-87** | Cryptographic Parent Binding: Strict parent exhibit ID and SHA-256 link | PRD §18.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-88** | Complete Transformation Audit Metadata: Tool name, version, CLI args logged | PRD §18.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-89** | Multi-Generational Lineage DAG: Recursive traversal back to original exhibit | PRD §18.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-90** | Package-Level Integrity Verification: Merkle root computed over multi-file export | PRD §18.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-91** | Path Traversal & Symlink Defense: Canonical relative paths, safe unzipping | PRD §18.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-92** | Standalone Portable Offline Verifier: Zero-PyPI Python verification script | PRD §18.7 | TRD §19.12 | **CEIPL-EIV-08** | `EIV-CP-08-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-93** | Fourteen Offline Verification Checks: Comprehensive 14-point audit in CLI | PRD §18.7 | TRD §19.12 | **CEIPL-EIV-08** | `EIV-CP-08-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-94** | Fifteen Dedicated REST API Endpoints: Versioned FastAPI routes with RBAC | PRD §18.7 | TRD §19.15 | **CEIPL-EIV-08** | `EIV-CP-08-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-95** | Asynchronous Celery Worker Integration: Dedicated background worker queue | PRD §18.7 | TRD §19.15 | **CEIPL-EIV-05** | `EIV-CP-05-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-96** | OpenAPI 3.1 & TypeScript Contract Sync: Synchronized Pydantic models & TS types | PRD §18.7 | TRD §12.10, §19.15 | **CEIPL-EIV-08** | `EIV-CP-08-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-97** | Seven-Tier Role-Based Access Control: Strict separation of Operator, Custodian | PRD §18.7 | TRD §19.14 | **CEIPL-EIV-10** | `EIV-CP-10-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-98** | Section 63 BSA / 65B IEA Dossier Assembly: Statutory evidence schedule PDF | PRD §18.7 | TRD §19.13 | **CEIPL-EIV-09** | `EIV-CP-09-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-99** | Five-Hundred-Fixture Verification Benchmark: 100% detection on 500 test fixtures | PRD §18.7 | TRD §19.17 | **CEIPL-EIV-10** | `EIV-CP-10-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-100** | Air-Gapped Packaging & Security Hardening: Docker deployment with zero egress | PRD §18.7 | TRD §19.17 | **CEIPL-EIV-10** | `EIV-CP-10-04` | Automated Test / Audit | `PLANNED` |
