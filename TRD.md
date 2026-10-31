@@ -2612,7 +2612,7 @@ flowchart LR
 The AIF-GEO subsystem is implemented across eleven sequential engineering phases defined in PHASES.md:
 - **AIF-GEO-00 (Architecture Baseline & Audit):** Package scaffold (`ps05.engines.image.geo`), Pydantic v2 schemas (`GeospatialObservationSchema`, `GeospatialCandidateSchema`), database DDL, and air-gap boundary definition.
 - **AIF-GEO-01 (GPS Extraction & Validation):** ExifTool safe wrapper, DMS rational decoder, coordinate boundary checks, and anomaly detection rules (GEO-01, GEO-02).
-- **AIF-GEO-02 (Geodesy & Uncertainty):** Karney WGS84 geodesic calculations, spatial error propagation ($\sigma_{	ext{diff}}$), and camera clock drift regression $\Delta t(t) = a \cdot t + b$ (GEO-05, GEO-06).
+- **AIF-GEO-02 (Geodesy & Uncertainty):** Karney WGS84 geodesic calculations, spatial error propagation ($\sigma_{\text{diff}}$), and camera clock drift regression $\Delta t(t) = a \cdot t + b$ (GEO-05, GEO-06).
 - **AIF-GEO-03 (Geographic Enrichment & Map):** Local SQLite gazetteer, rate-limited Nominatim adapter, GeoJSON layer generator, and air-gap network isolation (GEO-03, GEO-04, GEO-26).
 - **AIF-GEO-04 (Track Correlation & Movement):** GPX/KML/NMEA parser, linear geodesic interpolator, kinematic velocity gating, and Kalman filter trajectory smoother (GEO-07, GEO-08).
 - **AIF-GEO-05 (Visual Geolocation & Landmarks):** PaddleOCR signboard pipeline, hierarchical candidate ranker, SIFT/RANSAC homography, and WMM camera heading correction (GEO-09, GEO-10, GEO-21, GEO-22).
@@ -2621,6 +2621,219 @@ The AIF-GEO subsystem is implemented across eleven sequential engineering phases
 - **AIF-GEO-08 (Cross-Evidence Conflict Graph):** C2PA Content Credentials verifier, spatio-temporal DBSCAN clusterer, directed conflict graph, and PostGIS spatial search (GEO-16, GEO-20, GEO-23, GEO-24, GEO-25).
 - **AIF-GEO-09 (Investigator Workbench & Reports):** FastAPI REST endpoints, Archify JSON IR adapter, Section 65B/63 BSA certified PDF compiler, and reviewer disposition workflow.
 - **AIF-GEO-10 (Benchmarks, Privacy & Release):** Full regression test suite, 200-sample multi-device corpus, air-gap packet audit, and release readiness verification.
+
+### 10.11 Image Manipulation Localisation Framework (IMLF) Technical Specification
+
+#### 10.11.1 Component Boundaries & Execution Architecture
+The **Image Manipulation Localisation Framework (IMLF)** operates as the centralized spatial coordination and evidence fusion layer within the Advanced Image Forensics (AIF) subsystem. It does not replace the specialized detection logic of IRE, AIM, IVE, or FPA; rather, it standardizes their spatial outputs, normalizes coordinate frames, evaluates localization uncertainty, and fuses multi-modal spatial cues into court-admissible forensic masks.
+
+```mermaid
+flowchart TD
+    subgraph INTAKE["1. Secure Ingestion & Geometry Normalisation"]
+        Exhibit["Seized Image Exhibit (.jpg, .png, .tif, .raw)"] --> SafeDecode["Safe Decoder (MAX_PIXELS <= 100M)"]
+        SafeDecode --> CEIPL_Hash["CEIPL Dual-Hash (SHA-256 + Blake3)"]
+        CEIPL_Hash --> CoordEngine["Coordinate Engine: Invertible Transform (H_0)"]
+    end
+
+    subgraph DETECTOR_LAYER["2. Specialist AIF Detection Engines"]
+        CoordEngine --> CMFD_Mod["IRE: Copy-Move SIFT/RANSAC & Block-DCT"]
+        CoordEngine --> Splice_Mod["IRE: Noise Residuals R=I-D(I) & PRNU"]
+        CoordEngine --> Comp_Mod["IRE: JPEG ELA & Quantisation Grids"]
+        CoordEngine --> TruFor_Mod["AIM: TruFor RGB+Noiseprint++ CNN"]
+        CoordEngine --> CATNet_Mod["AIM: CAT-Net v2 DCT-Domain CNN"]
+        CoordEngine --> Inpaint_Mod["AIM: Deep Diffusion & Inpainting Heads"]
+        CoordEngine --> Face_Mod["FPA: RetinaFace & Facial Perimeter Seams"]
+    end
+
+    subgraph IMLF_CORE["3. IMLF Spatial Fusion & Uncertainty Core"]
+        CMFD_Mod & Splice_Mod & Comp_Mod & TruFor_Mod & CATNet_Mod & Inpaint_Mod & Face_Mod --> TileEngine["Multi-Scale Tiling & Invertible Stitching (H_tile^-1)"]
+        TileEngine --> MaskNorm["Mask Normalisation (Probability, Anomaly, Reliability)"]
+        MaskNorm --> FusionDAG["Evidence Dependency Fusion DAG"]
+        FusionDAG --> Disagreement["Conflict & Consensus Engine (Pairwise IoU)"]
+        Disagreement --> DecisionGate["7-State Localisation Decision Gate"]
+    end
+
+    subgraph OUTPUT_LAYER["4. Structured Findings & Legal Dossier"]
+        DecisionGate --> RegionStore["Pydantic v2: IMLRegionCandidate & IMLLocalizationResult"]
+        RegionStore --> WORM_Vault["POSIX 0400 WORM Vault Storage"]
+        WORM_Vault --> ReviewerUI["Examiner Multi-Layer Review Workbench"]
+        ReviewerUI --> LegalReport["Section 65B/63 BSA Certified PDF Dossier"]
+    end
+```
+
+#### 10.11.2 Standard Manipulation Taxonomy & Anomaly Classification Engine
+IMLF establishes a canonical mapping between the forensic anomaly characteristics and the specialized detection modules:
+
+| Taxonomy Class | Anomaly Signature & Forensic Trace | Primary Engine | Detection Mechanism | Output Representation |
+| :--- | :--- | :--- | :--- | :--- |
+| **1. Copy-Move (CMFD)** | Matched keypoint clusters with rigid homography; identical DCT coefficient blocks. | IRE CMFD Engine | SIFT / RootSIFT + RANSAC; $8\times 8$ Block-DCT Lexicographical Sort. | Paired Region Polygons $[\mathcal{R}_s, \mathcal{R}_t]$, Affine $H$. |
+| **2. Image Splicing** | Local noise variance discontinuity; demosaicing/CFA periodic break; PRNU mismatch. | IRE Noise & AIM | Wavelet/Median Residual $R=I-D(I)$; Sensor PRNU Correlation PCE. | Spatial Anomaly Map $A(x,y)$, Boundary Gradient Mask. |
+| **3. Object Inpainting** | Frequency rolloff; missing photographic sensor noise; repeated structural patches. | AIM Inpainting Head | Deep Inpainting CNN (LaMa/MAT); Edge Gradient Discontinuity. | Probability Mask $P_{\text{inpaint}}(x,y)$, Bounding Rectangle. |
+| **4. AI-Generated Patch** | Diffusion upsampling spectral rolloff; lack of PRNU; uncalibrated noise residuals. | AIM TruFor / CAT-Net | Dual-Branch RGB+Noiseprint Feature Fusion; Latent DCT Analysis. | Calibrated Probability Mask $P_{\text{AI}}(x,y)$, Reliability $R(x,y)$. |
+| **5. Face-Swap / Morph** | Blending seam around facial oval; color temperature jump; landmark misalignment. | FPA & AIM | RetinaFace 68 Landmarks + Facial Perimeter Gradient Analysis. | Biometric Facial Mask $\hat{M}_{\text{face}}$, Seam Score. |
+| **6. Local Retouching** | Localized blur/sharpening; contrast stretching; timestamp/clone erasure. | IRE Signal Profiler | High-Pass Filter Magnitude; Local Gradient Kurtosis. | Continuous Anomaly Heatmap $A(x,y)$. |
+| **7. Unknown Local** | Uncorrelated low-level signal breaks without specific generative attribution. | IMLF Fusion Core | Multi-Detector Consensus with unassigned model family. | Generic Anomaly Mask tagged `UNKNOWN_LOCAL_MANIPULATION`. |
+
+#### 10.11.3 Algorithm Selection & Technology Decision Matrix
+
+| Forensic Task | Primary Algorithm Candidate | Alternative Candidate | Input Preconditions | Primary Output | Validation Required | Decision Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Keypoint Copy-Move** | SIFT + RootSIFT + RANSAC Homography | ORB / AKAZE + Affine RANSAC | Minimum dimension $\ge 256\text{ px}$; RGB or Greyscale uint8. | Vector displacement arrows, paired region polygons. | False alarm rate on repeating textures (COVERAGE dataset). | `SELECTED_PRIMARY` |
+| **Dense Block Copy-Move** | $8\times 8$ Block-DCT with Lexicographical Sorting | DWT Haar Wavelet sub-band matching | Uncompressed or high-quality JPEG (QF $\ge 70$). | Dense block duplication raster mask. | Robustness to post-rotation and scaling. | `SELECTED_PRIMARY` |
+| **Sensor Noise Residual** | Wavelet / Median Noise Residual $R=I-D(I)$ | Noiseprint++ (Deep Residual Network) | Raw or minimally compressed image; $\text{SNR} \ge 10\text{ dB}$. | Local residual variance heatmap. | Sensitivity to natural texture vs sensor noise. | `SELECTED_PRIMARY` |
+| **Compression Splicing** | CAT-Net v2 (DCT + RGB Dual-Stream) | Error Level Analysis (ELA) + Block Grid | JPEG bitstream with intact quantization tables. | Pixel probability map $P(x,y) \in [0, 1]$. | Verification on double-compressed images (NIST16). | `SELECTED_PRIMARY` |
+| **Deep General Localisation**| TruFor (Learned RGB + Noiseprint Fusion) | MVSS-Net / PSCC-Net / IML-ViT | Standard RGB tensor $[3, H, W]$; normalized $[0, 1]$. | Pixel probability map, integrity score, reliability map. | License verification & benchmark on CASIA / DEFACTO. | `REQUIRES_VALIDATION` |
+| **Facial Manipulation** | FPA RetinaFace + Convex Hull Seam Gradient | Face X-Ray (Blending boundary CNN) | Detected face bounding box $\ge 64\times 64\text{ px}$. | Facial perimeter boundary mask, swap probability. | Face-Forensics++ cross-manipulation benchmark. | `SELECTED_PRIMARY` |
+| **Multi-Scale Tiling** | Overlapping Window Grid (1024 px, 25% stride) | Scale-Space Image Pyramid | High-resolution image $> 2048\times 2048\text{ px}$. | Stitched full-resolution canvas mask with inverse $H^{-1}$. | Seamless border blending without tile edge artifacts. | `SELECTED_PRIMARY` |
+
+#### 10.11.4 Algorithm Family A: Copy-Move Forgery Localisation Specification
+1. **Keypoint Feature Extraction:** Compute DoG (Difference of Gaussians) scale-space keypoints. Transform 128-dimensional SIFT descriptors to RootSIFT via $L_1$ normalization followed by square root:
+   $$x_{\text{RootSIFT}} = \sqrt{\frac{x_{\text{SIFT}}}{\|x_{\text{SIFT}}\|_1}}$$
+2. **Nearest-Neighbor Distance Ratio (NNDR):** For each keypoint $k_i$, identify the two nearest neighbors $n_1, n_2$ in descriptor space ($k\text{-d}$ tree). A candidate match is accepted if:
+   $$\frac{\|d(k_i, n_1)\|_2}{\|d(k_i, n_2)\|_2} < \tau_{\text{NNDR}} \quad (\text{default } \tau_{\text{NNDR}} = 0.75)$$
+3. **Spatial Separation Constraint:** Exclude trivial neighboring keypoints matching physical close proximity:
+   $$\|p_i - p_j\|_2 > d_{\min} \quad (\text{default } d_{\min} = 50\text{ px})$$
+4. **Geometric RANSAC Verification:** Group candidate matches into clusters. For each cluster, fit a projective homography $\mathbf{H} \in \mathbb{R}^{3\times 3}$:
+   $$\begin{bmatrix} x' \\ y' \\ 1 \end{bmatrix} \sim \mathbf{H} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}$$
+   A match is an inlier if the symmetric transfer error satisfies:
+   $$d(p', \mathbf{H}p)^2 + d(p, \mathbf{H}^{-1}p')^2 < \epsilon_{\text{RANSAC}}^2 \quad (\text{default } \epsilon = 3.0\text{ px})$$
+   A candidate region is accepted if the inlier count $N_{\text{inliers}} \ge 12$ and the estimated scale satisfies $s \in [0.5, 2.0]$.
+5. **False-Positive Mitigation on Natural Textures:** Authentic repeating structures (brick walls, window grids, foliage) produce dense inlier clusters. The engine computes feature spatial density and verifies whether the matched patch exhibits rigid geometric displacement versus natural Poisson-distributed point processes. If the spatial variance of matched points matches the background texture periodicity, the cluster is assigned `REPEATED_TEXTURE_BENIGN`.
+
+#### 10.11.5 Algorithm Family B: Image Splicing & Low-Level Inconsistency Localisation
+1. **Noise Residual Extraction:** Compute residual $R(x,y) = I(x,y) - D(I)(x,y)$, where $D(\cdot)$ represents adaptive Wiener filtering or 2D stationary wavelet shrinkage.
+2. **Local Noise Variance Mapping:** Partition residual $R$ into non-overlapping $16\times 16$ blocks $B_k$. Compute local sample variance:
+   $$\sigma_k^2 = \frac{1}{|B_k|-1} \sum_{(x,y) \in B_k} (R(x,y) - \mu_k)^2$$
+   Spliced regions originating from a foreign camera sensor or different ISO setting exhibit statistically significant divergence in $\sigma_k^2$ relative to the robust median background variance $\sigma_{\text{bg}}^2$.
+3. **Boundary Discontinuity & Gradient Profiling:** Splicing seams introduce microscopic edge transitions. For candidate region boundaries $\partial\Omega$, compute the orthogonal directional gradient magnitude:
+   $$G_{\perp}(\mathbf{p}) = \nabla I(\mathbf{p}) \cdot \mathbf{n}(\mathbf{p})$$
+   Evaluate the second derivative across the boundary: un-feathered splices display sharp step discontinuities ($\Delta G > \tau_{\text{step}}$), while feathered splices exhibit anomalous localized blur kernels inconsistent with the global point spread function (PSF).
+4. **Sensor PRNU Correlation (Camera Identification Integration):** When a reference camera fingerprint $K_{\text{ref}}$ is available (extracted via AIF-A9 from $N \ge 20$ flat-field frames), the engine calculates Normalized Cross-Correlation (NCC) across spatial sliding windows:
+   $$\rho(x,y) = \frac{\langle W(x,y), K_{\text{ref}}(x,y) \rangle}{\|W(x,y)\|_2 \|K_{\text{ref}}(x,y)\|_2}$$
+   Candidate regions exhibiting Peak-to-Correlation Energy $\text{PCE} < 15$ inside an otherwise strongly correlated frame ($\text{PCE}_{\text{global}} > 50$) are flagged as foreign sensor splices.
+
+#### 10.11.6 Algorithm Family C: Inpainting, Object Removal & AI-Modified Region Localisation
+1. **Deep Architecture Candidate — TruFor:**
+   - **Input:** RGB image tensor $I \in \mathbb{R}^{3\times H\times W}$, normalized to $[0.0, 1.0]$.
+   - **Backbone:** Two-branch architecture consisting of a visual RGB feature extractor and a high-frequency learned noiseprint feature extractor (Noiseprint++).
+   - **Cross-Attention Fusion:** Multi-scale transformer layers cross-correlate RGB semantics with noise anomalies.
+   - **Output Tensors:**
+     - Pixel Probability Mask: $\hat{M}(x,y) \in [0.0, 1.0]$.
+     - Global Integrity Score: $S_{\text{global}} \in [0.0, 1.0]$.
+     - Reliability Map: $R(x,y) \in [0.0, 1.0]$ quantifying local SNR and prediction stability.
+2. **Deep Architecture Candidate — CAT-Net v2:**
+   - **Input:** RGB image plus raw JPEG Discrete Cosine Transform (DCT) coefficients and quantization tables extracted via `libjpeg`.
+   - **Compression-Domain Stream:** Processes DCT block artifacts and double-quantization grid shifts.
+   - **Output:** Dense manipulation localization mask sensitive to re-saved JPEG splices and inpainting.
+3. **Unlocalised Manipulation Fallback:** If TruFor or global classifiers report high tampering probability ($S_{\text{global}} > 0.85$) but the pixel probability map $\hat{M}(x,y)$ contains no connected component exceeding minimum area ($A < 64\text{ px}$) or confidence ($\hat{M} < \tau_{\text{bin}}$), the engine **strictly refrains from fabricating a mask**. It assigns result status `GLOBAL_MANIPULATION_CANDIDATE` and annotates that manipulation is evident but spatially diffuse.
+
+#### 10.11.7 Algorithm Family D: Face-Swap & Facial Manipulation Localisation
+1. **Biometric Face Localization:** FPA extracts face bounding box $B_{\text{face}} = [y_{\min}, x_{\min}, y_{\max}, x_{\max}]$ using RetinaFace and generates 68 2D facial landmarks $\mathcal{L} = \{(\ell_x^i, \ell_y^i)\}_{i=1}^{68}$.
+2. **Convex Hull Perimeter Extraction:** Compute the convex hull polygon $\mathcal{P}_{\text{face}}$ surrounding the jawline (landmarks 1–17) and forehead contour.
+3. **Boundary Blending Seam Analysis:** Extract a $16\text{ px}$ morphological ribbon $\mathcal{S}_{\text{seam}} = (\mathcal{P} \oplus K_8) \setminus (\mathcal{P} \ominus K_8)$. Analyze spatial color transitions across the seam:
+   $$\Delta E_{00} = \operatorname{CIEDE2000}(C_{\text{inner}}(\mathbf{p}), C_{\text{outer}}(\mathbf{p}))$$
+   Face-swap algorithms (DeepFaceLab, SimSwap) frequently exhibit chromatic aberration and edge blur along $\mathcal{S}_{\text{seam}}$ due to Poisson image editing or alpha blending.
+4. **Biometric Mask Generation:** The final facial manipulation mask covers the inner facial polygon $\mathcal{P}_{\text{face}}$ with confidence weighted by boundary seam discontinuity and inner-facial GAN synthesis artifacts.
+
+#### 10.11.8 Algorithm Family E: Multi-Scale Tiling & Invertible Coordinate Geometry
+Forensic crime scene photographs frequently exceed $6000\times 4000\text{ px}$ (24–50 MP). Downsampling destroys microscopic forgery traces; processing whole frames in one GPU pass exceeds VRAM ceilings. IMLF specifies an invertible multi-scale tiling pipeline:
+
+1. **Tile Grid Generation:** For an image of dimensions $W \times H$, generate a regular overlapping grid of square tiles with size $S_{\text{tile}} = 1024\text{ px}$ and stride $S_{\text{stride}} = 768\text{ px}$ (overlap $O = 256\text{ px}$, $25\%$ overlap).
+2. **Homogeneous Coordinate Transformation:** Each tile $k$ extracted at top-left offset $(x_k, y_k)$ possesses a forward transformation matrix $\mathbf{H}_k$ and inverse matrix $\mathbf{H}_k^{-1}$:
+   $$\mathbf{H}_k = \begin{bmatrix} 1 & 0 & -x_k \\ 0 & 1 & -y_k \\ 0 & 0 & 1 \end{bmatrix}, \quad \mathbf{H}_k^{-1} = \begin{bmatrix} 1 & 0 & x_k \\ 0 & 1 & y_k \\ 0 & 0 & 1 \end{bmatrix}$$
+3. **Per-Tile Forward Inference:** Each tile $T_k \in \mathbb{R}^{3\times 1024\times 1024}$ is passed to the deep localization model, yielding tile probability map $P_k \in \mathbb{R}^{1024\times 1024}$.
+4. **Distance-Weighted Linear Canvas Stitching:** To eliminate boundary seam artifacts across overlapping tile regions, tiles are blended onto a global accumulator canvas $C(X, Y)$ using a 2D separable Bartlett/Hann window weight matrix $W_{\text{tile}}(x, y)$:
+   $$P_{\text{canvas}}(X, Y) = \frac{\sum_{k} W_{\text{tile}}(X - x_k, Y - y_k) \cdot P_k(X - x_k, Y - y_k)}{\sum_{k} W_{\text{tile}}(X - x_k, Y - y_k)}$$
+5. **Border Padding & Coordinate Inversion:** For tiles extending beyond image boundaries, replicate padding is applied. All serialized vector polygons are projected back into the original native coordinate frame $[0, W] \times [0, H]$ using $\mathbf{H}_k^{-1}$ before WORM vault persistence.
+
+#### 10.11.9 Canonical Coordinate Normalisation & Spatial Reference System
+1. **Origin:** Strictly $(0, 0)$ at the top-left corner.
+2. **Axes:** $+X$ horizontal (columns), $+Y$ vertical (rows).
+3. **Bounding Boxes:** Formatted as $[y_{\min}, x_{\min}, y_{\max}, x_{\max}]$ using zero-indexed half-open intervals $[x_{\min}, x_{\max})$ and $[y_{\min}, y_{\max})$.
+4. **Normalized Coordinates:** Serialized as floats $x_n = x / W$, $y_n = y / H$ rounded to 6 decimal places.
+5. **Polygons:** Represented as an ordered sequence of vertices $[[x_1, y_1], [x_2, y_2], \dots, [x_N, y_N]]$ with counter-clockwise winding.
+
+#### 10.11.10 Unified Mask & Region Data Contracts
+The data contracts are implemented using strict Pydantic v2 schemas:
+- `IMLRegionCandidate`: Individual candidate manipulated area with bounding box, polygon, area percentage, manipulation family, and supporting/conflicting detector IDs.
+- `IMLMaskMetadata`: Bitstream pointer, SHA-256 checksum, dimensions, and type (`PROBABILITY_MAP`, `BINARY_MASK`, `RELIABILITY_MAP`).
+- `IMLLocalizationResult`: Master record containing aggregate verdicts, list of regions, consensus score, and execution telemetry.
+- `IMLCoordinateTransform`: Documenting forward and inverse $3\times 3$ affine transformation matrices.
+
+#### 10.11.11 Multi-Detector Evidence Fusion & Lineage Graph
+1. **Pairwise Overlap Matrix:** For all regions $\mathcal{R}_i, \mathcal{R}_j$ proposed by distinct engines, compute Jaccard similarity:
+   $$\operatorname{IoU}(\mathcal{R}_i, \mathcal{R}_j) = \frac{|\mathcal{R}_i \cap \mathcal{R}_j|}{|\mathcal{R}_i \cup \mathcal{R}_j|}$$
+   Pairs with $\operatorname{IoU} \ge 0.50$ are clustered into unified candidate regions.
+2. **Conflict Resolution:** If Engine A (e.g. CMFD) flags region $\mathcal{R}_1$ with confidence $0.92$, while Engine B (e.g. TruFor) assigns reliability $R=0.88$ but zero tampering probability ($P=0.04$), IMLF logs an explicit conflict:
+   - Assigns status: `LOCALISATION_UNCERTAIN`.
+   - Records both detector findings with individual weights in `supporting_detectors` and `conflicting_detectors`.
+   - Prevents auto-approval; forces examiner review in UI.
+
+#### 10.11.12 Mathematical Foundations & Metric Definitions
+For predicted binary mask $\hat{M}(x,y) \in \{0, 1\}$ and ground truth $M_g(x,y) \in \{0, 1\}$ over $N = W \times H$ pixels:
+- **Pixel-Level Confusion Matrix:**
+  $$TP = \sum_{x,y} \hat{M}(x,y) M_g(x,y), \quad FP = \sum_{x,y} \hat{M}(x,y) (1 - M_g(x,y))$$
+  $$FN = \sum_{x,y} (1 - \hat{M}(x,y)) M_g(x,y), \quad TN = \sum_{x,y} (1 - \hat{M}(x,y)) (1 - M_g(x,y))$$
+- **Pixel Intersection over Union (IoU / Jaccard):**
+  $$\operatorname{IoU} = \frac{TP}{TP + FP + FN}$$
+  *Zero-Denominator Trap:* If $TP + FP + FN = 0$ (both masks completely authentic/empty), $\operatorname{IoU} = 1.0$. If $M_g = 0$ but $\hat{M} > 0$ (false alarm), $\operatorname{IoU} = 0.0$.
+- **Pixel F1 / Dice Coefficient:**
+  $$\text{Dice} = F_1 = \frac{2 TP}{2 TP + FP + FN}$$
+- **Matthews Correlation Coefficient (MCC):**
+  $$\text{MCC} = \frac{TP \cdot TN - FP \cdot FN}{\sqrt{(TP + FP)(TP + FN)(TN + FP)(TN + FN)}}$$
+- **Boundary F1 Score ($F_{1}^{\text{boundary}}$):** Evaluates mask edge contour accuracy within pixel tolerance $\tau$:
+  $$F_1^{\text{boundary}} = \frac{2 \cdot P_{\text{boundary}} \cdot R_{\text{boundary}}}{P_{\text{boundary}} + R_{\text{boundary}}} \quad (\text{default } \tau = 2\text{ px})$$
+
+#### 10.11.13 Independent Evaluation & Benchmark Execution Protocol
+IMLF enforces the fundamental benchmark rule: **image-level classification and pixel-level localization must be measured on separate axes**.
+- **Image-Level Evaluation:** Evaluates whether an exhibit is flagged as manipulated using full-frame ROC-AUC, PR-AUC, and Correct Detection Rate at fixed False Alarm Rate ($\text{CDR} @ \text{FAR} = 0.01$).
+- **Pixel-Level Evaluation:** Evaluates spatial mask quality strictly over the subset of manipulated exhibits using pixel IoU, Dice, and boundary F1.
+- **Benchmark vs. Deployment Thresholds:** Benchmarks evaluating optimum-MCC thresholds ($\tau_{\text{opt}} = \arg\max_\tau \text{MCC}(\tau)$) derive thresholds using ground truth; deployment systems are strictly forbidden from using ground truth and must execute with frozen thresholds calibrated on $D_{\text{cal}}$.
+
+#### 10.11.14 Controlled Test Corpus & Synthetic Degradation Grid
+Every candidate model is validated against the 14-condition synthetic perturbation grid:
+1. JPEG QF 95, 85, 70, 50, 35
+2. Gaussian Blur ($\sigma = 0.5, 1.0, 2.0\text{ px}$)
+3. Additive Gaussian Noise ($\text{SNR} = 30, 20, 10\text{ dB}$)
+4. Downscaling & Upscaling ($0.5\times, 0.25\times$)
+5. Central Crop ($50\%$ canvas area)
+6. Rotation ($5^\circ, 15^\circ, 90^\circ$)
+7. Screenshot Recapture (Canvas blit + sRGB re-encode)
+
+#### 10.11.15 Security, Resource Ceilings & Execution Sandbox
+1. **Decompression Bomb Guard:** Strict PIL `MAX_IMAGE_PIXELS = 100_000_000` (100 MP) limit. Files with compression ratios $> 10:1$ are rejected prior to memory allocation.
+2. **Resource Quotas:** Worker processes bound via Linux cgroups to $\le 16\text{ GB}$ RAM and $\le 8\text{ GB}$ VRAM.
+3. **Execution Ceilings:** 300-second hard SIGKILL timeout per exhibit.
+4. **Air-Gap Invariant:** Zero outbound network requests; 100% offline local model inference.
+
+#### 10.11.16 Master Requirement Traceability Matrix (IML-01 through IML-22)
+
+| Requirement ID | Summary | TRD Specification Section | Pydantic Contract | Implementation Phase | Checkpoint ID | Required Validation Evidence |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **IML-01** | Unified Localisation Architecture | TRD §10.11.1, §10.11.15 | `IMLLocalizationResult` | **AIF-IML-00** | `AIF-IML-CP-00-01` | Architecture baseline, engine routing contracts, zero memory leaks. |
+| **IML-02** | Copy-Move Forgery Localisation | TRD §10.11.4 | `IMLRegionCandidate` | **AIF-IML-01** | `AIF-IML-CP-01-01` | SIFT/RANSAC homography, inlier count $\ge 12$, COVERAGE benchmark. |
+| **IML-03** | Image Splicing Localisation | TRD §10.11.5 | `IMLRegionCandidate` | **AIF-IML-02** | `AIF-IML-CP-02-01` | Noise residual variance map, boundary gradient seams, Columbia dataset. |
+| **IML-04** | Object Removal & Inpainting Localisation | TRD §10.11.6 | `IMLRegionCandidate` | **AIF-IML-04** | `AIF-IML-CP-04-01` | Deep inpainting heads, spectral rolloff, DEFACTO inpainting test set. |
+| **IML-05** | AI-Generated Regional Localisation | TRD §10.11.6 | `IMLRegionCandidate` | **AIF-IML-04** | `AIF-IML-CP-04-02` | TruFor RGB+noiseprint, unlocalised manipulation fallback. |
+| **IML-06** | Face & Portrait Manipulation Localisation| TRD §10.11.7 | `IMLRegionCandidate` | **AIF-IML-05** | `AIF-IML-CP-05-01` | RetinaFace 68 landmarks, facial perimeter seam ribbon analysis. |
+| **IML-07** | Compression & Resampling Inconsistency | TRD §10.11.5, §10.11.6 | `IMLMaskMetadata` | **AIF-IML-02** | `AIF-IML-CP-02-02` | ELA error map, DCT $8\times 8$ grid shift, CAT-Net compression stream. |
+| **IML-08** | Sensor Noise & PRNU Inconsistency | TRD §10.11.5 | `IMLMaskMetadata` | **AIF-IML-02** | `AIF-IML-CP-02-03` | Camera PRNU correlation, Peak-to-Correlation Energy $\text{PCE} < 15$. |
+| **IML-09** | Multi-Scale Tiling & Invertible Mapping | TRD §10.11.8 | `IMLCoordinateTransform` | **AIF-IML-06** | `AIF-IML-CP-06-01` | $1024\text{ px}$ tiles, 25% overlap, inverse affine matrix $H^{-1}$ mapping. |
+| **IML-10** | Unified Mask, Polygon & Region Contract | TRD §10.11.10, §12.4 | `IMLRegionCandidate` | **AIF-IML-00** | `AIF-IML-CP-00-02` | Pydantic v2 schemas pass bidirectional JSON round-trip validation. |
+| **IML-11** | Canonical Coordinate Normalisation | TRD §10.11.9 | `IMLCoordinateTransform` | **AIF-IML-00** | `AIF-IML-CP-00-03` | Top-left $(0,0)$, half-open intervals, normalized floats $[0, 1]$. |
+| **IML-12** | Confidence, Reliability & Uncertainty | TRD §10.11.1, §10.11.10 | `IMLMaskMetadata` | **AIF-IML-07** | `AIF-IML-CP-07-01` | Distinct probability $P$, anomaly $A$, and reliability $R$ maps. |
+| **IML-13** | Multi-Detector Evidence Fusion | TRD §10.11.11 | `IMLLocalizationResult` | **AIF-IML-07** | `AIF-IML-CP-07-02` | Pairwise IoU clustering, anti-averaging invariant, conflict logs. |
+| **IML-14** | Forensic Examiner Review Workbench | TRD §10.11.1 | Archify JSON IR | **AIF-IML-09** | `AIF-IML-CP-09-01` | Multi-layer canvas, threshold sliders, examiner disposition tags. |
+| **IML-15** | Ground-Truth Dataset Management | TRD §10.11.13 | Dataset Manifest | **AIF-IML-08** | `AIF-IML-CP-08-01` | Zero-leakage source-scene partitioning ($\mathcal{G} \cap \mathcal{G}' = \emptyset$). |
+| **IML-16** | Pixel-Level Localisation Evaluation | TRD §10.11.12 | Evaluation Metric Run | **AIF-IML-08** | `AIF-IML-CP-08-02` | Pixel IoU, Dice, MCC, boundary F1 with zero-denominator safety. |
+| **IML-17** | Independent Image-Level Evaluation | TRD §10.11.13 | Evaluation Metric Run | **AIF-IML-08** | `AIF-IML-CP-08-03` | Image ROC-AUC and CDR @ 0.01 FAR evaluated independently from IoU. |
+| **IML-18** | Cross-Dataset & Unseen Benchmarking | TRD §10.11.13 | Transfer Evaluation Report | **AIF-IML-08** | `AIF-IML-CP-08-04` | Cross-corpus transfer $\Delta\operatorname{IoU}$, unseen tool degradation. |
+| **IML-19** | Robustness Sweeps & Repeated Textures | TRD §10.11.4, §10.11.14 | Robustness Grid Report | **AIF-IML-01** | `AIF-IML-CP-01-02` | 14-condition degradation sweep; false alarms $\le 0.05$ on textures. |
+| **IML-20** | First-Class Abstention & Inconclusive | TRD §10.11.1 | `IMLLocalizationResult` | **AIF-IML-07** | `AIF-IML-CP-07-03` | Emits `INCONCLUSIVE_LOW_QUALITY` on SNR $< 6\text{ dB}$, size $< 256\text{ px}$. |
+| **IML-21** | Evidentiary Lineage & BSA Traceability | TRD §10.11.1, §10.11.10 | Section 65B/63 BSA PDF | **AIF-IML-09** | `AIF-IML-CP-09-02` | Section 63 BSA certified PDF with SHA-256 and vector overlays. |
+| **IML-22** | Security Safeguards & Resource Limits | TRD §10.11.15 | Sandbox Telemetry | **AIF-IML-10** | `AIF-IML-CP-10-01` | 100 MP decompression bomb defense, 16 GB RAM ceiling, 300s timeout. |
+
+---
 
 ---
 
@@ -3524,7 +3737,7 @@ The Cryptographic Evidence Integrity & Provenance Layer (CEIPL) provides the cry
   4. `file_length_bytes`: Exact byte count verified against file system stat.
   5. `detected_media_type`: True container MIME type determined by magic byte inspection.
   6. `ingestion_event_id`: UUIDv4 linking the ingestion transaction to the examiner session.
-  7. `ingestion_timestamp_utc`: ISO 8601 UTC timestamp ($1	ext{ ms}$ precision).
+  7. `ingestion_timestamp_utc`: ISO 8601 UTC timestamp ($1\text{ ms}$ precision).
   8. `storage_object_uri`: Immutable WORM storage path (e.g. `s3://evidence-vault-worm/exhibits/2026/04/vid_77182.bin`).
   9. `storage_version_id`: Cloud object version ID or filesystem inode generation number.
   10. `reference_hash_match`: Boolean status comparing computed digest against court-supplied seizure memo hash (or `null` if none supplied).
@@ -3560,11 +3773,11 @@ flowchart TD
 
 - **Catalog of 12 Standardized Derived Artifact Classes:**
   1. `EXTRACTED_AUDIO_STREAM`: Raw lossless demuxed audio bitstream (`.aac`, `.ac3`, `.mp3`).
-  2. `STANDARDIZED_AUDIO_WAV`: 16 kHz Mono Float32 WAV representation normalized to $-23	ext{ LUFS}$.
+  2. `STANDARDIZED_AUDIO_WAV`: 16 kHz Mono Float32 WAV representation normalized to $-23\text{ LUFS}$.
   3. `SEPARATED_SPEAKER_TRACK`: SpeechBrain SepFormer isolated single-speaker audio track.
   4. `DECODED_FRAME_EXTRACT`: Microsecond-accurate lossless PNG frame extract with container PTS metadata.
   5. `DOWNSAMPLED_MODEL_TENSOR`: Batched, normalized tensor array formatted for neural network input.
-  6. `CANONICAL_MOUTH_ROI`: $112 	imes 112$ pixel normalized greyscale lip sequences for SyncNet cross-correlation.
+  6. `CANONICAL_MOUTH_ROI`: $112 \imes 112$ pixel normalized greyscale lip sequences for SyncNet cross-correlation.
   7. `OSD_CLOCK_CROP`: Bounding box raster crop containing recorder on-screen display timestamp overlay.
   8. `DEEPFAKE_SEAM_HEATMAP`: Color-mapped spatial prediction heatmap from EfficientNet-B4 / Xception.
   9. `LANDMARK_JITTER_PLOT`: Temporal sequence landmark trajectory displacement curve from FTCN.
@@ -3807,46 +4020,46 @@ The following comparative selection matrices detail the algorithmic, mathematica
 | Module | Exact Responsibility | Candidate Tool / Model | Official Paper / Repository | License & Restrictions | Input Contract | Output Contract | Supported Task | Hardware | Model Version Strategy | Benchmark / Evaluation Plan | Known Failure Cases | Integration Dependency | Current Status | Alternative Implementation |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `ps05.engines.vista.afb.extractor` | Lossless audio bitstream extraction | **FFmpeg stream-copy (`-c:a copy`)** | `https://ffmpeg.org` | LGPL v2.1+ | Video container path | Extracted audio file (`.aac`, `.ac3`, `.mp3`) | Stream extraction without transcoding | CPU (1 core) | Standardized CLI invocation | Bit-for-bit parity check against container stream (`cmp -l`) | Multi-channel audio mapping confusion if stream index unpinned | System FFmpeg binary | `PLANNED` | PyAV custom demux loop |
-| `ps05.engines.vista.afb.resampler` | Resampling to standardized forensic audio format | **SoX / FFmpeg (`libswresample`)** | `https://ffmpeg.org` | LGPL v2.1+ | Raw audio stream | 16 kHz Mono Float32 WAV normalized to -23 LUFS | Standardized analysis artifact creation | CPU (1 core) | SoX 14.4.2 / FFmpeg 6.x | Frequency response fidelity; THD+N measurement ($< -90	ext{ dB}$) | Phase distortion on aggressive downmixing from 5.1 surround | SoX / FFmpeg libraries | `PLANNED` | Torchaudio resampler |
-| `ps05.engines.vista.afb.separation` | Multi-speaker conversational source separation | **SpeechBrain SepFormer** | Subakan et al., 2021; `https://github.com/speechbrain/speechbrain` | Apache 2.0 | 16 kHz WAV audio buffer | N isolated single-speaker audio streams | Overlapped speech disentanglement | GPU recommended (4GB VRAM) / CPU fallback | Pretrained `sepformer-wsj02mix` | SI-SDR improvement on WSJ0-2mix and LibriMix ($> 14	ext{ dB}$) | Hallucinates musical noise artifacts at low input SNR ($< 0	ext{ dB}$) | PyTorch, Torchaudio | `RESEARCH_CANDIDATE` | Asteroid Conv-TasNet |
+| `ps05.engines.vista.afb.resampler` | Resampling to standardized forensic audio format | **SoX / FFmpeg (`libswresample`)** | `https://ffmpeg.org` | LGPL v2.1+ | Raw audio stream | 16 kHz Mono Float32 WAV normalized to -23 LUFS | Standardized analysis artifact creation | CPU (1 core) | SoX 14.4.2 / FFmpeg 6.x | Frequency response fidelity; THD+N measurement ($< -90\text{ dB}$) | Phase distortion on aggressive downmixing from 5.1 surround | SoX / FFmpeg libraries | `PLANNED` | Torchaudio resampler |
+| `ps05.engines.vista.afb.separation` | Multi-speaker conversational source separation | **SpeechBrain SepFormer** | Subakan et al., 2021; `https://github.com/speechbrain/speechbrain` | Apache 2.0 | 16 kHz WAV audio buffer | N isolated single-speaker audio streams | Overlapped speech disentanglement | GPU recommended (4GB VRAM) / CPU fallback | Pretrained `sepformer-wsj02mix` | SI-SDR improvement on WSJ0-2mix and LibriMix ($> 14\text{ dB}$) | Hallucinates musical noise artifacts at low input SNR ($< 0\text{ dB}$) | PyTorch, Torchaudio | `RESEARCH_CANDIDATE` | Asteroid Conv-TasNet |
 | `ps05.engines.vista.afb.auras_client`| Dispatching audio artifact to AURAS engine suite | **AURAS Bridge Client Adapter** | Internal Subsystem Contract | Proprietary (Hackathon Core) | Extracted audio UUID + SHA-256 | Celery Task ID & AURAS Job Reference | Audio forensic inspection (ARE, MVSI, ADDE) | Distributed Worker | Pinned AURAS API contract v1.2 | Integration test on synthetic spliced audio samples | Network timeout or Redis queue exhaustion on 100MB+ audio | Redis, Celery, AURAS service | `PLANNED` | Direct in-process Python module call |
 
 #### 11.10.3 Audio-Visual Synchronization & Facial Analysis Family
 
 | Module | Exact Responsibility | Candidate Tool / Model | Official Paper / Repository | License & Restrictions | Input Contract | Output Contract | Supported Task | Hardware | Model Version Strategy | Benchmark / Evaluation Plan | Known Failure Cases | Integration Dependency | Current Status | Alternative Implementation |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `ps05.engines.vista.avsc.face_track` | Surveillance-grade face detection | **RetinaFace / SCRFD** | Deng et al., 2020; `https://github.com/deepinsight/insightface` | MIT License | RGB frame tensor ($H 	imes W 	imes 3$) | Bounding boxes $[x, y, w, h]$, 5 landmarks, confidence | Low-resolution face localization in CCTV | CUDA (2GB VRAM) / ONNX CPU | InsightFace 0.7.3 ResNet50 / SCRFD-10G | Hard-set evaluation on WiderFace (Target AP $> 82\%$ on Hard) | Extreme occlusion ($> 70\%$) or profile angles ($> 85^\circ$ yaw) | ONNX Runtime, OpenCV | `PLANNED` | MediaPipe Face, MTCNN |
+| `ps05.engines.vista.avsc.face_track` | Surveillance-grade face detection | **RetinaFace / SCRFD** | Deng et al., 2020; `https://github.com/deepinsight/insightface` | MIT License | RGB frame tensor ($H \imes W \imes 3$) | Bounding boxes $[x, y, w, h]$, 5 landmarks, confidence | Low-resolution face localization in CCTV | CUDA (2GB VRAM) / ONNX CPU | InsightFace 0.7.3 ResNet50 / SCRFD-10G | Hard-set evaluation on WiderFace (Target AP $> 82\%$ on Hard) | Extreme occlusion ($> 70\%$) or profile angles ($> 85^\circ$ yaw) | ONNX Runtime, OpenCV | `PLANNED` | MediaPipe Face, MTCNN |
 | `ps05.engines.vista.avsc.face_track` | Inter-frame facial trajectory association | **ByteTrack** | Zhang et al., 2022; `https://github.com/ifzhang/ByteTrack` | MIT License | Frame-by-frame bounding box detections | Unique tracklet IDs with temporal spans | Multi-person face trajectory tracking | CPU (1 core) | ByteTrack v1.0.5 release | MOTA / IDF1 metrics on MOT17 and MOT20 benchmarks | Tracklet ID switching during prolonged camera occlusion | NumPy, Cython | `PLANNED` | BoT-SORT, DeepSORT |
-| `ps05.engines.vista.avsc.syncnet` | Cross-modal lip-sync embedding distance | **SyncNet (Modified)** | Chung & Zisserman, 2016; `https://github.com/joonson/syncnet_python` | MIT License | 112x112 greyscale mouth video + 16kHz audio MFCCs | Distance curve $D(\Delta)$, optimal offset $\Delta^*$, sync score $S_{	ext{sync}}$ | Lip-sync verification, re-dubbing detection | GPU (4GB VRAM) / CPU fallback | PyTorch weights checkpoint (Chung 2016 baseline) | Accuracy on LRS2 / LRS3 evaluation sets ($\pm 10$ frame shifts) | Fails on whisper speech, covered mouths, or non-English phonemes | PyTorch, SciPy, Librosa | `PLANNED` | Wav2Lip Sync Discriminator |
-| `ps05.engines.vista.avsc.event_corr` | Acoustic event classification | **YAMNet / AST** | Gemmeke et al., 2017 (AudioSet); Gong et al., 2021 | Apache 2.0 / MIT | 16 kHz audio buffer ($0.96	ext{ s}$ window) | 521 AudioSet class probabilities & timestamps | Gunshot, explosion, siren sound detection | CPU / CUDA | TensorFlow Hub YAMNet / HuggingFace AST | Top-5 accuracy on AudioSet eval set ($> 85\%$) | Background traffic noise masking transient acoustic events | TensorFlow / PyTorch | `RESEARCH_CANDIDATE` | PANNs CNN-14 |
+| `ps05.engines.vista.avsc.syncnet` | Cross-modal lip-sync embedding distance | **SyncNet (Modified)** | Chung & Zisserman, 2016; `https://github.com/joonson/syncnet_python` | MIT License | 112x112 greyscale mouth video + 16kHz audio MFCCs | Distance curve $D(\Delta)$, optimal offset $\Delta^*$, sync score $S_{\text{sync}}$ | Lip-sync verification, re-dubbing detection | GPU (4GB VRAM) / CPU fallback | PyTorch weights checkpoint (Chung 2016 baseline) | Accuracy on LRS2 / LRS3 evaluation sets ($\pm 10$ frame shifts) | Fails on whisper speech, covered mouths, or non-English phonemes | PyTorch, SciPy, Librosa | `PLANNED` | Wav2Lip Sync Discriminator |
+| `ps05.engines.vista.avsc.event_corr` | Acoustic event classification | **YAMNet / AST** | Gemmeke et al., 2017 (AudioSet); Gong et al., 2021 | Apache 2.0 / MIT | 16 kHz audio buffer ($0.96\text{ s}$ window) | 521 AudioSet class probabilities & timestamps | Gunshot, explosion, siren sound detection | CPU / CUDA | TensorFlow Hub YAMNet / HuggingFace AST | Top-5 accuracy on AudioSet eval set ($> 85\%$) | Background traffic noise masking transient acoustic events | TensorFlow / PyTorch | `RESEARCH_CANDIDATE` | PANNs CNN-14 |
 
 #### 11.10.4 Deepfake, Temporal Modeling & Generative Video Detection Family
 
 | Module | Exact Responsibility | Candidate Tool / Model | Official Paper / Repository | License & Restrictions | Input Contract | Output Contract | Supported Task | Hardware | Model Version Strategy | Benchmark / Evaluation Plan | Known Failure Cases | Integration Dependency | Current Status | Alternative Implementation |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `ps05.engines.vista.vdf.frame_detect` | Spatial facial boundary seam & artifact detection | **EfficientNet-B4 Dual-Domain** | Tan & Le, 2019; Dual-domain forensic adaptation | Apache 2.0 | Aligned face crop ($256 	imes 256 	imes 3$) | Manipulated probability $P_{	ext{fake}} \in [0, 1]$ + seam mask | Face-swap and reenactment detection | CUDA (4GB VRAM) / ONNX CPU | Pretrained on FaceForensics++ c23 | AUC-ROC on FF++ Deepfakes and FaceSwap ($> 0.96$) | Heavy compression (H.264 CRF $> 35$) obscures spatial seams | PyTorch, Timm | `PLANNED` | XceptionNet (Rossler et al.) |
-| `ps05.engines.vista.vdf.temporal` | Spatio-temporal inter-frame coherence modeling | **FTCN (Fully Temporal ConvNet)** | Zheng et al., ECCV 2022; `https://github.com/yinglinzheng/FTCN` | Apache 2.0 | Temporal sequence of face crops ($T 	imes 3 	imes 224 	imes 224$) | Temporal anomaly score + frame suspicion curve | Inter-frame flickering, landmark jitter detection | CUDA (6GB VRAM) | Official checkpoint `ftcn_ffpp_c23.pth` | Cross-dataset AUC-ROC on Celeb-DF v2 ($> 0.88$) | Static frozen video segments produce low temporal variance | PyTorch | `PLANNED` | STIL, TALL, VideoMAE |
-| `ps05.engines.vista.vdf.temporal` | Self-supervised spatio-temporal video representation | **VideoMAE ViT-B (Forensic Head)** | Tong et al., NeurIPS 2022; `https://github.com/MCG-NJU/VideoMAE` | Apache 2.0 | 16-frame video clip ($16 	imes 3 	imes 224 	imes 224$) | Temporal feature embedding + forgery logits | Spatio-temporal anomaly localization | CUDA (8GB VRAM) | HuggingFace `MCG-NJU/videomae-base` | Evaluation on DFDC and FaceForensics++ c40 splits | High compute footprint ($\sim 180	ext{ GFLOPs}$ per 16-frame tube) | PyTorch, Transformers | `RESEARCH_CANDIDATE` | TimeSformer, I3D |
-| `ps05.engines.vista.vdf.generative` | Text-to-Video generative synthesis detection | **Generative 3D FFT & Noise Analyzer** | Corvi et al., 2023; Wang et al., 2020 | Research use | Raw video sequence ($32 	imes 3 	imes 256 	imes 256$) | Frequency grid anomaly score + diffusion residual | Sora, Runway, Pika synthetic video detection | CUDA (4GB VRAM) / CPU | Mathematical FFT accumulator + linear head | Detection accuracy on GenVideo benchmark ($> 90\%$) | Video re-encoded through lossy social media codecs (WhatsApp) | PyTorch, NumPy | `PLANNED` | Spatial DIRE (Diffusion Reconstruction Error) |
-| `ps05.engines.vista.vdf.calibration`| Post-hoc probability calibration & OOD detection | **Platt Scaling + Mahalanobis OOD** | Guo et al., ICML 2017; Lee et al., NeurIPS 2018 | MIT License | Raw model logits + intermediate feature vectors | Calibrated confidence $P_{	ext{cal}} \in [0, 1]$ + OOD distance | Bounded probability estimation, out-of-distribution alert | CPU (1 core) | Pinned calibration parameters per model version | Expected Calibration Error ($ECE < 0.05$) on held-out test splits | Over-confidence on out-of-domain compression profiles | Scikit-learn, SciPy | `PLANNED` | Temperature Scaling, Isotonic Regression |
+| `ps05.engines.vista.vdf.frame_detect` | Spatial facial boundary seam & artifact detection | **EfficientNet-B4 Dual-Domain** | Tan & Le, 2019; Dual-domain forensic adaptation | Apache 2.0 | Aligned face crop ($256 \imes 256 \imes 3$) | Manipulated probability $P_{\text{fake}} \in [0, 1]$ + seam mask | Face-swap and reenactment detection | CUDA (4GB VRAM) / ONNX CPU | Pretrained on FaceForensics++ c23 | AUC-ROC on FF++ Deepfakes and FaceSwap ($> 0.96$) | Heavy compression (H.264 CRF $> 35$) obscures spatial seams | PyTorch, Timm | `PLANNED` | XceptionNet (Rossler et al.) |
+| `ps05.engines.vista.vdf.temporal` | Spatio-temporal inter-frame coherence modeling | **FTCN (Fully Temporal ConvNet)** | Zheng et al., ECCV 2022; `https://github.com/yinglinzheng/FTCN` | Apache 2.0 | Temporal sequence of face crops ($T \imes 3 \imes 224 \imes 224$) | Temporal anomaly score + frame suspicion curve | Inter-frame flickering, landmark jitter detection | CUDA (6GB VRAM) | Official checkpoint `ftcn_ffpp_c23.pth` | Cross-dataset AUC-ROC on Celeb-DF v2 ($> 0.88$) | Static frozen video segments produce low temporal variance | PyTorch | `PLANNED` | STIL, TALL, VideoMAE |
+| `ps05.engines.vista.vdf.temporal` | Self-supervised spatio-temporal video representation | **VideoMAE ViT-B (Forensic Head)** | Tong et al., NeurIPS 2022; `https://github.com/MCG-NJU/VideoMAE` | Apache 2.0 | 16-frame video clip ($16 \imes 3 \imes 224 \imes 224$) | Temporal feature embedding + forgery logits | Spatio-temporal anomaly localization | CUDA (8GB VRAM) | HuggingFace `MCG-NJU/videomae-base` | Evaluation on DFDC and FaceForensics++ c40 splits | High compute footprint ($\sim 180\text{ GFLOPs}$ per 16-frame tube) | PyTorch, Transformers | `RESEARCH_CANDIDATE` | TimeSformer, I3D |
+| `ps05.engines.vista.vdf.generative` | Text-to-Video generative synthesis detection | **Generative 3D FFT & Noise Analyzer** | Corvi et al., 2023; Wang et al., 2020 | Research use | Raw video sequence ($32 \imes 3 \imes 256 \imes 256$) | Frequency grid anomaly score + diffusion residual | Sora, Runway, Pika synthetic video detection | CUDA (4GB VRAM) / CPU | Mathematical FFT accumulator + linear head | Detection accuracy on GenVideo benchmark ($> 90\%$) | Video re-encoded through lossy social media codecs (WhatsApp) | PyTorch, NumPy | `PLANNED` | Spatial DIRE (Diffusion Reconstruction Error) |
+| `ps05.engines.vista.vdf.calibration`| Post-hoc probability calibration & OOD detection | **Platt Scaling + Mahalanobis OOD** | Guo et al., ICML 2017; Lee et al., NeurIPS 2018 | MIT License | Raw model logits + intermediate feature vectors | Calibrated confidence $P_{\text{cal}} \in [0, 1]$ + OOD distance | Bounded probability estimation, out-of-distribution alert | CPU (1 core) | Pinned calibration parameters per model version | Expected Calibration Error ($ECE < 0.05$) on held-out test splits | Over-confidence on out-of-domain compression profiles | Scikit-learn, SciPy | `PLANNED` | Temperature Scaling, Isotonic Regression |
 
 #### 11.10.5 Video Scene, Object Intelligence & OCR Family
 
 | Module | Exact Responsibility | Candidate Tool / Model | Official Paper / Repository | License & Restrictions | Input Contract | Output Contract | Supported Task | Hardware | Model Version Strategy | Benchmark / Evaluation Plan | Known Failure Cases | Integration Dependency | Current Status | Alternative Implementation |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `ps05.engines.vista.vci.detector` | Real-time surveillance object detection | **YOLOv8x / YOLOv10** | Ultralytics, 2023; Wang et al., 2024 | AGPL-3.0 / Commercial | Downsampled frame ($640 	imes 640 	imes 3$) | Bounding boxes $[x, y, w, h]$, class label, confidence | Person, vehicle, weapon detection in CCTV | CUDA (4GB VRAM) / ONNX CPU | Ultralytics YOLOv8x.pt pinned weights | COCO val2017 mAP50-95 ($> 53.9$) | Tiny objects ($< 16	ext{ px}$) in distant surveillance perspectives | Ultralytics, PyTorch | `PLANNED` | RT-DETR, Faster R-CNN |
+| `ps05.engines.vista.vci.detector` | Real-time surveillance object detection | **YOLOv8x / YOLOv10** | Ultralytics, 2023; Wang et al., 2024 | AGPL-3.0 / Commercial | Downsampled frame ($640 \imes 640 \imes 3$) | Bounding boxes $[x, y, w, h]$, class label, confidence | Person, vehicle, weapon detection in CCTV | CUDA (4GB VRAM) / ONNX CPU | Ultralytics YOLOv8x.pt pinned weights | COCO val2017 mAP50-95 ($> 53.9$) | Tiny objects ($< 16\text{ px}$) in distant surveillance perspectives | Ultralytics, PyTorch | `PLANNED` | RT-DETR, Faster R-CNN |
 | `ps05.engines.vista.vci.detector` | Promptable video object mask segmentation | **SAM 2 (Segment Anything 2)** | Ravi et al., Meta AI 2024; `https://github.com/facebookresearch/segment-anything-2` | Apache 2.0 | Video frame sequence + point/box prompt | Frame-by-frame binary segmentation masks | Physical object boundary tracking, tamper localization | CUDA (8GB VRAM) | `sam2_hiera_base_plus.pt` | SA-V dataset J&F benchmark ($> 75.0$) | Memory bloat on long video clips ($> 1000$ frames) | PyTorch, TorchVision | `RESEARCH_CANDIDATE` | Mask2Former, Track-Anything |
-| `ps05.engines.vista.vci.ocr_overlay`| OSD timestamp and camera channel OCR extraction | **PaddleOCR v4 + Tesseract 5** | `https://github.com/PaddlePaddle/PaddleOCR` | Apache 2.0 | Cropped OSD clock region ($H 	imes W 	imes 3$) | Extracted string, bounding polygon, confidence | Timestamp string parsing, camera channel identification | CPU / optional CUDA | PP-OCRv4 server model + Tesseract 5.3 | Character-level accuracy on 500 CCTV clock crops ($> 98\%$) | Dot-matrix LCD fonts or low-contrast text over white backgrounds | PaddlePaddle / Tesseract binary | `PLANNED` | EasyOCR, TrOCR |
-| `ps05.engines.vista.vci.actions` | Spatio-temporal human action and anomaly localization | **VideoMAE / SlowFast** | Feichtenhofer et al., ICCV 2019; Tong et al., 2022 | Apache 2.0 | 32-frame video clip ($32 	imes 3 	imes 224 	imes 224$) | Top-k action categories, temporal boundaries | Violence, fall, running, camera tampering detection | CUDA (6GB VRAM) | Pinned PyTorch weights on Kinetics-400 | Top-1 accuracy on UCF101 / Kinetics ($> 80\%$) | High inference latency on long CCTV clips | PyTorch | `RESEARCH_CANDIDATE` | X3D, TimeSformer |
+| `ps05.engines.vista.vci.ocr_overlay`| OSD timestamp and camera channel OCR extraction | **PaddleOCR v4 + Tesseract 5** | `https://github.com/PaddlePaddle/PaddleOCR` | Apache 2.0 | Cropped OSD clock region ($H \imes W \imes 3$) | Extracted string, bounding polygon, confidence | Timestamp string parsing, camera channel identification | CPU / optional CUDA | PP-OCRv4 server model + Tesseract 5.3 | Character-level accuracy on 500 CCTV clock crops ($> 98\%$) | Dot-matrix LCD fonts or low-contrast text over white backgrounds | PaddlePaddle / Tesseract binary | `PLANNED` | EasyOCR, TrOCR |
+| `ps05.engines.vista.vci.actions` | Spatio-temporal human action and anomaly localization | **VideoMAE / SlowFast** | Feichtenhofer et al., ICCV 2019; Tong et al., 2022 | Apache 2.0 | 32-frame video clip ($32 \imes 3 \imes 224 \imes 224$) | Top-k action categories, temporal boundaries | Violence, fall, running, camera tampering detection | CUDA (6GB VRAM) | Pinned PyTorch weights on Kinetics-400 | Top-1 accuracy on UCF101 / Kinetics ($> 80\%$) | High inference latency on long CCTV clips | PyTorch | `RESEARCH_CANDIDATE` | X3D, TimeSformer |
 
 #### 11.10.6 Cryptographic Integrity, Storage & Manifest Signing Family
 
 | Module | Exact Responsibility | Candidate Tool / Model | Official Paper / Repository | License & Restrictions | Input Contract | Output Contract | Supported Task | Hardware | Model Version Strategy | Benchmark / Evaluation Plan | Known Failure Cases | Integration Dependency | Current Status | Alternative Implementation |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `ps05.shared.ceipl.hasher` | Pre-decode dual cryptographic hashing | **OpenSSL / Python `hashlib`** | FIPS PUB 180-4, FIPS PUB 202 | OpenSSL / PSF License | Binary stream in 64KB chunks | Hex-encoded SHA-256 and SHA3-512 digests | Bitstream integrity verification | CPU (Hardware SHA-NI) | Python standard library `hashlib` | Throughput measurement on 10GB video file ($> 500	ext{ MB/s}$) | I/O bus saturation on slow mechanical drives | Native Python C extensions | `PLANNED` | BLAKE3 (where legally permissible) |
-| `ps05.shared.ceipl.signer` | Manifest sealing & digital signature verification | **Ed25519 (`cryptography` / `PyNaCl`)** | RFC 8032; Bernstein et al., 2012 | Apache 2.0 / BSD | Canonical JSON byte buffer (RFC 8785) | 64-byte Ed25519 signature string | Manifest authenticity sealing & tamper evidence | CPU (1 core) | `cryptography` Python package $\ge 42.0$ | Sign/verify latency ($< 1	ext{ ms}$ per manifest) | Signature failure if JSON canonicalization differs by one space | `cryptography` library | `PLANNED` | RSA-PSS 4096, ECDSA P-256 |
+| `ps05.shared.ceipl.hasher` | Pre-decode dual cryptographic hashing | **OpenSSL / Python `hashlib`** | FIPS PUB 180-4, FIPS PUB 202 | OpenSSL / PSF License | Binary stream in 64KB chunks | Hex-encoded SHA-256 and SHA3-512 digests | Bitstream integrity verification | CPU (Hardware SHA-NI) | Python standard library `hashlib` | Throughput measurement on 10GB video file ($> 500\text{ MB/s}$) | I/O bus saturation on slow mechanical drives | Native Python C extensions | `PLANNED` | BLAKE3 (where legally permissible) |
+| `ps05.shared.ceipl.signer` | Manifest sealing & digital signature verification | **Ed25519 (`cryptography` / `PyNaCl`)** | RFC 8032; Bernstein et al., 2012 | Apache 2.0 / BSD | Canonical JSON byte buffer (RFC 8785) | 64-byte Ed25519 signature string | Manifest authenticity sealing & tamper evidence | CPU (1 core) | `cryptography` Python package $\ge 42.0$ | Sign/verify latency ($< 1\text{ ms}$ per manifest) | Signature failure if JSON canonicalization differs by one space | `cryptography` library | `PLANNED` | RSA-PSS 4096, ECDSA P-256 |
 | `ps05.shared.ceipl.canonical`| RFC 8785 JSON canonicalization | **`canonicaljson` / `rfc8785` Python** | RFC 8785 (JCS standard) | Apache 2.0 | Arbitrary JSON-serializable dictionary | Deterministic UTF-8 byte string | Manifest normalization prior to hashing/signing | CPU (1 core) | `canonicaljson` 2.0.x | Cross-platform byte-equality check across Windows/Linux | Non-serializable objects (datetime, UUID) require strict string mapping | Pure Python / C extension | `PLANNED` | Custom recursive key sorter |
-| `ps05.shared.ceipl.tsa` | External RFC 3161 trusted timestamp binding | **`pyRFC3161` client** | RFC 3161 / RFC 5816 | Apache 2.0 | SHA-256 digest of signed manifest | ASN.1 DER-encoded TimeStampToken | Court-admissible proof of temporal existence | Network access to certified TSA | Pinned X.509 TSA root CA certificate | Verification of TSA response signature and chain of trust | TSA endpoint network failure or latency timeout ($> 5	ext{ s}$) | PyOpenSSL, Requests | `PLANNED` | Local hardware TSA appliance |
+| `ps05.shared.ceipl.tsa` | External RFC 3161 trusted timestamp binding | **`pyRFC3161` client** | RFC 3161 / RFC 5816 | Apache 2.0 | SHA-256 digest of signed manifest | ASN.1 DER-encoded TimeStampToken | Court-admissible proof of temporal existence | Network access to certified TSA | Pinned X.509 TSA root CA certificate | Verification of TSA response signature and chain of trust | TSA endpoint network failure or latency timeout ($> 5\text{ s}$) | PyOpenSSL, Requests | `PLANNED` | Local hardware TSA appliance |
 | `ps05.shared.ceipl.vault` | Hardware/Kernel-enforced WORM storage | **POSIX `0400` / AWS S3 Object Lock** | POSIX standard / AWS S3 Compliance API | N/A (Infrastructure) | Seized binary media payload | Immutable S3 object URI + Version ID | Non-rewritable evidence vault archiving | Storage Appliance | S3 API v4 / Linux filesystem | Tamper test: attempt PUT/DELETE on locked object returns HTTP 403 | Premature retention expiration if policy configured incorrectly | MinIO / AWS S3 SDK | `PLANNED` | Ceph WORM, optical WORM media |
 ### 11.11 Performance, Resource & Execution Architecture
 
@@ -3879,6 +4092,361 @@ To prevent computational bottlenecks on long surveillance exhibits (e.g. 24-hour
   - Ingestion does not read entire files into memory; it streams directly from disk via chunked 64KB I/O.
   - Long recordings are segmented into contiguous 5-minute logical analysis chunks along keyframe (I-frame) boundaries.
   - Chunks are dispatched as independent, parallel Celery tasks across worker queues and re-assembled by the timeline merger upon completion.
+
+---
+
+### 11.12 CCTV Frame Integrity, Temporal Sequence Forensics & Video Tampering Localisation (CFITSA)
+
+#### 11.12.1 Architectural Boundaries & Engine Integration
+The CCTV Frame Integrity & Temporal Sequence Analysis (CFITSA) capability operates as a specialized temporal-integrity sub-engine embedded directly within the **Video Reverse Engineering Engine (VRE)** (`ps05.engines.vista.vre.cadence`, `ps05.engines.vista.vre.temporal`) and the **CCTV Forensic Profile** (`ps05.engines.vista.cctv`). It adheres strictly to the unified VISTA five-engine architecture, reusing core services rather than duplicating pipelines:
+
+```mermaid
+flowchart TB
+    subgraph INTAKE["📥 Ingestion & WORM Vault (CEIPL)"]
+        EXHIBIT["Master Video / CCTV Exhibit
+(MP4, MKV, AVI, TS, DAV, SEC)"]
+        WORM["POSIX 0400 WORM Vault
+(SHA-256 / SHA3-512 Dual Hash)"]
+        EXHIBIT --> WORM
+    end
+
+    subgraph DEMUX_PARSE["🔬 Defensive Demuxer & Bitstream Inspection (VRE)"]
+        DEMUX["Defensive Demuxer Sandbox
+(PyAV / Libavformat, 10s I/O Timeout)"]
+        PACKETS["Demuxed Packet Queue
+(PTS, DTS, Keyframe Flags, Byte Offsets)"]
+        DECODER["Hardware/CPU Decoder
+(Planar YUV420p Ring Buffer <= 64 Frames)"]
+        WORM --> DEMUX --> PACKETS --> DECODER
+    end
+
+    subgraph TIMELINE_ENG["⏱️ Presentation Timeline & Cadence Analysis"]
+        PTS_ALIGN["PTS Rational Timebase Alignment
+(t_i = PTS_i * TB_num / TB_den)"]
+        CADENCE_MODEL["Robust Interval Cadence Estimator
+(Median, MAD, Modified Z-score, VFR/CFR)"]
+        PACKETS --> PTS_ALIGN --> CADENCE_MODEL
+    end
+
+    subgraph CORE_FIVE["🔍 The Five Primary Frame Integrity Detectors"]
+        FI01["FI-01: Missing / Deleted Frames
+(Modes A, B, C, D)"]
+        FI02["FI-02: Duplicated Frames
+(BLAKE3, pHash, SSIM, Static Invariant)"]
+        FI03["FI-03: Inserted Frames
+(Optical Flow Warping R_i, Macroblock QP)"]
+        FI04["FI-04: Frozen Sequences
+(Static vs Freeze Invariant, Audio Continuity)"]
+        FI05["FI-05: Reordered Frames
+(PTS Monotonicity, Trajectory Physics, Kendall Tau)"]
+        CADENCE_MODEL & DECODER --> FI01 & FI02 & FI03 & FI04 & FI05
+    end
+
+    subgraph CROSS_CORR["🌐 Cross-Engine & External Corroboration"]
+        CCTV_OSD["CCTV OSD Clock Drift Regression
+(PaddleOCR / Tesseract delta(t) Model)"]
+        AUDIO_CORR["AFB / AVSC Audio Correlation
+(Speech Continuity & Lip-Sync S_sync)"]
+        MULTI_CAM["Cross-Camera Timeline Graph
+(UTC Normalization & Trajectory Handoff)"]
+        COMPANION["DVR / NVR Event Logs & Native Manifests"]
+        FI01 & FI02 & FI03 & FI04 & FI05 --> CCTV_OSD & AUDIO_CORR & MULTI_CAM & COMPANION
+    end
+
+    subgraph OUTPUT_REP["📄 Admissibility & Reporting"]
+        FINDINGS["Pydantic v2 Finding Schemas
+(VideoFrameObservation, FrameIntegrityFinding)"]
+        WORKBENCH["Examiner Visualisation Workbench
+(Dual Timeline, PTS/DTS Curves, Heatmaps)"]
+        REPORT["Section 65B IEA / Section 63 BSA Certified Dossier
+(RFC 8785 JSON & Signed Cryptographic PDF)"]
+        CCTV_OSD & AUDIO_CORR & MULTI_CAM & COMPANION --> FINDINGS --> WORKBENCH --> REPORT
+    end
+```
+
+#### 11.12.2 Frame and Packet Identity Contracts
+The platform rejects the ambiguous conflation of physical file packets, decoder outputs, and display timestamps into a single `frame_index`. Every observed frame entity strictly maintains five independent, traceable coordinate dimensions:
+1. `packet_index` ($k \in \mathbb{N}_0$): The 0-based sequential ordinal index of the demuxed elementary bitstream packet returned by `av.demux()`.
+2. `decoder_output_index` ($d \in \mathbb{N}_0$): The 0-based ordinal sequence in which decompressed raster images are emitted by the decoder.
+3. `presentation_order_index` ($i \in \mathbb{N}_0$): The chronological playback order obtained by sorting all valid decoded frames strictly by Presentation Timestamp ($PTS_i \le PTS_{i+1}$).
+4. `source_reference_index` ($r \in \mathbb{N}_0 \cup \{\text{null}\}$): The ground-truth ordinal index from an authentic master camera reference recording, when available during laboratory reference comparisons.
+5. `scene_relative_index` ($s \in \mathbb{N}_0$): The 0-based frame counter relative to the most recent detected shot cut or scene transition boundary.
+
+#### 11.12.3 Decode Order vs Presentation Order Invariant
+In modern inter-frame video compression (H.264/AVC, H.265/HEVC, VP9, AV1), bidirectional predictive frames (B-frames) require backward and forward temporal reference frames for motion compensation. Consequently, a future reference frame (e.g. an I or P frame) must be transmitted and decoded **before** intermediate B-frames can be displayed:
+$$\text{Decode Order (DTS): } I_0 \o P_3 \o B_1 \o B_2 \o P_6 \o B_4 \o B_5$$
+$$\text{Presentation Order (PTS): } I_0 \o B_1 \o B_2 \o P_3 \o B_4 \o B_5 \o P_6$$
+- **Evidentiary Invariant:** A non-zero difference between DTS and PTS, or a decode order that differs from display order, is **standard, legitimate codec behaviour**. The system strictly prohibits flagging B-frame decode reordering as evidence of video tampering or frame shuffling. Composition time offsets are verified directly against the ISO/IEC 14496-12 `ctts` atom or Matroska `BlockAdditions`.
+
+#### 11.12.4 Presentation Timestamps, DTS and Rational Timebases
+Container timestamps are represented as discrete integer ticks scaled by a rational timebase:
+- $PTS_i \in \mathbb{Z}$: Presentation timestamp integer tick count.
+- $DTS_i \in \mathbb{Z}$: Decoding timestamp integer tick count.
+- $TB = rac{TB_{\text{num}}}{TB_{\text{den}}} \in \mathbb{Q}$: Stream rational timebase (e.g., $rac{1}{90000}$ for MPEG-TS, $rac{1}{1000}$ for Matroska/WebM, $rac{1}{600}$ for MP4).
+- Exact presentation time in seconds:
+  $$t_i = PTS_i \imes rac{TB_{\text{num}}}{TB_{\text{den}}}$$
+- Exact frame display duration:
+  $$\Delta t_i = t_i - t_{i-1} = (PTS_i - PTS_{i-1}) \imes rac{TB_{\text{num}}}{TB_{\text{den}}}$$
+*Rule:* Floating-point rounding is strictly forbidden in the primary data model; timestamps are persisted as $(PTS, TB_{\text{num}}, TB_{\text{den}})$ triples to prevent precision drift across multi-hour CCTV streams.
+
+#### 11.12.5 Variable-Frame-Rate-Aware Cadence Analysis
+Surveillance CCTV systems commonly operate in Variable Frame Rate (VFR) mode to conserve storage and bandwidth, throttling capture rates during inactivity ($1\text{--}5\text{ fps}$) and boosting rates upon motion sensor activation ($15\text{--}30\text{ fps}$).
+- **Failure of Constant-Frame-Rate (CFR) Assumptions:** Assuming a fixed cadence $\Delta t_{\text{expected}} = rac{1}{F}$ on VFR footage causes hundreds of false-positive missing frame detections.
+- **Robust Non-Parametric Cadence Statistics:**
+  For an analysis window $W$ of presentation intervals $\mathbf{\Delta t} = \{\Delta t_1, \Delta t_2, \dots, \Delta t_N\}$:
+  $$m = \operatorname{median}(\mathbf{\Delta t})$$
+  $$MAD = \operatorname{median}(\{|\Delta t_i - m| : i \in W\})$$
+  The modified robust z-score measures interval divergence:
+  $$z_i = egin{cases} rac{0.6745 \cdot (\Delta t_i - m)}{MAD} & \text{if } MAD > 10^{-6}\text{ s} \ 0.0 & \text{if } MAD \le 10^{-6}\text{ s and } |\Delta t_i - m| \le 10^{-6}\text{ s} \ rac{|\Delta t_i - m|}{10^{-6}} & \text{if } MAD \le 10^{-6}\text{ s and } |\Delta t_i - m| > 10^{-6}\text{ s} \end{cases}$$
+- **Piecewise Cadence Segmentation & Change-Point Detection:**
+  The system deploys Pruned Exact Linear Time (PELT) change-point detection on the time-series $\mathbf{\Delta t}$ using a normal-cost objective function with penalty $eta = 2 \ln(N)$. This segments the video into statistically homogeneous cadence regimes (e.g. Regime 1: $6.25\text{ fps}$, Regime 2: $25\text{ fps}$), preventing false alarms at legitimate camera mode switches.
+
+#### 11.12.6 Category FI-01: Missing or Deleted Frame Algorithms
+- **Mode A (Internal Timing Cadence Check):**
+  Identifies presentation intervals where $z_i > \tau_{z,\text{gap}}$ (default $\tau_{z,\text{gap}} = 3.5$ marked `THRESHOLD_REQUIRES_VALIDATION`).
+  - Estimated missing frame count: $\hat{k}_{\text{missing}} = \operatorname{round}\left(rac{\Delta t_i}{m}
+ight) - 1$.
+  - Emits: `FRAME_GAP_OBSERVED`.
+- **Mode B (Source-Reference Sequence Comparison):**
+  When an authentic reference bitstream is available, frames are mapped via perceptual hash matching. Let $\mathbf{r} = (1, \dots, M)$ be the reference frame sequence and $\mathbf{q} = (q_1, \dots, q_N)$ be the questioned sequence. The Longest Common Subsequence (LCS) identifies unmapped reference indices:
+  $$\mathcal{M}_{\text{deleted}} = \{r \in \mathbf{r} : r
+otin \operatorname{LCS}(\mathbf{r}, \mathbf{q})\}$$
+  - Emits: `CONFIRMED_FRAME_DELETION` with exact reference frame hashes.
+- **Mode C (Visual Continuity & Trajectory Rupture):**
+  For candidate intervals lacking timestamp markers, inter-frame forward-backward warping residuals $R_i$ and ByteTrack bounding box centroid velocities are evaluated. If spatial velocity $\mathbf{v}_i = rac{\mathbf{x}_{i} - \mathbf{x}_{i-1}}{\Delta t_i}$ exceeds kinematic threshold $v_{\max} = 5.0\text{ m/s}$ (or $150\text{ px/frame}$) without optical flow continuity, the system emits `POSSIBLE_FRAME_DELETION`.
+- **Mode D (CCTV Recorder Log Corroboration):**
+  Cross-references missing PTS spans against companion DVR JSON/XML event logs (e.g. `ALARM_MOTION_STOP`, `RECORDING_PAUSED`, `BUFFER_OVERFLOW`).
+
+#### 11.12.7 Category FI-02: Duplicated Frame Algorithms
+1. **Decoded-Frame Exact Digest:** Computes 256-bit BLAKE3 hash on canonical planar YUV420p raster bytes (excluding container wrappers and padding). If $\operatorname{BLAKE3}(I_i) == \operatorname{BLAKE3}(I_{i+1})$, frames are bit-exact duplicates.
+2. **Perceptual Hash Distance:** Computes 64-bit Discrete Cosine Transform (DCT) perceptual hash $h_i = \operatorname{pHash}(I_i)$. Hamming distance:
+   $$d_H(h_i, h_j) = \sum_{k=1}^{64} \mathbf{1}[h_{i,k}
+eq h_{j,k}]$$
+   Near-duplicate condition: $d_H(h_i, h_j) \le \tau_{\text{pHash}}$ (default $\tau_{\text{pHash}} = 2$).
+3. **Structural Similarity (SSIM):**
+   $$SSIM(x,y) = rac{(2\mu_x\mu_y + C_1)(2\sigma_{xy} + C_2)}{(\mu_x^2 + \mu_y^2 + C_1)(\sigma_x^2 + \sigma_y^2 + C_2)}$$
+   where $C_1 = (0.01 \cdot 255)^2$, $C_2 = (0.03 \cdot 255)^2$. Near-identical condition: $SSIM \ge 0.985$.
+4. **Stationary CCTV Scene Invariant:**
+   Surveillance cameras in empty rooms naturally produce $SSIM > 0.98$. To prevent false accusations:
+   - Evaluates sensor Photo-Response Non-Uniformity (PRNU) noise residue:
+     $$W_i = I_i - \operatorname{DenoiseFilter}(I_i)$$
+   - Computes cross-correlation $
+ho(W_i, W_{i+1})$. Bit-exact duplicates have $
+ho = 1.0$ with zero noise variation. Legitimate stationary scenes maintain independent photon shot noise ($
+ho < 0.60$).
+   - If $d_H \le 2$ but independent camera sensor noise is active, the system classifies content as `BENIGN_STATIC_SCENE` rather than tampering.
+
+#### 11.12.8 Category FI-03: Inserted Frame Algorithms
+- **Taxonomy of Frame Insertions:**
+  1. *Cloned Frame Insertion:* Duplicate frame from another point in the video copied into timeline.
+  2. *AI-Interpolated Frame:* Synthetic frame generated via neural frame rate up-conversion (RIFE, DAIN, CAIN).
+  3. *Foreign Frame Splice:* Frame sourced from an external video stream.
+- **Forward-Backward Optical Flow Consistency Warping Residual:**
+  Dense optical flow fields $\mathbf{f}_{i \o i+1} = (u_f, v_f)$ and $\mathbf{f}_{i+1 \o i} = (u_b, v_b)$ are estimated using Gunnar Farnebäck or TV-L1 algorithms. Forward-warped frame:
+  $$\hat{I}_{i+1}(x, y) = I_i(x + u_f(x, y), y + v_f(x, y))$$
+  Normalised motion-compensated warping residual:
+  $$R_i = rac{1}{|\Omega_i|} \sum_{(x,y) \in \Omega_i} rac{|I_{i+1}(x, y) - \hat{I}_{i+1}(x, y)|}{255.0}$$
+  where $\Omega_i$ is the non-occluded mask ($||\mathbf{f}_{i \o i+1} + \mathbf{f}_{i+1 \o i}||_2 < 1.0$).
+- **AI-Interpolation Halos:** Interpolated frames exhibit high spatial blur along occlusion edges with sharp textural patches. A sudden residual peak $R_i > \tau_{\text{warp}}$ accompanied by a dropped prediction error in the succeeding frame flags an interpolated insertion (`INSERTED_FRAME_CANDIDATE`).
+- **GOP Boundary Anomaly:** An isolated I-frame appearing mid-GOP (e.g. frame 7 of a 60-frame GOP) with discontinuous Macroblock QP distribution indicates a foreign spliced frame.
+
+#### 11.12.9 Category FI-04: Frozen or Repeated-Sequence Algorithms
+- **Consecutive Frame Difference:**
+  $$D_i = rac{1}{W \imes H \imes C} \sum_{x=1}^W \sum_{y=1}^H \sum_{c=1}^C |I_i(x,y,c) - I_{i-1}(x,y,c)|$$
+- **Freeze Interval Extraction:**
+  A continuous sequence of frames $[i_{\text{start}}, i_{\text{end}}]$ where $D_i < \heta_{\text{diff}}$ and $d_H(h_i, h_{i-1}) = 0$ for duration $\Delta T_{\text{freeze}} = t_{i_{\text{end}}} - t_{i_{\text{start}}} \ge 1.0\text{ s}$.
+- **Multi-Modal Freeze Disambiguation Invariant:**
+  The system cross-references candidate freezes with audio and OSD telemetry:
+  - *Case A (Deliberate Video Freeze Attack):* Decoded pixels frozen ($D_i < 0.001$), but burned-in OSD clock advances normally, AND demuxed audio contains active continuous ambient noise. Verdict: `FROZEN_SEQUENCE_CANDIDATE` (High Confidence).
+  - *Case B (Recorder / Decoder Stalling):* Decoded pixels frozen, OSD clock frozen, audio muted, and decoder reports repeated NAL packet drops. Verdict: `RECORDER_BUFFER_FREEZE_BENIGN`.
+  - *Case C (Genuine Static Scene):* Low pixel difference, motionless ByteTrack tracks, but high-frequency PRNU noise fluctuates normally. Verdict: `STATIC_SCENE_OR_FREEZE_INCONCLUSIVE`.
+
+#### 11.12.10 Category FI-05: Reordered or Shuffled Frame Algorithms
+- **Presentation Timestamp Monotonicity:**
+  In presentation order, $t_i > t_{i-1}$ must hold strictly. Any condition where $t_i < t_{i-1}$ indicates container timebase corruption or an explicit timestamp inversion.
+- **Kinematic Momentum & Trajectory Continuity:**
+  For tracked human/vehicle entities $k$ with bounding box centers $\mathbf{c}_k(t) = (x_k(t), y_k(t))$:
+  $$\mathbf{v}_k(t) = rac{\mathbf{c}_k(t) - \mathbf{c}_k(t-1)}{\Delta t}, \quad \mathbf{a}_k(t) = rac{\mathbf{v}_k(t) - \mathbf{v}_k(t-1)}{\Delta t}$$
+  Reversed or shuffled blocks cause acceleration discontinuities $|\mathbf{a}_k(t)| \gg a_{\max}$ and abrupt $180^\circ$ vector reversals incompatible with physical mass and momentum.
+- **Reference Alignment via Kendall Rank Correlation:**
+  When evaluating matched frame pairs between questioned sequence and known reference sequence:
+  $$\tau = rac{P - Q}{rac{1}{2} n(n - 1)}$$
+  where $P$ is concordant pairs, $Q$ is discordant pairs. Normal playback yields $\tau = 1.0$; a reversed sequence yields $\tau = -1.0$; shuffled sequences yield $\tau \in (-1.0, 0.90)$. Flags: `REORDERED_FRAME_CANDIDATE`.
+
+#### 11.12.11 Optical Flow & Motion Continuity Analysis
+```mermaid
+flowchart LR
+    F_PREV["Frame I(t-1)"] --> FLOW_EST["Optical Flow Estimator
+(Farneback / TV-L1 / RAFT)"]
+    F_CURR["Frame I(t)"] --> FLOW_EST
+    FLOW_EST --> FORWARD_FLOW["Forward Flow f_fwd(u, v)"]
+    FLOW_EST --> BACKWARD_FLOW["Backward Flow f_bwd(u, v)"]
+    FORWARD_FLOW & BACKWARD_FLOW --> OCCLUSION["Occlusion & Motion Mask Omega
+(||f_fwd + f_bwd|| < 1.0)"]
+    OCCLUSION --> WARP_ENGINE["Bilinear Motion Compensation Warp
+I_hat(t) = Warp(I(t-1), f_fwd)"]
+    WARP_ENGINE & F_CURR --> RESIDUAL["Warping Residual R(t)
+1/|Omega| * sum |I(t) - I_hat(t)|"]
+    RESIDUAL --> ANOMALY_TEST{"Residual R(t) > Threshold?"}
+    ANOMALY_TEST -->|Yes| FLAG_RUPTURE["Flag Motion Rupture / Splice Boundary"]
+    ANOMALY_TEST -->|No| FLAG_CONT["Visual Motion Continuous"]
+```
+- **Algorithms:**
+  - *Farnebäck Optical Flow:* Polynomial expansion model, window $= 15\text{ px}$, iterations $= 3$, poly sigma $= 1.2$. Fast CPU-bound baseline.
+  - *TV-L1 Dual Flow:* Dual total variation regularization preserving sharp object motion boundaries.
+  - *RAFT (Recurrent All-Pairs Field Transforms):* Deep optical flow architecture (marked `REQUIRES_VALIDATION` pending checkpoint certification).
+- **PTZ Camera Motion Compensation:** Camera pan, tilt, and zoom movements induce global affine optical flow. Global motion is estimated via RANSAC affine transformation $H_{\text{affine}}$; only residual local motion vectors exceeding $H_{\text{affine}}$ are evaluated for tampering.
+
+#### 11.12.12 Codec, GOP and Bitstream Forensics
+Bitstream properties are extracted without full raster decoding:
+- **GOP Cadence & Slice Types:** Extracts NAL unit headers (`nal_unit_type` $1 = \text{non-IDR slice}$, $5 = \text{IDR keyframe}$, $7 = \text{SPS}$, $8 = \text{PPS}$). Computes instantaneous GOP length $L_{\text{GOP}}$. Mid-sequence splice edits often create truncated GOPs (e.g. $L_{\text{GOP}} = 8$ instead of $30$).
+- **Macroblock Quantization Parameter (QP) Analysis:** Extracts macroblock QP values ($0\text{--}51$). Spliced regions or double-compressed re-encodings show distinct spatial QP variance and periodic GOP pulsing:
+  $$\sigma^2_{\text{QP}}(t) = rac{1}{M} \sum_{j=1}^M (QP_j(t) - \overline{QP}(t))^2$$
+- **Broken Reference Prediction:** P and B frames contain reference picture lists (`RefPicList0`, `RefPicList1`). Excised anchor frames cause demuxer/decoder warnings: `reference picture missing during decode` or `POC out of range`.
+
+#### 11.12.13 CCTV Clock & OCR Timestamp Correlation
+```mermaid
+sequenceDiagram
+    autonumber
+    participant FRAME as Decoded Video Frame
+    participant OCR as PaddleOCR / Tesseract
+    participant PARSER as Datetime Normaliser
+    participant REGRESS as Clock Drift Regression
+    participant VRE as Container PTS Engine
+
+    FRAME->>OCR: Crop Corner Margins (OSD Quadrants)
+    OCR->>PARSER: Raw Clock String ("2026-04-12 14:22:15")
+    PARSER->>PARSER: Normalise to UTC Unix Epoch Seconds T_ocr(t)
+    VRE->>REGRESS: Stream Container PTS Seconds t_pts
+    PARSER->>REGRESS: Stream OCR Timestamp T_ocr(t)
+    REGRESS->>REGRESS: Compute Delta(t) = T_ocr(t) - (T_0 + t_pts)
+    REGRESS->>REGRESS: Fit Linear Model Delta(t) = alpha + beta * t + epsilon
+    alt Step Jump |Delta T_ocr| >= 1.0s (t_pts monotonic)
+        REGRESS-->>VRE: Emit Status: POSSIBLE_FRAME_DELETION (Excised Segment)
+    else Clock Stalling (T_ocr constant, t_pts advancing)
+        REGRESS-->>VRE: Emit Status: FROZEN_SEQUENCE_CANDIDATE (Freeze Attack)
+    else Linear Slope |beta| > 0.01 s/s
+        REGRESS-->>VRE: Emit Status: PLAYBACK_SPEED_ALTERATION
+    else Residuals Normal
+        REGRESS-->>VRE: Emit Status: OSD_CLOCK_SYNCHRONIZED
+    end
+```
+
+#### 11.12.14 Cross-Camera Timeline Analysis & Corroboration
+In surveillance investigations involving multiple cameras covering an incident scene:
+1. **Multi-Camera Exhibit Isolation:** Each camera file is assigned an independent UUID and stored in a distinct POSIX `0400` WORM vault path.
+2. **Timezone & Reference Alignment:** Feeds are aligned to a universal UTC timeline using verified OSD clocks or investigator-specified anchor events.
+3. **Relative Clock Offset Estimation:**
+   $$\Delta t_{\text{cam1-cam2}} = t_{\text{cam1, event}} - t_{\text{cam2, event}}$$
+4. **Trajectory Handoff Corroboration:** ByteTrack entity appearance embeddings are matched across camera boundaries. If Camera 1 shows a subject exiting at $t_1$, but Camera 2 (with overlapping field of view) shows zero corresponding entry during $[t_1 - \epsilon, t_1 + \epsilon]$, the system flags a `CROSS_CAMERA_COVERAGE_DISCREPANCY`.
+
+#### 11.12.15 Audio-Video Timeline Correlation (AFB & AVSC)
+- **Container Offset Alignment:** Measures global container-level audio-to-video start time skew:
+  $$\Delta t_{\text{AV}} = t_{\text{video, start}} - t_{\text{audio, start}}$$
+- **Acoustic Continuity Across Video Freezes:** During visual freezes ($D_i < 0.001$), AFB extracts audio RMS energy and spectral flux. If acoustic power $P_{\text{audio}} > -40\text{ dBFS}$ and spectral flux is active, the freeze is deemed an unnatural visual suppression.
+- **Lip-Sync Desynchronization:** AVSC SyncNet computes lip-sync cross-correlation $S_{\text{sync}}$ on detected facial crops. Talking heads with active speech audio but static lips ($S_{\text{sync}} < 1.0$) indicate dubbing or video freezing.
+
+#### 11.12.16 Unified Pydantic v2 Contract Specifications
+The data model implements three primary schemas for timeline analysis:
+- `VideoFrameObservation`: Captures per-frame metadata, hashes, and timing metrics.
+- `FrameSequenceObservation`: Summarizes contiguous cadence regimes and scene intervals.
+- `FrameIntegrityFinding`: Represents judicial findings with confidence, alternative explanations, and Section 65B/63 BSA lineage bindings.
+*(Full Python Pydantic v2 class definitions are documented in Section 12.6).*
+
+#### 11.12.17 Asynchronous Orchestration, Worker Routing & Resource Limits
+- **FastAPI Endpoints:**
+  - `POST /api/v1/vista/cfit/analyze`: Dispatches asynchronous frame-integrity analysis job.
+  - `GET /api/v1/vista/cfit/jobs/{job_id}`: Retrieves job progress, worker state, and intermediate telemetry.
+  - `GET /api/v1/vista/cfit/jobs/{job_id}/timeline`: Streams frame observation array with pagination (`limit=1000`, `offset=0`).
+  - `GET /api/v1/vista/cfit/jobs/{job_id}/findings`: Returns list of confirmed `FrameIntegrityFinding` records.
+  - `POST /api/v1/vista/cfit/findings/{finding_id}/adjudicate`: Records examiner disposition (`CONFIRMED_ANOMALY`, `BENIGN_VARIATION`) into audit log.
+- **Celery Task Dispatch & Worker Ceilings:**
+  - Worker memory hard limit: cgroups enforced $\le 4\text{ GB}$ resident RAM.
+  - Uncompressed frame buffer: In-memory ring buffer strictly capped at $64\text{ frames}$ ($pprox 398\text{ MB}$ for 1080p RGB). Exceeding 64 frames triggers automatic streaming to disk-backed memmaps.
+  - Execution timeout: 60 seconds container header parse; 600 seconds per 10-minute video chunk.
+
+#### 11.12.18 Investigator Workbench & Visualisation Pipeline
+The web forensic workbench provides examiner-grade visual diagnostics:
+1. **Interactive Dual-Timeline Canvas:** Renders presentation order frame sequence with color-coded finding overlays (Red: Missing, Amber: Duplicate, Blue: Inserted, Purple: Freeze, Green: Reordered).
+2. **PTS/DTS Cadence Curve:** Plots $\Delta t_i$ against frame index with horizontal baselines for expected interval $m$ and tolerance bands $\pm 3.5 \imes MAD$.
+3. **Multi-Scale Similarity Heatmap:** Matrix plotting inter-frame SSIM and pHash Hamming distance across suspicious frame spans, exposing repeated loops.
+4. **Motion Vector & Optical Flow Display:** Overlays color-coded optical flow vectors and warping residual error maps directly on decoded frames.
+5. **Adjacent Frame Comparator:** Displays $I_{i-1}, I_i, I_{i+1}$ side-by-side with toggleable difference masks, enabling instant inspection of suspected excised or inserted frames.
+
+#### 11.12.19 Test Corpus & Ground-Truth Generation
+To guarantee scientific validity, the platform specifies a controlled 1,000-sample test corpus:
+- **Authentic Controls ($N = 400$):** Genuine unmodified CFR/VFR smartphone clips, broadcast feeds with B-frames, PTZ CCTV surveillance with camera panning, static room night-vision, IR switching, and natural scene cuts.
+- **Controlled Tampering Derivatives ($N = 600$):**
+  - *Missing Frames ($N = 150$):* Controlled deletions (1 frame, 5 frames, 30 frames, 120 frames) across CFR and VFR streams, both with and without PTS restamping.
+  - *Duplicate Frames ($N = 150$):* Repeated frame blocks (single repeats, 10-frame loops, 50-frame alibi extensions) with recompression at various bitrates.
+  - *Inserted Frames ($N = 100$):* Spliced foreign frames, cloned frames, and RIFE neural interpolated frames.
+  - *Frozen Frames ($N = 100$):* Video freezes during motion and static scenes, with and without advancing OSD clocks and audio tracks.
+  - *Reordered Frames ($N = 100$):* Adjacent swapped frames, reversed sequences (10--60 frames), and shuffled blocks.
+
+#### 11.12.20 Evaluation Metrics & Mathematical Formulations
+1. **Event Classification:** For each anomaly category $c \in \{\text{Missing}, \text{Duplicate}, \text{Inserted}, \text{Freeze}, \text{Reordered}\}$:
+   $$\text{Precision}_c = rac{TP_c}{TP_c + FP_c}, \quad \text{Recall}_c = rac{TP_c}{TP_c + FN_c}, \quad F1_c = rac{2 \cdot \text{Precision}_c \cdot \text{Recall}_c}{\text{Precision}_c + \text{Recall}_c}$$
+2. **Temporal Localisation Intersection-over-Union ($tIoU$):**
+   For ground-truth anomaly interval $T_g = [t_{g,\text{start}}, t_{g,\text{end}}]$ and predicted interval $T_p = [t_{p,\text{start}}, t_{p,\text{end}}]$:
+   $$tIoU = rac{|T_p \cap T_g|}{|T_p \cup T_g|} = rac{\max(0, \min(t_{p,\text{end}}, t_{g,\text{end}}) - \max(t_{p,\text{start}}, t_{g,\text{start}}))}{\max(t_{p,\text{end}}, t_{g,\text{end}}) - \min(t_{p,\text{start}}, t_{g,\text{start}})}$$
+   Boundary error: $\Delta t_{\text{start}} = |t_{p,\text{start}} - t_{g,\text{start}}|$, $\Delta t_{\text{end}} = |t_{p,\text{end}} - t_{g,\text{end}}|$.
+3. **Sequence Ordering Kendall's Tau ($\tau$):** Measures pairwise order agreement on matched reference frames.
+4. **False Alarm Rate on Hard Negatives:** Measures false alarms per video-hour on authentic controls (VFR jitter, PTZ panning, static scenes), mandating $\le 0.05$ false alarms/hour.
+
+#### 11.12.21 Technology Decision Matrix
+
+| Forensic Capability | Primary Candidate | Evaluated Alternative | Required Technical Capability | Licence & Compatibility | Selection State |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Demuxing & Bitstream Parsing** | **PyAV (Libav 6.1)** | FFprobe JSON CLI | Direct C-binding access to packet PTS/DTS, slice headers, and keyframe flags. | LGPL v2.1+ / Permissive | **SELECTED** |
+| **Frame Decompression** | **PyAV / FFmpeg** | OpenCV VideoCapture | Accurate decode order vs presentation order resolution; planar YUV access. | LGPL v2.1+ / Permissive | **SELECTED** |
+| **Dense Optical Flow** | **OpenCV Farnebäck / TV-L1** | RAFT (Deep Learning) | Sub-pixel motion estimation, forward-backward warping residual computation. | Apache 2.0 / BSD | **SELECTED** (Classical)<br/>`REQUIRES_VALIDATION` (RAFT) |
+| **Perceptual Hashing** | **imagehash (DCT pHash)** | PhotoHash | 64-bit frequency-domain perceptual fingerprinting; Hamming distance. | BSD-2-Clause | **SELECTED** |
+| **Structural Similarity** | **scikit-image SSIM** | OpenCV SSIM | Multi-channel luminance/contrast/structural similarity comparison. | BSD-3-Clause | **SELECTED** |
+| **Scene Boundary Detection** | **PySceneDetect** | Custom Color Histogram | Adaptive thresholding on HSV histograms and edge content changes. | BSD-3-Clause | **SELECTED** |
+| **OSD Clock OCR** | **PaddleOCR v2.7** | Tesseract 5.x | Corner quadrant text detection and robust datetime string extraction. | Apache 2.0 | **SELECTED** |
+| **Object & Entity Tracking** | **ByteTrack (VCI reuse)** | DeepSORT | Association of bounding box trajectories across brief occlusions. | MIT | **SELECTED** |
+| **Statistical Cadence Modeling** | **SciPy / NumPy** | Custom C++ extension | Fast vectorised median, MAD, and PELT change-point detection. | BSD-3-Clause | **SELECTED** |
+| **Exact Frame Hashing** | **blake3-py** | hashlib SHA-256 | High-throughput SIMD hashing (> 1 GB/s) of planar uncompressed pixels. | Apache 2.0 / CC0 | **SELECTED** |
+
+#### 11.12.22 Master Architecture & Review Flowcharts
+```mermaid
+flowchart TD
+    subgraph STAGE1["Stage 1: Container & Packet Demuxing"]
+        IN_FILE["Questioned Video Exhibit"] --> DEMUX_RUN["Demux Packets (PyAV)"]
+        DEMUX_RUN --> PKT_PTS["Extract Packet PTS, DTS, Size, Flags"]
+        PKT_PTS --> VFR_TEST{"Is Cadence VFR?"}
+        VFR_TEST -->|Yes| VFR_CADENCE["Fit Robust Median & MAD Baseline"]
+        VFR_TEST -->|No| CFR_CADENCE["Compute Fixed Cadence 1/FPS"]
+    end
+
+    subgraph STAGE2["Stage 2: Raster Decoding & Motion Extraction"]
+        DEMUX_RUN --> DECODE_RUN["Decode Frames to Planar YUV"]
+        DECODE_RUN --> HASH_RUN["Compute BLAKE3 Digest & 64-bit pHash"]
+        DECODE_RUN --> FLOW_RUN["Compute Dense Optical Flow Fields"]
+        DECODE_RUN --> TRACK_RUN["Update ByteTrack Entity Trajectories"]
+    end
+
+    subgraph STAGE3["Stage 3: Multi-Category Anomaly Verification"]
+        VFR_CADENCE & CFR_CADENCE --> CHK_GAP["Check PTS Discontinuities & Missing Frames (FI-01)"]
+        HASH_RUN --> CHK_DUP["Check Decoded Duplicates & Static Scene Invariant (FI-02)"]
+        FLOW_RUN --> CHK_INS["Check Motion Warping Residuals & Insertions (FI-03)"]
+        DECODE_RUN & HASH_RUN --> CHK_FRZ["Check Frozen Sequences & Audio Continuity (FI-04)"]
+        TRACK_RUN --> CHK_ORD["Check Presentation Monotonicity & Trajectory Physics (FI-05)"]
+    end
+
+    subgraph STAGE4["Stage 4: CCTV OSD & External Corroboration"]
+        DECODE_RUN --> OCR_RUN["PaddleOCR Extract OSD Clock Strings"]
+        OCR_RUN --> DRIFT_RUN["Evaluate Clock Drift Delta(t) Regression"]
+        CHK_GAP & CHK_DUP & CHK_INS & CHK_FRZ & CHK_ORD & DRIFT_RUN --> FUSION_NODE["Cross-Evidence Temporal Fusion Engine"]
+    end
+
+    subgraph STAGE5["Stage 5: Forensic Adjudication & Dossier Generation"]
+        FUSION_NODE --> WB_UI["Examiner Interactive Workbench & Visualisation"]
+        WB_UI --> EX_CONFIRM{"Examiner Adjudication"}
+        EX_CONFIRM -->|Confirmed| FINAL_CERT["Section 65B/63 BSA Certified PDF Dossier"]
+        EX_CONFIRM -->|Benign| SUPPRESS["Mark Finding as BENIGN_VARIATION"]
+    end
+```
 
 ---
 
@@ -4594,10 +5162,105 @@ CDVF implements explicit, trapped forensic exceptions to guarantee that no bench
 
 ## 12. Pydantic v2 API & Contract Schemas
 
+### 12.6 CCTV Frame Integrity & Temporal Sequence Forensics Schemas
+```python
+from pydantic import BaseModel, Field
+from typing import Optional, List, Dict, Any, Literal
+from uuid import UUID
+from datetime import datetime
+
+class VideoFrameObservation(BaseModel):
+    """Granular observation metadata for an individual decoded video frame."""
+    evidence_id: UUID
+    stream_id: str = Field(..., description="Elementary stream identifier, e.g. 'v:0'")
+    frame_observation_id: UUID
+    packet_index: Optional[int] = Field(None, description="Ordinal index of demuxed bitstream packet")
+    packet_byte_offset: Optional[int] = Field(None, description="Byte position in source container")
+    decoder_output_index: int = Field(..., description="Decompression sequence ordinal")
+    presentation_order_index: int = Field(..., description="Playback display sequence ordinal")
+    pts: int = Field(..., description="Raw integer presentation timestamp ticks")
+    dts: Optional[int] = Field(None, description="Raw integer decompression timestamp ticks")
+    timebase_num: int = Field(..., description="Rational timebase numerator")
+    timebase_den: int = Field(..., description="Rational timebase denominator")
+    presentation_time_seconds: float = Field(..., description="Computed PTS in seconds (unrounded)")
+    duration_seconds: Optional[float] = Field(None, description="Nominal frame duration in seconds")
+    width: int
+    height: int
+    pixel_format: str = Field(..., description="e.g. 'yuv420p'")
+    frame_type: Literal["I", "P", "B", "IDR", "UNKNOWN"]
+    is_keyframe: bool
+    packet_size_bytes: Optional[int] = None
+    decoded_frame_hash: str = Field(..., description="BLAKE3 64-char lowercase hex digest of planar raster")
+    perceptual_hash: str = Field(..., description="64-bit DCT perceptual hash binary string")
+    decode_status: Literal["OK", "CORRUPTED", "DROPPED"]
+    source_reference_index: Optional[int] = None
+    scene_relative_index: Optional[int] = None
+
+class FrameSequenceObservation(BaseModel):
+    """Summary of a contiguous sequence of frames belonging to a single cadence regime or scene."""
+    sequence_id: UUID
+    evidence_id: UUID
+    stream_id: str
+    start_frame_index: int
+    end_frame_index: int
+    start_presentation_time: float
+    end_presentation_time: float
+    duration_seconds: float
+    total_frames: int
+    cadence_type: Literal["CFR", "VFR", "UNKNOWN"]
+    nominal_fps: float
+    observed_mean_fps: float
+    scene_id: Optional[UUID] = None
+    mean_motion_magnitude: float
+    duplicate_run_length: int
+    timeline_status: Literal["CONTINUOUS", "GAP_DETECTED", "FREEZE_DETECTED", "SHUFFLE_DETECTED"]
+
+class FrameIntegrityFinding(BaseModel):
+    """Judicially auditable finding record detailing a detected temporal sequence anomaly."""
+    finding_id: UUID
+    evidence_id: UUID
+    stream_id: str
+    finding_classification: Literal[
+        "FRAME_GAP_OBSERVED",
+        "POSSIBLE_FRAME_DELETION",
+        "DUPLICATED_FRAME_CANDIDATE",
+        "INSERTED_FRAME_CANDIDATE",
+        "FROZEN_SEQUENCE_CANDIDATE",
+        "REORDERED_FRAME_CANDIDATE",
+        "PTS_DISCONTINUITY",
+        "DUPLICATE_TIMESTAMP",
+        "FRAME_DURATION_ANOMALY",
+        "MOTION_CONTINUITY_ANOMALY",
+        "CODEC_SEQUENCE_ANOMALY",
+        "DECODE_CORRUPTION",
+        "REFERENCE_SEQUENCE_MISMATCH",
+        "INCONCLUSIVE",
+        "INSUFFICIENT_REFERENCE_EVIDENCE",
+        "ANALYSIS_FAILED"
+    ]
+    start_frame_index: int
+    end_frame_index: int
+    start_pts: int
+    end_pts: int
+    start_time_seconds: float
+    end_time_seconds: float
+    expected_duration_seconds: Optional[float] = None
+    observed_duration_seconds: float
+    metric_values: Dict[str, float] = Field(default_factory=dict)
+    supporting_observations: List[str] = Field(default_factory=list)
+    contradictory_observations: List[str] = Field(default_factory=list)
+    detection_method: str
+    confidence_score: float = Field(..., ge=0.0, le=1.0)
+    alternative_explanations: List[str] = Field(default_factory=list)
+    limitations: List[str] = Field(default_factory=list)
+    examiner_disposition: Literal["UNREVIEWED", "CONFIRMED_ANOMALY", "BENIGN_VARIATION", "INCONCLUSIVE"] = "UNREVIEWED"
+    lineage_manifest_uri: str
+```
+
 ### 12.1 Audio Ingestion & Registration Contract
 ```python
 from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 from datetime import datetime
 from uuid import UUID
 
@@ -5267,6 +5930,81 @@ class CDVFTaskPreconditions(BaseModel):
     faces_required: bool = False
     supported_codecs: List[str] = Field(default_factory=list)
 ```
+# ==============================================================================
+# 12.4 Image Manipulation Localisation Framework (IMLF) Schemas
+# ==============================================================================
+
+class IMLRegionCandidate(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    region_id: str = Field(description="UUIDv4 identifier for the candidate manipulated region")
+    evidence_id: str = Field(description="Foreign key to the source image exhibit")
+    bounding_box: List[int] = Field(description="[ymin, xmin, ymax, xmax] in original canvas coordinates")
+    polygon: List[List[int]] = Field(description="Ordered [[x1, y1], [x2, y2], ...] contour vertices")
+    area_pixels: int = Field(ge=1, description="Exact integer pixel count within candidate mask")
+    area_percentage: float = Field(ge=0.0, le=100.0, description="Percentage of total image canvas area")
+    manipulation_family: str = Field(
+        description="One of COPY_MOVE, SPLICING, OBJECT_REMOVAL_INPAINTING, AI_GENERATED_REGIONAL, FACE_MANIPULATION, LOCAL_RETOUCHING, UNKNOWN_LOCAL_MANIPULATION"
+    )
+    confidence_score: float = Field(ge=0.0, le=1.0, description="Calibrated manipulation probability")
+    reliability_score: float = Field(ge=0.0, le=1.0, description="Detector extraction reliability score")
+    supporting_detectors: List[str] = Field(description="List of detector IDs corroborating the region")
+    conflicting_detectors: List[str] = Field(default_factory=list, description="Detectors disputing the region")
+    alternative_explanations: List[str] = Field(default_factory=list, description="Plausible benign causes")
+    reviewer_disposition: str = Field(
+        default="PENDING_REVIEW",
+        description="One of PENDING_REVIEW, ACCEPTED, REJECTED, MODIFIED"
+    )
+
+class IMLMaskMetadata(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    mask_id: str = Field(description="UUIDv4 identifier for the raster mask artifact")
+    mask_type: str = Field(
+        description="One of BINARY_MASK, PROBABILITY_MAP, ANOMALY_MAP, RELIABILITY_MAP, UNCERTAINTY_MAP"
+    )
+    storage_uri: str = Field(description="WORM vault URI storing the lossless PNG or float32 npy file")
+    sha256_checksum: str = Field(description="SHA-256 bitstream hash of the mask file")
+    width: int = Field(ge=1, description="Pixel width matching original evidence image")
+    height: int = Field(ge=1, description="Pixel height matching original evidence image")
+    coordinate_reference_system: str = Field(default="PIXEL_CANVAS_ORIGIN_TOP_LEFT")
+    threshold_applied: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+
+class IMLCoordinateTransform(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    source_dimensions: List[int] = Field(description="[W0, H0] original canvas dimensions")
+    target_dimensions: List[int] = Field(description="[Wt, Ht] transformed dimensions")
+    affine_matrix_3x3: List[float] = Field(description="Flat 9-element array representing forward affine matrix H")
+    inverse_matrix_3x3: List[float] = Field(description="Flat 9-element array representing inverse affine matrix H^-1")
+    operation: str = Field(description="One of CROP, RESIZE, PAD, TILE, ROTATE_90, TRANSPOSE")
+
+class IMLMultiScaleConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    tile_size: int = Field(default=1024, ge=256, le=4096)
+    stride: int = Field(default=768, ge=128, le=4096)
+    min_overlap: float = Field(default=0.20, ge=0.10, le=0.50)
+    blending_method: str = Field(default="DISTANCE_WEIGHTED_LINEAR")
+
+class IMLLocalizationResult(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    localization_result_id: str = Field(description="UUIDv4 identifier for the aggregate localization run")
+    evidence_id: str = Field(description="Target exhibit identifier")
+    image_level_verdict: str = Field(
+        description="One of AUTHENTIC_WITHIN_TESTED_SCOPE, MANIPULATED_CONTENT_DETECTED, INCONCLUSIVE"
+    )
+    image_level_score: float = Field(ge=0.0, le=1.0, description="Global calibrated manipulation probability")
+    localization_status: str = Field(
+        description="One of LOCALISATION_CANDIDATE_FOUND, NO_LOCALISATION_CANDIDATE, GLOBAL_MANIPULATION_CANDIDATE, LOCALISATION_UNCERTAIN, INCONCLUSIVE_LOW_QUALITY, UNSUPPORTED_MANIPULATION_TYPE, ANALYSIS_FAILED"
+    )
+    regions: List[IMLRegionCandidate] = Field(default_factory=list)
+    masks: List[IMLMaskMetadata] = Field(default_factory=list)
+    multi_detector_consensus_score: float = Field(ge=0.0, le=1.0)
+    lineage_graph_ref: str = Field(description="URI pointing to the DAG evidence dependency graph")
+    execution_telemetry: Dict[str, Union[float, int, str]] = Field(default_factory=dict)
+```
 
 ---
 
@@ -5536,6 +6274,20 @@ All geospatial forensic processing within AIF-GEO is governed by eight immutable
 6. **Non-Destructive Processing Invariant:** Reading, parsing, or normalizing GPS metadata must never modify the original evidence bitstream. Coordinate transformations and normalized values are stored exclusively as derived artifact manifests linked via CEIPL DAG.
 7. **Prohibition of Monolithic "Truth" Verdicts:** Machine-learning models (GeoCLIP, SigLIP) must never output an absolute verdict claiming an image was "proven" to be taken at a specific coordinate. Uncalibrated scores must be explicitly reported as ranking metrics, and candidate areas must state their bounding uncertainty.
 8. **Mandatory Inconclusive Attribution:** When metadata is absent and visual scene clues are insufficient or ambiguous, the platform must report **"Location Inconclusive / Insufficient Geospatial Telemetry"** as the court-admissible finding, rather than speculating.
+
+
+### 15.5 CCTV Frame Integrity, Temporal Analysis & Forensic Security Invariants
+
+All video temporal sequence and CCTV frame integrity analyses within CFITSA are governed by eight strict evidentiary and operational security invariants:
+
+1. **Master Video Bitstream Preservation Invariant:** Seized master video exhibits stored in the WORM vault must never be transcoded, remuxed, or modified in place. Read permissions must enforce POSIX `0400` mode and S3 Object Lock compliance.
+2. **Defensive Parsing & Resource Ceilings:** Demuxing and raster decoding must execute inside unprivileged worker processes with strict Linux cgroup memory ceilings ($\le 4\text{ GB}$) and timeouts ($60\text{ s}$ header parse, $600\text{ s}$ segment decode) to prevent infinite GOP loops and libavformat exploits.
+3. **Shell-String Injection Immunity:** Every invocation of FFmpeg, FFprobe, or MediaInfo must pass arguments as discrete string lists (`subprocess.run(["ffmpeg", ...], shell=False)`). Direct shell string formatting is prohibited.
+4. **Air-Gapped Offline Execution:** All parsing, optical flow estimation, OCR clock extraction, and tracking models must execute 100% locally with zero external network connectivity or telemetry.
+5. **Decoupled Frame Coordinate Spaces:** The system must strictly preserve separate, un-conflated indices for packet sequence, decoder emission, presentation display, and reference frames.
+6. **B-Frame Legal Invariant:** Codec-level decode order differences resulting from bidirectional B-frame prediction must never be interpreted, cited, or reported in judicial testimony as evidence of video manipulation or frame shuffling.
+7. **Observable Anomaly vs Deletion Invariant:** When an external authentic reference sequence, recorder log, or corroborating camera feed is unavailable, the system must limit findings to observable technical anomalies (`FRAME_GAP_OBSERVED`) and strictly abstain from speculative claims of historical deletion.
+8. **Section 65B IEA / Section 63 BSA Traceability:** Every generated finding, diagnostic curve, and report annexure must bind cryptographically to the master exhibit SHA-256 digest, raw integer presentation timestamps, and software environment commit hashes.
 
 ### 15.4 CDVF Model Governance, Integrity & Evaluation Security Invariants
 

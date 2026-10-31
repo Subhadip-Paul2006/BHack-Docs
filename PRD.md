@@ -55,7 +55,7 @@ To establish India's most trustworthy, court-admissible, and technologically adv
 - **O-5 (Indian Linguistic Resilience):** Audio speaker diarization and 3.voice tampering verification that operates across Indian language environments including Scheduled Indian Languages and regional Hindi dialects.
 
 ### 3.3 VISTA Subsystem Product Objectives
-The **VISTA (Video Integrity, Synchronization & Tampering Analysis)** subsystem fulfills twelve foundational forensic objectives:
+The **VISTA (Video Integrity, Synchronization & Tampering Analysis)** subsystem fulfills thirteen foundational forensic objectives:
 1. **OBJ-VISTA-01 (Bitstream Reverse Engineering):** Reverse-engineer container atoms, codec profiles, presentation timestamps (PTS/DTS), GOP cadence, and encoding structures across standard and proprietary video formats.
 2. **OBJ-VISTA-02 (Lossless Audio Demuxing):** Extract native audio bitstreams with zero transcoding loss into independent derived exhibits bound to parent exhibits via SHA-256 lineage manifests.
 3. **OBJ-VISTA-03 (AURAS Subsystem Reuse):** Re-route extracted audio into the established AURAS platform (ARE, MVSI, ADDE) without duplicating audio forensic algorithms.
@@ -68,6 +68,7 @@ The **VISTA (Video Integrity, Synchronization & Tampering Analysis)** subsystem 
 10. **OBJ-VISTA-10 (Cryptographic Provenance & Custody):** Anchor all video exhibits, stream extracts, and derived artifacts in the shared CEIPL service with RFC 8785 manifests, Ed25519 signatures, and RFC 3161 TSA tokens.
 11. **OBJ-VISTA-11 (Adaptive Discovery & Minimal Follow-Up):** Extract all available technical metadata and OSD clocks *before* questioning the user, asking only targeted follow-up questions without blocking execution if answers are missing.
 12. **OBJ-VISTA-12 (Traceable Court-Admissible Reporting):** Generate separable domain sub-reports and a unified Section 65B IEA / Section 63 BSA certified dossier that transparently preserves uncertainty and conflicting signals.
+13. **OBJ-VISTA-13 (CCTV Frame Integrity & Temporal Sequence Forensics):** Detect, localize, and corroborate missing, duplicated, inserted, frozen, or reordered frames, presentation timestamp discontinuities, variable-frame-rate cadence anomalies, motion vector ruptures, and cross-camera timeline conflicts while strictly differentiating detectable bitstream anomalies from unprovable historical events.
 
 ### 3.4 Dedicated Offline Network Traffic Forensics (ONTF) Product Objectives
 The **ONTF (Offline Network Traffic Forensics)** subsystem fulfills twelve core forensic objectives for seized packet captures:
@@ -2081,3 +2082,765 @@ Every benchmark or approval run produces an immutable **24-item artifact bundle*
 1. **Unverified Empirical Baselines (`THRESHOLD_REQUIRES_VALIDATION`):** For specialized domains such as CCTV surveillance and regional Indian dialect voice synthesis, fixed deployment thresholds cannot be arbitrarily declared without prior empirical data. These criteria are marked `THRESHOLD_REQUIRES_VALIDATION` and mandate formal pilot benchmarking studies.
 2. **Research Licensing Audits:** Public benchmark corpora (FaceForensics++, ASVspoof) carry research-only licensing terms. While suitable for academic validation and benchmarking, production deployment for state law enforcement requires formal licensing review or transition to open/governmental datasets.
 3. **Hardware Precision Constraints:** GPU floating-point non-determinism across disparate microarchitectures (NVIDIA Ampere vs. Ada Lovelace) can introduce minor rounding variations ($< 10^{-6}$). CDVF mandates pinning deterministic flags (`torch.use_deterministic_algorithms(True)`) and documenting hardware architecture in the 19-parameter manifest.
+---
+
+## 13. Image Manipulation Detection, Localisation & Regional Evidence Mapping (IMLF)
+
+### 13.1 Problem Statement & Forensic Context
+In judicial proceedings and criminal investigations, an image-level verdict such as *"85% probability of manipulation"* is fundamentally inadequate on its own. Courts, forensic examiners, and defense counsel require specific answers to critical evidentiary questions:
+1. **Where specifically is the image manipulated?** Which exact pixel regions, boundaries, or structural objects have been altered?
+2. **What manipulation technique was employed?** Was an object cloned from within the same frame (copy-move), imported from an external source (splicing), removed and reconstructed (generative inpainting), locally synthesized via text-to-image diffusion, or subject to facial biometric replacement (face-swap)?
+3. **What empirical forensic traces substantiate the finding?** Do sensor noise residuals (PRNU/Noiseprint++), JPEG double-quantization grids, CFA demosaicing periodicities, or illumination/shadow vector mismatches corroborate the flagged region?
+4. **How reliable is the localization mask?** What is the pixel-level uncertainty, boundary error tolerance ($\Delta t_{\text{boundary}}$), and confidence map?
+5. **Do independent forensic techniques corroborate or contradict each other?** If keypoint matching detects duplicate regions but compression analysis reveals uniform quantization, how is this discrepancy exposed to the examiner?
+6. **Is the evidence sufficient to support a definitive conclusion, or must the system abstain?** If severe downscaling, social-media recompression, or extreme blur obscures forensic artifacts, can the system produce an `INCONCLUSIVE` outcome rather than guessing?
+
+The **Image Manipulation Localisation Framework (IMLF)** addresses these challenges by establishing an evidence-aware, multi-detector spatial reasoning capability embedded directly within the Advanced Image Forensics (AIF) subsystem.
+
+---
+
+### 13.2 Core Architectural Principles & Scope
+1. **Separation of Detection and Localisation:** Image-level classification (determining whether an image contains manipulated content) and pixel-level localisation (generating binary or probabilistic spatial masks $\hat{M}(x,y) \in [0,1]$) are treated as mathematically distinct tasks. A model that achieves high image-level ROC-AUC on full frames may fail catastrophically at boundary segmentation; both dimensions must be benchmarked and reported independently.
+2. **Shared Capability, Not Standalone Engine:** IMLF does not replace or duplicate existing AIF specialist engines. Instead, it serves as the unifying spatial coordinate, mask aggregation, and evidence fusion layer across:
+   - **IRE (Image Reverse Engineering Engine):** Classical signal processing, PRNU sensor noise, ELA, and block-level DCT analysis.
+   - **AIM (AI, Manipulation & Steganography Engine):** Deep neural network manipulation localization, TruFor, CAT-Net, and inpainting detectors.
+   - **IVE (Image Understanding & Visual Evidence Engine):** Object detection, segmentation, and semantic scene context.
+   - **FPA (Face, Portrait & Biometric Analysis Engine):** Facial landmarks, head pose, and facial perimeter boundary analysis.
+3. **Zero Mask Fabrication Invariant:** If a detector only outputs an image-level scalar score, the system is strictly prohibited from fabricating a pseudo-mask (e.g. coloring the entire frame or generating an uncalibrated heatmap). A spatial mask is emitted only when supported by genuine spatial or pixel-level feature extractions.
+4. **Preservation of Individual Detector Findings:** Fused localisation masks never overwrite or erase raw model predictions. Every candidate region retains pointers to the underlying detector masks, model versions, checkpoint SHA-256 hashes, and raw confidence matrices.
+5. **Invertible Coordinate Mapping:** All spatial masks, bounding polygons, and keypoint coordinates must map unambiguously to the original uncompressed evidence coordinate frame, tracking all intermediate crops, rotations, scaling transforms, and tile grids via homogeneous affine transformation matrices.
+
+---
+
+### 13.3 Standard Manipulation Taxonomy
+IMLF defines an exhaustive, standardized forensic taxonomy covering six primary manipulation families and an explicit unknown category:
+
+```mermaid
+flowchart TD
+    Taxonomy["Canonical Image Manipulation Taxonomy"] --> CMFD["1. Copy-Move Forgery (Intra-Image)"]
+    Taxonomy --> Splicing["2. Image Splicing (Inter-Image Compositing)"]
+    Taxonomy --> Inpainting["3. Object Removal & Inpainting"]
+    Taxonomy --> RegionalAI["4. AI-Generated Regional Manipulation"]
+    Taxonomy --> FaceManip["5. Face & Portrait Manipulation"]
+    Taxonomy --> LocalEdit["6. Retouching & Local Alteration"]
+    Taxonomy --> UnknownManip["7. UNKNOWN_LOCAL_MANIPULATION"]
+
+    CMFD --> CMFD_Types["Direct, Scaled, Rotated, Flipped, Blended, Multi-Region"]
+    Splicing --> Splice_Types["Perspective Insert, Multi-Camera, Feathered Edge, Color-Matched"]
+    Inpainting --> Inpaint_Types["Clone/Heal, PatchMatch, Content-Aware, Generative Diffusion"]
+    RegionalAI --> AI_Types["Diffusion Inpainting, Object Insertion, Outpainting, Texture Gen"]
+    FaceManip --> Face_Types["Face Swap, Expression Morph, Facial Blending, Biometric Warp"]
+    LocalEdit --> Edit_Types["Selective Blur/Sharpen, Contrast Warp, Shadow Erasure, Stamp Removal"]
+```
+
+1. **Copy-Move Forgery (CMFD):** Duplication of one or more regions from within the same image to cover an incriminating object or multiply scene elements (e.g. crowds, vehicles, weapons). Sub-types: Direct translation, scaled copy-move, rotated copy-move, horizontally/vertically flipped, color-adjusted, feathered boundary, and multi-source intra-cloning.
+2. **Image Splicing & Compositing:** Insertion of an external region extracted from a different source image into the recipient target image. Sub-types: Direct insertion, perspective-homography transformed insertion, multi-sensor compositing, color-temperature matched splicing, feathered/blended boundary insertion, and background replacement.
+3. **Object Removal & Inpainting:** Eradication of an original image entity followed by structural or statistical background synthesis. Sub-types: Traditional PDE-based inpainting, PatchMatch / clone-stamp reconstruction, Adobe Content-Aware Fill, and generative neural inpainting (LaMa, MAT).
+4. **AI-Generated Regional Manipulation:** Localized synthesis of new visual content within a photographic scene via text-to-image or image-to-image generative diffusion models. Sub-types: Latent diffusion inpainting (Stable Diffusion, FLUX), generative object insertion, contextual outpainting, and synthetic high-frequency detail replacement.
+5. **Face & Portrait Manipulation:** Targeted biometric alteration of human facial regions. Sub-types: Deepfake face-swap (RoOP, InsightFace), face replacement, expression reenactment, facial boundary seam blending, facial morphing, and synthetic skin retouching.
+6. **Retouching & Local Image Alteration:** Fine-grained localized edits that do not alter scene semantics but modify evidential details. Sub-types: Localized Gaussian blur/sharpening, contrast adjustment, timestamp/watermark removal, selective dodging/burning, and chromatic aberration removal.
+7. **`UNKNOWN_LOCAL_MANIPULATION`:** An anomaly mask identified by multiple independent low-level statistical detectors (e.g. noise residual and CFA break) where the exact generative or editing tool cannot be attributed with scientific certainty.
+
+---
+
+### 13.4 Ten Core Investigator User Journeys
+
+#### Journey IML-J01: Localising a Copy-Move Forgery with Paired Geometries
+- **Context:** An investigator examines a seized photograph where a suspect claims an empty parking lot proves an alibi; intelligence indicates duplicate vehicles were cloned to conceal an entrance.
+- **Workflow:** The investigator submits the exhibit to AIF. IMLF invokes the IRE Copy-Move module. The engine extracts SIFT and RootSIFT keypoints, applies $k$-d tree nearest-neighbor ratio matching ($r < 0.75$), and filters trivial neighbor pairs ($d > 50\text{ px}$). RANSAC estimates a valid projective homography $H$ with 42 inlier matches ($\text{RMSE} = 0.82\text{ px}$).
+- **Output:** IMLF renders paired colored bounding polygons showing the donor region $\mathcal{R}_{\text{source}}$ and recipient region $\mathcal{R}_{\text{target}}$, links them with vector displacement arrows, generates binary masks for both regions, and exports mathematical transformation parameters ($s = 1.05, \theta = 14.2^\circ$).
+
+#### Journey IML-J02: Localising an Inserted / Spliced Region via Sensor Noise & ELA
+- **Context:** An extortion case involves a photograph of a political figure in an incriminating venue; the defense claims the figure was spliced from an online press photo.
+- **Workflow:** IMLF invokes IRE Noise Analysis and AIM TruFor. The residual engine calculates $R(x,y) = I(x,y) - D(I)(x,y)$ using median filtering and evaluates local variance across $32\times 32$ blocks. TruFor extracts RGB and noiseprint features. Both independent methods detect anomalous noise variance and mismatched high-frequency distributions concentrated strictly within the torso and head boundaries.
+- **Output:** The examiner views a side-by-side split screen: the original photograph overlaid with a red semi-transparent mask ($\operatorname{IoU} = 0.88$ agreement between IRE and TruFor), a boundary gradient discontinuity map highlighting feathering seams, and an extraction confidence score of $0.94$.
+
+#### Journey IML-J03: Detecting an Erased / Inpainted Object via Frequency & Edge Inconsistencies
+- **Context:** A traffic accident investigation requires determining whether a speed limit sign was digitally removed from dashcam footage prior to submission.
+- **Workflow:** The investigator flags the roadside quadrant. IMLF dispatches AIM Inpainting Analysis and IRE Resampling Profiler. The deep inpainting detector identifies characteristic spectral rolloff and structural texture repetition indicative of content-aware fill. The edge gradient profiler reveals a blurred boundary ring surrounded by sharp photographic noise.
+- **Output:** IMLF isolates a $180\times 320\text{ px}$ bounding rectangle, generates an anomaly heatmap peaking at $0.91$, reports manipulation family `OBJECT_REMOVAL_INPAINTING`, and logs that surrounding photographic noise was destroyed within the bounding perimeter.
+
+#### Journey IML-J04: Identifying Local AI-Generated Elements in an Authentic Photograph
+- **Context:** A protest photograph submitted as evidence contains authentic crowds, but a provocative banner is suspected of being locally generated via diffusion inpainting.
+- **Workflow:** IMLF runs full-frame classification via SigLIP (overall image score: authentic photograph, $P_{\text{AI}} = 0.12$). However, the regional localization pipeline (TruFor / Cat-Net v2) flags the banner region ($1200\times 450\text{ px}$) with a local anomaly score of $0.96$. High-frequency DCT analysis shows an absence of camera sensor noise and latent diffusion upsampling artifacts inside the banner bounding polygon.
+- **Output:** The examiner workbench highlights the localized banner in yellow, displays the global classification score alongside the regional mask, and prevents the investigator from mistakenly classifying the entire photograph as an AI deepfake.
+
+#### Journey IML-J05: Reviewing Facial Region Manipulation with FPA Biometric Landmarks
+- **Context:** A passport forgery case involves an authentic identity card where the portrait face is suspected of being swapped with an imposter.
+- **Workflow:** IMLF coordinates with FPA. FPA detects the primary facial bounding box using RetinaFace and extracts 68 MediaPipe facial landmarks. IMLF evaluates color transition and blur gradients along the convex hull perimeter of the face. An independent face-swap head identifies boundary blending seams and GAN/diffusion synthesis artifacts across the inner ocular and oral regions.
+- **Output:** IMLF renders the 68 biometric landmarks, highlights the boundary seam in cyan, outputs an IoU mask covering the swapped facial oval, and confirms that the outer hair and collar belong to the original card substrate.
+
+#### Journey IML-J06: Multi-Scale Tiling on a High-Resolution Crime Scene Exhibit
+- **Context:** A high-resolution forensic photograph ($8192\times 6144\text{ px}$, 50 MP) must be analyzed for minute localized tampering (e.g. altered serial numbers on seized currency).
+- **Workflow:** Full-frame downsampling to $512\times 512$ would obliterate the microscopic edit. IMLF activates its Multi-Scale Tiling Engine: it partitions the 50 MP image into $1024\times 1024$ overlapping tiles with a $256\text{ px}$ stride (25% overlap). Each tile is processed through the localization models. A coordinate transformation manager maps tile-relative mask coordinates $(x_t, y_t)$ back to original canvas coordinates $(X, Y)$ using invertible affine matrices $H_t^{-1}$. Overlapping tile masks are merged using distance-weighted linear blending.
+- **Output:** IMLF detects a $45\times 95\text{ px}$ manipulation on a single banknote serial number, preserves exact native coordinates, and displays a localized zoom window on the examiner workbench.
+
+#### Journey IML-J07: Resolving and Presenting Multi-Detector Conflict
+- **Context:** An ELA detector flags a white building roof as heavily manipulated due to high compression error, whereas TruFor and PRNU report the roof is authentic camera sensor noise.
+- **Workflow:** IMLF Multi-Detector Fusion engine evaluates spatial consensus. It cross-references the ELA anomaly with the visual texture: the roof is high-contrast white snow, a known ELA false-positive failure mode. TruFor's reliability map indicates high confidence in authentic sensor noise.
+- **Output:** Rather than averaging the conflicting scores or picking a winner blindly, IMLF records an explicit conflict entry: `ELA: SUSPICIOUS (High Error)`, `TruFor: AUTHENTIC (P=0.03)`, `PRNU: CORRELATED (PCE=74)`. It assigns region status `LOCALISATION_UNCERTAIN`, provides an alternative forensic explanation (*"High-contrast edge artifact"*), and alerts the examiner to review raw signal profiles.
+
+#### Journey IML-J08: Inspecting Pixel-Level Confidence Maps & Reliability Masks
+- **Context:** An investigator must assess whether a detected manipulation mask is crisp and reliable or fuzzy and speculative before including it in a search warrant affidavit.
+- **Workflow:** IMLF provides three distinct visual layers on the workbench: (1) Binary Mask ($\hat{M} \in \{0, 1\}$ at threshold $\tau = 0.50$); (2) Continuous Probability Map ($P(x,y) \in [0.0, 1.0]$); and (3) Detector Reliability Map ($R(x,y) \in [0.0, 1.0]$) derived from local noise SNR and model uncertainty.
+- **Output:** The examiner observes that while the continuous probability map shows $P > 0.80$, the reliability map drops to $0.20$ near deep shadow regions. The workbench allows the examiner to slide an uncertainty threshold filter, shrinking the reported mask to the high-reliability core ($R > 0.70$) and ensuring only defensible boundaries are submitted to court.
+
+#### Journey IML-J09: Exporting a Region-Linked Forensic Report (Section 65B/63 BSA)
+- **Context:** A certified forensic examiner must export a complete legal evidence dossier for judicial submission in an Indian court under Section 63 of Bharatiya Sakshya Adhiniyam (BSA 2023).
+- **Workflow:** The examiner validates candidate regions $\mathcal{R}_1$ and $\mathcal{R}_2$, marks them `ACCEPTED`, enters forensic observations, and clicks "Generate Certified Dossier". IMLF compiles an RFC 8785 canonical JSON IR and a high-resolution PDF.
+- **Output:** The dossier includes the original exhibit SHA-256, WORM vault URI, thumbnail with vector polygon overlays, exact pixel bounding boxes $[y_{\min}, x_{\min}, y_{\max}, x_{\max}]$, area percentage ($3.4\%$), supporting detector IDs, SHA-256 checkpoint hashes, ECE calibration records, and the examiner's digital signature.
+
+#### Journey IML-J10: Handling Low-Quality Exhibits with First-Class Abstention
+- **Context:** An exhibit downloaded from WhatsApp is downscaled to $640\times 480$, recompressed with JPEG QF 45, and exhibits heavy blockiness.
+- **Workflow:** IMLF executes pre-flight signal quality checks. The noise floor is completely erased by DCT quantization; high-frequency residuals cannot be extracted; JPEG block boundaries exhibit widespread ringing. Both TruFor and IRE report signal-to-noise ratio below operational minimums ($\text{SNR} < 6\text{ dB}$).
+- **Output:** The system refuses to fabricate a low-confidence mask or force an authentic verdict. It returns status `INCONCLUSIVE_LOW_QUALITY`, annotates the specific technical deficiencies (*"Excessive compression precludes reliable noise residual and boundary seam extraction"*), and logs the abstention in the evidentiary audit trail.
+
+---
+
+### 13.5 Unified Mask and Region Contracts
+IMLF specifies five core data structures to standardize spatial findings across all detection engines:
+
+1. **`IMLRegionCandidate`:** Represents an individual localized region of suspicion.
+   - `region_id`: UUIDv4.
+   - `evidence_id` & `case_id`: Foreign keys linking to seized exhibit.
+   - `bounding_box`: Pixel coordinates $[y_{\min}, x_{\min}, y_{\max}, x_{\max}]$ in original image coordinate frame.
+   - `polygon`: List of $[x, y]$ vertices tracing the boundary contour.
+   - `area_pixels`: Exact integer pixel count.
+   - `area_percentage`: Float $[0.0, 100.0]$ representing fraction of total image area.
+   - `manipulation_family`: Enum (`COPY_MOVE`, `SPLICING`, `OBJECT_REMOVAL_INPAINTING`, `AI_GENERATED_REGIONAL`, `FACE_MANIPULATION`, `LOCAL_RETOUCHING`, `UNKNOWN_LOCAL_MANIPULATION`).
+   - `confidence_score`: Calibrated probability $[0.0, 1.0]$.
+   - `reliability_score`: Local reliability metric $[0.0, 1.0]$.
+   - `supporting_detectors`: List of detector IDs corroborating the finding.
+   - `conflicting_detectors`: List of detector IDs disputing or failing to find the region.
+   - `alternative_explanations`: Textual explanation of benign causes (e.g. natural texture repetition, ELA edge artifact).
+   - `reviewer_disposition`: Enum (`PENDING_REVIEW`, `ACCEPTED`, `REJECTED`, `MODIFIED`).
+
+2. **`IMLMaskMetadata`:** Metadata descriptor governing stored raster mask arrays.
+   - `mask_id`: UUIDv4.
+   - `mask_type`: Enum (`BINARY_MASK`, `PROBABILITY_MAP`, `ANOMALY_MAP`, `RELIABILITY_MAP`, `UNCERTAINTY_MAP`).
+   - `storage_uri`: POSIX WORM vault path or S3 key storing lossless PNG or float32 NumPy array.
+   - `sha256_checksum`: Cryptographic hash of mask bitstream.
+   - `width` & `height`: Exact integer dimensions (must match original evidence image).
+   - `coordinate_reference_system`: String (e.g. `PIXEL_CANVAS_ORIGIN_TOP_LEFT`).
+   - `threshold_applied`: Float value used to binarize probability map into binary mask.
+
+3. **`IMLLocalizationResult`:** Master aggregate record summarizing all spatial findings for an evidence exhibit.
+   - `localization_result_id`: UUIDv4.
+   - `evidence_id`: Target exhibit identifier.
+   - `image_level_verdict`: Enum (`AUTHENTIC_WITHIN_TESTED_SCOPE`, `MANIPULATED_CONTENT_DETECTED`, `INCONCLUSIVE`).
+   - `image_level_score`: Calibrated global manipulation probability $[0.0, 1.0]$.
+   - `localization_status`: Enum (`LOCALISATION_CANDIDATE_FOUND`, `NO_LOCALISATION_CANDIDATE`, `GLOBAL_MANIPULATION_CANDIDATE`, `LOCALISATION_UNCERTAIN`, `INCONCLUSIVE_LOW_QUALITY`, `UNSUPPORTED_MANIPULATION_TYPE`, `ANALYSIS_FAILED`).
+   - `regions`: List of `IMLRegionCandidate` objects.
+   - `masks`: List of `IMLMaskMetadata` objects.
+   - `multi_detector_consensus_score`: Float $[0.0, 1.0]$.
+   - `lineage_graph_ref`: Pointer to DAG evidence dependency graph.
+   - `execution_telemetry`: Latency (ms), peak VRAM (MB), tile count.
+
+4. **`IMLCoordinateTransform`:** Transformation record documenting spatial adjustments applied to an image during analysis.
+   - `source_dimensions`: $[W_0, H_0]$.
+   - `target_dimensions`: $[W_t, H_t]$.
+   - `affine_matrix_3x3`: Flat 9-element array representing forward homogeneous transformation $H$.
+   - `inverse_matrix_3x3`: Flat 9-element array representing inverse transformation $H^{-1}$.
+   - `operation`: Enum (`CROP`, `RESIZE`, `PAD`, `TILE`, `ROTATE_90`, `TRANSPOSE`).
+
+5. **`IMLMultiScaleConfig`:** Parameters governing high-resolution image tiling.
+   - `tile_size`: Integer (e.g. 1024 px).
+   - `stride`: Integer (e.g. 768 px, providing 256 px / 25% overlap).
+   - `min_overlap`: Float (e.g. 0.20).
+   - `blending_method`: Enum (`DISTANCE_WEIGHTED_LINEAR`, `MAX_POOLING`, `GAUSSIAN_TAPER`).
+
+---
+
+### 13.6 Canonical Coordinate Normalisation & Spatial Alignment
+To eliminate spatial ambiguity across disparate computer vision libraries (OpenCV, PIL, PyTorch, Albumentations), IMLF enforces a single canonical spatial reference system:
+
+1. **Origin & Axis Orientation:** The origin $(0, 0)$ is strictly located at the **top-left corner** of the image. The $X$-axis increases positively to the right $[0, W-1]$; the $Y$-axis increases positively downward $[0, H-1]$.
+2. **Pixel-Center Convention:** Pixels are addressed at continuous center coordinates $(x + 0.5, y + 0.5)$. Bounding boxes use zero-indexed, half-open interval semantics $[y_{\min}, x_{\min}, y_{\max}, x_{\max})$, where the pixel at $(x_{\max}, y_{\max})$ is exclusive.
+3. **Normalized Coordinates:** Normalized coordinates $[x_n, y_n] \in [0.0, 1.0]$ are defined as $x_n = x / W$ and $y_n = y / H$. Bounding boxes and polygons are serialized in both absolute integer pixel coordinates (for exact mask reconstruction) and normalized floats (for resolution-independent frontend rendering).
+4. **Invertible Affine Transformations:** Any geometric preprocessing operation (scaling to model input size, cropping facial bounding boxes, or tiling) must maintain an explicit $3\times 3$ homogeneous transformation matrix:
+   $$\begin{bmatrix} x_{\text{orig}} \\ y_{\text{orig}} \\ 1 \end{bmatrix} = \mathbf{H}^{-1} \begin{bmatrix} x_{\text{model}} \\ y_{\text{model}} \\ 1 \end{bmatrix}$$
+   Predicted masks $\hat{M}_{\text{model}}$ are projected back to native canvas resolution using bilinear or nearest-neighbor interpolation guided strictly by $\mathbf{H}^{-1}$.
+5. **No Blind Cropping:** Model pipelines are prohibited from discarding border pixels or un-tiled margins. If an image's dimensions are not integer multiples of tile stride, asymmetric padding is recorded in $\mathbf{H}$ and stripped during inverse projection.
+
+---
+
+### 13.7 Confidence, Reliability, Anomaly & Disagreement Semantics
+Forensic reporting requires distinct mathematical and operational definitions for four frequently conflated spatial maps:
+
+| Map Type | Symbol | Domain | Definition & Forensic Semantics | Examiner Interpretation |
+| :--- | :--- | :--- | :--- | :--- |
+| **Probability Map** | $P_{\text{manip}}(x,y)$ | $[0.0, 1.0]$ | Calibrated empirical likelihood that the pixel at $(x,y)$ was altered by a manipulation process. | Higher values indicate higher likelihood of tampering under calibrated evaluation. |
+| **Anomaly Map** | $A(x,y)$ | $[0.0, \infty)$ or normalized | Continuous distance metric measuring statistical deviation from local background expectation (e.g. noise residual variance, prediction error). | Highlights unusual signal traces; does not prove malicious intent without corroboration. |
+| **Reliability Map** | $R(x,y)$ | $[0.0, 1.0]$ | Confidence of the detector in its own extraction under local image conditions (e.g. texture complexity, illumination level, absence of saturation). | Low reliability flags areas where the detector is blind or unreliable (e.g. pitch-black shadows, blown-out highlights). |
+| **Disagreement Map** | $D(x,y)$ | $[0.0, 1.0]$ | Spatial standard deviation or normalized entropy among multiple independent detector outputs covering the same pixel $(x,y)$. | High disagreement indicates conflicting forensic cues, triggering mandatory examiner manual review. |
+
+---
+
+### 13.8 Multi-Detector Evidence Fusion & Lineage Graph
+When multiple AIF engines generate spatial findings for an image exhibit, IMLF assembles them into an Evidence Dependency Directed Acyclic Graph (DAG) rather than naively blending pixel values:
+
+```mermaid
+flowchart TD
+    Exhibit["Seized Image Exhibit (WORM)"] --> PreCheck["Quality & Pre-Flight Checks"]
+    PreCheck --> IRE_Branch["IRE: Classical Signal & Noise"]
+    PreCheck --> AIM_Branch["AIM: Deep Learning Localisation"]
+    PreCheck --> FPA_Branch["FPA: Face & Biometric Seams"]
+
+    IRE_Branch --> CMFD_Keypoint["Keypoint / Homography Matching"]
+    IRE_Branch --> Noise_PRNU["Noise Residual & PRNU Break"]
+    IRE_Branch --> ELA_DCT["JPEG Block Grid & ELA"]
+
+    AIM_Branch --> TruFor_Model["TruFor RGB + Noiseprint"]
+    AIM_Branch --> CATNet_Model["CAT-Net v2 Compression"]
+    AIM_Branch --> Inpaint_Model["Deep Inpainting Head"]
+
+    FPA_Branch --> Face_Seams["Facial Boundary Seam Profiler"]
+
+    CMFD_Keypoint & Noise_PRNU & ELA_DCT & TruFor_Model & CATNet_Model & Inpaint_Model & Face_Seams --> Fusion_DAG["IMLF Multi-Detector Fusion DAG"]
+
+    Fusion_DAG --> Overlap["Spatial Overlap Analysis (IoU Matrix)"]
+    Overlap --> ConflictCheck{"Spatial Consensus or Conflict?"}
+    ConflictCheck -- Consensus >= 0.70 --> Corroborated["Corroborated Candidate Region (Status: ACCEPTED_CANDIDATE)"]
+    ConflictCheck -- Conflict Detected --> Disagreement["Flagged Discrepancy (Status: LOCALISATION_UNCERTAIN)"]
+    ConflictCheck -- Single Detector --> Uncorroborated["Isolated Anomaly (Status: SINGLE_DETECTOR_CANDIDATE)"]
+
+    Corroborated & Disagreement & Uncorroborated --> MasterDossier["IMLLocalizationResult & Section 65B/63 BSA Dossier"]
+```
+
+1. **Anti-Averaging Invariant:** Pixel probability maps from distinct models must **never** be averaged into an unweighted arithmetic mean. Averaging a high-confidence CMFD mask with a low-confidence deep inpainting mask dilutes the genuine finding and produces an uncalibrated artifact.
+2. **Spatial Overlap Evaluation:** Pairwise Intersection over Union ($\operatorname{IoU}$) is calculated across all candidate regions proposed by different engines. Regions with $\operatorname{IoU} \ge 0.50$ are grouped into unified candidate clusters.
+3. **Consensus Scoring:** A candidate cluster's confidence is determined by independent evidence weights derived from validation benchmarks:
+   $$C_{\text{fused}}(\mathcal{R}) = 1 - \prod_{m \in \mathcal{M}_{\text{supp}}} (1 - w_m \cdot P_m(\mathcal{R}))$$
+   where $w_m$ is the benchmark-validated reliability weight of detector $m$, and $\mathcal{M}_{\text{supp}}$ is the subset of independent detectors supporting the region.
+4. **Co-Dependency Tracking:** If two detectors share an identical upstream feature backbone (e.g. both using a common ResNet-50 feature extractor), the fusion engine enforces an evidence dependency constraint, treating them as co-dependent rather than independent corroboration.
+
+---
+
+### 13.9 Seven Canonical Localisation Outcome States
+To prevent the system from returning misleading or fabricated binary verdicts, IMLF mandates seven standardized operational outcome states:
+
+1. **`LOCALISATION_CANDIDATE_FOUND`:** One or more candidate manipulated regions have been identified, validated against boundary and area thresholds, and corroborated by at least one primary detection engine.
+2. **`NO_LOCALISATION_CANDIDATE`:** Exhaustive multi-scale analysis across all applicable detectors reveals no statistically significant spatial anomalies or manipulation boundaries.
+3. **`GLOBAL_MANIPULATION_CANDIDATE`:** The image exhibits strong evidence of whole-image transformation (e.g. global diffusion generation, universal color grading, or uniform re-encoding), but no localized, isolated edited region can be segmented.
+4. **`LOCALISATION_UNCERTAIN`:** One or more detectors flag potential anomalies, but boundary confidence is low, spatial IoU between independent models is $< 0.30$, or alternative benign explanations (e.g. natural texture repetition) cannot be ruled out.
+5. **`INCONCLUSIVE_LOW_QUALITY`:** Severe image degradation (downscaling $< 256\text{ px}$, heavy recompression QF $< 40$, extreme noise or motion blur) destroys microscopic forensic artifacts, precluding scientifically reliable analysis.
+6. **`UNSUPPORTED_MANIPULATION_TYPE`:** The submitted exhibit or query targets a manipulation family that is outside the validated operational envelope of the current AIF model registry.
+7. **`ANALYSIS_FAILED`:** A critical operational exception occurred (e.g. decompression bomb trap triggered, worker timeout exceeded, or corrupted bitstream).
+
+---
+
+### 13.10 Ground-Truth Datasets, Benchmarks & Zero-Leakage Policy
+1. **Public Benchmark Corpora Reconciliation:**
+   - **CASIA v1.0 / v2.0:** Splicing and copy-move operations with ground-truth binary masks; requires auditing for JPEG compression artifacts and boundary inaccuracies.
+   - **Columbia Image Splicing Dataset:** Uncompressed, sharp splicing benchmarks with verified ground-truth masks; ideal for sensor noise residual baselines.
+   - **COVERAGE:** Benchmarks specifically designed for copy-move forgery with similar but non-manipulated authentic control regions to measure false-alarm rates.
+   - **NIST OpenMFC / NIST16:** Rigorous governmental evaluation datasets featuring diverse manipulation types (splicing, removal, retouching) with pixel-level ground truth and operational protocol constraints.
+   - **IMD2020 / DEFACTO:** Large-scale modern synthetic and real-world inpainting, copy-move, and splicing benchmarks.
+2. **Zero-Leakage Grouped Partitioning Invariant:**
+   - Training, calibration, validation, and test splits must be partitioned strictly by **source scene / parent capture identity**.
+   - If an authentic photograph was used to generate five different spliced or copy-move variants, the authentic original and all five derivatives must reside strictly within the same split partition.
+   - Automated test suites assert zero intersection of root group identifiers:
+     $$\mathcal{G}_{\text{train}} \cap \mathcal{G}_{\text{cal}} \cap \mathcal{G}_{\text{val}} \cap \mathcal{G}_{\text{test}} = \emptyset$$
+3. **Ground-Truth Mask Validation:** Every benchmark sample must provide a verified binary mask where pixel value $1$ indicates manipulated ground truth and $0$ indicates authentic substrate. Annotations with loose bounding boxes or ambiguous boundaries are categorized as `WEAK_GROUND_TRUTH` and excluded from core benchmark gate evaluations.
+
+---
+
+### 13.11 Controlled Manipulation Test Corpus Specification
+To evaluate IMLF under rigorously auditable conditions, the project specifies a controlled test corpus composed of six distinct partitions:
+1. **Authentic Controls ($N \ge 100$):** High-resolution photographs captured across multiple smartphone and DSLR sensors, dense repeating textures (building facades, tile floors, brick walls, foliage, fabric), text documents, crowd scenes, and low-light captures.
+2. **Controlled Copy-Move ($N \ge 100$):** Known donor-recipient pairs generated with parametric rotations ($0^\circ, 15^\circ, 45^\circ, 90^\circ, 180^\circ$), scalings ($0.5\times, 0.8\times, 1.2\times, 2.0\times$), horizontal flips, and boundary feathering ($\sigma = 1, 3, 5\text{ px}$).
+3. **Controlled Splicing ($N \ge 100$):** Multi-source insertions combining different camera sensors (e.g. iPhone donor into Sony DSLR recipient), color-temperature matched insertions, and perspective-warped insertions.
+4. **Controlled Inpainting & Removal ($N \ge 100$):** Object removals executed via Adobe Content-Aware Fill, PatchMatch, and neural diffusion inpainting (LaMa, Stable Diffusion Inpainting), with precise masks recording original object silhouettes.
+5. **Controlled Regional AI Synthesis ($N \ge 100$):** Authentic base photographs with localized $512\times 512$ bounding boxes in-painted with text-guided diffusion prompts.
+6. **Post-Processing Robustness Sweeps ($N \ge 100$):** The above partitions subjected to systematic degradation sweeps: JPEG recompression (QF 95, 80, 65, 50, 35), Gaussian blur ($\sigma = 0.5, 1.0, 2.0$), additive Gaussian noise ($\text{SNR} = 30, 20, 10\text{ dB}$), resizing ($0.5\times, 0.25\times$), and screenshot recapture.
+
+---
+
+### 13.12 Examiner Review Workbench Requirements
+The forensic examiner interface provides an interactive, scientifically defensible workspace:
+1. **Interactive Multi-Layer Canvas:** Examiners can toggle and blend between (1) Original Exhibit, (2) Calibrated Probability Mask, (3) Binary Segmentation Mask, (4) Spatial Anomaly Heatmap, (5) Detector Reliability Map, and (6) Vector Boundary Polygons.
+2. **Opacity & Threshold Sliders:** Real-time interactive adjustment of binarization threshold $\tau \in [0.0, 1.0]$ and reliability cutoff $R_{\min} \in [0.0, 1.0]$, dynamically rendering the resulting mask contour without modifying the stored immutable forensic artifact.
+3. **Side-by-Side Synchronized Split Viewer:** Synchronized panning and zooming across original, donor, and recipient regions for copy-move inspections.
+4. **Examiner Disposition Workflow:** Examiners can mark individual candidate regions as `ACCEPTED` (corroborated by forensic testimony), `REJECTED` (identified as benign false-positive, with mandatory rationale selection), or `MODIFIED` (boundary polygon manually refined by qualified examiner).
+5. **Chain of Custody & Legal Export:** One-click export compiling a Section 65B/63 BSA certified technical dossier linking every accepted region to its mathematical coordinates, detector provenance, and examiner signature.
+
+---
+
+### 13.13 Exhaustive Functional Requirements Inventory (IML-01 through IML-22)
+
+| Req ID | Requirement Title | Primary Input | Expected Output | Measurable Acceptance Criteria | Trapped Failure States | Relevant Phase |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **IML-01** | Unified Localisation Architecture & Router | Image exhibit bitstream, AIF configuration. | Dispatched tasks to IRE, AIM, FPA; aggregated spatial findings. | Orchestrates multi-engine execution within resource limits; zero dropped engine results. | `ENGINE_DISPATCH_TIMEOUT`, `UNSUPPORTED_IMAGE_FORMAT` | **AIF-IML-00** |
+| **IML-02** | Copy-Move Forgery Localisation | Image exhibit, feature config (SIFT, ORB). | Paired donor/recipient regions, homography $H$, inlier matches. | Detects duplicated regions $> 32\times 32\text{ px}$ with rotation up to $180^\circ$ and scale $0.5\times$–$2.0\times$; inlier count $\ge 12$. | `INSUFFICIENT_KEYPOINTS`, `DEGENERATE_HOMOGRAPHY` | **AIF-IML-01** |
+| **IML-03** | Image Splicing & Compositing Localisation | Image exhibit, noise residual config. | Spatial anomaly mask, boundary gradient seam score, noise variance map. | Achieves pixel-level $\operatorname{IoU} \ge 0.70$ on uncompressed splicing benchmarks (Columbia). | `UNIFORM_NOISE_ESTIMATE_FAILED`, `COMPRESSION_MASKED` | **AIF-IML-02** |
+| **IML-04** | Object Removal & Inpainting Localisation | Image exhibit, spectral/deep inpainting heads. | Inpainting mask, boundary blur gradient, structural repetition score. | Identifies deep inpainting $> 64\times 64\text{ px}$ with $\operatorname{IoU} \ge 0.65$ on DEFACTO inpainting test set. | `SPECTRAL_ROLLOFF_INDETERMINATE` | **AIF-IML-04** |
+| **IML-05** | AI-Generated Regional Manipulation Localisation | Image exhibit, TruFor / Cat-Net models. | Pixel anomaly map, regional $P_{\text{AI}}$, bounding polygons. | Distinguishes regional AI insertion from global AI generation; flags manipulated patch without flagging full frame. | `GLOBAL_AI_CONFOUNDER`, `CHECKPOINT_UNAVAILABLE` | **AIF-IML-04** |
+| **IML-06** | Face & Portrait Manipulation Localisation | Image exhibit, FPA biometric landmarks. | Facial perimeter boundary mask, face-swap confidence, landmark seam map. | Segments swapped facial oval with $\operatorname{IoU} \ge 0.75$; isolates biometric boundary from hair/ears. | `NO_FACE_DETECTED`, `PROFILE_POSE_UNSUPPORTED` | **AIF-IML-05** |
+| **IML-07** | Compression & Resampling Inconsistency | Image exhibit, JPEG quantisation tables. | ELA map, DCT block artifact grid, resampling periodic peak spectrum. | Detects double-JPEG compression grid shifts ($8\times 8$ periodicity) and ELA error peaks. | `RAW_FORMAT_NO_DCT`, `RECOMPRESSION_UNIFORM` | **AIF-IML-02** |
+| **IML-08** | Sensor Noise & PRNU Inconsistency Localisation | Image exhibit, camera PRNU fingerprint (if available). | PRNU correlation map, Peak-to-Correlation Energy (PCE), noise residue. | Flags spliced regions lacking sensor reference PRNU correlation ($\text{PCE} < 15$). | `PRNU_FINGERPRINT_UNAVAILABLE`, `IMAGE_OVEREXPOSED` | **AIF-IML-02** |
+| **IML-09** | Multi-Scale Tiling & Inverse Mapping | High-resolution image ($> 2048\text{ px}$), tiling config. | Stitched full-resolution mask, tile boundary blends, affine mapping $H^{-1}$. | Reconstructs 50 MP image masks with zero border seam artifacts; preserves native canvas coordinates. | `TILE_ALLOCATION_OOM`, `COORDINATE_INVERSION_ERROR` | **AIF-IML-06** |
+| **IML-10** | Unified Mask, Polygon & Region Contract | Raw engine detections, spatial contours. | Serialized `IMLLocalizationResult`, `IMLRegionCandidate`, WORM mask files. | Conforms strictly to Pydantic v2 schemas; passes JSON Schema v1.0 validation. | `SCHEMA_VALIDATION_ERROR`, `POLYGON_WINDING_INVALID` | **AIF-IML-00** |
+| **IML-11** | Canonical Coordinate Normalisation | Raw detector pixel coordinates. | Normalized $[0, 1]$ floats, absolute top-left pixel coordinates. | Half-open interval $[y_{\min}, x_{\min}, y_{\max}, x_{\max})$ verified across all spatial representations. | `OUT_OF_BOUNDS_COORDINATE`, `NEGATIVE_DIMENSION` | **AIF-IML-00** |
+| **IML-12** | Confidence, Reliability & Uncertainty | Raw logits, noise SNR, local texture entropy. | Probability map $P$, reliability map $R$, uncertainty boundary $\sigma$. | Separates model predictive confidence from data reliability; flags shadow/saturation unreliability. | `DIVISION_BY_ZERO_VARIANCE` | **AIF-IML-07** |
+| **IML-13** | Multi-Detector Evidence Fusion & Conflict Handling | Disparate engine masks, dependency graph. | Fused mask, consensus score, explicit conflict log entries. | Disallows unweighted arithmetic score averaging; exposes cross-engine disagreements prominently. | `MUTUALLY_EXCLUSIVE_DETECTIONS` | **AIF-IML-07** |
+| **IML-14** | Forensic Examiner Review Workbench | `IMLLocalizationResult`, examiner inputs. | Interactive UI layers, threshold sliders, examiner disposition tags. | Supports real-time threshold adjustment ($< 50\text{ ms}$ re-render); records examiner modifications in audit log. | `UNAUTHORIZED_DISPOSITION_CHANGE` | **AIF-IML-09** |
+| **IML-15** | Ground-Truth Dataset Management & Provenance | Public benchmark archives (CASIA, NIST). | Validated dataset cards, zero-leakage split manifests, mask alignment checks. | Partitions datasets strictly by parent scene; automated assertions verify zero cross-split overlap. | `DATASET_LEAKAGE_DETECTED`, `MASK_DIMENSION_MISMATCH` | **AIF-IML-08** |
+| **IML-16** | Pixel-Level Localisation Evaluation | Predicted masks $\hat{M}$, ground-truth masks $M_g$. | Pixel Precision, Recall, F1, IoU, Dice, Matthews Correlation Coefficient (MCC). | Handles zero-denominator and empty ground truth safely; matches theoretical values on test fixtures. | `EMPTY_GROUND_TRUTH_DIVISION` | **AIF-IML-08** |
+| **IML-17** | Independent Image-Level Detection Evaluation | Image predictions, ground-truth labels. | Image ROC-AUC, PR-AUC, Balanced Accuracy, CDR at fixed FAR. | Evaluates image-level classification completely independently from pixel localization metrics. | `IMBALANCED_CLASS_COLLAPSE` | **AIF-IML-08** |
+| **IML-18** | Cross-Dataset & Unseen-Manipulation Benchmarking | Models trained on Dataset $X$, evaluated on $Y$. | Transfer $\Delta\operatorname{IoU}$, generalisation degradation report, unseen tool metrics. | Quantifies performance decay outside training domain; prohibits blanket generalisation claims. | `DOMAIN_COLLAPSE_DETECTED` | **AIF-IML-08** |
+| **IML-19** | Robustness Sweeps & Repeated-Texture Controls | Degraded images (JPEG QF 30-95, blur, noise), repeating textures. | Robustness decay curves, false-positive region count on authentic textures. | Maintains false-alarm rate $\le 0.05$ on authentic repeating patterns (facades, foliage, tiles). | `FALSE_ALARM_TEXTURE_BURST` | **AIF-IML-01** |
+| **IML-20** | First-Class Abstention & Inconclusive Outcomes | Low-quality/corrupted inputs, SNR metrics. | Typed outcome status (`INCONCLUSIVE_LOW_QUALITY`, `LOCALISATION_UNCERTAIN`). | Abstains on $100\%$ of test samples with $\text{SNR} < 6\text{ dB}$ or resolution $< 256\times 256\text{ px}$. | `FORCED_PREDICTION_ATTEMPT` | **AIF-IML-07** |
+| **IML-21** | Evidentiary Lineage & Section 65B/63 BSA Traceability | Exhibit metadata, localization results, examiner Ed25519 signature. | Court-ready certified PDF dossier with SHA-256 manifests and vector overlays. | Formats complete technical dossier conforming strictly to Section 63 BSA 2023 evidentiary standards. | `SIGNATURE_VERIFICATION_FAILED` | **AIF-IML-09** |
+| **IML-22** | Security Safeguards, Resource Ceilings & Reproducibility | Input bitstreams, execution environment. | Sandboxed execution, cgroup memory enforcement, deterministic seeds. | Caps worker RAM to $\le 16\text{ GB}$, VRAM $\le 8\text{ GB}$; traps decompression bombs $> 100\text{ MP}$; 100% offline. | `DECOMPRESSION_BOMB_EXCEEDED`, `WORKER_OOM_KILLED` | **AIF-IML-10** |
+
+---
+
+### 13.14 Security, Operational & Legal Requirements
+1. **Defensive Decompression & Image Bomb Safeguards:** Before decoding, all incoming image bitstreams must undergo header inspection. PIL `MAX_IMAGE_PIXELS` is strictly bound to $100,000,000$ pixels (100 MP). Image files exceeding this threshold or exhibiting recursive ZIP/compression ratios $> 10:1$ are rejected immediately with `DECOMPRESSION_BOMB_EXCEEDED`.
+2. **Resource Limits & Execution Isolation:** Worker processes executing deep localization models (TruFor, CAT-Net) run in unprivileged Linux cgroups capping host memory to $\le 16\text{ GB}$ RAM and GPU VRAM to $\le 8\text{ GB}$. A hard execution timeout of 300 seconds per exhibit prevents infinite loops during keypoint matching or homography RANSAC.
+3. **Air-Gapped Network Isolation:** All feature extractors, deep networks, and OCR engines execute 100% locally. Zero telemetry, model weights, or image exhibits are transmitted across external networks.
+4. **POSIX 0400 WORM Vaulting:** All generated binary masks, probability arrays, and JSON findings are written to immutable storage mounted with read-only permissions (`0400`), cryptographically hashed via SHA-256, and linked to the parent evidence chain of custody.
+
+---
+
+### 13.15 Scientific Limitations, Edge Cases & Assumptions
+1. **Unverified Empirical Thresholds (`THRESHOLD_REQUIRES_VALIDATION`):** Exact decision thresholds ($\tau_{\text{binarize}}$, $\text{IoU}_{\text{match}}$, $\text{RANSAC}_{\text{inliers}}$) are marked `THRESHOLD_REQUIRES_VALIDATION` and must be tuned on isolated calibration partitions ($D_{\text{cal}}$) rather than assumed a priori.
+2. **Natural Texture Ambiguity:** Inherent physical repetition (e.g. identical mass-produced window frames or printed fabric patterns) naturally yields high feature descriptor similarity. The system mitigates this via strict spatial distance thresholds and rigid homography verification, but manual examiner review remains mandatory for architectural and textile exhibits.
+3. **Severe Downscaling & Recompression Limits:** Forensic manipulation traces exist predominantly in high-frequency pixel residuals. When an image is resized to $< 256\times 256\text{ px}$ or recompressed at JPEG QF $< 40$, microscopic traces are mathematically unrecoverable; the framework mandatorily emits `INCONCLUSIVE_LOW_QUALITY`.
+
+---
+
+## 14. CCTV Frame Integrity, Temporal Sequence Forensics & Video Tampering Localisation (CFITSA)
+
+### 14.1 Problem Statement & Forensic Context
+Video recordings, closed-circuit television (CCTV) surveillance exports, digital video recorder (DVR) captures, and network video recorder (NVR) archives represent critical electronic evidence in criminal prosecutions, counter-terrorism operations, and judicial proceedings under Section 65B of the Indian Evidence Act (IEA) and Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA). However, digital video is uniquely susceptible to temporal manipulation, sequence excision, and visual fabrication that can subvert the truth:
+1. **Missing or Deleted Frames:** Malicious excision of critical moments (e.g. an assault, weapon draw, or vehicle collision) followed by container restamping to conceal the deletion.
+2. **Duplicated or Repeated Frames:** Insertion of identical or near-identical frames to artificially extend an event or pad deleted temporal intervals.
+3. **Inserted Frames:** Introduction of foreign frames, synthetic AI-interpolated frames, or frames cloned from another point in time to construct a false alibi or fabricated sequence.
+4. **Frozen or Abnormally Repeated Frame Sequences:** Decoded visual content remaining static while container timestamps advance, concealing activity while simulating camera operation.
+5. **Reordered or Shuffled Frames:** Rearranging frame sequences (e.g. reversing a sequence or swapping adjacent blocks) to invert cause-and-effect or confuse chronology.
+6. **Timestamp Discontinuities:** Step jumps, backward non-monotonic steps, or irregular increments in container presentation timestamps (PTS).
+7. **Suspicious Frame-Duration Irregularities:** Dramatic duration fluctuations inconsistent with declared stream properties.
+8. **Inconsistent Frame Cadence:** Irregular presentation intervals uncharacteristic of the recording hardware or established profile.
+9. **Motion Discontinuities Between Adjacent Frames:** Physical object position leaps or optical-flow ruptures inconsistent with natural velocity and inertia.
+10. **GOP and Compression-Structure Inconsistencies:** Splice boundaries occurring at unexpected bitstream locations (e.g., non-keyframe transitions, broken motion vector references, or macroblock QP pulsing).
+11. **Suspicious Frame-Boundary Transitions:** Sudden visual or structural shifts lacking associated encoder scene-cut markers.
+12. **Potential Editing or Re-Encoding Traces:** Quantisation parameter modulation, double-compression artifacts, or container atom rearrangements (`faststart` moved `moov` atoms) indicative of post-acquisition desktop software.
+13. **CCTV Timestamp-Overlay Inconsistencies:** Contradictions between burned-in on-screen display (OSD) digital clocks and underlying stream presentation timestamps.
+14. **Timeline Conflicts Across Related Video Evidence:** Chronological contradictions across companion video tracks or incident recordings.
+15. **Cross-Camera Temporal Inconsistencies:** Divergence in timestamps, sequence progression, or entity appearances across independent cameras covering the same physical scene.
+
+#### Core Investigative Questions Answered
+The platform answers eleven fundamental investigative questions:
+- Is the presentation timeline continuous?
+- Are there unexplained gaps or duplicate timestamps?
+- Are there intervals containing repeated or nearly identical frames?
+- Does the observed motion remain temporally consistent?
+- Are there candidate inserted frames or foreign frame sequences?
+- Does the presentation order appear inconsistent with visual progression?
+- Are frame durations and stream timing compatible with declared capture characteristics?
+- Are there unusual changes in GOP structure, compression behaviour, or codec properties?
+- Do timestamp overlays and container timestamps agree?
+- Can related CCTV cameras or independent evidence corroborate or contradict the timeline?
+- Which anomalies are observable, which are inferred, and which remain uncertain?
+
+#### Fundamental Forensic Principle
+**An isolated video file does not always contain sufficient intrinsic information to prove that frames were removed or inserted prior to acquisition.** If an editor deletes ten frames and thoroughly re-encodes the file with pristine, monotonic timestamps and a standard constant frame rate, the bitstream alone cannot prove historical deletion without a trusted external reference, recorder event log, native proprietary export, companion manifest, or corroborating camera footage. The platform rigorously distinguishes **observable anomalies** (e.g., `FRAME_GAP_OBSERVED`, `PTS_DISCONTINUITY`) from **inferred possibilities** (`POSSIBLE_FRAME_DELETION`), preventing speculative or over-reaching claims in courtroom testimony.
+
+---
+
+### 14.2 Core Architectural Principles & Scope
+1. **Integrated VRE & CCTV Profile Specialisation (No Sixth Engine):** CFITSA is an integrated, specialised temporal integrity capability residing within the existing **Video Reverse Engineering Engine (VRE)** (`ps05.engines.vista.vre.cadence`, `ps05.engines.vista.vre.temporal`) and the cross-cutting **CCTV Forensic Profile** (`ps05.engines.vista.cctv`). It does **not** create a sixth independent VISTA engine.
+2. **Reuse of Existing Foundations:** CFITSA directly reuses:
+   - Defensive demuxing and container inspection (`safe_demux.py`, PyAV, FFprobe).
+   - Packet and elementary stream analysis (`ps05.engines.vista.vre.bitstream`).
+   - PTS/DTS extraction and cadence baselines (`ps05.engines.vista.vre.cadence`).
+   - Scene-cut and transition detection (`ps05.engines.vista.vre.scene_cuts`).
+   - Macroblock QP and re-encoding analysis (`ps05.engines.vista.vre.reencode`).
+   - PaddleOCR / Tesseract OSD clock extraction (`ps05.engines.vista.vci.ocr_overlay`).
+   - ByteTrack entity tracking and motion vectors (`ps05.engines.vista.vci.tracker`).
+   - Audio-visual timeline alignment (`ps05.engines.vista.avsc`).
+   - Audio extraction and AURAS bridge (`ps05.engines.vista.afb`).
+   - CEIPL pre-decode dual hashing, immutable WORM storage, and RFC 8785 DAG lineage.
+   - Court-admissible reporting under Section 65B IEA / Section 63 BSA (`ps05.reporting`).
+3. **Multi-Signal Evidence Synthesis:** Frame-integrity verdicts are not computed from isolated Boolean tests. They synthesize packet timestamps, decoded raster pixels, optical-flow fields, compression bitstreams, OCR clocks, and cross-camera footage into an integrated, defensible timeline graph.
+
+---
+
+### 14.3 Core Evidence & Temporal Terminology
+To maintain judicial clarity and prevent technical misinterpretations during cross-examination, the framework defines and enforces ten foundational terms:
+
+1. **Encoded Packet:** A packet or packet-like demuxed bitstream unit returned from the container/demuxer. It contains compressed elementary data for one or more video frames depending on the container and codec. *The system never assumes a one-to-one packet-to-frame relationship.*
+2. **Decoded Frame:** A discrete raster image matrix produced by the decoder from valid encoded bitstream packets.
+3. **Decode Order:** The strict chronological sequence in which compressed packets must be decoded by the video decompression pipeline, dictated by decoding timestamps ($DTS$).
+4. **Presentation Order:** The chronological sequence in which decoded raster frames must be displayed to the human viewer, dictated by presentation timestamps ($PTS$). Because modern codecs (H.264/AVC, H.265/HEVC, VP9, AV1) employ bidirectional predictive frames (B-frames) that reference both past and future anchor frames, **decode order legitimately differs from presentation order**. *The system never interprets legitimate B-frame decode reordering as evidence of malicious frame manipulation.*
+5. **Frame Index Dimensions:** The platform strictly differentiates five distinct frame numbering indices rather than reusing a single ambiguous `frame_index`:
+   - `packet_index`: Ordinal position ($0, 1, 2, \dots$) of the demuxed elementary packet in the container bitstream.
+   - `decoder_output_index`: Ordinal sequence ($0, 1, 2, \dots$) of frames emitted by the decoder.
+   - `presentation_order_index`: Chronological display sequence ($0, 1, 2, \dots$) sorted monotonically by PTS.
+   - `source_reference_index`: Ground-truth ordinal index from a known master reference recording (if available).
+   - `scene_relative_index`: Frame offset ($0, 1, 2, \dots$) relative to the current detected scene or shot boundary.
+6. **Presentation Timestamp (PTS):** An exact integer timestamp expressed in stream timebase ticks. For stream timebase $TB = \frac{TB_{\text{num}}}{TB_{\text{den}}}$, presentation time in seconds is:
+   $$t_i = PTS_i \times \frac{TB_{\text{num}}}{TB_{\text{den}}}$$
+   The platform preserves raw integer PTS and exact rational fractions; it never relies solely on rounded floating-point seconds.
+7. **Decoding Timestamp (DTS):** An integer timestamp specifying when an encoded access unit must be removed from the coded picture buffer and decoded.
+8. **Wall-Clock Recording Time:** The absolute real-world date and time at which the physical camera recorded the event. Relative container PTS ($t=0.00\text{s}$) does not establish absolute wall-clock time; absolute time must be derived from burned-in OSD clock overlays, camera metadata, or recorder event logs.
+9. **Frame-Sequence Anomaly:** An observed departure in frame order, interval, repetition, motion, or compression structure from declared stream properties or established baselines. *An anomaly does not automatically establish deliberate human manipulation.*
+10. **Evidence Levels for Missing Frames:** The platform differentiates five distinct evidentiary tiers:
+    - *Tier 1 (Observed PTS/Duration Gap):* Objective mathematical gap in container timestamps ($\Delta t_i > \Delta t_{\text{expected}}$).
+    - *Tier 2 (Reference Index Gap):* Missing ordinal identifiers verified against an authoritative source export.
+    - *Tier 3 (Visual Motion Discontinuity):* Abrupt, unphysical spatial leap in object trajectories without timestamp indication.
+    - *Tier 4 (Cross-Camera / Recorder Log Conflict):* Time interval missing in questioned footage but documented in recorder transaction logs or adjacent camera feeds.
+    - *Tier 5 (Inferred Deletion):* Investigative hypothesis where evidence is consistent with excision but lacks external corroboration.
+
+---
+
+### 14.4 The Five Primary Frame Integrity Categories
+CFITSA establishes a unified taxonomy and analysis pipeline across five core categories:
+
+```mermaid
+flowchart TD
+    INGEST["Seized Video Exhibit (WORM 0400)"] --> DEMUX["Safe Demuxing & Packet Extraction\n(PyAV / FFprobe)"]
+    DEMUX --> TIMELINE["Presentation Timeline Construction\n(PTS Sorting & Rational Timebase Conversion)"]
+
+    TIMELINE --> CAT1["FI-01: Missing / Deleted Frame Candidates\n(Modes A, B, C, D)"]
+    TIMELINE --> CAT2["FI-02: Duplicated Frame Candidates\n(Exact Hashing, pHash, SSIM, DCT)"]
+    TIMELINE --> CAT3["FI-03: Inserted Frame Candidates\n(Motion Ruptures, Optical Flow Warping, GOP)"]
+    TIMELINE --> CAT4["FI-04: Frozen Sequence Detection\n(Optical Flow, Static Camera vs Freeze Invariant)"]
+    TIMELINE --> CAT5["FI-05: Reordered Frame Candidates\n(PTS Monotonicity, Trajectory Graph, DTW, Kendall Tau)"]
+
+    CAT1 & CAT2 & CAT3 & CAT4 & CAT5 --> CORRELATE["Evidence Corroboration Engine\n(CCTV OSD Clock, Recorder Logs, Cross-Camera, AVSC Audio)"]
+    CORRELATE --> WORKBENCH["Forensic Examiner Workbench & Dual-Timeline Review"]
+    WORKBENCH --> DOSSIER["Certified Section 65B/63 BSA Forensic Dossier"]
+```
+
+#### 14.4.1 FI-01 — Missing or Deleted Frame Candidates
+- **Purpose:** Identify temporal intervals where one or more expected frames are absent from the video sequence.
+- **Observable Signals:** PTS intervals exceeding expected local cadence; frame duration step changes; missing packet counter indices; broken optical-flow vectors; unphysical object displacements; recorder event log gap records; cross-camera corroboration conflicts.
+- **Four Analytical Detection Modes:**
+  - *Mode A (Internal Timing Analysis):* Evaluates raw PTS intervals against local cadence references (CFR baseline or robust VFR median/MAD).
+  - *Mode B (Source-Reference Comparison):* Compares questioned video sequence against an authentic master recording or known reference sequence, identifying omitted frames.
+  - *Mode C (Visual Continuity Analysis):* Evaluates inter-frame optical-flow consistency and object trajectory continuity; flags sudden state jumps occurring within continuous scenes.
+  - *Mode D (CCTV Corroboration):* Correlates timeline against companion DVR event logs, motion detection triggers, or independent camera footage.
+- **Forensic Status Typing:** Emits `FRAME_GAP_OBSERVED` when timing gaps are directly measurable, and `POSSIBLE_FRAME_DELETION` when deletions are inferred from visual/motion cues without timestamp markers.
+
+#### 14.4.2 FI-02 — Duplicated Frame Candidates
+- **Purpose:** Detect exact or near-identical frames repeated across consecutive or non-consecutive intervals.
+- **Scope of Evaluation:** Consecutive repeated frames; non-consecutive repeated frames; repeated frame blocks (cloned loops); frame duplication with replacement (preserving total duration while overwriting content); frame duplication without replacement (padding stream duration).
+- **Multi-Tier Detection Approach:**
+  1. *Decoded-Frame Hashing:* Standardized 64-bit BLAKE3/SHA-256 hash on decoded planar YUV420p pixels for exact equality.
+  2. *Perceptual Hashing (pHash):* 64-bit DCT perceptual hash with Hamming distance $d_H(h_i, h_j) \le \tau_{\text{pHash}}$.
+  3. *Structural Similarity (SSIM):* Pixel luminance, contrast, and structural comparison ($SSIM \ge \tau_{\text{SSIM}}$).
+  4. *DCT-Domain Energy Analysis:* High-frequency coefficient comparisons to detect duplicate frames subject to minor recompression noise.
+- **Stationary CCTV Scene Invariant:** A stationary surveillance camera viewing an empty room naturally produces near-identical consecutive frames ($SSIM > 0.98$). The system evaluates sensor noise residuals (PRNU) and camera motion before declaring duplication, preventing false accusations on static scenes.
+
+#### 14.4.3 FI-03 — Inserted Frame Candidates
+- **Purpose:** Detect foreign, cloned, synthesized, or interpolated frames introduced into an existing recording.
+- **Algorithmic Categorization:**
+  - *Duplicated Existing Frame Insertion:* Cloned frame copied from another point in the same video.
+  - *AI-Interpolated Frame Insertion:* Frames generated via motion-compensated frame rate up-conversion (RIFE, DAIN, CAIN).
+  - *Foreign Frame Insertion:* Frames spliced in from an entirely different video recording or camera.
+  - *Synthetically Generated Frame:* Diffusion or generative video model synthesis inserted into timeline.
+  - *Benign Frame-Rate Conversion:* Telecine pull-down ($3:2$), duplicate-frame padding, or broadcast rate normalization.
+- **Detection Traces:** Forward-backward optical-flow warping residual spikes ($R_i > \tau_{\text{residual}}$); sudden macroblock QP distribution shifts; unexpected I-frame insertions without visual scene change; encoder profile mismatches; broken person trajectory IDs.
+
+#### 14.4.4 FI-04 — Frozen or Repeated-Frame Sequence Detection
+- **Purpose:** Detect intervals where displayed visual content remains completely or abnormally static while audio or container timecodes continue to advance.
+- **Potential Origins Evaluated:**
+  - *Malicious Video Looping:* Perpetrator loops a static background segment to conceal an intrusion or theft.
+  - *DVR Buffer Freeze / Capture Stalling:* Hardware or network buffer exhaustion causing the recorder to repeat the last valid frame.
+  - *Transmission Packet Loss:* RTSP/ONVIF stream interruption where decoder freezes last frame during retransmission request.
+  - *Decoder Failure:* Corrupted bitstream causing decoder to repeat reference frames until next IDR keyframe.
+  - *Genuine Stationary Scene:* Low-traffic or night-vision scene with zero physical motion.
+- **Mandatory Reporting Criteria:** For every candidate freeze, the system records start time, end time, total repeated frames, exact vs near-duplicate status, optical-flow magnitude, object movement flags, decoder error logs, alternative benign explanations, and confidence bounds. The system explicitly supports `STATIC_SCENE_OR_FREEZE_INCONCLUSIVE`.
+
+#### 14.4.5 FI-05 — Reordered or Shuffled Frame Candidates
+- **Purpose:** Detect evidence that the display presentation order of frames was intentionally modified.
+- **Evaluated Manipulation Patterns:** Adjacent frame swapping; local sequence reversal (e.g. playing an action in reverse); frame-block reordering; scene-block shuffling; non-adjacent frame interleaving.
+- **Detection Methodology:**
+  - *PTS Presentation-Order Monotonicity:* Verifying $PTS_i > PTS_{i-1}$ across all presentation frames.
+  - *Optical Flow Temporal Continuity:* Reverse motion vector testing and directional trajectory validation.
+  - *Object Trajectory Physics:* Validating kinematic momentum and acceleration vectors across ByteTrack trajectories.
+  - *Dynamic Time Warping (DTW) & Kendall Rank Correlation ($\tau$):* When comparing against a known authentic reference sequence, evaluating pairwise sequence alignment and rank order.
+- **B-Frame Decode Invariant:** Legitimate decode order differences arising from bidirectional prediction are strictly decoupled from presentation order; B-frame reordering is verified against slice header syntax and container composition offsets (`ctts`) rather than flagged as tampering.
+
+---
+
+### 14.5 Eleven Core Investigator User Journeys
+
+#### Journey CFI-J01: Investigating a Possible Missing-Frame Interval
+- **Context:** In a homicide investigation, CCTV footage outside a commercial premise shows a suspect approaching a victim at $t=14\text{m }12\text{s}$, followed by an abrupt jump where the victim is collapsed on the ground at $t=14\text{m }13\text{s}$. The defense claims camera dropped frames naturally.
+- **System Action:** VRE cadence analyzer inspects container PTS timestamps and elementary packet sequence. Cadence analysis reveals a continuous, monotonic PTS progression ($30\text{ fps}$ declared, $\Delta t = 33.3\text{ ms}$ uniform). However, optical-flow analysis detects a massive motion warping residual spike ($R = 48.2$), and ByteTrack person trajectory exhibits an unphysical instantaneous displacement of $2.4\text{ meters}$ in a single $33.3\text{ ms}$ frame.
+- **Investigator Outcome:** Platform flags candidate `POSSIBLE_FRAME_DELETION` with finding details showing uniform PTS but ruptured visual continuity, indicating frames were excised and container timestamps restamped during post-processing.
+
+#### Journey CFI-J02: Detecting Repeated or Duplicated Frames
+- **Context:** An alibi video submitted by a suspect shows him sitting in a restaurant booth across a 5-minute span.
+- **System Action:** CFITSA executes decoded-frame BLAKE3 hashing and pHash Hamming distance across all frames. It identifies an exact 48-frame sequence ($1.6\text{ seconds}$) that repeats eight times consecutively between $t=01:14$ and $t=01:27$. Sensor noise analysis reveals identical PRNU noise patterns across repeated blocks.
+- **Investigator Outcome:** Platform generates finding `DUPLICATED_FRAME_CANDIDATE` with exact frame indices and duration padding metrics, demonstrating the video was artificially lengthened to fabricate an alibi.
+
+#### Journey CFI-J03: Reviewing a Candidate Inserted Frame
+- **Context:** Surveillance footage from a bank vault shows an authorized employee opening a safe. A single frame at $t=03:41.200$ appears to show an accomplice's face reflected in a glass partition.
+- **System Action:** VRE bitstream analysis discovers an isolated H.264 I-frame inserted outside the standard 60-frame GOP cadence. Forward-backward optical flow warping produces a sharp boundary residual artifact, and macroblock QP distribution exhibits a $12\text{ QP}$ step decrease compared to surrounding P-frames.
+- **Investigator Outcome:** Platform flags `INSERTED_FRAME_CANDIDATE` with spatial and temporal coordinates, demonstrating the single frame originated from a different recording.
+
+#### Journey CFI-J04: Investigating a Long Frozen Sequence
+- **Context:** A jewelry store burglary occurs during a 30-second interval where the CCTV feed shows an empty storefront. The security company claims camera failure.
+- **System Action:** CFITSA evaluates consecutive frame differences, optical-flow magnitude, and burned-in OSD clock overlays. Decoded raster pixels are identical across 750 frames ($25\text{ seconds}$), but the burned-in OSD clock advances normally from `02:14:10` to `02:14:35`. Concurrently, the demuxed audio track records continuous ambient traffic noise without interruption.
+- **Investigator Outcome:** System issues `FROZEN_SEQUENCE_CANDIDATE` noting advancing OSD clock and continuous audio paired with static visual raster, establishing a deliberate video freeze injection or NVR buffer playback attack.
+
+#### Journey CFI-J05: Reviewing Reordered Frames
+- **Context:** Protesters allege police officers initiated violence; police submit bodycam footage claiming protesters attacked first.
+- **System Action:** CFITSA tracks object and limb trajectories. It detects a local sequence reversal where a 60-frame block ($2.0\text{ seconds}$) was reversed in presentation order before being spliced back into the container, inverting the physical sequence of events. Kinematic trajectory continuity analysis confirms acceleration vectors violate physical momentum.
+- **Investigator Outcome:** System emits `REORDERED_FRAME_CANDIDATE` with exact reversed frame range and motion continuity graph, demonstrating inverted presentation chronology.
+
+#### Journey CFI-J06: Comparing PTS/DTS with OCR Timestamps
+- **Context:** A seized DVR export has an OSD clock in the upper-right corner. The defense claims the video timeline was altered during police acquisition.
+- **System Action:** VCI PaddleOCR extracts clock strings $T_{\text{ocr}}(t)$ across every frame while VRE extracts container $t_{\text{pts}}$. The linear drift model $\delta(t) = T_{\text{ocr}}(t) - (T_0 + t_{\text{pts}})$ is evaluated. At $t_{\text{pts}} = 120.4\text{s}$, $T_{\text{ocr}}$ exhibits an instantaneous step jump of $+45.0\text{ seconds}$ while $t_{\text{pts}}$ continues monotonically without packet loss.
+- **Investigator Outcome:** System generates `CCTV_CLOCK_PTS_DISCREPANCY` and `POSSIBLE_FRAME_DELETION`, proving 45 seconds of real-world footage was excised from the export while timestamps were normalized.
+
+#### Journey CFI-J07: Analysing a Variable-Frame-Rate CCTV Export
+- **Context:** Low-cost surveillance camera exports footage with high frame-interval jitter. A conventional forensic tool flags 140 "missing frame" errors due to constant-frame-rate assumptions.
+- **System Action:** CFITSA recognizes VFR capture via stream metadata and robust interval statistics ($m = 66.7\text{ ms}$, $MAD = 14.2\text{ ms}$). It models frame intervals using a piecewise adaptive cadence estimator, distinguishing legitimate network/sensor jitter from actual sequence interruptions.
+- **Investigator Outcome:** System suppresses 138 false-alarm cadence warnings, correctly highlighting only 2 genuine multi-second dropouts where frame intervals exceeded $3.5\times MAD$ and OSD clock jumped.
+
+#### Journey CFI-J08: Comparing Two or More Camera Timelines
+- **Context:** Two independent cameras (CAM-01 lobby, CAM-02 driveway) cover a bank robbery. Investigators need to verify timeline synchronization.
+- **System Action:** CFITSA ingests both exhibits into separate WORM slots. It normalizes both feeds to UTC using OSD clock readings, establishes relative clock drift ($\Delta t = 2.14\text{ s}$), and evaluates cross-camera entity trajectory handoffs. It detects that CAM-02 is missing a 15-second window during which CAM-01 recorded the getaway vehicle departing.
+- **Investigator Outcome:** System generates a unified cross-camera timeline graph highlighting the coverage gap in CAM-02 while preserving CAM-01 evidence.
+
+#### Journey CFI-J09: Correlating Video-Frame Anomalies with Audio Evidence
+- **Context:** In a kidnapping case, a video recording contains a 4-second candidate video freeze during which the victim is purported to be speaking.
+- **System Action:** VISTA routes demuxed audio to AFB and AURAS. AURAS Voice Activity Detection (VAD) confirms continuous human speech during the freeze window, and AVSC SyncNet flags severe lip-sync desynchronization ($S_{\text{sync}} < 1.0$) because the lips are motionless while speech acoustic formants are active.
+- **Investigator Outcome:** System issues `CROSS_MODAL_AV_ANOMALY` documenting that audio continued during a video freeze, indicating visual suppression.
+
+#### Journey CFI-J10: Reviewing a Partially Decoded or Corrupted CCTV File
+- **Context:** A physical DVR hard disk recovered from a fire contains partially corrupted, truncated H.264 elementary streams.
+- **System Action:** Defensive PyAV parser encounters bitstream corruption at byte offset `0x4F12000`. Rather than aborting analysis, CFITSA isolates the corruption, logs `DECODE_CORRUPTION` for damaged packets, recovers synchronization at the next valid NAL keyframe, and analyzes all undamaged temporal intervals.
+- **Investigator Outcome:** Platform yields partial timeline verification for 92% of the footage with clear boundaries indicating the corrupted segment.
+
+#### Journey CFI-J11: Generating a Traceable Frame-Integrity Report
+- **Context:** The public prosecutor requires a court-admissible forensic certificate complying with Section 63 BSA 2023.
+- **System Action:** CFITSA aggregates all frame observations, cadence charts, duplicate sequences, and OSD correlations into a cryptographically sealed Section 65B/63 BSA PDF report containing dual SHA-256 hashes, exact frame numbers, and examiner adjudication notes.
+- **Investigator Outcome:** Examiner exports certified report with complete mathematical evidence attachments for trial submission.
+
+---
+
+### 14.6 Common Frame-Level Data Contracts & Pydantic v2 Compatibility
+
+The platform defines three core logical data schemas conforming strictly to Pydantic v2 conventions:
+
+#### 14.6.1 VideoFrameObservation
+```python
+class VideoFrameObservation(BaseModel):
+    evidence_id: UUID
+    stream_id: str
+    frame_observation_id: UUID
+    packet_index: int | None
+    packet_byte_offset: int | None
+    decoder_output_index: int
+    presentation_order_index: int
+    pts: int
+    dts: int | None
+    timebase_num: int
+    timebase_den: int
+    presentation_time_seconds: float
+    duration_seconds: float | None
+    width: int
+    height: int
+    pixel_format: str
+    frame_type: Literal["I", "P", "B", "IDR", "UNKNOWN"]
+    is_keyframe: bool
+    packet_size_bytes: int | None
+    decoded_frame_hash: str  # BLAKE3 64-character hex
+    perceptual_hash: str     # 64-bit binary string
+    decode_status: Literal["OK", "CORRUPTED", "DROPPED"]
+    source_reference_index: int | None
+    scene_relative_index: int | None
+```
+
+#### 14.6.2 FrameSequenceObservation
+```python
+class FrameSequenceObservation(BaseModel):
+    sequence_id: UUID
+    evidence_id: UUID
+    stream_id: str
+    start_frame_index: int
+    end_frame_index: int
+    start_presentation_time: float
+    end_presentation_time: float
+    duration_seconds: float
+    total_frames: int
+    cadence_type: Literal["CFR", "VFR", "UNKNOWN"]
+    nominal_fps: float
+    observed_mean_fps: float
+    scene_id: UUID | None
+    mean_motion_magnitude: float
+    duplicate_run_length: int
+    timeline_status: Literal["CONTINUOUS", "GAP_DETECTED", "FREEZE_DETECTED", "SHUFFLE_DETECTED"]
+```
+
+#### 14.6.3 FrameIntegrityFinding
+```python
+class FrameIntegrityFinding(BaseModel):
+    finding_id: UUID
+    evidence_id: UUID
+    stream_id: str
+    finding_classification: Literal[
+        "FRAME_GAP_OBSERVED",
+        "POSSIBLE_FRAME_DELETION",
+        "DUPLICATED_FRAME_CANDIDATE",
+        "INSERTED_FRAME_CANDIDATE",
+        "FROZEN_SEQUENCE_CANDIDATE",
+        "REORDERED_FRAME_CANDIDATE",
+        "PTS_DISCONTINUITY",
+        "DUPLICATE_TIMESTAMP",
+        "FRAME_DURATION_ANOMALY",
+        "MOTION_CONTINUITY_ANOMALY",
+        "CODEC_SEQUENCE_ANOMALY",
+        "DECODE_CORRUPTION",
+        "REFERENCE_SEQUENCE_MISMATCH",
+        "INCONCLUSIVE",
+        "INSUFFICIENT_REFERENCE_EVIDENCE",
+        "ANALYSIS_FAILED"
+    ]
+    start_frame_index: int
+    end_frame_index: int
+    start_pts: int
+    end_pts: int
+    start_time_seconds: float
+    end_time_seconds: float
+    expected_duration_seconds: float | None
+    observed_duration_seconds: float
+    metric_values: dict[str, float]  # SSIM, pHash distance, warping residual, robust z-score
+    supporting_observations: list[str]
+    contradictory_observations: list[str]
+    detection_method: str
+    confidence_score: float  # [0.0, 1.0]
+    alternative_explanations: list[str]
+    limitations: list[str]
+    examiner_disposition: Literal["UNREVIEWED", "CONFIRMED_ANOMALY", "BENIGN_VARIATION", "INCONCLUSIVE"]
+    lineage_manifest_uri: str
+```
+
+---
+
+### 14.7 Variable-Frame-Rate-Aware Cadence & Mathematical Foundations
+
+#### 14.7.1 Presentation-Time Differences
+For frames sorted in presentation order ($i = 1, \dots, N$):
+$$\Delta t_i = t_i - t_{i-1} = (PTS_i - PTS_{i-1}) \times \frac{TB_{\text{num}}}{TB_{\text{den}}}$$
+For Constant Frame Rate (CFR) streams with validated frame rate $F$:
+$$\Delta t_{\text{expected}} = \frac{1}{F}$$
+*The CFR assumption is never applied blindly to surveillance video.*
+
+#### 14.7.2 Robust Cadence Statistics (Median & MAD)
+Surveillance video exhibits natural network and encoder jitter. To prevent false alarms, cadence is modelled using robust non-parametric statistics:
+$$m = \operatorname{median}(\Delta t_i)$$
+$$MAD = \operatorname{median}(|\Delta t_i - m|)$$
+A modified robust z-score measures interval deviation:
+$$z_i = \begin{cases} \frac{0.6745(\Delta t_i - m)}{MAD} & \text{if } MAD > \epsilon \\ 0.0 & \text{if } MAD \le \epsilon \end{cases}$$
+When $MAD = 0$ (perfect CFR stream), any $\Delta t_i \neq m$ triggers direct cadence deviation evaluation. Piecewise adaptive windowing models deliberate rate changes (e.g., camera switching from $5\text{ fps}$ to $15\text{ fps}$ upon motion detection).
+
+#### 14.7.3 Decoded Frame Difference & Warping Residuals
+Inter-frame absolute raster difference:
+$$D_i = \frac{1}{N_{\text{pix}}} \sum_{x,y,c} |I_i(x,y,c) - I_{i+1}(x,y,c)|$$
+Motion-compensated warping residual using dense optical-flow field $\mathbf{f}_i(x,y) = (u_i, v_i)$:
+$$R_i = \frac{1}{|\Omega_i|} \sum_{(x,y) \in \Omega_i} |I_{i+1}(x + u_i, y + v_i) - I_i(x,y)|$$
+where $\Omega_i$ represents the valid, non-occluded image domain.
+
+#### 14.7.4 Perceptual Hash Hamming Distance & SSIM
+Binary perceptual hash distance across 64-bit vectors:
+$$d_H(h_i, h_j) = \sum_{k=1}^{64} \mathbf{1}[h_{i,k} \neq h_{j,k}]$$
+Structural Similarity Index:
+$$SSIM(x,y) = \frac{(2\mu_x\mu_y + C_1)(2\sigma_{xy} + C_2)}{(\mu_x^2 + \mu_y^2 + C_1)(\sigma_x^2 + \sigma_y^2 + C_2)}$$
+
+#### 14.7.5 Reference Sequence Alignment & Kendall Rank Correlation
+When comparing ground-truth reference sequence $\mathbf{r} = (r_1, \dots, r_n)$ to questioned sequence $\mathbf{q} = (q_1, \dots, q_n)$, relative ordering agreement is computed via Kendall's rank correlation coefficient $\tau$:
+$$\tau = \frac{P - Q}{\frac{1}{2} n (n-1)}$$
+where $P$ is the count of concordant pairs and $Q$ is the count of discordant pairs.
+
+---
+
+### 14.8 Codec, GOP & Bitstream Integrity
+CFITSA extracts and evaluates deep bitstream characteristics:
+- **Group of Pictures (GOP) Cadence:** Validates keyframe (IDR/I) periodicity. Spliced videos frequently exhibit irregular GOP lengths (e.g. an unexpected I-frame inserted 12 frames after the previous keyframe).
+- **Macroblock QP Distribution:** Tracks spatial quantization parameter variance across $16\times 16$ macroblocks. Double-compression introduces characteristic periodic QP modulation and histogram clustering.
+- **Reference Frame Dependency:** Validates that P and B frames reference valid, un-excised preceding anchor frames; broken motion vector predictor references directly expose excised frames.
+- **Sequence Parameter Set (SPS) / Picture Parameter Set (PPS) Changes:** Mid-stream changes in SPS/PPS resolution, profile, or level indicate concatenated video segments from disparate sources.
+
+---
+
+### 14.9 CCTV Clock, OCR Overlay & Multi-Camera Corroboration
+1. **OSD Clock Drift Regression:** Correlates burned-in OCR clock strings $T_{\text{ocr}}(t)$ with container presentation timestamps $t_{\text{pts}}$:
+   $$\delta(t) = T_{\text{ocr}}(t) - (T_0 + t_{\text{pts}}) = \alpha + \beta t + \epsilon(t)$$
+   - *Instantaneous Step Jump ($|\Delta T_{\text{ocr}}| \ge 1.0\text{s}$ with continuous $t_{\text{pts}}$):* Excised footage.
+   - *Clock Stalling ($T_{\text{ocr}}$ constant while $t_{\text{pts}}$ advances):* Looped video or freeze attack.
+   - *Linear Drift ($|\beta| > 0.01\text{ s/s}$):* Frame rate conversion or playback re-timing.
+2. **Cross-Camera Timeline Alignment:** In multi-camera surveillance scenes, independent camera exhibits are preserved in separate WORM vaults. Timelines are aligned onto a unified UTC axis using verified visual anchor events or corroborated OSD clocks, identifying temporal gaps and corroborating physical trajectories.
+
+---
+
+### 14.10 Audio-Video Cross-Modal Alignment (AFB & AVSC)
+CFITSA leverages existing VISTA AFB and AVSC bridges:
+- Correlates container-level global audio-video stream offsets ($\Delta t$).
+- Verifies acoustic continuity (ambient noise floor and speech presence) during candidate video freeze intervals.
+- Correlates talking-head lip-sync confidence ($S_{\text{sync}}$) with visible speech, ensuring audio was not dubbed over altered or frozen video.
+
+---
+
+### 14.11 Examiner Visualisation & Workbench Requirements
+The platform provides a dedicated forensic examiner workbench interface enabling:
+- Synchronized dual-timeline display (container presentation timeline vs OSD clock timeline).
+- Interactive PTS/DTS cadence and frame-duration diagnostic curves.
+- Multi-scale duplicate frame similarity heatmaps.
+- Optical-flow vector overlay with motion magnitude indicators.
+- Side-by-side adjacent frame comparison ($I_{i-1}, I_i, I_{i+1}$) with difference masks.
+- Scene cut and GOP keyframe markers.
+- Multi-camera synchronized playback with cross-camera timeline alignment.
+- Non-destructive annotation tools allowing examiners to record findings directly into the Section 65B/63 BSA audit log.
+
+---
+
+### 14.12 Exhaustive Functional Requirements Inventory (CFI-01 through CFI-22)
+
+| Req ID | Requirement Title | Primary Input | Expected Output | Measurable Acceptance Criteria | Trapped Failure States | Relevant Phase |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **CFI-01** | Frame & Packet Identity Tracking | Video container bitstream. | Demuxed packets, decoded frames, 5 distinct frame indices. | Preserves distinct packet, decoder, presentation, reference, and scene indices; zero identifier conflation. | `CORRUPTED_INDEX_MAP`, `DEMUX_PACKET_LOSS` | **VISTA-CFI-01** |
+| **CFI-02** | Timestamp & Timebase Inspection | Video elementary stream. | Raw integer PTS/DTS, exact rational timebases, presentation seconds. | Retains unrounded integer PTS and rational fractions; converts accurately via $t_i = PTS_i \times TB$. | `INVALID_TIMEBASE`, `NON_MONOTONIC_DTS` | **VISTA-CFI-01** |
+| **CFI-03** | Variable-Frame-Rate Cadence Analysis | Frame presentation timestamps. | Robust median interval $m$, $MAD$, modified z-scores $z_i$, CFR/VFR classification. | Accurately classifies VFR streams; suppresses false cadence alarms when jitter is within $3.5\times MAD$. | `INSUFFICIENT_SAMPLE_SIZE`, `ZERO_VARIANCE_MAD` | **VISTA-CFI-02** |
+| **CFI-04** | Missing-Frame Candidate Detection | Presentation timeline, optical flow. | Localized frame gap candidates, expected vs observed durations, Mode A–D evidence. | Detects single and multi-frame gaps; differentiates observed gaps from inferred deletions. | `GAP_EXCEEDS_MAX_DURATION`, `AMBIGUOUS_CADENCE` | **VISTA-CFI-04** |
+| **CFI-05** | Duplicate-Frame Detection | Decoded raster frames. | Decoded-frame digests (BLAKE3), pHash Hamming distances, SSIM scores. | Identifies duplicate and near-duplicate frames; enforces static CCTV scene safeguard ($SSIM > 0.98$ requires motion/noise audit). | `HASH_COMPUTATION_ERROR`, `STATIC_SCENE_INCONCLUSIVE` | **VISTA-CFI-03** |
+| **CFI-06** | Inserted-Frame Candidate Detection | Decoded frames, GOP bitstream. | Flagged inserted frames, optical flow warping residuals $R_i$, macroblock QP anomalies. | Differentiates duplicated frame insertion from AI-interpolated and foreign frames; flags anomalous isolated I-frames. | `FLOW_WARP_DIVERGENCE`, `INCONCLUSIVE_INTERPOLATION` | **VISTA-CFI-04** |
+| **CFI-07** | Frozen-Sequence Detection | Consecutive frames, optical flow, audio. | Localized freeze intervals $[t_{\text{start}}, t_{\text{end}}]$, repeat counts, benign freeze classification. | Detects video freezes $\ge 1.0\text{ s}$; cross-references audio continuity and OSD clock progression; emits `STATIC_SCENE_OR_FREEZE_INCONCLUSIVE` when uncertain. | `DECODER_BUFFER_TIMEOUT`, `MOTIONLESS_BACKGROUND` | **VISTA-CFI-03** |
+| **CFI-08** | Reordered-Frame Candidate Detection | Presentation order frames, ByteTrack. | Localized shuffled frame blocks, trajectory continuity scores, Kendall $\tau$. | Detects swapped or reversed frame sequences; strictly ignores legitimate B-frame decode order differences. | `DEGENERATE_TRAJECTORY_GRAPH`, `NON_MONOTONIC_PTS` | **VISTA-CFI-05** |
+| **CFI-09** | Motion-Continuity Analysis | Decoded frames, optical flow fields. | Dense flow vectors $\mathbf{f}_i$, warping residuals $R_i$, motion rupture flags. | Detects unphysical motion discontinuities; differentiates object motion from camera PTZ/pan/tilt. | `OPTICAL_FLOW_DIVERGENCE`, `TEXTURELESS_FRAME_WARNING` | **VISTA-CFI-05** |
+| **CFI-10** | Codec, GOP & Bitstream Correlation | Elementary bitstream, slice headers. | GOP cadence, I/P/B frame types, macroblock QP variance, SPS/PPS transitions. | Identifies mid-stream parameter set changes, non-cadence I-frames, and macroblock double-compression pulsing. | `BITSTREAM_PARSER_ERROR`, `UNSUPPORTED_NAL_UNIT` | **VISTA-CFI-06** |
+| **CFI-11** | CCTV Clock & OCR Timestamp Correlation | Frame OSD crops, PaddleOCR. | Parsed clock strings $T_{\text{ocr}}(t)$, drift regression parameters $\alpha, \beta$, step-jump alerts. | Detects OSD step jumps $\ge 1.0\text{ s}$ and clock stalling; distinguishes clock drift from excised footage. | `OCR_RECOGNITION_LOW_CONFIDENCE`, `CLOCK_OCCLUSION` | **VISTA-CFI-06** |
+| **CFI-12** | Recorder & Export Evidence Integration | Companion manifests, DVR logs. | Corroborated event timestamps, export software tags, native container markers. | Ingests companion files without requiring proprietary DVR credentials; flags discrepancies between logs and video. | `MANIFEST_PARSING_FAILED`, `LOG_TIMESTAMP_UNPARSABLE` | **VISTA-CFI-06** |
+| **CFI-13** | Cross-Camera Timeline Comparison | Multi-camera exhibits, OSD clocks. | Aligned multi-camera timelines, relative clock offsets, temporal conflict graphs. | Preserves independent WORM exhibits for each camera; detects coverage gaps across independent feeds. | `CLOCK_OFFSET_INDETERMINATE`, `CAMERA_TIMELINE_MISMATCH` | **VISTA-CFI-07** |
+| **CFI-14** | Audio-Video Timeline Correlation | Video PTS, extracted audio stream. | Global offset $\Delta t$, audio continuity during video freezes, lip-sync correspondence. | Correlates acoustic activity with video anomalies; detects speech continuation during video freeze. | `AUDIO_STREAM_ABSENT`, `LIP_SYNC_INDETERMINATE` | **VISTA-CFI-07** |
+| **CFI-15** | Frame-Range Localisation & Reporting | Temporal findings, evidence metadata. | Standardized `FrameIntegrityFinding` records, millisecond timecodes, frame indices. | Conforms strictly to Pydantic v2 schemas; binds findings to master exhibit SHA-256 via DAG manifest. | `SCHEMA_VALIDATION_ERROR`, `LINEAGE_BINDING_FAILED` | **VISTA-CFI-08** |
+| **CFI-16** | Examiner Visualisation & Review | Analysis observations, UI events. | Dual timeline, duration curves, similarity heatmaps, adjacent frame comparisons. | Renders interactive forensic diagnostic plots; records examiner annotations into immutable audit log. | `RENDER_BUFFER_EXCEEDED`, `UNAUTHORIZED_ANNOTATION` | **VISTA-CFI-08** |
+| **CFI-17** | Ground-Truth Corpus & Annotation | Authentic controls, synthetic derivatives. | Controlled corruption corpus manifests, source-to-derived frame maps. | Synthesizes controlled frame deletions, insertions, duplications, freezes, and reorderings with bit-exact ground truth. | `CORPUS_METADATA_MISMATCH`, `GROUND_TRUTH_LEAKAGE` | **VISTA-CFI-09** |
+| **CFI-18** | Event & Temporal Localisation Metrics | Predicted findings, ground truth. | Precision, Recall, F1, $tIoU$, boundary errors $\Delta t_{\text{boundary}}$, Kendall $\tau$. | Evaluates event detection and temporal localisation ($tIoU$) independently; handles zero-denominator cases safely. | `ZERO_INTERSECTION_INTERVAL`, `UNDEFINED_LOCALISATION_METRIC` | **VISTA-CFI-09** |
+| **CFI-19** | Robustness & False-Positive Evaluation | Hard-negative controls (VFR, PTZ, cuts). | False alarms per video-hour, robustness curves across compression and lighting. | Enforces false-positive rate $\le 0.05$ on authentic hard-negative controls (PTZ panning, IR switching, natural cuts). | `FALSE_ALARM_BURST_DETECTED`, `CAMERA_MOTION_CONFOUNDER` | **VISTA-CFI-09** |
+| **CFI-20** | Evidence Lineage & CEIPL Integration | Exhibit bytes, derived frames. | SHA-256/SHA3-512 dual hashes, WORM `0400` paths, RFC 8785 JSON manifests. | Anchors all frame extracts and finding records in CEIPL DAG; guarantees 100% bitstream immutability. | `WORM_WRITE_PERM_ERROR`, `CRYPTOGRAPHIC_HASH_MISMATCH` | **VISTA-CFI-00** |
+| **CFI-21** | Security Safeguards & Resource Ceilings | Input bitstreams, worker sandbox. | Sandboxed execution, cgroup memory enforcement, timeout termination. | Caps worker RAM to $\le 4\text{ GB}$, uncompressed frame ring buffer $\le 64$ frames; traps decompression bombs $\le 10\text{ s}$. | `WORKER_OOM_KILLED`, `CONTAINER_PARSE_TIMEOUT` | **VISTA-CFI-00** |
+| **CFI-22** | Reproducibility & Release Validation | Test suites, benchmark execution. | Automated pytest regression logs, deterministic hash assertions, release sign-off. | Verifies 100% reproducibility of timeline extraction and anomaly scores across independent benchmark runs. | `NON_DETERMINISTIC_SCORE`, `REGRESSION_ASSERTION_FAILED` | **VISTA-CFI-09** |
+
+---
+
+### 14.13 Security, Operational & Legal Invariants
+1. **Zero-Alteration Master Evidence Invariant:** Seized master video bitstreams stored in WORM storage are marked with POSIX `0400` read-only permissions and S3 Object Lock. Files are NEVER transcoded, demuxed, or normalized in place.
+2. **Defensive Demuxer Sandbox:** Container parsing executes inside unprivileged Linux cgroups with strict memory ceilings ($\le 4\text{ GB}$ RAM) and execution timeouts ($60\text{ s}$ header parse, $600\text{ s}$ segment decode) to prevent infinite GOP loops and libavformat buffer overflows.
+3. **No Shell-String Interpolation:** All FFmpeg, FFprobe, and external tool invocations pass arguments as discrete, sanitized string vectors (`subprocess.run(["ffmpeg", ...], shell=False)`). Direct shell string concatenation is strictly prohibited.
+4. **Air-Gapped Offline Execution:** All parsing, optical flow, OCR, tracking, and evaluation algorithms execute 100% locally with zero external network connectivity or cloud telemetry.
+5. **Section 65B IEA / Section 63 BSA Traceability:** Every generated finding, diagnostic curve, and report annexure references master exhibit SHA-256, presentation timestamps, exact frame indices, and software environment hashes, guaranteeing courtroom admissibility.
+
+---
+
+### 14.14 Scientific Limitations, Edge Cases & Assumptions
+1. **Unprovable Pre-Acquisition Deletion:** Without an authentic reference sequence, native recorder log, companion manifest, or corroborating camera footage, a video that has been edited and cleanly re-encoded with uniform timestamps cannot be definitively proven to have had frames removed. The platform limits findings to observable anomalies (`FRAME_GAP_OBSERVED`) and explicitly abstains from speculating on unprovable historical acts.
+2. **Natural Texture & Stationary Camera Ambiguity:** Stationary surveillance cameras viewing static scenes naturally yield near-identical frames ($SSIM > 0.98$, pHash distance $= 0$). The system mitigates false alarms via sensor noise residuals and optical flow magnitude thresholds, but examiner review remains mandatory for static surveillance footage.
+3. **Legitimate Frame-Rate Jitter:** Real-world surveillance networks and mobile devices employ variable frame rates with legitimate transmission jitter. The system applies robust median/MAD cadence modeling, but extreme network dropouts may produce ambiguous cadence states classified as `INCONCLUSIVE`.
+4. **Empirical Decision Thresholds (`THRESHOLD_REQUIRES_VALIDATION`):** Exact decision thresholds ($\tau_{\text{SSIM}}$, $\tau_{\text{pHash}}$, $\tau_{\text{residual}}$, $z_{\text{threshold}}$) are marked `THRESHOLD_REQUIRES_VALIDATION` and must be tuned on empirical validation partitions rather than assumed a priori.

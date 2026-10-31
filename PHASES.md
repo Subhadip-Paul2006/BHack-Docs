@@ -15,9 +15,11 @@ The PS-05 development lifecycle is structured into eleven platform-level phases 
 - **AURAS Audio Forensics Subsystem:** Eleven engineering phases (**AURAS-A0 through AURAS-A10**).
 - **VISTA Video Forensics Subsystem:** Fourteen engineering phases (**VISTA-A0 through VISTA-A13**).
 - **AIF Image Forensics Subsystem:** Retained as Phase 4 with its multi-branch visual examination modules (**AIF-A0 through AIF-A15**).
+- **AIF-IML Image Manipulation Localisation Framework:** Eleven dedicated engineering phases (**AIF-IML-00 through AIF-IML-10**), providing unified copy-move, splicing, inpainting, AI-generated patch, and facial manipulation spatial localization and multi-detector mask fusion.
 - **AIF-GEO Geospatial Forensics Subsystem:** Eleven engineering phases (**AIF-GEO-00 through AIF-GEO-10**).
 - **ONTF Network Traffic Forensics Subsystem:** Fourteen engineering phases (**ONTF-A0 through ONTF-A13**).
 - **Cross-Modal Deepfake Validation Framework (CDVF):** Twelve engineering phases (**CDVF-A0 through CDVF-A11**), providing a shared scientific benchmarking, empirical calibration, OOD gating, and model-governance backbone governing AIF, AURAS, and VISTA detection engines.
+- **CCTV Frame Integrity & Temporal Sequence Analysis (CFITSA):** Ten dedicated engineering phases (**VISTA-CFI-00 through VISTA-CFI-09**), providing specialized temporal sequence, variable-frame-rate cadence, motion continuity, and CCTV clock integrity validation embedded within VRE and the CCTV Forensic Profile.
 - **Shared Platform Layer:** Common pre-decode dual-hashing, WORM vault persistence, Celery worker orchestration, and Section 65B/63 BSA legal reporting infrastructure.
 
 ```mermaid
@@ -174,6 +176,16 @@ flowchart TD
 | **VISTA-A11**| Cross-Engine Video Evidence Fusion | Fusion / VISTA | `PLANNED` | VISTA-A5, A8, A10 | Multi-track timeline alignment, conflict resolution matrix, finding merger |
 | **VISTA-A12**| Video Legal Reporting & Sec 65B/63 BSA | Reporting / VISTA | `PLANNED` | VISTA-A11 Gate | Section 65B/63 BSA PDF certificate, Archify JSON IR, digital signature |
 | **VISTA-A13**| End-to-End Video Validation & Benchmark | Validation / Release | `PLANNED` | VISTA-A12 Gate | FF++, Celeb-DF, DFDC, CCTV synthetic corpus, air-gap verification |
+| **VISTA-CFI-00** | Temporal Architecture & Contract Baseline | VRE / CCTV Profile | `PLANNED` | Phase 0 Gate | 5 frame index dimensions, decode/presentation invariant, Pydantic v2 schemas |
+| **VISTA-CFI-01** | Frame & Packet Timeline Extraction | VRE Baseline | `PLANNED` | VISTA-CFI-00 Gate | PyAV demuxer, PTS/DTS rational timebase, stream offsets, packet index map |
+| **VISTA-CFI-02** | VFR Cadence & Robust Statistics | VRE Cadence | `PLANNED` | VISTA-CFI-01 Gate | Robust median, MAD, modified z-score, PELT piecewise cadence regimes |
+| **VISTA-CFI-03** | Decoded Duplicates & Frozen Sequences | VRE / CCTV Baseline | `PLANNED` | VISTA-CFI-02 Gate | BLAKE3 raster digest, pHash, SSIM, PRNU noise invariant, freeze detector |
+| **VISTA-CFI-04** | Missing & Inserted Frame Analysis | VRE Advanced | `PLANNED` | VISTA-CFI-03 Gate | Modes A-D missing frames, optical flow warping residual R_i, AI interpolation |
+| **VISTA-CFI-05** | Reordering & Motion Continuity | VRE Advanced | `PLANNED` | VISTA-CFI-04 Gate | PTS monotonicity, Farneback/TV-L1, ByteTrack kinematic momentum, Kendall tau |
+| **VISTA-CFI-06** | Codec GOP & CCTV OSD Clock Regression | CCTV Advanced | `PLANNED` | VISTA-CFI-05 Gate | GOP cadence, macroblock QP, PaddleOCR clock drift delta(t), companion DVR logs |
+| **VISTA-CFI-07** | Cross-Camera & Audio-Video Alignment | CCTV / AVSC | `PLANNED` | VISTA-CFI-06 Gate | Multi-camera UTC alignment, relative clock offsets, AFB audio continuity |
+| **VISTA-CFI-08** | Unified Findings & Examiner Workbench | UI / Reporting | `PLANNED` | VISTA-CFI-07 Gate | Dual timeline, cadence curves, similarity heatmaps, Section 65B/63 BSA dossier |
+| **VISTA-CFI-09** | Test Corpus, Benchmarking & Release | Release / Gate | `PLANNED` | VISTA-CFI-08 Gate | 1,000-sample test corpus, event metrics, tIoU, hard-negative sweep <= 0.05/hr |
 | **AIF-A0**  | AIF Architecture Baseline & Audit | AIF Core / Docs | `PLANNED` | Phase 0 Gate | Directory structure, module boundary contracts, threat model |
 | **AIF-A1**  | Shared Contracts & CEIPL Foundation | CEIPL / AIF Core | `PLANNED` | AIF-A0 Gate | Pre-decode dual-hasher, WORM vault, RFC 8785 canonical manifests |
 | **AIF-A2**  | Secure Image Intake & Safe Decoding | IVE Baseline | `PLANNED` | AIF-A1 Gate | Magic bytes, Pillow 128MP quota, isolated parser sandbox |
@@ -201,6 +213,17 @@ flowchart TD
 | **AIF-GEO-08** | Cross-Evidence Spatio-Temporal Graph | AIF-GEO Graph | `PLANNED` | AIF-GEO-03, 04, 07 | C2PA verifier, DBSCAN clusterer, conflict graph, PostGIS spatial search |
 | **AIF-GEO-09** | Investigator Workbench & Legal Reports | AIF-GEO Reporting | `PLANNED` | AIF-GEO-08 Gate | FastAPI endpoints, Archify JSON IR adapter, Sec 65B/63 BSA PDF compiler |
 | **AIF-GEO-10** | Benchmarking, Privacy Audit & Release | Validation / Release | `PLANNED` | AIF-GEO-09 Gate | Full regression suite, air-gap packet audit, 5-run determinism benchmark |
+| **AIF-IML-00** | Repository Audit, Localisation Contracts & Baseline | Shared AIF IMLF | `IMPLEMENTED_AND_VERIFIED` | Phase 0 Gate | Capability audit, canonical taxonomy, Pydantic v2 contracts, coordinate rules |
+| **AIF-IML-01** | Classical Copy-Move Forgery Localisation Engine | IRE / CMFD | `PLANNED` | AIF-IML-00 Gate | SIFT/RootSIFT, RANSAC homography H, block-DCT sort, texture false-alarm filter |
+| **AIF-IML-02** | Image Splicing, Noise Residual & Sensor Inconsistency | IRE Splicing | `PLANNED` | AIF-IML-00 Gate | 2D wavelet noise residual R=I-D(I), block variance, boundary seams, PRNU PCE |
+| **AIF-IML-03** | Deep-Learning Localisation Baselines (TruFor & CAT-Net) | AIM Deep Models | `PLANNED` | AIF-IML-00 Gate | TruFor RGB+noiseprint pipeline, CAT-Net v2 DCT stream, SHA-256 weight verifier |
+| **AIF-IML-04** | Inpainting, Object Removal & AI-Modified Region Localisation| AIM Inpainting | `PLANNED` | AIF-IML-03 Gate | Noise annihilation detector, diffusion patch checkerboard, unlocalised fallback |
+| **AIF-IML-05** | Face-Swap, Morphing & Facial Region Localisation | FPA Biometrics | `PLANNED` | AIF-IML-00 Gate | RetinaFace 68 landmarks, 16 px perimeter seam ribbon, CIEDE2000 color jump |
+| **AIF-IML-06** | Multi-Scale Tiling & Invertible Coordinate Mapping | AIF Tiling Core | `PLANNED` | AIF-IML-03 Gate | 1024 px tiles, 25% overlap, inverse affine H^-1 mapping, 2D distance blend |
+| **AIF-IML-07** | Unified Mask Architecture, Multi-Detector Fusion & Lineage | IMLF Core | `PLANNED` | AIF-IML-01..A06 | Evidence dependency DAG, pairwise IoU clustering, anti-averaging invariant |
+| **AIF-IML-08** | Localisation Benchmarking, Ground-Truth & Metric Harness | AIF Benchmarks | `PLANNED` | AIF-IML-07 Gate | Zero-leakage parent-scene splitting, pixel IoU/Dice/MCC, boundary F1, NIST |
+| **AIF-IML-09** | Forensic Examiner Review Workbench & Legal Dossier | UI / Reporting | `PLANNED` | AIF-IML-07, A08 | Multi-layer canvas, threshold sliders, reviewer disposition, Sec 65B/63 BSA |
+| **AIF-IML-10** | Security Hardening, Resource Ceilings & Release Readiness | Security / Release | `PLANNED` | AIF-IML-09 Gate | 100 MP bomb defense, cgroup quotas (16 GB RAM, 8 GB VRAM), air-gap packet audit |
 | **ONTF-A0** | Network Architecture & Sandbox Baseline | ONTF Core / Shared | `PLANNED` | Phase 0 Gate | Directory scaffold, defensive sandbox harness, typing contracts, exceptions |
 | **ONTF-A1** | Intake, Dual Hashing & WORM Vault | CEIPL / ONTF Core | `PLANNED` | ONTF-A0 Gate | Pre-parse dual-hasher, WORM vault, metadata registry, RFC 8785 receipt |
 | **ONTF-A2** | Defensive Packet Parsing (TShark & Scapy) | ONTF Ingestion | `PLANNED` | ONTF-A1 Gate | Magic bytes, snaplen validation, sandboxed TShark/Scapy deep packet dissection |
@@ -1023,7 +1046,7 @@ Ingestion endpoints operational, dual hashing verified against test vectors, Mer
 1. Implement PyAV container parser in `src/ps05/engines/vista/vre/bitstream.py` extracting track timebases and codec parameters.
 2. Build MP4 box inspector verifying `ftyp`, `moov`, `mvhd`, `tkhd`, and `stts` consistency.
 3. Implement `cadence.py` computing inter-packet timestamp differences $\Delta PTS_k = PTS_k - PTS_{k-1}$.
-4. Build variable frame rate detector calculating instantaneous FPS variance $\sigma^2_{	ext{vfr}}$.
+4. Build variable frame rate detector calculating instantaneous FPS variance $\sigma^2_{\text{vfr}}$.
 5. Develop frozen frame detector flagging identical raster spans ($SSIM > 0.998$) exceeding 1.0 second.
 **6. Detailed Execution Workflow:**
 Raw Exhibit Demuxed -> Box Offsets Scanned -> Stream Descriptors Extracted -> Packet Timestamps Logged -> PTS Continuity Regressed -> VFR Variance Computed -> Frozen Spans Segmented -> `VRERunResult` Emitted.
@@ -1170,13 +1193,13 @@ AFB extraction pipeline complete, AURAS bridge operational, end-to-end integrati
 - Surveillance Face Detection: RetinaFace / SCRFD high-recall face localization.
 - Trajectory Association: ByteTrack multi-object tracking associating face tracklets across frames.
 - Canonical Mouth ROI Normalization: Standardized 112x112 greyscale lip sequence extraction.
-- SyncNet Lip-Sync Cross-Correlation: Computing embedding distance curve $D(\Delta)$ and sync score $S_{	ext{sync}}$.
+- SyncNet Lip-Sync Cross-Correlation: Computing embedding distance curve $D(\Delta)$ and sync score $S_{\text{sync}}$.
 - Multi-Face Speaker Disambiguation: Attributing dialogue to the active talker while classifying bystanders as silent.
 - Acoustic-to-Visual Event Matching: Correlating transient sounds (gunshots, explosions) with visible phenomena (flashes, falls).
 **5. Exact Tasks:**
 1. Implement container offset alignment in `src/ps05/engines/vista/avsc/alignment.py`.
 2. Integrate RetinaFace and ByteTrack in `face_track.py` maintaining consistent face trajectory IDs.
-3. Build mouth crop extractor `mouth_roi.py` producing normalized $112 	imes 112$ tensors aligned via landmark homography.
+3. Build mouth crop extractor `mouth_roi.py` producing normalized $112 \imes 112$ tensors aligned via landmark homography.
 4. Implement SyncNet evaluation harness in `syncnet.py` computing offset distance curves and confidence scores.
 5. Build multi-speaker disambiguation logic in `multi_face.py` separating active speakers from bystanders.
 6. Implement cross-modal event matcher in `event_corr.py` verifying light-travel-time physics constraints.
@@ -1201,7 +1224,7 @@ Phase VISTA-A3 and VISTA-A4 Gates passed; decoded frames and 16kHz audio availab
 Biometric face feature vectors are strictly ephemeral; zero 1:N biometric gallery searching; privacy-preserving crops.
 **12. Acceptance Criteria:**
 - Optimal offset identification accuracy >= 95% on LRS2/LRS3 benchmark clips (+/- 10 frame shifts).
-- Accurately classifies passive bystanders as `BYSTANDER_SILENT` ($S_{	ext{sync}} < 2.5$).
+- Accurately classifies passive bystanders as `BYSTANDER_SILENT` ($S_{\text{sync}} < 2.5$).
 - Traps temporal physical violations where gunshot sound precedes visible muzzle flash by > 50 ms.
 **13. Definition of Done (DoD):**
 AVSC pipeline fully operational, SyncNet benchmarks passing, multi-face disambiguation unit tests passing.
@@ -1328,14 +1351,14 @@ CCTV triage operational, context schema implemented, adaptive questionnaire test
 **2. Current Status:** `PLANNED`
 **3. Purpose:** Implement advanced CCTV forensics: model OSD clock continuity and drift regression $\delta(t)$, detect temporal frame excisions and clock freezes, verify native DVR/NVR proprietary exports (`.dav`, `.sec`), validate ONVIF Export File Format and Media Signing digital seals, and corroborate multi-camera multi-channel timelines.
 **4. Topics & Subtopics:**
-- OSD Clock Continuity Regression: Regressing OCR timestamp against presentation timestamp $\delta(t) = t_{	ext{ocr}} - t_{	ext{pts}}$.
+- OSD Clock Continuity Regression: Regressing OCR timestamp against presentation timestamp $\delta(t) = t_{\text{ocr}} - t_{\text{pts}}$.
 - Clock Jumps & Non-Monotonic Reversals: Trapping time jumps indicating deleted surveillance footage.
 - Native DVR/NVR Bitstream Verification: Parsing proprietary Dahua DAV and Hikvision packet headers.
 - ONVIF Media Signing Seal Verification: Validating X.509 certificate chains, XML signatures, and NAL unit hash chains.
 - Multi-Camera Feed Corroboration: Aligning cross-camera UTC timelines and detecting duplicate/re-broadcast feeds.
 **5. Exact Tasks:**
 1. Implement clock drift regression in `src/ps05/engines/vista/cctv/clock_drift.py` computing slope and residual variance.
-2. Build clock jump detector flagging excision intervals $\Delta t_{	ext{gap}} \ge 1.0	ext{ s}$.
+2. Build clock jump detector flagging excision intervals $\Delta t_{\text{gap}} \ge 1.0\text{ s}$.
 3. Implement native export parsers in `native_export.py` extracting proprietary recorder header metadata.
 4. Build ONVIF verifier in `onvif_seals.py` checking XML Media Signing atoms and continuous NAL hash chains.
 5. Implement multi-camera correlator in `multi_cam.py` performing cross-camera SSIM and timeline synchronization.
@@ -1460,7 +1483,7 @@ Inference operates strictly in memory with GPU cgroups; zero temporary frame ras
 **12. Acceptance Criteria:**
 - Cross-dataset AUC-ROC >= 0.88 on Celeb-DF v2 without retraining.
 - Generative 3D FFT detector classifies text-to-video clips (Runway, Pika) with accuracy >= 90%.
-- Mahalanobis OOD flags synthetic diffusion video with distance $d_{	ext{mah}} > 3.0$.
+- Mahalanobis OOD flags synthetic diffusion video with distance $d_{\text{mah}} > 3.0$.
 **13. Definition of Done (DoD):**
 Temporal models and 3D FFT detector operational, OOD metric validated, cross-dataset benchmark passing.
 **14. Checkpoint Table:**
@@ -1623,6 +1646,462 @@ Complete VISTA test suite passing, benchmark dossier committed, security audit s
 | **VISTA-CP-13-02** | 5-Run Deterministic Reproducibility | 100% bit-identical canonical JSON report hashes across 5 runs | `NOT_STARTED` | Awaits phase activation |
 | **VISTA-CP-13-03** | Air-Gap Offline Operation Verification | Pipeline executes with network interface disabled; zero egress calls | `NOT_STARTED` | Awaits phase activation |
 | **VISTA-CP-13-04** | Dependency License Compliance Audit | Zero GPL or restrictive commercial license conflicts identified | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+## 4.B Dedicated CCTV Frame Integrity & Temporal Sequence Forensics Playbook (VISTA-CFI-00 through VISTA-CFI-09)
+
+The CCTV Frame Integrity & Temporal Sequence Analysis (CFITSA) engineering roadmap defines ten sequential, research-oriented, and cryptographically grounded implementation phases. CFITSA operates as a specialized temporal-integrity capability within the existing **Video Reverse Engineering Engine (VRE)** and the **CCTV Forensic Profile**, adhering strictly to Section 65B of the Indian Evidence Act (IEA) and Section 63 of the Bharatiya Sakshya Adhiniyam (BSA 2023):
+
+```mermaid
+flowchart TD
+    subgraph CFI_STREAM["⏱️ VISTA-CFI Engineering Sequence"]
+        direction TB
+        CFI00["VISTA-CFI-00: Temporal Contracts & Pydantic Baseline"] --> CFI01["VISTA-CFI-01: Packet & Frame Demuxing (PTS/DTS)"]
+        CFI01 --> CFI02["VISTA-CFI-02: VFR Cadence & Robust Statistics (Median/MAD)"]
+        CFI02 --> CFI03["VISTA-CFI-03: Decoded Duplicates & Freeze Detection (SSIM/PRNU)"]
+        CFI03 --> CFI04["VISTA-CFI-04: Missing & Inserted Frame Analysis (Optical Warping)"]
+        CFI04 --> CFI05["VISTA-CFI-05: Reordering & Motion Continuity (ByteTrack/Kendall)"]
+        CFI05 --> CFI06["VISTA-CFI-06: Codec/GOP Forensics & CCTV OSD Clock Regression"]
+        CFI06 --> CFI07["VISTA-CFI-07: Cross-Camera Alignment & Audio-Visual Continuity"]
+        CFI07 --> CFI08["VISTA-CFI-08: Unified Findings & Examiner Workbench"]
+        CFI08 --> CFI09["VISTA-CFI-09: 1,000-Sample Test Corpus, Metrics & Release Validation"]
+    end
+```
+
+---
+
+### Phase VISTA-CFI-00: Repository Audit, Temporal Architecture & Contract Baseline
+
+**1. Phase ID & Title:** `VISTA-CFI-00: Repository Audit, Temporal Architecture & Contract Baseline`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Establish structural, mathematical, and schema foundations for CCTV frame-integrity analysis. Define the five distinct frame coordinate dimensions, encode-vs-presentation order invariants, Pydantic v2 data models (`VideoFrameObservation`, `FrameSequenceObservation`, `FrameIntegrityFinding`), and CEIPL cryptographic DAG bindings.
+**4. Topics & Subtopics:**
+- Repository Gap Audit: Verifying demuxer and timeline components in `src/ps05/engines/vista/`.
+- Coordinate Separation: `packet_index`, `decoder_output_index`, `presentation_order_index`, `source_reference_index`, `scene_relative_index`.
+- B-Frame Legal Invariant: Establishing non-tampering semantics for decode vs presentation ordering.
+- Pydantic v2 Models: Strict validation schemas with typed outcome classifications.
+- Evidence Provenance: CEIPL RFC 8785 manifest structure for frame-level observations.
+**5. Exact Tasks:**
+1. Create module hierarchy under `src/ps05/engines/vista/vre/temporal/` and `src/ps05/engines/vista/cctv/temporal/`.
+2. Define Pydantic v2 schemas for `VideoFrameObservation`, `FrameSequenceObservation`, and `FrameIntegrityFinding` in `src/ps05/engines/vista/temporal/contracts.py`.
+3. Implement coordinate mapper resolving packet, decoder, and presentation order indices.
+4. Draft defensive exception classes (`TemporalContinuityError`, `TimebaseInvalidError`, `CadenceAmbiguityError`).
+5. Write initial contract unit tests verifying JSON serialization and deserialization.
+**6. Detailed Execution Workflow:**
+Audit Existing Modules -> Scaffold Directory Structure -> Implement Pydantic v2 Contracts -> Register Exception Hierarchy -> Validate JSON Schemas -> Run Test Harness.
+**7. Technologies, Tools & Models:** Python 3.12, Pydantic v2, pytest, mypy (strict mode).
+**8. Prerequisites & Dependencies:** Phase 0 architecture baseline; VISTA-A0 scaffold completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/vista/vre/temporal/__init__.py`
+- `src/ps05/engines/vista/vre/temporal/contracts.py`
+- `src/ps05/engines/vista/vre/temporal/coordinates.py`
+- `tests/unit/test_cfi_contracts.py`
+**10. Failure Cases & Risks:**
+- Identifier conflation: Mitigated by enforcing distinct typing on all index fields.
+**11. Security Considerations:** Immutable schemas; read-only data contracts; no external network calls.
+**12. Acceptance Criteria:**
+- 100% clean type check via `mypy --strict`.
+- Round-trip JSON serialization matches Pydantic v2 specifications exactly.
+**13. Definition of Done (DoD):** Contracts committed, test suite passing with 100% exit code 0.
+**14. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CFI-CP-00-01** | Package Scaffold & Clean Imports | All temporal sub-modules import cleanly without circular dependencies | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-00-02** | Coordinate Dimension Decoupling | Unit test proves distinct indexing across packet, decoder, and presentation spaces | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-00-03** | Pydantic v2 Contract Validation | Serialization round-trip test passes across all 16 typed outcome states | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-00-04** | CEIPL DAG Provenance Binding | Manifest builder binds observation IDs to parent exhibit SHA-256 | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase VISTA-CFI-01: Container Demuxing, Frame/Packet Extraction & Timeline Construction
+
+**1. Phase ID & Title:** `VISTA-CFI-01: Container Demuxing, Frame/Packet Extraction & Timeline Construction`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement defensive container demuxing and packet parsing using PyAV. Extract raw integer PTS/DTS, exact rational timebases, packet sizes, keyframe flags, and build the monotonically sorted presentation display timeline without floating-point precision loss.
+**4. Topics & Subtopics:**
+- Defensive Container Demuxing: Sandboxed `av.open()` with 10s packet read timeouts.
+- Rational Timebase Precision: $t_i = PTS_i \imes rac{TB_{\text{num}}}{TB_{\text{den}}}$.
+- B-Frame Resolution: Composition offset parsing via ISO/IEC 14496-12 `ctts` box.
+- Stream Inventory: Video stream index, codec parameters, pixel format, interlacing.
+- Bitstream Corruption Trapping: Recovery at next valid NAL keyframe.
+**5. Exact Tasks:**
+1. Implement `TimelineExtractor` in `src/ps05/engines/vista/vre/temporal/extractor.py`.
+2. Extract demuxed packets, recording `packet_index`, byte offset, PTS, DTS, and size.
+3. Decode frames into planar YUV420p format, maintaining decoder emission order.
+4. Sort decoded frames into presentation order by PTS, computing exact presentation seconds.
+5. Trap container truncation and malformed NAL units with typed `DECODE_CORRUPTION` logs.
+**6. Detailed Execution Workflow:**
+Ingest Bitstream -> Open via Defensive PyAV -> Demux Packets -> Extract PTS/DTS/TB -> Decode to Ring Buffer -> Sort by PTS -> Build Presentation Timeline -> Persist Observation Records.
+**7. Technologies, Tools & Models:** PyAV (FFmpeg 6.1.1 C-bindings), Python 3.12, NumPy.
+**8. Prerequisites & Dependencies:** `VISTA-CFI-00` completed; Libavformat shared libraries.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/vista/vre/temporal/extractor.py`
+- `src/ps05/engines/vista/vre/temporal/timeline.py`
+- `tests/unit/test_cfi_extractor.py`
+**10. Failure Cases & Risks:**
+- Infinite GOP loops or decompression bombs: Trapped via 10s packet timeout and 256MB parser cap.
+**11. Security Considerations:** Sandboxed execution; unprivileged user; source files opened read-only.
+**12. Acceptance Criteria:**
+- Extracts 100% of packets and frames across MP4, MKV, AVI, TS, and DAV test fixtures.
+- Preserves raw integer PTS and exact rational fractions without floating-point drift.
+**13. Definition of Done (DoD):** Extractor module committed and passing unit test suite.
+**14. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CFI-CP-01-01** | Defensive Demuxer & Timeout Guard | 10s timeout triggers safely on crafted malformed container bomb | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-01-02** | Rational Timebase Math Verification | Zero floating-point rounding error across 100,000 sequential frames | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-01-03** | B-Frame PTS/DTS Resolution | Presentation order sorting correctly resolves B-frame display chronology | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-01-04** | Bitstream Corruption Recovery | Demuxer recovers sync at next IDR keyframe after simulated byte corruption | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase VISTA-CFI-02: Variable-Frame-Rate Cadence Analysis & Robust Interval Statistics
+
+**1. Phase ID & Title:** `VISTA-CFI-02: Variable-Frame-Rate Cadence Analysis & Robust Interval Statistics`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement variable-frame-rate (VFR) aware cadence analysis. Formulate robust non-parametric cadence statistics (median interval $m$, Median Absolute Deviation $MAD$, modified z-score $z_i$) and Pruned Exact Linear Time (PELT) change-point detection to model legitimate surveillance camera mode switches without false cadence alarms.
+**4. Topics & Subtopics:**
+- Inter-Frame Presentation Intervals: $\Delta t_i = t_i - t_{i-1}$.
+- Non-Parametric Interval Statistics: Vectorized median and $MAD$ calculation.
+- Modified Z-Score: Handling $MAD=0$ and low-variance surveillance streams.
+- Piecewise Cadence Segmentation: PELT change-point detection with penalty $eta = 2\ln(N)$.
+- Stream Cadence Classification: Classifying streams as CFR, VFR-Stable, or VFR-Erratic.
+**5. Exact Tasks:**
+1. Implement `CadenceAnalyzer` in `src/ps05/engines/vista/vre/temporal/cadence.py`.
+2. Compute presentation intervals $\mathbf{\Delta t}$ across the presentation timeline.
+3. Calculate robust windowed median $m$ and $MAD$; evaluate modified z-scores $z_i$.
+4. Implement PELT change-point segmentation partition into homogeneous cadence regimes.
+5. Classify stream cadence type and emit `FrameSequenceObservation` summary records.
+**6. Detailed Execution Workflow:**
+Presentation Timeline -> Compute Delta(t) -> Evaluate Median and MAD -> Run PELT Segmentation -> Classify Regimes -> Flag Cadence Anomalies -> Emit Sequence Summaries.
+**7. Technologies, Tools & Models:** NumPy, SciPy (stats and signal modules), Python 3.12.
+**8. Prerequisites & Dependencies:** `VISTA-CFI-01` completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/vista/vre/temporal/cadence.py`
+- `tests/unit/test_cfi_cadence.py`
+**10. Failure Cases & Risks:**
+- False alarms on legitimate VFR rate shifts: Mitigated via PELT change-point modeling.
+**11. Security Considerations:** Memory allocation constrained to vector arrays ($\le 50\text{ MB}$).
+**12. Acceptance Criteria:**
+- Correctly identifies 100% of CFR and VFR test fixtures.
+- Suppresses false alarms on authentic VFR streams with jitter within $3.5\imes MAD$.
+**13. Definition of Done (DoD):** Cadence module committed, unit tests passing with 100% exit code 0.
+**14. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CFI-CP-02-01** | Robust Median & MAD Implementation | Vectorized calculation matches analytical values on synthetic test arrays | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-02-02** | Zero-MAD Edge Case Handling | Mathematical guard prevents division-by-zero on perfect CFR streams | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-02-03** | PELT Change-Point Segmentation | Accurately identifies simulated 5 fps -> 25 fps camera mode transition | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-02-04** | VFR Cadence False Alarm Control | Zero false alarms triggered on authentic 1-hour VFR smartphone test clip | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase VISTA-CFI-03: Decoded-Frame Duplicate Detection & Frozen-Sequence Analysis
+
+**1. Phase ID & Title:** `VISTA-CFI-03: Decoded-Frame Duplicate Detection & Frozen-Sequence Analysis`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement multi-tier duplicate frame and frozen-sequence detection. Formulate 256-bit BLAKE3 exact raster hashing, 64-bit DCT perceptual hashing, multi-channel SSIM, and PRNU sensor noise verification to rigorously distinguish malicious video freeze attacks from authentic stationary surveillance scenes.
+**4. Topics & Subtopics:**
+- Decoded Raster Hashing: SIMD-accelerated BLAKE3 on planar YUV420p pixels.
+- Perceptual Hashing: DCT pHash with Hamming distance calculation $d_H(h_i, h_j)$.
+- Structural Similarity: Vectorized SSIM comparison ($SSIM \ge 0.985$).
+- Stationary CCTV Scene Invariant: Photo-Response Non-Uniformity (PRNU) noise residue check.
+- Multi-Modal Freeze Disambiguation: Cross-referencing audio continuity and OSD clock advance.
+**5. Exact Tasks:**
+1. Implement `DuplicateDetector` in `src/ps05/engines/vista/vre/temporal/duplicates.py`.
+2. Implement `FreezeDetector` in `src/ps05/engines/vista/vre/temporal/freeze.py`.
+3. Compute BLAKE3 digests and DCT pHash vectors for every decoded raster frame.
+4. Extract run-length encoded duplicate spans and compute total duration padding.
+5. Cross-reference candidate freezes with demuxed audio power and OSD clock readings.
+**6. Detailed Execution Workflow:**
+Decoded YUV Frames -> BLAKE3 Hash -> DCT pHash -> Hamming Distance Matrix -> SSIM Verification -> PRNU Noise Check -> Audio Continuity Audit -> Emit Duplicate/Freeze Findings.
+**7. Technologies, Tools & Models:** blake3-py, imagehash, scikit-image, OpenCV Headless, NumPy.
+**8. Prerequisites & Dependencies:** `VISTA-CFI-01`, `VISTA-CFI-02` completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/vista/vre/temporal/duplicates.py`
+- `src/ps05/engines/vista/vre/temporal/freeze.py`
+- `tests/unit/test_cfi_duplicates_freeze.py`
+**10. Failure Cases & Risks:**
+- Flagging static CCTV scenes as tampering: Mitigated via mandatory PRNU noise verification.
+**11. Security Considerations:** Memory ring buffer constrained to 64 frames.
+**12. Acceptance Criteria:**
+- Detects 100% of exact duplicated frames and cloned video loops.
+- Emits `STATIC_SCENE_OR_FREEZE_INCONCLUSIVE` on stationary cameras with active sensor noise.
+**13. Definition of Done (DoD):** Duplicate and freeze detectors committed with passing test suite.
+**14. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CFI-CP-03-01** | BLAKE3 Exact Duplicate Hashing | Identifies 100% of bit-identical decoded frames in test sequence | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-03-02** | pHash & SSIM Near-Duplicate Match | Detects re-encoded duplicate frames with Hamming distance <= 2 | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-03-03** | Stationary CCTV Scene Safeguard | PRNU noise check prevents false duplicate alarm on empty room camera | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-03-04** | Multi-Modal Freeze Disambiguation | Accurately flags freeze attack where OSD clock and audio advance | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase VISTA-CFI-04: Missing-Frame Detection & Inserted-Frame Localization
+
+**1. Phase ID & Title:** `VISTA-CFI-04: Missing-Frame Detection & Inserted-Frame Localization`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement algorithms for detecting missing (deleted) frames and candidate inserted frames. Formulate Mode A (timing gap), Mode B (reference sequence LCS/edit distance), Mode C (motion warping residual $R_i$), and Mode D (CCTV DVR log cross-referencing). Detect AI-interpolated and foreign spliced frames.
+**4. Topics & Subtopics:**
+- Missing-Frame Modes A–D: Distinguishing observed gaps from inferred deletions.
+- Sequence Alignment: Longest Common Subsequence (LCS) against authentic master reference.
+- Motion-Compensated Warping Residual: Forward-backward optical flow warping $R_i$.
+- AI Frame Interpolation Detection: Halo edge blur and residual warping spikes (RIFE/DAIN).
+- Foreign Frame Splice Detection: Isolated non-cadence I-frames and macroblock QP shifts.
+**5. Exact Tasks:**
+1. Implement `MissingFrameDetector` in `src/ps05/engines/vista/vre/temporal/missing.py`.
+2. Implement `InsertedFrameDetector` in `src/ps05/engines/vista/vre/temporal/inserted.py`.
+3. Compute forward-backward optical flow warping residuals $R_i$ across suspicious boundaries.
+4. Execute LCS sequence matching when reference sequence hashes are supplied.
+5. Classify findings into `FRAME_GAP_OBSERVED`, `POSSIBLE_FRAME_DELETION`, `INSERTED_FRAME_CANDIDATE`.
+**6. Detailed Execution Workflow:**
+Presentation Timeline -> Cadence Gap Check -> Optical Flow Warping -> Warping Residual Spike -> Macroblock QP Inspection -> Reference LCS Comparison -> Emit Findings.
+**7. Technologies, Tools & Models:** OpenCV Farnebäck / TV-L1, NumPy, SciPy, Pydantic v2.
+**8. Prerequisites & Dependencies:** `VISTA-CFI-02`, `VISTA-CFI-03` completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/vista/vre/temporal/missing.py`
+- `src/ps05/engines/vista/vre/temporal/inserted.py`
+- `tests/unit/test_cfi_missing_inserted.py`
+**10. Failure Cases & Risks:**
+- Fast camera motion triggering false warping spikes: Mitigated via RANSAC affine compensation.
+**11. Security Considerations:** Bounded execution time ($\le 300\text{ ms}$ per frame pair).
+**12. Acceptance Criteria:**
+- Achieves $\ge 0.90$ Precision and Recall on controlled frame deletion test cases.
+- Differentiates duplicated frame insertion from AI-interpolated and foreign spliced frames.
+**13. Definition of Done (DoD):** Missing and inserted frame modules committed and verified.
+**14. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CFI-CP-04-01** | Mode A PTS Gap Detection | Accurately identifies 1, 5, and 30-frame deletions from PTS cadence | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-04-02** | Mode B Reference LCS Alignment | Identifies exact deleted frame indices when comparing against reference | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-04-03** | Warping Residual Spike Detection | Forward-backward warping residual R_i spikes on synthetic frame splice | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-04-04** | AI-Interpolated Frame Localization | Detects RIFE-interpolated frames via boundary blur and residual error | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase VISTA-CFI-05: Reordering Detection, Optical Flow & Motion Continuity Analysis
+
+**1. Phase ID & Title:** `VISTA-CFI-05: Reordering Detection, Optical Flow & Motion Continuity Analysis`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement algorithms for detecting reordered, swapped, or reversed frame sequences. Validate presentation order PTS monotonicity, evaluate ByteTrack entity trajectory kinematics (velocity and acceleration continuity), and compute Kendall rank correlation ($\tau$) against authentic reference sequences.
+**4. Topics & Subtopics:**
+- Presentation Monotonicity: Enforcing $PTS_i > PTS_{i-1}$ in presentation display order.
+- Kinematic Trajectory Consistency: Evaluating velocity $\mathbf{v}_k(t)$ and acceleration $\mathbf{a}_k(t)$ continuity.
+- Sequence Reversal Detection: Reverse motion vector testing and momentum violations.
+- Kendall Rank Correlation: Measuring pairwise ordering agreement $\tau$ on matched frames.
+- Legitimate B-Frame Exemption: Ensuring decode order differences are never flagged as reordering.
+**5. Exact Tasks:**
+1. Implement `ReorderingDetector` in `src/ps05/engines/vista/vre/temporal/reordering.py`.
+2. Implement kinematic momentum checks on ByteTrack object trajectories.
+3. Formulate Kendall rank correlation $\tau$ against reference frame sequences.
+4. Verify that H.264/H.265 B-frame decode order differences are exempted from reordering flags.
+5. Emit `REORDERED_FRAME_CANDIDATE` records with exact shuffled frame boundaries.
+**6. Detailed Execution Workflow:**
+Presentation Frames -> PTS Monotonicity Audit -> Optical Flow Vector Testing -> ByteTrack Kinematic Acceleration Check -> Reference Kendall Tau Comparison -> Emit Reordering Findings.
+**7. Technologies, Tools & Models:** OpenCV, ByteTrack (VCI integration), SciPy, Python 3.12.
+**8. Prerequisites & Dependencies:** `VISTA-CFI-01`, `VISTA-CFI-04` completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/vista/vre/temporal/reordering.py`
+- `tests/unit/test_cfi_reordering.py`
+**10. Failure Cases & Risks:**
+- Tracking ID switches triggering false motion jumps: Mitigated via multi-frame trajectory smoothing.
+**11. Security Considerations:** Bounded memory tracking graph ($\le 1,000$ active tracks).
+**12. Acceptance Criteria:**
+- Accurately detects swapped adjacent frames and reversed 60-frame blocks.
+- Yields $\tau = -1.0$ on fully reversed sequence; flags B-frames with zero false alarms.
+**13. Definition of Done (DoD):** Reordering detector committed and verified against unit test suite.
+**14. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CFI-CP-05-01** | Presentation PTS Monotonicity Test | Flags non-monotonic PTS reversals in presentation display order | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-05-02** | Kinematic Momentum Violation Check | Detects unphysical 180-degree velocity reversal on human trajectory | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-05-03** | Kendall Tau Sequence Score | Kendall tau correctly reflects order degradation on shuffled sequence | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-05-04** | B-Frame Invariant Compliance | Zero reordering alarms emitted on authentic high-profile B-frame stream | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase VISTA-CFI-06: Codec/GOP Forensics, CCTV OSD Clock & DVR Log Corroboration
+
+**1. Phase ID & Title:** `VISTA-CFI-06: Codec/GOP Forensics, CCTV OSD Clock & DVR Log Corroboration`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement codec-level bitstream forensics and correlate visual frames with burned-in CCTV OSD clocks. Track GOP keyframe cadence and macroblock QP variance. Fit linear drift model $\delta(t) = lpha + eta t + \epsilon(t)$ on PaddleOCR clock strings $T_{\text{ocr}}(t)$ against container $t_{\text{pts}}$, detecting step jumps and stalls. Ingest companion DVR event logs.
+**4. Topics & Subtopics:**
+- Bitstream GOP Forensics: IDR periodicity, SPS/PPS transitions, broken reference pictures.
+- Macroblock QP Distribution: Variance $\sigma^2_{\text{QP}}(t)$ and double-compression GOP pulsing.
+- OSD Clock OCR Extraction: PaddleOCR corner margin detection and datetime normalisation.
+- Clock Drift Regression: Linear model $\delta(t)$ estimating offset $lpha$ and drift slope $eta$.
+- Companion DVR Manifest Parsing: Ingesting JSON/XML export logs without proprietary credentials.
+**5. Exact Tasks:**
+1. Implement `BitstreamForensicAnalyzer` in `src/ps05/engines/vista/vre/temporal/bitstream_forensics.py`.
+2. Implement `OSDClockCorrelator` in `src/ps05/engines/vista/cctv/temporal/osd_drift.py`.
+3. Extract macroblock QP matrices and detect periodic re-encoding modulation.
+4. Fit robust Theil-Sen or RANSAC linear regression on $T_{\text{ocr}}(t) - t_{\text{pts}}$.
+5. Parse companion DVR export manifests, cross-referencing motion events with video timeline.
+**6. Detailed Execution Workflow:**
+Extract Slice Headers -> Compute GOP Length & QP Variance -> Run PaddleOCR on OSD -> Normalise to UTC Epoch -> Fit Drift Regression -> Cross-Reference DVR Logs -> Emit Corroborated Findings.
+**7. Technologies, Tools & Models:** PyAV, PaddleOCR v2.7, SciPy, scikit-learn, Python 3.12.
+**8. Prerequisites & Dependencies:** `VISTA-CFI-01`, `VISTA-CFI-04` completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/vista/vre/temporal/bitstream_forensics.py`
+- `src/ps05/engines/vista/cctv/temporal/osd_drift.py`
+- `tests/unit/test_cfi_bitstream_osd.py`
+**10. Failure Cases & Risks:**
+- OCR misreads due to glare or low contrast: Mitigated via confidence filtering ($P_{\text{ocr}} \ge 0.85$).
+**11. Security Considerations:** Read-only manifest parsing; strict XML entity expansion limits.
+**12. Acceptance Criteria:**
+- Accurately detects instantaneous OSD clock jumps $\ge 1.0\text{ s}$ while PTS continues monotonically.
+- Identifies macroblock QP re-encoding pulsing on double-compressed H.264 streams.
+**13. Definition of Done (DoD):** Bitstream forensics and OSD drift modules committed and verified.
+**14. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CFI-CP-06-01** | GOP Cadence & QP Variance Audit | Flags mid-stream truncated GOP and non-cadence I-frame insertion | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-06-02** | PaddleOCR OSD Datetime Normalisation | Correctly parses diverse datetime formats (YYYY-MM-DD, DD/MM/YYYY) | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-06-03** | OSD Step-Jump Detection | Detects 45-second clock jump with monotonic container PTS | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-06-04** | Companion DVR Manifest Ingestion | Cross-references XML alarm log timestamps against video timeline | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase VISTA-CFI-07: Cross-Camera Timeline Graph & Audio-Visual Alignment
+
+**1. Phase ID & Title:** `VISTA-CFI-07: Cross-Camera Timeline Graph & Audio-Visual Alignment`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement multi-camera timeline synchronization and audio-visual cross-modal correlation. Align independent camera exhibits onto a unified UTC axis, estimate relative clock offsets, detect multi-camera coverage gaps, and leverage AFB/AVSC to verify acoustic continuity and SyncNet lip-sync during video freezes.
+**4. Topics & Subtopics:**
+- Multi-Camera Exhibit Preservation: Independent WORM vaulting and UUID assignment.
+- UTC Normalization: Aligning multi-feed timelines using OSD clocks or visual anchor events.
+- Relative Clock Offset Estimation: $\Delta t_{\text{cam1-cam2}} = t_{\text{cam1}} - t_{\text{cam2}}$.
+- Trajectory Handoff Graph: Tracking subjects across adjacent camera fields of view.
+- AFB / AVSC Audio Correlation: Acoustic power during video freezes and SyncNet lip-sync $S_{\text{sync}}$.
+**5. Exact Tasks:**
+1. Implement `MultiCameraCorrelator` in `src/ps05/engines/vista/cctv/temporal/multi_camera.py`.
+2. Build timeline alignment graph connecting multiple video exhibits by case ID.
+3. Compute relative clock offsets and detect spatial-temporal coverage discrepancies.
+4. Integrate with AFB to extract audio RMS power and spectral flux during video freezes.
+5. Integrate with AVSC SyncNet to evaluate lip synchronization on talking-head segments.
+**6. Detailed Execution Workflow:**
+Ingest Multi-Camera Exhibits -> Align to UTC via OSD Clocks -> Compute Relative Offsets -> Evaluate Trajectory Handoffs -> Correlate Demuxed Audio -> Check Lip-Sync -> Emit Cross-Evidence Graph.
+**7. Technologies, Tools & Models:** NetworkX, ByteTrack, SyncNet, PyAV, Python 3.12.
+**8. Prerequisites & Dependencies:** `VISTA-CFI-03`, `VISTA-CFI-06` completed; AVSC/AFB available.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/vista/cctv/temporal/multi_camera.py`
+- `src/ps05/engines/vista/temporal/av_correlation.py`
+- `tests/unit/test_cfi_cross_camera.py`
+**10. Failure Cases & Risks:**
+- False conflict when cameras cover non-overlapping areas: Mitigated via FOV topology checks.
+**11. Security Considerations:** Multi-tenant case isolation; independent evidence preservation.
+**12. Acceptance Criteria:**
+- Correctly identifies 15-second coverage gap in secondary camera during verified incident.
+- Flags audio continuation ($P_{\text{audio}} > -40\text{ dBFS}$) during video freeze interval.
+**13. Definition of Done (DoD):** Multi-camera and AV correlation modules committed and passing tests.
+**14. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CFI-CP-07-01** | Multi-Camera UTC Normalization | Synchronizes 3 independent camera timelines onto unified UTC axis | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-07-02** | Cross-Camera Coverage Gap Flagging | Accurately localizes missing 15s window in secondary camera feed | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-07-03** | Audio Continuity Across Freeze | Flags continuous ambient speech audio during 4-second video freeze | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-07-04** | AVSC SyncNet Lip-Sync Cross-Check | Lip-sync cross-correlation S_sync < 1.0 flags dubbed talking head | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase VISTA-CFI-08: Unified Findings Synthesis & Examiner Review Workbench
+
+**1. Phase ID & Title:** `VISTA-CFI-08: Unified Findings Synthesis & Examiner Review Workbench`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the cross-evidence finding synthesis engine, examiner interactive visualization workbench, and court-admissible reporting. Merge frame, packet, cadence, motion, bitstream, OSD clock, and cross-camera observations into Pydantic v2 `FrameIntegrityFinding` records; render interactive dual-timelines, cadence plots, and similarity heatmaps; export Section 65B/63 BSA certified dossiers.
+**4. Topics & Subtopics:**
+- Cross-Evidence Finding Synthesis: Multi-detector consensus and anti-averaging fusion.
+- Interactive Dual-Timeline Canvas: Presentation order vs OSD clock visualization.
+- Cadence & Duration Diagnostic Curves: Interactive plotting of $\Delta t_i$ and robust baselines.
+- Multi-Scale Similarity Heatmaps: SSIM and pHash matrix visualization for duplicate loops.
+- Adjacent Frame Side-by-Side Comparator: Non-destructive difference masks and overlays.
+- Section 65B IEA / Section 63 BSA Legal Dossier: Cryptographic PDF report with SHA-256 bindings.
+**5. Exact Tasks:**
+1. Implement `TemporalFindingSynthesizer` in `src/ps05/engines/vista/temporal/fusion.py`.
+2. Build FastAPI endpoints for timeline streaming, finding retrieval, and examiner adjudication.
+3. Implement web visualization serializers for dual-timeline canvas, cadence plots, and heatmaps.
+4. Implement Section 65B/63 BSA PDF report builder in `src/ps05/reporting/temporal_dossier.py`.
+5. Connect examiner adjudication notes to the append-only CEIPL Merkle audit log.
+**6. Detailed Execution Workflow:**
+Aggregate Detector Findings -> Apply Fusion Logic -> Emit Pydantic v2 Findings -> Render Workbench UI -> Examiner Adjudicates -> Generate Signed Section 65B/63 BSA Certified PDF Dossier.
+**7. Technologies, Tools & Models:** FastAPI, Pydantic v2, WeasyPrint, Jinja2, Matplotlib, React/TypeScript.
+**8. Prerequisites & Dependencies:** `VISTA-CFI-00` through `VISTA-CFI-07` completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/vista/temporal/fusion.py`
+- `src/ps05/reporting/temporal_dossier.py`
+- `tests/unit/test_cfi_workbench_reporting.py`
+**10. Failure Cases & Risks:**
+- Over-averaging conflicting findings: Mitigated via strict anti-averaging rules preserving dissent.
+**11. Security Considerations:** Examiner dispositions signed with Ed25519; immutable audit log.
+**12. Acceptance Criteria:**
+- Interactive dual-timeline renders $\ge 10,000$ frames with smooth $< 50\text{ ms}$ scrubbing latency.
+- Certified PDF report compiles with bitstream checksums, frame numbers, and legal declarations.
+**13. Definition of Done (DoD):** Synthesis engine, workbench API, and PDF dossier generator committed.
+**14. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CFI-CP-08-01** | Multi-Detector Finding Fusion | Synthesizes 5 detector outputs into unified non-redundant findings | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-08-02** | Dual-Timeline & Cadence Plot API | FastAPI endpoint serves paginated timeline and cadence vectors | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-08-03** | Examiner Adjudication Logging | Examiner confirmation commits signed entry to append-only audit log | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-08-04** | Section 65B/63 BSA Dossier Generation | Generated PDF dossier validates against official Bihar Police template | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase VISTA-CFI-09: Controlled Test Corpus, Benchmarking, Security & Release Validation
+
+**1. Phase ID & Title:** `VISTA-CFI-09: Controlled Test Corpus, Benchmarking, Security & Release Validation`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Execute comprehensive release validation across a controlled 1,000-sample video test corpus. Evaluate event classification metrics (Precision, Recall, F1), temporal localisation ($tIoU$), sequence ordering (Kendall $\tau$), and hard-negative false-alarm rates ($\le 0.05$ false alarms/hour). Verify air-gap offline execution, memory ceilings, and release gate sign-off.
+**4. Topics & Subtopics:**
+- 1,000-Sample Test Corpus: 400 authentic controls, 600 controlled tampering derivatives.
+- Event Classification Metrics: Precision, Recall, F1, confusion matrix per anomaly category.
+- Temporal Localisation Evaluation: Interval $tIoU$ and boundary error $\Delta t_{\text{boundary}}$.
+- Hard-Negative Robustness: VFR jitter, B-frames, PTZ camera panning, static scenes, natural cuts.
+- Security & Air-Gap Audit: Verification of $\le 4\text{ GB}$ RAM cap, zero network egress, license compliance.
+**5. Exact Tasks:**
+1. Implement synthetic tampering generator in `tests/fixtures/temporal_corpus_generator.py`.
+2. Generate 600 controlled derivatives (deletions, duplications, insertions, freezes, reorderings).
+3. Execute automated benchmark evaluation suite across all 1,000 corpus samples.
+4. Compute event-level metrics, $tIoU$, Kendall $\tau$, and false alarm rates per hour.
+5. Execute air-gapped execution verification with network interfaces disabled.
+**6. Detailed Execution Workflow:**
+Generate Test Corpus -> Execute Full CFITSA Pipeline -> Evaluate Classification & tIoU -> Benchmark Hard Negatives -> Run Memory/Security Audit -> Sign Release Gate Manifest.
+**7. Technologies, Tools & Models:** pytest, NumPy, SciPy, synthetic video generator, cgroups harness.
+**8. Prerequisites & Dependencies:** `VISTA-CFI-00` through `VISTA-CFI-08` completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `tests/fixtures/temporal_corpus_generator.py`
+- `tests/integration/test_cfi_benchmark_suite.py`
+- `reports/validation/cfitsa_release_benchmark_report.json`
+**10. Failure Cases & Risks:**
+- False-alarm burst on PTZ camera pans: Mitigated by tuning affine motion compensation thresholds.
+**11. Security Considerations:** 100% offline air-gap validation; memory ceiling enforcement.
+**12. Acceptance Criteria:**
+- Event classification $F1 \ge 0.90$ across missing, duplicate, inserted, freeze, and reorder categories.
+- Mean temporal localisation $tIoU \ge 0.85$ on continuous tampering intervals.
+- False alarm rate $\le 0.05$ alarms per video-hour on authentic hard-negative controls.
+- 100% test pass in air-gapped environment with network disabled.
+**13. Definition of Done (DoD):** Benchmark report signed, test suite passing, release gate approved.
+**14. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **VISTA-CFI-CP-09-01** | 1,000-Sample Test Corpus Generation | Complete corpus generated with bit-exact frame ground-truth maps | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-09-02** | Anomaly Classification & tIoU Benchmark | F1 >= 0.90 and tIoU >= 0.85 across all 5 primary anomaly categories | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-09-03** | Hard-Negative False Alarm Rate Audit | False alarms <= 0.05 / hour on VFR, PTZ, and static camera controls | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CFI-CP-09-04** | Air-Gap & Memory Ceiling Sign-Off | Pipeline executes with zero network calls; RAM <= 4 GB under load | `NOT_STARTED` | Awaits phase activation |
+
+---
 ## 5. Dedicated Image Forensics Engineering Playbook (AIF-A0 through AIF-A15)
 
 The Advanced Image Forensics (AIF) engineering roadmap defines sixteen sequential, research-oriented, and cryptographically grounded implementation phases. Each phase provides an exhaustive engineering specification with verifiable completion criteria and independent checkpoint tables:
@@ -1828,7 +2307,7 @@ Implement a versioned, 150-category hierarchical taxonomy covering forensic and 
 5. Build triage alert router identifying urgent investigative categories (e.g. violent incidents, weapons, forensic trauma) as prioritization flags.
 
 **5. Execution Workflow:**
-Load image exhibit -> Resample to $336	imes 336$ normalized tensor -> Forward pass SigLIP -> Calibrate logits -> Filter by threshold -> Store taxonomy annotations.
+Load image exhibit -> Resample to $336\imes 336$ normalized tensor -> Forward pass SigLIP -> Calibrate logits -> Filter by threshold -> Store taxonomy annotations.
 
 **6. Tools & Technologies:**
 PyTorch 2.3, Hugging Face `transformers` (SigLIP / CLIP), scikit-learn (calibration).
@@ -1875,7 +2354,7 @@ Taxonomy loaded, classifier inference operational, calibration verified, checkpo
 Deploy high-resolution object detection, zero-shot instance segmentation (SAM 2), and occlusion-aware people counting with high-resolution tiling and coordinate transform tracking.
 
 **2. Topics & Subtopics:**
-YOLOv8x / YOLOv10x detectors, SAM 2 instance masks, $1024	imes 1024$ overlapping tiling, NMS boundary suppression, dual-head people counting, crowd density estimation.
+YOLOv8x / YOLOv10x detectors, SAM 2 instance masks, $1024\imes 1024$ overlapping tiling, NMS boundary suppression, dual-head people counting, crowd density estimation.
 
 **3. Modules Covered:**
 `ps05.engines.image.ive.detector`, `ps05.engines.image.ive.segmentor`, `ps05.engines.image.ive.people_count`.
@@ -1883,7 +2362,7 @@ YOLOv8x / YOLOv10x detectors, SAM 2 instance masks, $1024	imes 1024$ overlapping
 **4. Exact Tasks:**
 1. Implement YOLOv8x/v10x object detection pipeline mapped to forensic taxonomy categories.
 2. Implement SAM 2 (Segment Anything 2) promptable instance segmentation to generate precise polygon masks.
-3. Implement high-resolution tiling dispatcher: partition images $> 2048	imes 2048$ into $1024	imes 1024$ tiles with 128px overlap; merge boxes via NMS.
+3. Implement high-resolution tiling dispatcher: partition images $> 2048\imes 2048$ into $1024\imes 1024$ tiles with 128px overlap; merge boxes via NMS.
 4. Record linear affine coordinate mappings in Derived Artifact DAG to guarantee pixel-accurate projection back to original exhibit.
 5. Implement occlusion-aware people counter combining head-box and full-body detectors; resolve overlaps via Hungarian matching.
 
@@ -1906,7 +2385,7 @@ Evaluate on COCO and CrowdHuman benchmark splits; assert mAP@50 $\ge 0.65$; asse
 False positive detections on mannequins and posters; mitigated by 2D frequency texture depth check.
 
 **11. Security Considerations:**
-Enforce worker memory quotas ($\le 8	ext{GB}$ VRAM); prevent GPU Out-Of-Memory errors during high-res tiling.
+Enforce worker memory quotas ($\le 8\text{GB}$ VRAM); prevent GPU Out-Of-Memory errors during high-res tiling.
 
 **12. Acceptance Criteria:**
 Bounding boxes and masks correctly mapped to parent image; people count separated from face count.
@@ -1941,7 +2420,7 @@ RetinaFace / SCRFD face detection, MediaPipe 468-point 3D facial mesh, head pose
 `ps05.engines.image.fpa.detector`, `ps05.engines.image.fpa.landmarks`, `ps05.engines.image.fpa.quality`, `ps05.engines.image.fpa.matcher`.
 
 **4. Exact Tasks:**
-1. Implement RetinaFace / SCRFD detector extracting face bounding boxes across micro-faces ($\ge 20	ext{px}$) and high-res portraits.
+1. Implement RetinaFace / SCRFD detector extracting face bounding boxes across micro-faces ($\ge 20\text{px}$) and high-res portraits.
 2. Implement MediaPipe Face Landmarker extracting 468 3D landmark coordinates.
 3. Implement face quality scoring evaluating Laplacian blur variance, illumination symmetry, and head pose angles.
 4. Enforce strict biometric privacy gating: automated 1:N searching prohibited; 1:1 feature extraction enabled ONLY when authorized `case_token` is present.
@@ -1995,14 +2474,14 @@ FPA module fully integrated; biometric privacy tests passing; checkpoints record
 Provide specialized forensics for questioned documents, official seals, and signatures, including convex hull quadrilateral rectification and multilingual OCR across Indian scripts.
 
 **2. Topics & Subtopics:**
-Canny edge detection, convex hull polygon approximation, $3	imes 3$ perspective transformation matrix, PaddleOCR Indian script models (Hindi, Bhojpuri, Maithili, Bengali, English), seal and stamp region detection.
+Canny edge detection, convex hull polygon approximation, $3\imes 3$ perspective transformation matrix, PaddleOCR Indian script models (Hindi, Bhojpuri, Maithili, Bengali, English), seal and stamp region detection.
 
 **3. Modules Covered:**
 `ps05.engines.image.ive.ocr_engine`, `ps05.engines.image.common.transforms`.
 
 **4. Exact Tasks:**
 1. Implement document boundary localization using Canny edge filtering and convex hull 4-corner polygon approximation.
-2. Compute perspective homography matrix $H_{	ext{persp}} \in \mathbb{R}^{3	imes 3}$ and warp document to normalized rectangular plane.
+2. Compute perspective homography matrix $H_{\text{persp}} \in \mathbb{R}^{3\imes 3}$ and warp document to normalized rectangular plane.
 3. Integrate PaddleOCR text recognition supporting Devanagari (Hindi, Maithili, Bhojpuri), Bengali, and English scripts.
 4. Implement official seal, rubber stamp, and handwritten signature region localization.
 5. Register rectified document as child artifact in Derived Artifact DAG with complete affine transform parameters.
@@ -2064,7 +2543,7 @@ ExifTool parser wrapper, DQT Quantization Tables, 2D FFT magnitude spectrum, per
 1. Implement sandboxed ExifTool wrapper extracting full tag dictionary across EXIF, MakerNotes, IPTC, and XMP blocks.
 2. Extract JPEG Quantization Tables (Luminance and Chrominance) and compare against catalog of 20,000 camera and editor profiles.
 3. Implement 2D Fast Fourier Transform on grayscale luminance; compute centered log-magnitude spectrum to detect periodic resampling spikes.
-4. Analyze $8	imes 8$ block DCT coefficient histograms for truncation and double-quantization periodicity.
+4. Analyze $8\imes 8$ block DCT coefficient histograms for truncation and double-quantization periodicity.
 5. Execute internal timestamp cross-validation: `DateTimeOriginal` vs `DateTimeDigitized` vs `FileModifyDate`.
 
 **5. Execution Workflow:**
@@ -2140,7 +2619,7 @@ AIF-A7 signal analysis operational.
 `src/ps05/engines/image/ire/geom_cv.py`, `tests/unit/test_ire_geom_cv.py`.
 
 **9. Validation Plan:**
-Evaluate RANSAC homography on synthetic rotated/scaled image pairs; assert reprojection RMSE $\le 1.2	ext{px}$.
+Evaluate RANSAC homography on synthetic rotated/scaled image pairs; assert reprojection RMSE $\le 1.2\text{px}$.
 
 **10. Failure Cases & Risks:**
 Treating Canny edges or SIFT matches as proof of tampering; mitigated by framing outputs strictly as geometric properties.
@@ -2184,7 +2663,7 @@ SIFT keypoint DBSCAN clustering, DCT block matching, affine transformation consi
 1. Implement dual-branch Copy-Move Forgery Detection (CMFD): keypoint-based SIFT matching with DBSCAN spatial clustering and block-based DCT matching.
 2. Generate source and destination polygon bounding boxes enclosing cloned and pasted image regions.
 3. Implement Mihcak wavelet denoising filter to extract sensor noise residual $W = I - F(I)$.
-4. Implement Normalized Cross-Correlation (NCC) against camera reference fingerprint $K_{	ext{ref}}$ from 25 flat-field images.
+4. Implement Normalized Cross-Correlation (NCC) against camera reference fingerprint $K_{\text{ref}}$ from 25 flat-field images.
 5. Explicitly document PRNU degradation under social media compression (WhatsApp, Facebook) and state verification limitations.
 
 **5. Execution Workflow:**
@@ -2207,7 +2686,7 @@ ho > 0.15$).
 PRNU false matches on images with shared ISP scene processing; mitigated by high significance threshold ($p < 0.001$).
 
 **11. Security Considerations:**
-Enforce spatial distance thresholds ($r > 30	ext{px}$) to eliminate self-matching keypoint trivial loops.
+Enforce spatial distance thresholds ($r > 30\text{px}$) to eliminate self-matching keypoint trivial loops.
 
 **12. Acceptance Criteria:**
 Cloned polygons localized; PRNU correlation calculated with legal limitations noted.
@@ -2249,7 +2728,7 @@ Multi-branch classifier (ResNet50 spatial head, 2D FFT Fourier head, SigLIP foun
 5. Generate pixel-level floating-point anomaly heatmaps $M(x, y) \in [0, 1]$ and vector polygon contours enclosing edited regions.
 
 **5. Execution Workflow:**
-Input exhibit -> Parallel inference (Spatial + Fourier + SigLIP) -> Calibrate $P(	ext{AI})$ -> Execute TruFor localization -> Binarize mask -> Store heatmap & polygons.
+Input exhibit -> Parallel inference (Spatial + Fourier + SigLIP) -> Calibrate $P(\text{AI})$ -> Execute TruFor localization -> Binarize mask -> Store heatmap & polygons.
 
 **6. Tools & Technologies:**
 PyTorch 2.3, TruFor (`grip-unina/TruFor`), Hugging Face `transformers`, NumPy.
@@ -2270,7 +2749,7 @@ Domain shift on newly released diffusion/flow-matching generators; mitigated by 
 Enforce model checkpoint SHA-256 verification before loading weights into GPU memory.
 
 **12. Acceptance Criteria:**
-Calibrated $P(	ext{AI})$ score produced; inpainting heatmaps generated; disagreement warnings logged.
+Calibrated $P(\text{AI})$ score produced; inpainting heatmaps generated; disagreement warnings logged.
 
 **13. Definition of Done:**
 AI detection and inpainting localization operational; benchmark metrics verified; checkpoints recorded.
@@ -2364,7 +2843,7 @@ Least Significant Bit (LSB) plane randomness, Sample Pair Analysis (SPA), Chi-sq
 **4. Exact Tasks:**
 1. Implement LSB plane visual extraction and bit-distribution entropy calculation.
 2. Implement Sample Pair Analysis (SPA) and Chi-square ($\chi^2$) statistical tests to estimate spatial embedding rates.
-3. Implement Regular-Singular (RS) steganalysis calculating flipping group proportions across $2	imes 2$ pixel blocks.
+3. Implement Regular-Singular (RS) steganalysis calculating flipping group proportions across $2\imes 2$ pixel blocks.
 4. Implement container structural inspection detecting unexpected trailing bytes past standard End-Of-Image markers (JPEG `FF D9`, PNG `IEND`).
 5. Enforce zero-execution policy: quarantined trailing bytes and steganographic payloads are never executed.
 
@@ -2381,7 +2860,7 @@ AIF-A2 safe intake operational.
 `src/ps05/engines/image/aim/steganalysis.py`, `src/ps05/engines/image/aim/file_defense.py`, `tests/unit/test_aim_steganography.py`.
 
 **9. Validation Plan:**
-Evaluate on BOSSbase test set with known Steghide and LSB injected payloads; assert detection rate $\ge 85\%$ for embedding rates $> 0.1	ext{ bpp}$.
+Evaluate on BOSSbase test set with known Steghide and LSB injected payloads; assert detection rate $\ge 85\%$ for embedding rates $> 0.1\text{ bpp}$.
 
 **10. Failure Cases & Risks:**
 Statistical anomalies in high-noise raw photos misinterpreted as steganography; label findings as statistical indicators.
@@ -2585,6 +3064,695 @@ All 16 AIF phases validated; benchmark report compiled; all 64 checkpoints initi
 | **AIF15-CP-02** | 5-Run Deterministic Reproducibility Audit | Identical exhibits produce bit-for-bit identical JSON scores across 5 runs | `NOT_STARTED` | Zero floating-point variance |
 | **AIF15-CP-03** | Air-Gap Network Isolation Verification | Suite executes completely offline with zero outbound network calls | `NOT_STARTED` | Verified via packet monitor |
 | **AIF15-CP-04** | Open-Source License & Documentation Audit | All dependencies licensed permissively; 5 target docs 100% aligned | `NOT_STARTED` | Zero license or naming conflicts |
+---
+
+## 5.B Dedicated Image Manipulation Localisation Engineering Playbook (AIF-IML-00 through AIF-IML-10)
+
+The **Image Manipulation Localisation Framework (IMLF)** establishes an empirical, multi-detector spatial reasoning capability embedded directly within the Advanced Image Forensics (AIF) subsystem. It orchestrates existing specialist engines (IRE, AIM, IVE, FPA) to detect, localize, segment, and corroborate suspicious pixel regions. The workstream defines eleven sequential engineering phases establishing copy-move keypoint/block matching, noise residual and PRNU inconsistency mapping, deep localization baselines (TruFor, CAT-Net v2), inpainting and diffusion patch detection, biometric facial seam profiling, multi-scale high-resolution tiling ($H^{-1}$ inverse mapping), multi-detector evidence fusion DAGs, ground-truth benchmarking (CASIA, NIST, COVERAGE), examiner review workbenches, and court-admissible Section 65B/63 BSA dossiers:
+
+---
+
+### Phase AIF-IML-00: Repository Audit, Localisation Contracts & Baseline Gap Matrix
+
+**1. Phase ID & Title:** `AIF-IML-00: Repository Audit, Localisation Contracts & Baseline Gap Matrix`
+**2. Current Status:** `IMPLEMENTED_AND_VERIFIED`
+**3. Purpose:** Execute comprehensive audit across existing AIF engines (IRE, AIM, IVE, FPA) to map spatial localization capabilities and identify technical gaps. Define the canonical image manipulation taxonomy, the canonical top-left coordinate system, and standard Pydantic v2 data contracts (`IMLRegionCandidate`, `IMLMaskMetadata`, `IMLLocalizationResult`, `IMLCoordinateTransform`). Enforce the fundamental design invariant: image-level detection and pixel-level localization are separate, independently benchmarked tasks.
+**4. Topics & Subtopics:**
+- Repository State & Engine Capability Mapping: Auditing IRE (CMFD, ELA, noise), AIM (TruFor, inpainting), IVE (segmentation), and FPA (RetinaFace landmarks).
+- Canonical 6-Family Taxonomy: Formalizing copy-move, splicing, inpainting, regional AI, face manipulation, and local retouching.
+- Spatial Coordinate Invariants: Enforcing $(0, 0)$ top-left origin, half-open intervals $[y_{\min}, x_{\min}, y_{\max}, x_{\max})$, and normalized floats.
+- Data Contract Specifications: Establishing Pydantic v2 schemas and JSON Schema v1.0 exports.
+- Zero Mask Fabrication Invariant: Prohibiting synthetic mask generation from whole-image scalar classification scores.
+**5. Exact Tasks:**
+1. Inspect existing AIF modules and document which engines output genuine spatial masks versus image-level scalars.
+2. Formalize the canonical manipulation taxonomy across PRD, TRD, PHASES, and README.
+3. Formulate Pydantic v2 schemas under `src/ps05/engines/image/iml/schemas.py`.
+4. Establish the coordinate normalisation rules and homogeneous matrix transformation contracts.
+5. Create baseline architectural verification test suite asserting contract consistency.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    AuditStart["Audit IRE, AIM, IVE, FPA Capabilities"] --> GapAudit["Map Spatial Mask vs Image Scalar Capabilities"]
+    GapAudit --> TaxDef["Formulate 6-Family Manipulation Taxonomy"]
+    TaxDef --> CoordNorm["Establish Canonical Top-Left Coordinate System"]
+    CoordNorm --> SchemaDraft["Draft Pydantic v2 Contracts (IMLRegionCandidate, etc.)"]
+    SchemaDraft --> InvariantLock["Lock Anti-Averaging & Zero-Mask-Fabrication Invariants"]
+    InvariantLock --> BaselineDone["AIF-IML-00 Baseline Locked & Verified"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, Pydantic v2, Git, Markdown, Mermaid.
+**8. Prerequisites & Dependencies:**
+Phase 0 platform architecture and CDVF validation baseline completed; AIF engine specifications accessible.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/image/iml/__init__.py`
+- `src/ps05/engines/image/iml/schemas.py`
+- `tests/unit/aif/test_iml_schemas.py`
+**10. Failure Cases & Risk Mitigations:**
+- Risk of conflating whole-image AI scores with localized masks: Mitigated by mandatory `GLOBAL_MANIPULATION_CANDIDATE` fallback.
+- Inconsistent coordinate conventions between OpenCV ($x, y$) and NumPy ($y, x$): Explicitly enforced as $[y_{\min}, x_{\min}, y_{\max}, x_{\max}]$ bounding boxes with $(x, y)$ polygon vertices.
+**11. Security & Privacy Considerations:**
+Pure architectural specification phase; zero sensitive biometric or case exhibits processed.
+**12. Acceptance Criteria:**
+- 100% agreement between PRD, TRD, and PHASES regarding IMLF boundaries and schemas.
+- Pydantic v2 schemas pass bidirectional JSON round-trip validation with all required fields.
+- Coordinate invariants documented and verified via test assertions.
+**13. Definition of Done:**
+All four canonical architecture documents updated, cross-referenced, verified, and locked.
+**14. Explicit Status:** `IMPLEMENTED_AND_VERIFIED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-IML-CP-00-01** | Engine Spatial Capability Audit & Gap Matrix | Documented matrix separating genuine spatial mask outputs from scalar classification scores | `IMPLEMENTED_AND_VERIFIED` | Completed in master architecture task |
+| **AIF-IML-CP-00-02** | Pydantic v2 Data Contracts Validation | `IMLRegionCandidate` and `IMLLocalizationResult` pass bidirectional JSON serialization tests | `IMPLEMENTED_AND_VERIFIED` | Locked in TRD §12.4 |
+| **AIF-IML-CP-00-03** | Canonical Spatial Coordinate Invariant | Half-open interval $[y_{\min}, x_{\min}, y_{\max}, x_{\max})$ and top-left $(0, 0)$ origin locked in TRD/PRD | `IMPLEMENTED_AND_VERIFIED` | Locked in TRD §10.11.9 |
+| **AIF-IML-CP-00-04** | Zero-Mask-Fabrication Architectural Rule | Explicit invariant prohibiting synthetic heatmaps from scalar whole-image scores locked | `IMPLEMENTED_AND_VERIFIED` | Locked in PRD §13.2 |
+
+---
+
+### Phase AIF-IML-01: Classical Copy-Move Forgery Localisation Engine
+
+**1. Phase ID & Title:** `AIF-IML-01: Classical Copy-Move Forgery Localisation Engine`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the classical keypoint-based and block-based copy-move forgery detection (CMFD) engine under `src/ps05/engines/image/iml/cmfd/`. Extract SIFT and RootSIFT local descriptors, perform $k$-d tree nearest-neighbor distance ratio matching ($r < 0.75$), filter trivial neighbor pairs ($d > 50\text{ px}$), and estimate projective homography transformations $\mathbf{H}$ using robust RANSAC. Implement $8\times 8$ block Discrete Cosine Transform (DCT) matching with lexicographical sorting for dense duplication analysis. Build false-positive controls distinguishing genuine forgeries from authentic repeating textures (facades, foliage, fabrics).
+**4. Topics & Subtopics:**
+- SIFT & RootSIFT Extraction: Difference of Gaussians scale-space keypoint extraction and $L_1$-root normalization.
+- Feature Matching & Ratio Tests: $k$-d tree 2-NN distance ratio checks and spatial distance filtering.
+- Robust Homography Fitting: RANSAC fitting of $\mathbf{x}' \sim \mathbf{H}\mathbf{x}$ with symmetric transfer error ceiling $\epsilon \le 3.0\text{ px}$.
+- Block-Based DCT Matching: Lexicographically sorted DCT quantization vectors for smooth/textureless duplication.
+- Authentic Repeating Texture Controls: Spatial density and Poisson point process analysis to suppress false alarms on building facades.
+**5. Exact Tasks:**
+1. Create `src/ps05/engines/image/iml/cmfd/` package and implement `KeypointCMFDEngine`.
+2. Build `RootSIFTExtractor` applying $L_1$ normalization and square root transformation.
+3. Implement `HomographyRANSACVerifier` calculating inlier counts, reprojection error, and scale/rotation parameters.
+4. Implement `BlockDCTCMFDEngine` partitioning images into $8\times 8$ blocks and matching quantized DCT vectors.
+5. Build `RepeatingTextureClassifier` measuring spatial match entropy to flag natural architectural patterns.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    ImgIn["Image Input (RGB uint8)"] --> KeypointExtract["Extract DoG Keypoints & RootSIFT Descriptors"]
+    KeypointExtract --> NNDR["k-d Tree 2-NN Ratio Matching (r < 0.75)"]
+    NNDR --> DistFilt["Filter Trivial Neighbors (d > 50 px)"]
+    DistFilt --> RANSAC["RANSAC Homography Estimation (H in R^3x3)"]
+    RANSAC --> InlierCheck{"Inliers >= 12 and Error < 3.0 px?"}
+    InlierCheck -- No --> BlockDCT["Fallback: 8x8 Block-DCT Lexicographical Sort"]
+    InlierCheck -- Yes --> TextureCheck{"Spatial Density Matches Periodic Texture?"}
+    TextureCheck -- Yes --> BenignTexture["Flag: REPEATED_TEXTURE_BENIGN (Status: NO_CANDIDATE)"]
+    TextureCheck -- No --> EmitCMFD["Emit Paired Candidate Regions [R_source, R_target]"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, OpenCV (`cv2.SIFT_create`), NumPy, SciPy, Scikit-learn.
+**8. Prerequisites & Dependencies:**
+Phase AIF-IML-00 completed; IRE baseline contracts accessible.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/image/iml/cmfd/__init__.py`
+- `src/ps05/engines/image/iml/cmfd/keypoint.py`
+- `src/ps05/engines/image/iml/cmfd/block_dct.py`
+- `src/ps05/engines/image/iml/cmfd/texture_filter.py`
+- `tests/unit/aif/test_cmfd_engine.py`
+**10. Failure Cases & Risk Mitigations:**
+- Severe rotation ($> 90^\circ$) or scale change ($> 2\times$): Addressed via scale-invariant SIFT keypoint orientations.
+- Degenerate homography (collinear points): RANSAC estimator rejects transformations with $\det(\mathbf{H}) \approx 0$.
+**11. Security & Privacy Considerations:**
+Keypoint matching is bounded to a maximum of 10,000 keypoints per image to prevent CPU exhaustion denial-of-service.
+**12. Acceptance Criteria:**
+- Accurately detects duplicated regions $\ge 32\times 32\text{ px}$ with rotation up to $180^\circ$ and scale $0.5\times$–$2.0\times$.
+- Inlier match count $\ge 12$ with symmetric transfer RMSE $\le 3.0\text{ px}$.
+- False-positive region count $\le 0.05$ on COVERAGE authentic repeating texture control set.
+**13. Definition of Done:**
+Keypoint and block CMFD engines implemented, verified on COVERAGE dataset, 100% unit test pass rate.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-IML-CP-01-01** | SIFT/RootSIFT Homography CMFD Engine | `KeypointCMFDEngine` identifies duplicated regions with $\ge 12$ inliers and homography $\mathbf{H}$ | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-01-02** | Repeating Texture False-Positive Filter | Engine achieves false-alarm rate $\le 0.05$ on building facades and foliage control test set | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-01-03** | Block-DCT Lexicographical Sort Matcher | `BlockDCTCMFDEngine` detects exact and near-identical textureless cloned regions | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-01-04** | Paired Region Polygon & Vector Export | Output serializes exact $[y_{\min}, x_{\min}, y_{\max}, x_{\max}]$ boxes and displacement vectors | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase AIF-IML-02: Image Splicing, Noise Residual & Sensor Inconsistency Engine
+
+**1. Phase ID & Title:** `AIF-IML-02: Image Splicing, Noise Residual & Sensor Inconsistency Engine`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the physical and statistical splicing localization engine under `src/ps05/engines/image/iml/splicing/`. Extract noise residuals $R(x,y) = I(x,y) - D(I)(x,y)$ via 2D stationary wavelet shrinkage and adaptive Wiener filtering. Calculate localized noise variance across $16\times 16$ blocks to detect sensor/ISO mismatches. Implement boundary gradient seam profiling measuring orthogonal edge step-discontinuities and abnormal blending ribbons. Integrate camera PRNU sensor noise correlation to detect regions lacking correlation with reference camera fingerprints.
+**4. Topics & Subtopics:**
+- Wavelet & Median Noise Residual Extraction: Removing visual scene content to isolate high-frequency stochastic sensor noise.
+- Spatial Residual Variance Mapping: $16\times 16$ block variance computation and outlier segmentation relative to robust background median.
+- Boundary Gradient & Blending Analysis: Second-derivative edge profiling across candidate perimeter contours.
+- Sensor PRNU Inconsistency Mapping: Sliding-window normalized cross-correlation (NCC) and PCE thresholding.
+- CFA / Demosaicing Trace Verification: Periodic interpolation artifact analysis across color filter arrays.
+**5. Exact Tasks:**
+1. Create `src/ps05/engines/image/iml/splicing/` package and implement `NoiseResidualEngine`.
+2. Build `WaveletResidualExtractor` applying 2D stationary wavelet decomposition (Daubechies wavelets).
+3. Build `BoundaryDiscontinuityProfiler` calculating directional orthogonal edge gradients along mask perimeters.
+4. Implement `PRNULocalCorrelationEngine` computing spatial NCC against reference sensor fingerprints.
+5. Create automated test verifying splicing detection on Columbia Image Splicing benchmark.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    ImgIn["Image Input (RGB)"] --> NoiseDenoise["Denoising Filter D(I) (Wavelet / Median)"]
+    NoiseDenoise --> ResidualCalc["Calculate Noise Residual R = I - D(I)"]
+    ResidualCalc --> BlockVar["Partition into 16x16 Blocks & Compute Variance sigma^2"]
+    BlockVar --> AnomalyMap["Generate Spatial Noise Anomaly Map A(x,y)"]
+    ImgIn --> BoundaryGrad["Calculate Orthogonal Boundary Gradients nabla I . n"]
+    BoundaryGrad --> SeamScore["Compute Edge Step Discontinuity Score"]
+    ImgIn --> PRNUMatch["PRNU Sliding-Window NCC (if Camera Fingerprint Available)"]
+    AnomalyMap & SeamScore & PRNUMatch --> SpliceCluster["Cluster Anomalies into Candidate Splicing Regions"]
+    SpliceCluster --> EmitSplice["Emit Splicing Regions & Boundary Ribbons"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, PyTorch, PyWavelets (`pywt`), OpenCV, NumPy, SciPy.
+**8. Prerequisites & Dependencies:**
+Phase AIF-IML-00 completed; IRE noise profiling modules accessible.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/image/iml/splicing/__init__.py`
+- `src/ps05/engines/image/iml/splicing/noise_residual.py`
+- `src/ps05/engines/image/iml/splicing/boundary_profiler.py`
+- `src/ps05/engines/image/iml/splicing/prnu_correlator.py`
+- `tests/unit/aif/test_splicing_engine.py`
+**10. Failure Cases & Risk Mitigations:**
+- Image heavily recompressed (JPEG QF $< 50$): Quantization noise overwhelms sensor residuals; engine logs warning and reduces residual weight.
+- Spliced region from same camera model and ISO: Relies on boundary gradient discontinuity and CFA demosaicing phase shifts.
+**11. Security & Privacy Considerations:**
+PRNU reference databases must be protected with SHA-256 integrity checks and access-controlled file permissions.
+**12. Acceptance Criteria:**
+- Achieves pixel-level $\operatorname{IoU} \ge 0.70$ on uncompressed splicing test fixtures (Columbia dataset).
+- Detects boundary step-discontinuities across spliced insertion perimeters with $F_1^{\text{boundary}} \ge 0.65$.
+- Correctly identifies absence of reference camera PRNU in spliced regions ($\text{PCE} < 15$).
+**13. Definition of Done:**
+Noise residual, boundary profiler, and PRNU localization engines implemented, unit tests passed.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-IML-CP-02-01** | Wavelet Noise Residual Variance Engine | `NoiseResidualEngine` generates continuous anomaly maps isolating foreign sensor insertions | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-02-02** | Boundary Gradient Seam Profiler | `BoundaryDiscontinuityProfiler` measures orthogonal step edges along insertion perimeters | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-02-03** | PRNU Sliding-Window Correlation Engine | System maps local PCE values and isolates regions lacking camera sensor correlation | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-02-04** | Columbia Benchmark Verification Suite | Test suite validates splicing localization accuracy exceeding 0.70 IoU on Columbia fixtures | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase AIF-IML-03: Deep-Learning Manipulation Localisation Baselines (TruFor & CAT-Net)
+
+**1. Phase ID & Title:** `AIF-IML-03: Deep-Learning Manipulation Localisation Baselines (TruFor & CAT-Net)`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the deep-learning manipulation localization baseline harnesses under `src/ps05/engines/image/iml/deep/`. Integrate TruFor (learned RGB and Noiseprint++ dual-branch CNN with transformer fusion) to output dense pixel probability masks, global integrity scores, and local reliability maps. Integrate CAT-Net v2 (DCT compression-domain stream) for JPEG-specific splicing and inpainting analysis. Implement strict model checkpoint SHA-256 verification, licensing audits, and input tensor standardization.
+**4. Topics & Subtopics:**
+- TruFor Integration: Dual-stream RGB + noiseprint architecture, cross-modal transformer fusion, and reliability output $R(x,y)$.
+- CAT-Net v2 Integration: Direct JPEG DCT coefficient parsing via `libjpeg` and double-quantization grid shift analysis.
+- Model Weight Verification: Streaming SHA-256 verification before GPU allocation; licensing compatibility checks.
+- Tensor Preprocessing Pipeline: Standardized resizing, normalization, and asymmetric padding maintaining coordinate tracking.
+- Reliability Map Normalization: Mapping raw detector confidence matrices to standardized $[0.0, 1.0]$ reliability scores.
+**5. Exact Tasks:**
+1. Create `src/ps05/engines/image/iml/deep/` package and implement `DeepLocalizationManager`.
+2. Build `TruForInferencePipeline` wrapping the official PyTorch TruFor architecture and loading verified weights.
+3. Build `CATNetInferencePipeline` extracting JPEG DCT coefficient arrays and feeding the compression stream.
+4. Implement `CheckpointVerificationGuard` asserting exact SHA-256 bitstream match before model initialization.
+5. Create automated test verifying that TruFor outputs valid probability masks and reliability maps on test fixtures.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    ImgIn["Image Input Exhibit"] --> CheckpointVerify["Verify Model Weights SHA-256 Hash"]
+    CheckpointVerify -- Mismatch --> AbortLoad["Abort: CheckpointIntegrityError"]
+    CheckpointVerify -- Match --> InputFormat{"Image Format"}
+    InputFormat -- JPEG with DCT --> CATNet["CAT-Net v2 (DCT + RGB Streams)"]
+    InputFormat -- RGB / Non-JPEG --> TruFor["TruFor (RGB + Noiseprint++ Streams)"]
+    CATNet & TruFor --> RawTensors["Extract Probability Mask P(x,y) & Reliability R(x,y)"]
+    RawTensors --> IntegrityScore["Extract Global Image-Level Score S_global"]
+    IntegrityScore --> OutputPack["Package into IMLMaskMetadata & IMLRegionCandidate"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, PyTorch 2.6+, torchvision, timm, OpenCV, NumPy.
+**8. Prerequisites & Dependencies:**
+Phase AIF-IML-00 completed; GPU acceleration environment configured; model checkpoints catalogued.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/image/iml/deep/__init__.py`
+- `src/ps05/engines/image/iml/deep/trufor.py`
+- `src/ps05/engines/image/iml/deep/catnet.py`
+- `src/ps05/engines/image/iml/deep/verifier.py`
+- `tests/unit/aif/test_deep_localization.py`
+**10. Failure Cases & Risk Mitigations:**
+- Model weight tampering: Prevented via mandatory pre-load SHA-256 verification.
+- Non-JPEG images submitted to CAT-Net: Automatically diverted to TruFor with logged format note.
+**11. Security & Privacy Considerations:**
+Checkpoints must be loaded strictly from local read-only storage; zero runtime downloads from HuggingFace or GitHub.
+**12. Acceptance Criteria:**
+- 100% of candidate checkpoints validated for SHA-256 hash match prior to VRAM allocation.
+- TruFor outputs continuous probability map $\hat{M}(x,y) \in [0, 1]$ and reliability map $R(x,y) \in [0, 1]$.
+- CAT-Net v2 extracts DCT quantization tables and detects double-compression grid misalignments.
+**13. Definition of Done:**
+Deep localization pipelines implemented, verified on synthetic test tensors, 100% pytest pass rate.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-IML-CP-03-01** | TruFor Dual-Branch Localisation Pipeline | `TruForInferencePipeline` generates pixel probability masks and reliability maps | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-03-02** | CAT-Net v2 DCT Compression Stream Engine| `CATNetInferencePipeline` processes raw JPEG DCT coefficients and detects grid shifts | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-03-03** | Checkpoint SHA-256 Tamper Gating Guard | System raises `CheckpointIntegrityError` and aborts on single-bit weight mutation | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-03-04** | License Audit & Commercial Deployment Guard | Automated audit confirms open-source research license compliance for deep models | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase AIF-IML-04: Inpainting, Object Removal & AI-Modified Region Localisation
+
+**1. Phase ID & Title:** `AIF-IML-04: Inpainting, Object Removal & AI-Modified Region Localisation`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the inpainting and generative regional AI localization engine under `src/ps05/engines/image/iml/inpainting/`. Detect traditional content-aware fill, clone-stamp reconstruction, and modern latent diffusion inpainting (Stable Diffusion, FLUX). Identify frequency rolloff, high-frequency noise annihilation, and latent diffusion upsampling artifacts inside candidate bounding regions. Enforce the unlocalised manipulation fallback: if global tampering is detected but spatial boundaries cannot be resolved, emit `GLOBAL_MANIPULATION_CANDIDATE` without fabricating a pseudo-mask.
+**4. Topics & Subtopics:**
+- Traditional vs Generative Inpainting Traces: Distinguishing PatchMatch repetition from neural diffusion latent synthesis.
+- High-Frequency Noise Annihilation: Detecting localized loss of sensor noise characteristic of content-aware fill.
+- Diffusion Upsampling & Spectral Rolloff: Identifying circular averaging and Fourier power spectrum dips inside generated patches.
+- Regional AI vs Whole-Image AI Separation: Flagging a local $512\times 512$ edit without classifying the entire photo as synthetic.
+- Unlocalised Manipulation Fallback Guard: Enforcing zero-mask fabrication when spatial resolution fails.
+**5. Exact Tasks:**
+1. Create `src/ps05/engines/image/iml/inpainting/` package and implement `InpaintingLocalisationEngine`.
+2. Build `NoiseFloorAnnihilationDetector` measuring local high-pass residual energy relative to canvas background.
+3. Build `DiffusionPatchDetector` identifying latent upsampling checkerboard patterns and spectral rolloff.
+4. Implement `UnlocalisedFallbackHandler` assigning `GLOBAL_MANIPULATION_CANDIDATE` when pixel masks are diffuse.
+5. Create automated test verifying inpainting detection on DEFACTO inpainting test fixtures.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    ImgIn["Image Input Exhibit"] --> NoiseResidual["Compute High-Pass Noise Energy"]
+    NoiseResidual --> NoiseFloorDrop{"Localized Drop in Noise Energy?"}
+    NoiseFloorDrop -- Yes --> PatchMatchCandidate["Flag Content-Aware Fill / Clone-Stamp Candidate"]
+    ImgIn --> DiffusionHead["Forward Pass: Diffusion Patch Localisation Head"]
+    DiffusionHead --> PatchMask["Extract Candidate Diffusion Mask"]
+    PatchMatchCandidate & PatchMask --> AreaCheck{"Connected Component Area >= 64 px?"}
+    AreaCheck -- No --> GlobalFallback["Check Global AI Score -> Emit GLOBAL_MANIPULATION_CANDIDATE"]
+    AreaCheck -- Yes --> EmitInpaint["Emit IMLRegionCandidate (OBJECT_REMOVAL / AI_GENERATED)"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, PyTorch, OpenCV, SciPy (2D FFT spectral analysis), NumPy.
+**8. Prerequisites & Dependencies:**
+Phases AIF-IML-00 and AIF-IML-03 completed; AIM baseline contracts accessible.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/image/iml/inpainting/__init__.py`
+- `src/ps05/engines/image/iml/inpainting/detector.py`
+- `src/ps05/engines/image/iml/inpainting/spectral.py`
+- `src/ps05/engines/image/iml/inpainting/fallback.py`
+- `tests/unit/aif/test_inpainting_localization.py`
+**10. Failure Cases & Risk Mitigations:**
+- Smooth sky or water naturally lacking high-frequency noise: Mitigated by cross-referencing visual segmentation from IVE (verifying region is not a natural homogeneous sky).
+- Small inpainting ($< 16\text{ px}$): Handled via multi-scale tiled inference to preserve local pixel resolution.
+**11. Security & Privacy Considerations:**
+Inpainting analysis must execute locally without transmitting candidate crops to external generative AI APIs.
+**12. Acceptance Criteria:**
+- Detects content-aware fill and diffusion inpainting $> 64\times 64\text{ px}$ with $\operatorname{IoU} \ge 0.65$ on DEFACTO dataset.
+- Accurately identifies noise-floor annihilation inside erased object boundaries.
+- Emits `GLOBAL_MANIPULATION_CANDIDATE` without fabricating a mask when spatial boundaries are unresolvable.
+**13. Definition of Done:**
+Inpainting detector and unlocalised fallback engine implemented, unit and integration tests passed.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-IML-CP-04-01** | Content-Aware Fill & Inpainting Detector | `InpaintingLocalisationEngine` detects erased objects and achieves $\ge 0.65$ IoU on DEFACTO | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-04-02** | Localized Diffusion Patch Identifier | Engine isolates localized diffusion edits while reporting authentic background substrate | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-04-03** | Noise-Floor Annihilation Energy Profiler| System detects localized drop in sensor noise energy inside cloned/erased bounding perimeters | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-04-04** | Unlocalised Manipulation Fallback Guard | Pipeline safely returns `GLOBAL_MANIPULATION_CANDIDATE` when pixel masks are diffuse | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase AIF-IML-05: Face-Swap, Morphing & Facial Region Localisation
+
+**1. Phase ID & Title:** `AIF-IML-05: Face-Swap, Morphing & Facial Region Localisation`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the facial biometric manipulation localization engine under `src/ps05/engines/image/iml/face/`. Integrate FPA's RetinaFace detector and 68 MediaPipe facial landmarks to extract precise convex hull facial perimeter polygons. Analyze boundary blending seams along the $16\text{ px}$ morphological perimeter ribbon to detect color temperature shifts ($\Delta E_{00}$), edge blur inconsistencies, and Poisson blending artifacts. Generate biometric facial masks separating the manipulated inner facial oval from authentic hair, ears, and collar substrate.
+**4. Topics & Subtopics:**
+- RetinaFace & Landmark Integration: 68-point 2D facial landmark extraction and convex hull perimeter definition.
+- Perimeter Blending Ribbon Analysis: Morphological dilation and erosion ($\mathcal{S}_{\text{seam}} = (\mathcal{P} \oplus K_8) \setminus (\mathcal{P} \ominus K_8)$).
+- Color & Texture Transition Discontinuities: CIEDE2000 color distance and high-frequency gradient mismatch across the seam.
+- Face-Swap vs Facial Retouching Classification: Distinguishing structural identity replacement from benign cosmetic retouching.
+- Profile Pose & Multi-Face Handling: Graceful handling of extreme head poses ($> 45^\circ$) and crowded scenes.
+**5. Exact Tasks:**
+1. Create `src/ps05/engines/image/iml/face/` package and implement `FacialManipulationLocaliser`.
+2. Build `FacialSeamProfiler` calculating morphological ribbon boundaries and CIEDE2000 color transitions.
+3. Build `FacialOvalMaskGenerator` generating pixel-level binary and probabilistic masks for the inner face.
+4. Implement multi-face dispatcher evaluating each detected face independently and tagging specific imposter faces.
+5. Create automated test verifying face-swap detection on FaceForensics++ image test set.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    ImgIn["Image Input Exhibit"] --> FaceDetect["FPA: RetinaFace Face Bounding Box"]
+    FaceDetect -- No Face Found --> ExitNoFace["Emit NO_FACE_DETECTED (Status: NO_CANDIDATE)"]
+    FaceDetect -- Face Detected --> Landmarks["Extract 68 Biometric Landmarks (MediaPipe)"]
+    Landmarks --> ConvexHull["Compute Jawline & Forehead Convex Hull Polygon"]
+    ConvexHull --> RibbonRibbon["Generate 16 px Morphological Seam Ribbon"]
+    RibbonRibbon --> ColorSeam["Compute CIEDE2000 Color Jump & Blur Discontinuity"]
+    ColorSeam --> SeamScore{"Boundary Seam Anomalies Detected?"}
+    SeamScore -- Yes --> EmitFaceSwap["Emit IMLRegionCandidate (FACE_MANIPULATION, Oval Mask)"]
+    SeamScore -- No --> RetouchCheck["Inspect Inner Landmarks for Local Retouching"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, PyTorch, MediaPipe, OpenCV, Scikit-image (`colormath`, `ciede2000`), NumPy.
+**8. Prerequisites & Dependencies:**
+Phase AIF-IML-00 completed; FPA facial analysis modules accessible.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/image/iml/face/__init__.py`
+- `src/ps05/engines/image/iml/face/localiser.py`
+- `src/ps05/engines/image/iml/face/seam_profiler.py`
+- `src/ps05/engines/image/iml/face/ribbon.py`
+- `tests/unit/aif/test_facial_localization.py`
+**10. Failure Cases & Risk Mitigations:**
+- Occluded face (sunglasses, medical mask): Landmark extractor flags occlusion; engine isolates unoccluded regions or emits `LOCALISATION_UNCERTAIN`.
+- Extreme profile pose ($> 60^\circ$ yaw): Trapped by landmark 3D pose estimator and flagged `PROFILE_POSE_UNSUPPORTED`.
+**11. Security & Privacy Considerations:**
+Facial feature vectors are used strictly for spatial boundary segmentation; zero biometric templates or identity embeddings are exported.
+**12. Acceptance Criteria:**
+- Segments swapped facial ovals with $\operatorname{IoU} \ge 0.75$ relative to ground-truth face-swap masks.
+- Successfully separates inner manipulated face from outer authentic hair and collar substrate.
+- Correctly isolates individual manipulated faces in multi-person group photographs.
+**13. Definition of Done:**
+Facial manipulation localizer and seam profiler implemented, verified on FaceForensics++ fixtures, 100% pytest pass rate.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-IML-CP-05-01** | Facial Convex Hull Seam Ribbon Generator | `FacialSeamProfiler` extracts 16 px perimeter ribbons around 68-point landmark contours | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-05-02** | Boundary Color & Gradient Discontinuity | System measures CIEDE2000 color jump and edge blur across facial perimeter seams | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-05-03** | Face-Swap Oval Mask Segmentation Engine | `FacialOvalMaskGenerator` outputs precise facial masks separating swapped face from hair | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-05-04** | Multi-Face Disaggregated Inspection Suite | Engine independently inspects multiple faces in one frame, isolating altered individuals | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase AIF-IML-06: Multi-Scale Tiling & Invertible Coordinate Mapping Engine
+
+**1. Phase ID & Title:** `AIF-IML-06: Multi-Scale Tiling & Invertible Coordinate Mapping Engine`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the high-resolution multi-scale tiling and coordinate reconstruction engine under `src/ps05/engines/image/iml/tiling/`. Support high-resolution crime scene images up to 100 megapixels without downsampling loss or GPU Out-Of-Memory exceptions. Generate regular overlapping grids ($1024\times 1024\text{ px}$ tiles, $256\text{ px}$ / $25\%$ overlap). Track every tile transformation via $3\times 3$ homogeneous affine matrices $\mathbf{H}_k$. Reconstruct global canvas probability maps using 2D distance-weighted linear blending to eliminate border seam artifacts. Project all vector polygons back to original canvas coordinates using inverse matrices $\mathbf{H}_k^{-1}$.
+**4. Topics & Subtopics:**
+- Regular Overlapping Tile Grid Generation: Parametric tile sizing ($1024\text{ px}$) and stride ($768\text{ px}$).
+- Invertible Affine Coordinate Tracking: Forward $\mathbf{H}_k$ and inverse $\mathbf{H}_k^{-1}$ homogeneous transformation matrices.
+- Memory-Safe Sequential/Batch Tile Inference: Generator-based tile dispatching bounding peak VRAM to $\le 8\text{ GB}$.
+- 2D Distance-Weighted Window Blending: Bartlett/Hann 2D window stitching eliminating tile edge discontinuities.
+- Coordinate Inversion & Vector Polygon Projection: Transforming tile-relative contours back to native uncompressed canvas space.
+**5. Exact Tasks:**
+1. Create `src/ps05/engines/image/iml/tiling/` package and implement `MultiScaleTileEngine`.
+2. Build `AffineCoordinateTracker` computing forward $\mathbf{H}$ and inverse $\mathbf{H}^{-1}$ matrices for all geometric crops and tiles.
+3. Build `TileCanvasStitcher` applying 2D distance-weighted blending across tile probability arrays.
+4. Implement `VectorPolygonProjector` mapping tile-space contours $[[x_t, y_t], \dots]$ back to native coordinates $[[X, Y], \dots]$.
+5. Create automated test verifying seamless reconstruction of a 50-megapixel synthetic image with known localized edits.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    HiResImg["High-Res Image (> 2048 px, up to 100 MP)"] --> GridGen["Generate Overlapping Grid (1024 px tile, 25% overlap)"]
+    GridGen --> AffineGen["Compute Affine Matrices H_k & H_k^-1 for Each Tile"]
+    AffineGen --> TileIterator["Sequential Memory-Safe Tile Dispatcher (<= 8 GB VRAM)"]
+    TileIterator --> DeepInference["Forward Pass Tile Models (TruFor / CAT-Net)"]
+    DeepInference --> TileMasks["Extract Per-Tile Probability Maps P_k(x, y)"]
+    TileMasks --> DistanceStitch["2D Distance-Weighted Linear Blending onto Canvas C(X, Y)"]
+    DistanceStitch --> PolygonInversion["Project Detected Contours to Native Canvas via H_k^-1"]
+    PolygonInversion --> FullCanvas["Emit Seamless Full-Resolution Canvas Mask & Native Polygons"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, NumPy, OpenCV, PyTorch.
+**8. Prerequisites & Dependencies:**
+Phases AIF-IML-00 and AIF-IML-03 completed; image decoder pipeline available.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/image/iml/tiling/__init__.py`
+- `src/ps05/engines/image/iml/tiling/grid.py`
+- `src/ps05/engines/image/iml/tiling/stitcher.py`
+- `src/ps05/engines/image/iml/tiling/affine.py`
+- `tests/unit/aif/test_tiling_engine.py`
+**10. Failure Cases & Risk Mitigations:**
+- Edge artifacts along tile borders: Eliminated by 25% window overlap and distance-weighted linear tapering.
+- Asymmetric border tiles: Handled via mirror padding in tile extractor and exact clipping in inverse coordinate projector.
+**11. Security & Privacy Considerations:**
+Tile dispatchers must enforce strict memory garbage collection after each tile pass to prevent worker process OOM termination.
+**12. Acceptance Criteria:**
+- Reconstructs full-resolution masks for images up to 100 MP with zero border seam artifacts.
+- Projected polygon coordinates match native canvas ground truth to within $< 10^{-5}$ relative tolerance.
+- Peak GPU memory consumption remains strictly $\le 8\text{ GB}$ VRAM throughout 50 MP execution.
+**13. Definition of Done:**
+Multi-scale tiling engine, coordinate inverter, and canvas stitcher implemented, verified on 50 MP test fixtures.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-IML-CP-06-01** | Overlapping Tile Grid & Invertible Affine Engine | `MultiScaleTileEngine` generates regular grids and maintains exact inverse matrices $\mathbf{H}_k^{-1}$ | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-06-02** | 2D Distance-Weighted Canvas Stitcher | `TileCanvasStitcher` blends overlapping tile masks with zero visible border seam artifacts | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-06-03** | Vector Polygon Coordinate Inversion Suite | System projects tile-space contours back to native coordinates matching ground truth | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-06-04** | 50 MP Memory Ceiling & VRAM Benchmark | Complete 50 MP multi-scale analysis completes within $\le 8\text{ GB}$ VRAM ceiling | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase AIF-IML-07: Unified Mask Architecture, Multi-Detector Fusion & Lineage Graph
+
+**1. Phase ID & Title:** `AIF-IML-07: Unified Mask Architecture, Multi-Detector Fusion & Lineage Graph`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the multi-detector evidence fusion engine and spatial lineage graph under `src/ps05/engines/image/iml/fusion/`. Integrate spatial outputs across IRE (CMFD, noise, ELA), AIM (TruFor, inpainting), and FPA (face seams). Enforce the anti-averaging invariant: prohibit naive arithmetic score averaging. Implement pairwise Jaccard overlap clustering ($\operatorname{IoU} \ge 0.50$) to merge corroborated candidate regions. Formulate the consensus scoring algorithm weighting independent evidence sources while accounting for shared backbone co-dependencies. Build the 7-state decision gate and explicit conflict logging engine.
+**4. Topics & Subtopics:**
+- Spatial Evidence Dependency DAG: Modeling causal dependencies and shared feature backbones among detectors.
+- Pairwise Spatial IoU Clustering: Grouping overlapping regional detections into unified candidate clusters.
+- Independent Evidence Consensus Scoring: Calculating Bayesian/noisy-OR consensus confidence $C_{\text{fused}}(\mathcal{R})$.
+- Anti-Averaging Invariant Enforcement: Trapping and rejecting naive arithmetic mask averaging attempts.
+- Explicit Conflict Logging: Documenting opposing detector findings (e.g. CMFD duplicate vs authentic sensor noise).
+- 7-State Localisation Decision Gate: Emitting canonical outcome states with automated abstention on low quality.
+**5. Exact Tasks:**
+1. Create `src/ps05/engines/image/iml/fusion/` package and implement `MultiDetectorFusionEngine`.
+2. Build `EvidenceDependencyDAG` tracking upstream model architectures and feature backbones.
+3. Build `SpatialIoUClusterer` grouping candidate regions across detectors using Jaccard threshold $\ge 0.50$.
+4. Build `ConsensusScoringEngine` computing fused confidence and logging co-dependent feature relationships.
+5. Implement `LocalisationDecisionGate` mapping fused findings to the 7 canonical outcome states.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    DetectorOutputs["Outputs from IRE, AIM, FPA (Masks, Boxes, Confidence)"] --> DAGLoad["Load Evidence Dependency DAG"]
+    DAGLoad --> IoUCluster["Calculate Pairwise IoU Across Regions (IoU >= 0.50)"]
+    IoUCluster --> ClusterEval{"Multiple Independent Detectors Corroborate?"}
+    ClusterEval -- Yes --> ConsensusCalc["Compute Fused Consensus Score (Noisy-OR Formulation)"]
+    ClusterEval -- Conflict --> LogConflict["Log Disagreement Entry (Status: LOCALISATION_UNCERTAIN)"]
+    ClusterEval -- Single --> SingleDet["Record Single-Detector Anomaly"]
+    ConsensusCalc & LogConflict & SingleDet --> DecisionGate["Execute 7-State Decision Gate"]
+    DecisionGate --> FinalResult["Compile IMLLocalizationResult with Full Evidence Lineage"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, NetworkX (DAG modeling), Pydantic v2, NumPy, SciPy.
+**8. Prerequisites & Dependencies:**
+Phases AIF-IML-01 through AIF-IML-06 completed; specialist detector outputs available.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/image/iml/fusion/__init__.py`
+- `src/ps05/engines/image/iml/fusion/dag.py`
+- `src/ps05/engines/image/iml/fusion/clusterer.py`
+- `src/ps05/engines/image/iml/fusion/consensus.py`
+- `src/ps05/engines/image/iml/fusion/decision_gate.py`
+- `tests/unit/aif/test_iml_fusion.py`
+**10. Failure Cases & Risk Mitigations:**
+- Co-dependent models inflating confidence: Prevented by DAG dependency check discounting shared backbones.
+- Naive score averaging in UI: Prevented by schema validation requiring structured region records with individual scores.
+**11. Security & Privacy Considerations:**
+Lineage graphs are serialized into immutable JSON records stamped with examiner Ed25519 signatures.
+**12. Acceptance Criteria:**
+- Prohibits unweighted arithmetic mask averaging; raises `ArchitectureViolationError` on violation.
+- Merges overlapping candidate regions ($\operatorname{IoU} \ge 0.50$) while preserving individual detector provenance.
+- Emits all 7 canonical outcome states correctly based on deterministic quality and consensus triggers.
+**13. Definition of Done:**
+Multi-detector fusion engine, lineage DAG, and decision gate implemented, verified on conflict fixtures.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-IML-CP-07-01** | Evidence Dependency DAG & Co-Dependency Engine| `EvidenceDependencyDAG` tracks shared backbones and prevents artificial confidence inflation | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-07-02** | Spatial IoU Clustering & Region Merger | `SpatialIoUClusterer` groups overlapping regions ($\operatorname{IoU} \ge 0.50$) across disparate engines | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-07-03** | Anti-Averaging Invariant Enforcement Guard | System intercepts naive arithmetic mask averaging and asserts structured finding contracts | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-07-04** | 7-State Localisation Decision Gate | Decision gate correctly emits all 7 states, including `INCONCLUSIVE_LOW_QUALITY` | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase AIF-IML-08: Localisation Benchmarking, Ground-Truth Datasets & Metric Harness
+
+**1. Phase ID & Title:** `AIF-IML-08: Localisation Benchmarking, Ground-Truth Datasets & Metric Harness`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the standardized localization benchmarking and mathematical evaluation harness under `src/ps05/engines/image/iml/benchmark/`. Integrate public ground-truth corpora (CASIA v1/v2, Columbia, COVERAGE, NIST16, DEFACTO). Enforce the zero-leakage source-group splitting invariant: parent authentic scenes and all derived manipulations must reside strictly within the same split partition. Implement the complete pixel-level metric suite (Precision, Recall, F1, IoU, Dice, MCC, boundary F1 with $\tau = 2\text{ px}$) with division-by-zero protection. Enforce independent evaluation of image-level classification (ROC-AUC, CDR @ 0.01 FAR) versus pixel-level localization.
+**4. Topics & Subtopics:**
+- Ground-Truth Benchmark Corpora Integration: CASIA, Columbia, COVERAGE, NIST16, DEFACTO dataset cards.
+- Zero-Leakage Grouped Partitioning: GroupKFold partitioning on parent scene hashes ($\mathcal{G} \cap \mathcal{G}' = \emptyset$).
+- Pixel-Level Metric Suite: Mathematical implementations of IoU, Dice, MCC, and boundary F1 with safe division.
+- Image-Level vs Pixel-Level Metric Separation: Independent reporting of whole-frame classification vs spatial segmentation.
+- Cross-Dataset & Generalisation Testing: Measuring transfer performance drop $\Delta\operatorname{IoU}_{\text{cross}}$ across unseen corpora.
+**5. Exact Tasks:**
+1. Create `src/ps05/engines/image/iml/benchmark/` package and implement `LocalisationBenchmarkRunner`.
+2. Build `GroundTruthDatasetCard` loader parsing binary ground-truth masks and parent scene identifiers.
+3. Build `SourceGroupLeakageChecker` asserting zero intersection of parent scene hashes across train/cal/val/test splits.
+4. Implement `PixelMetricCalculator` computing IoU, Dice, MCC, and boundary F1 with zero-denominator safety.
+5. Build `CrossDatasetTransferMatrix` executing zero-shot evaluation across independent benchmark corpora.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    CorpusLoad["Load Benchmark Corpora (CASIA, Columbia, COVERAGE, NIST16)"] --> GroupSplit["Source-Group Partitioning (Parent Scene Key)"]
+    GroupSplit --> LeakCheck{"Assert Disjoint Group Sets (G cap G' == empty)?"}
+    LeakCheck -- Failed --> LeakAbort["Abort: DataLeakageDetectedError"]
+    LeakCheck -- Passed --> BenchRun["Execute Localisation Benchmark Runner"]
+    BenchRun --> ImageMetrics["Compute Image-Level Metrics (ROC-AUC, CDR @ 0.01 FAR)"]
+    BenchRun --> PixelMetrics["Compute Pixel-Level Metrics (IoU, Dice, MCC, Boundary F1)"]
+    ImageMetrics & PixelMetrics --> CrossDataset["Execute Cross-Dataset Transfer Matrix"]
+    CrossDataset --> BenchReport["Compile Standardized Localisation Evaluation Report"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, Scikit-learn, NumPy, Pandas, SciPy, Pydantic v2.
+**8. Prerequisites & Dependencies:**
+Phases AIF-IML-01 through AIF-IML-07 completed; benchmark corpora accessible.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/image/iml/benchmark/__init__.py`
+- `src/ps05/engines/image/iml/benchmark/runner.py`
+- `src/ps05/engines/image/iml/benchmark/metrics.py`
+- `src/ps05/engines/image/iml/benchmark/dataset_card.py`
+- `tests/unit/aif/test_iml_benchmark.py`
+**10. Failure Cases & Risk Mitigations:**
+- Empty ground truth (authentic image) evaluated: Handled via zero-denominator logic ($\operatorname{IoU} = 1.0$ if predicted mask is empty, $0.0$ if false-alarm mask emitted).
+- Benchmark optimum-MCC threshold applied to deployment: Trapped by configuration validator enforcing frozen deployment thresholds calibrated on $D_{\text{cal}}$.
+**11. Security & Privacy Considerations:**
+Benchmark manifests must be stored in RFC 8785 canonical JSON with SHA-256 bitstream checksums.
+**12. Acceptance Criteria:**
+- Pixel IoU, Dice, MCC, and boundary F1 calculate accurately and match theoretical Scikit-learn reference values.
+- Source-group partitioning guarantees zero cross-split scene overlap ($\mathcal{G} \cap \mathcal{G}' = \emptyset$).
+- Image-level detection and pixel-level localization reported on strictly independent evaluation axes.
+**13. Definition of Done:**
+Benchmark runner, metric calculator, and leakage checker implemented, verified on benchmark corpora.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-IML-CP-08-01** | Zero-Leakage Source-Scene Split Engine | Automated test asserts zero cross-split intersection of parent scene hashes | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-08-02** | Pixel-Level Metric Suite with Safe Division | Metrics engine calculates IoU, Dice, MCC, and boundary F1 with zero division crashes | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-08-03** | Independent Image vs Pixel Evaluation Protocol | Benchmark runner outputs separate image-level ROC-AUC and pixel-level mask IoU | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-08-04** | Cross-Dataset Transfer Matrix Runner | Runner measures zero-shot degradation $\Delta\operatorname{IoU}_{\text{cross}}$ across independent corpora | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase AIF-IML-09: Forensic Examiner Review Workbench & Section 65B/63 BSA Dossier
+
+**1. Phase ID & Title:** `AIF-IML-09: Forensic Examiner Review Workbench & Section 65B/63 BSA Dossier`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the examiner-facing interactive review workbench and court-admissible legal dossier generator under `src/ps05/engines/image/iml/ui/` and `src/ps05/engines/image/iml/reporting/`. Build the multi-layer canvas allowing investigators to toggle and blend between original exhibits, probability maps, binary masks, anomaly heatmaps, and reliability masks with dynamic opacity and threshold sliders ($< 50\text{ ms}$ latency). Implement the examiner disposition workflow (`ACCEPTED`, `REJECTED`, `MODIFIED`) with mandatory audit logging. Generate Section 65B IEA / Section 63 BSA certified PDF dossiers containing exhibit SHA-256 hashes, vector polygon overlays, calibrated ECE records, detector provenance, and examiner digital signatures.
+**4. Topics & Subtopics:**
+- Interactive Multi-Layer Canvas: Original exhibit, calibrated probability map, binary mask, anomaly map, and reliability map.
+- Real-Time Opacity & Threshold Sliders: Interactive threshold filtering ($\tau \in [0.0, 1.0], R_{\min} \in [0.0, 1.0]$) rendering vector contours.
+- Synchronized Split-View Panning: Panning and zooming across donor and recipient regions in copy-move examinations.
+- Examiner Disposition Workflow: Marking candidate regions as `ACCEPTED`, `REJECTED`, or `MODIFIED` with mandatory audit rationale.
+- Section 65B/63 BSA Legal Dossier: Compiling certified PDF reports with SHA-256 manifests and vector overlays.
+**5. Exact Tasks:**
+1. Create `src/ps05/engines/image/iml/ui/` and `src/ps05/engines/image/iml/reporting/` packages.
+2. Build `ExaminerCanvasAdapter` generating Archify JSON IR visual layers for multi-layer rendering.
+3. Build `ExaminerDispositionManager` recording reviewer accept/reject decisions with examiner Ed25519 signatures.
+4. Build `LegalDossierCompiler` generating Section 65B/63 BSA certified PDF reports via WeasyPrint / ReportLab.
+5. Create automated test verifying dossier rendering and bitstream integrity against Indian legal standards.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    Result["IMLLocalizationResult & Stored WORM Masks"] --> CanvasAdapter["Generate Archify JSON IR Visual Layers"]
+    CanvasAdapter --> WorkbenchUI["Examiner Workbench (Multi-Layer Canvas & Sliders)"]
+    WorkbenchUI --> ExaminerReview["Examiner Reviews Regions & Adjusts Threshold Sliders"]
+    ExaminerReview --> DispositionTag["Assign Disposition: ACCEPTED / REJECTED / MODIFIED"]
+    DispositionTag --> AuditLog["Append Examiner Rationale to Tamper-Proof Audit Trail"]
+    AuditLog --> DossierGen["Compile Section 65B / 63 BSA Legal Dossier"]
+    DossierGen --> SignDossier["Sign PDF with Examiner Ed25519 Key & TSA Timestamp"]
+    SignDossier --> CourtReady["Court-Ready Certified Evidentiary PDF Export"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, FastAPI, Archify JSON IR, WeasyPrint / ReportLab, Ed25519 cryptography, Jinja2.
+**8. Prerequisites & Dependencies:**
+Phases AIF-IML-01 through AIF-IML-08 completed; platform legal reporting templates available.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/image/iml/ui/__init__.py`
+- `src/ps05/engines/image/iml/ui/adapter.py`
+- `src/ps05/engines/image/iml/reporting/__init__.py`
+- `src/ps05/engines/image/iml/reporting/dossier.py`
+- `tests/unit/aif/test_iml_reporting.py`
+**10. Failure Cases & Risk Mitigations:**
+- Examiner attempts to modify raw mask bitstream: Prevented by POSIX 0400 WORM vault locking; modifications stored as separate derived annotation layers.
+- Missing cryptographic signature: Dossier compiler aborts export if examiner private key is not unlocked.
+**11. Security & Privacy Considerations:**
+Exported dossiers must include explicit legal disclaimers detailing tested manipulation scope and known forensic limitations.
+**12. Acceptance Criteria:**
+- Multi-layer canvas renders in $< 50\text{ ms}$ upon slider threshold adjustment.
+- Examiner dispositions recorded in tamper-proof audit log with cryptographic timestamps.
+- Certified PDF dossier compiles cleanly conforming strictly to Section 63 BSA 2023 evidentiary rules.
+**13. Definition of Done:**
+Workbench adapter, disposition manager, and legal dossier compiler implemented, certified PDF verified.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-IML-CP-09-01** | Multi-Layer Examiner Canvas & Slider Engine | Workbench adapter generates Archify JSON IR layers supporting dynamic threshold sliders | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-09-02** | Examiner Disposition Audit Trail Manager | System records reviewer accept/reject decisions with Ed25519 examiner signatures | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-09-03** | Section 65B/63 BSA Certified Legal Dossier | Dossier compiler generates court-ready PDF with vector overlays and SHA-256 manifests | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-09-04** | Synchronized Split-View Panning Engine | UI adapter supports synchronized panning/zooming across donor and recipient regions | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase AIF-IML-10: Security Hardening, Resource Ceilings & Release Readiness
+
+**1. Phase ID & Title:** `AIF-IML-10: Security Hardening, Resource Ceilings & Release Readiness`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Execute defensive security hardening, resource ceiling enforcement, and full regression release testing across the complete IMLF workstream under `src/ps05/engines/image/iml/security/`. Enforce defensive decompression bomb thresholds (PIL `MAX_IMAGE_PIXELS = 100_000_000`), Linux cgroup quotas ($\le 16\text{ GB}$ RAM, $\le 8\text{ GB}$ VRAM), and 300-second hard worker execution timeouts. Execute continuous regression suites ensuring no metric degradation across frozen golden manifests. Conduct 100% offline air-gap network packet audits. Perform comprehensive licensing compliance audits to verify zero restrictive proprietary dependencies.
+**4. Topics & Subtopics:**
+- Decompression Bomb Defense: Header inspection and 100 MP hard pixel ceilings trapping decompression bombs.
+- Linux cgroups & Resource Quotas: Enforcing host RAM $\le 16\text{ GB}$, GPU VRAM $\le 8\text{ GB}$, and 300s timeouts.
+- Air-Gap Network Isolation Audit: Verifying zero outbound sockets or telemetry during full pipeline execution.
+- 5-Run Deterministic Reproducibility: Validating bit-for-bit identical metric outputs across repeated runs with fixed seeds.
+- Open-Source License Audit: Verifying Apache 2.0, MIT, or permissible research licenses across all models and libraries.
+**5. Exact Tasks:**
+1. Create `src/ps05/engines/image/iml/security/` package and implement `SecuritySandboxManager`.
+2. Build `DecompressionBombGuard` inspecting file headers and trapping recursive compression bombs.
+3. Build `ResourceQuotaEnforcer` monitoring worker RAM/VRAM consumption and terminating runaway jobs.
+4. Build `AirGapNetworkAuditor` capturing network sockets during end-to-end execution to assert offline isolation.
+5. Execute end-to-end master regression test suite across all 11 IMLF phases.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    ImgIn["Incoming Exhibit Bitstream"] --> HeaderAudit["Inspect Headers & Compress Ratio (Limit <= 100 MP)"]
+    HeaderAudit -- Bomb Detected --> TrapBomb["Raise DecompressionBombExceededError & Abort"]
+    HeaderAudit -- Clean --> WorkerSandbox["Launch Sandboxed Worker (cgroups: RAM <= 16 GB, VRAM <= 8 GB)"]
+    WorkerSandbox --> TimeoutTimer["Set 300s Hard SIGKILL Execution Timer"]
+    TimeoutTimer --> RunPipeline["Execute Full End-to-End IMLF Localisation Pipeline"]
+    RunPipeline --> SocketAudit["Network Packet Auditor Asserts Zero Outbound Sockets"]
+    SocketAudit --> ReproduceCheck["5-Run Reproducibility Audit (Assert Bit-Identical Scores)"]
+    ReproduceCheck --> ReleaseReady["Release Gate Passed: Ready for Production Deployment"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, Linux cgroups, pytest, resource, psutil, tcpdump/tshark.
+**8. Prerequisites & Dependencies:**
+Phases AIF-IML-00 through AIF-IML-09 completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/engines/image/iml/security/__init__.py`
+- `src/ps05/engines/image/iml/security/sandbox.py`
+- `src/ps05/engines/image/iml/security/bomb_guard.py`
+- `tests/integration/aif/test_iml_end_to_end.py`
+**10. Failure Cases & Risk Mitigations:**
+- Malformed header crash: Trapped by isolated worker process; failure cleanly reported as `ANALYSIS_FAILED` without taking down parent platform.
+- Floating-point non-determinism: Pinned via `torch.use_deterministic_algorithms(True)` and fixed seeds.
+**11. Security & Privacy Considerations:**
+All temporary buffers and tile caches must be securely wiped using DoD 5220.22-M zeroing upon job completion.
+**12. Acceptance Criteria:**
+- 100% pass rate across all IMLF unit, integration, and security test suites.
+- Traps and rejects images exceeding 100 MP or compression ratios $> 10:1$ before memory allocation.
+- Zero outbound network packets detected during air-gap network isolation audit.
+**13. Definition of Done:**
+All 11 IMLF phases completed, all 44 checkpoints verified, end-to-end regression test suite passing with 100% exit code 0.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF-IML-CP-10-01** | Decompression Bomb & Image Bomb Defense | `DecompressionBombGuard` traps and rejects files $> 100\text{ MP}$ before memory allocation | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-10-02** | Linux cgroup Resource Quotas & Timeout | Sandbox terminates runaway test jobs exceeding 16 GB RAM or 300s execution timeout | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-10-03** | Air-Gapped Network Isolation Audit | Automated packet auditor verifies zero outbound network calls during full execution | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-10-04** | Master Regression Suite & Release Readiness | Complete integration suite passes with 100% exit code 0; zero license conflicts | `NOT_STARTED` | Awaits phase activation |
+
+---
 
 ---
 
@@ -3006,11 +4174,11 @@ The Offline Network Traffic Forensics (ONTF) engineering roadmap defines fourtee
 
 **1. Phase ID & Title:** `ONTF-A0: Network Architecture Baseline & Sandbox Execution Harness`
 **2. Current Status:** `PLANNED`
-**3. Purpose:** Establish the structural, algorithmic, defensive, and legal foundation for the ONTF subsystem. Initialize package hierarchies under `src/ps05/engines/ontf/`, configure typing contracts, establish defensive subprocess sandbox execution harnesses (`safe_exec.py`) for external CLI tools (TShark, Scapy, Zeek), enforce memory allocation ceilings ($\le 4	ext{ GB}$ RAM) and execution timeouts (300s), trap malformed packet bombs, and link ONTF into the shared platform service locator.
+**3. Purpose:** Establish the structural, algorithmic, defensive, and legal foundation for the ONTF subsystem. Initialize package hierarchies under `src/ps05/engines/ontf/`, configure typing contracts, establish defensive subprocess sandbox execution harnesses (`safe_exec.py`) for external CLI tools (TShark, Scapy, Zeek), enforce memory allocation ceilings ($\le 4\text{ GB}$ RAM) and execution timeouts (300s), trap malformed packet bombs, and link ONTF into the shared platform service locator.
 **4. Topics & Subtopics:**
 - Directory & Module Scaffold: Sub-packages (`common`, `ingest`, `parsers`, `schema`, `features`, `attribution`, `threats`, `ml`, `graph`, `correlation`, `ui`, `reporting`).
 - Defensive Subprocess Sandbox: `safe_exec.py` wrapping external binaries with strict 300-second timeouts, resource quotas, and non-root user execution (`uid 10002`).
-- Memory & CPU Quotas: Linux cgroups / process limits capping worker RAM to $\le 4	ext{ GB}$ with disk-backed streaming iterators.
+- Memory & CPU Quotas: Linux cgroups / process limits capping worker RAM to $\le 4\text{ GB}$ with disk-backed streaming iterators.
 - ONTF Domain Exception Hierarchy: Standardized typed error handling (`PCAPFormatError`, `TruncatedCaptureError`, `ZeekExecutionError`, `AttributionAmbiguityError`).
 - Legal Evidentiary Invariants: Section 65B/63 BSA pre-flight integrity rules.
 **5. Exact Tasks:**
@@ -3088,7 +4256,7 @@ Phase ONTF-A0 completed; CEIPL platform key store available.
 **11. Security Considerations:**
 Original capture bitstream is marked immutable immediately; no parser execution before cryptographic hashing completes.
 **12. Acceptance Criteria:**
-- Dual-hash computation completes in $< 3.0	ext{ s}$ per GB of capture data.
+- Dual-hash computation completes in $< 3.0\text{ s}$ per GB of capture data.
 - Vault files are strictly read-only (`0400`); overwrite attempts raise `PermissionError`.
 - Intake manifest accurately records whether a reference hash was matched or newly established.
 **13. Definition of Done:**
@@ -3142,7 +4310,7 @@ TShark runs in read-only sandbox without network privileges; output parsed as un
 **12. Acceptance Criteria:**
 - Accurate identification of PCAP (microsecond/nanosecond) and PCAPNG container formats.
 - Correct flagging of truncated frames with explicit truncation length metadata.
-- Streaming JSON extraction completes with $< 500	ext{ MB}$ memory footprint on 100,000 packet captures.
+- Streaming JSON extraction completes with $< 500\text{ MB}$ memory footprint on 100,000 packet captures.
 **13. Definition of Done:**
 Parsers implemented and passing test suite against crafted malformed and standard capture fixtures.
 **14. Explicit Status:** `PLANNED`
@@ -3265,21 +4433,21 @@ Schema models and normalisation pipeline committed and validated by `test_ontf_s
 
 **1. Phase ID & Title:** `ONTF-A5: Statistical Flow & Inter-Arrival Feature Engineering`
 **2. Current Status:** `PLANNED`
-**3. Purpose:** Implement a reproducible, zero-data-leakage feature-engineering pipeline extracting 80+ bidirectional and unidirectional flow metrics. Calculate packet count forward/backward, byte volume forward/backward, packet size distribution statistics (min, max, mean, stddev, skewness), flow duration, active and idle duration, TCP flag distributions (SYN, ACK, FIN, RST, PSH, URG), inter-arrival time (IAT) distribution, and coefficient of variation ($CV_{	ext{IAT}} = \sigma_{	ext{IAT}} / \mu_{	ext{IAT}}$) for beaconing/jitter analysis. Enforce strict numerical determinism across re-runs.
+**3. Purpose:** Implement a reproducible, zero-data-leakage feature-engineering pipeline extracting 80+ bidirectional and unidirectional flow metrics. Calculate packet count forward/backward, byte volume forward/backward, packet size distribution statistics (min, max, mean, stddev, skewness), flow duration, active and idle duration, TCP flag distributions (SYN, ACK, FIN, RST, PSH, URG), inter-arrival time (IAT) distribution, and coefficient of variation ($CV_{\text{IAT}} = \sigma_{\text{IAT}} / \mu_{\text{IAT}}$) for beaconing/jitter analysis. Enforce strict numerical determinism across re-runs.
 **4. Topics & Subtopics:**
 - 80+ Bidirectional Flow Metrics: Standard flow statistics compatible with CICFlowMeter definitions.
 - Inter-Arrival Time (IAT) Statistics: Forward and backward IAT mean, stddev, min, max, and jitter.
-- Beaconing Metric Formulation: Coefficient of variation ($CV_{	ext{IAT}}$) measuring periodicity ($< 0.15$ indicates regular heartbeat).
+- Beaconing Metric Formulation: Coefficient of variation ($CV_{\text{IAT}}$) measuring periodicity ($< 0.15$ indicates regular heartbeat).
 - TCP Flag Cadence: SYN-to-ACK ratios, FIN/RST termination patterns, and abnormal flag occurrences.
 - Zero-Leakage Contract: Feature generation calculated strictly on causal packet arrival windows.
 **5. Exact Tasks:**
 1. Implement bidirectional flow packet aggregator tracking forward and backward packet streams (`flow_aggregator.py`).
 2. Build statistical feature extractor calculating packet length and duration moments (`flow_stats.py`).
-3. Build inter-arrival time and jitter analyzer computing $CV_{	ext{IAT}}$ and periodicity metrics (`iat_analyzer.py`).
+3. Build inter-arrival time and jitter analyzer computing $CV_{\text{IAT}}$ and periodicity metrics (`iat_analyzer.py`).
 4. Implement TCP flag counter and cadence evaluator (`flag_analyzer.py`).
 5. Write unit tests asserting numerical determinism against synthetic reference packet sequences.
 **6. Detailed Execution Workflow:**
-Normalized Flow Records Ingested -> Forward/Backward Streams Separated -> Duration & Volume Moments Calculated -> IAT Jitter & $CV_{	ext{IAT}}$ Extracted -> Flag Cadence Formulated -> Feature Vector Output.
+Normalized Flow Records Ingested -> Forward/Backward Streams Separated -> Duration & Volume Moments Calculated -> IAT Jitter & $CV_{\text{IAT}}$ Extracted -> Flag Cadence Formulated -> Feature Vector Output.
 **7. Technologies, Tools & Models:**
 Python 3.12, NumPy, SciPy, Pydantic v2.
 **8. Prerequisites & Dependencies:**
@@ -3291,14 +4459,14 @@ Phase ONTF-A4 completed.
 - `src/ps05/engines/ontf/features/flag_analyzer.py`
 - `tests/unit/test_ontf_features.py`
 **10. Failure Cases & Risks:**
-- Division by zero on single-packet flows: Handled with safe defaults ($CV_{	ext{IAT}} = 0.0$, duration $= 0.0$).
+- Division by zero on single-packet flows: Handled with safe defaults ($CV_{\text{IAT}} = 0.0$, duration $= 0.0$).
 - Floating-point discrepancies across OS platforms: Handled by rounding to 6 decimal places.
 **11. Security Considerations:**
 Features computed entirely in memory without writing intermediate unencrypted data to temporary files.
 **12. Acceptance Criteria:**
 - Exact numerical parity with verified mathematical reference formulas on test packet vectors.
-- $CV_{	ext{IAT}}$ calculation correctly identifies simulated periodic beacons with $CV < 0.10$.
-- Feature extractor executes at $\ge 50,000	ext{ packets/sec}$ on standard CPU.
+- $CV_{\text{IAT}}$ calculation correctly identifies simulated periodic beacons with $CV < 0.10$.
+- Feature extractor executes at $\ge 50,000\text{ packets/sec}$ on standard CPU.
 **13. Definition of Done:**
 Feature engineering modules implemented and passing all parity and performance tests.
 **14. Explicit Status:** `PLANNED`
@@ -3307,7 +4475,7 @@ Feature engineering modules implemented and passing all parity and performance t
 | Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
 | :--- | :--- | :--- | :--- | :--- |
 | **ONTF-CP-05-01** | 80+ Flow Feature Parity | Matches mathematical reference formulas on synthetic fixtures | `NOT_STARTED` | Awaits phase activation |
-| **ONTF-CP-05-02** | IAT Jitter & Periodicity ($CV_{	ext{IAT}}$) | Detects periodic heartbeats with $CV_{	ext{IAT}} < 0.15$ accurately | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-05-02** | IAT Jitter & Periodicity ($CV_{\text{IAT}}$) | Detects periodic heartbeats with $CV_{\text{IAT}} < 0.15$ accurately | `NOT_STARTED` | Awaits phase activation |
 | **ONTF-CP-05-03** | TCP Flag Cadence Accuracy | Correct counts of SYN, ACK, FIN, RST, PSH, URG flags per flow | `NOT_STARTED` | Awaits phase activation |
 | **ONTF-CP-05-04** | Deterministic Reproducibility | 5 identical re-runs produce identical feature vectors to 6 decimals | `NOT_STARTED` | Awaits phase activation |
 
@@ -3370,17 +4538,17 @@ Attribution engine and mode routers implemented, passing all test cases with ver
 
 **1. Phase ID & Title:** `ONTF-A7: Deterministic Threat & Port Scan Detection Engine`
 **2. Current Status:** `PLANNED`
-**3. Purpose:** Implement explainable, rule-based deterministic threat detection modules. Detect horizontal port scans (single destination port probed across $\ge 15$ destination IPs in 60s), vertical port scans ($\ge 25$ distinct destination ports on a single host in 60s), stealth scans (SYN-only, FIN, XMAS, NULL), suspicious DNS activity (Iodine/DNScat2 TXT tunneling, high Shannon entropy domain names $> 3.8$ bits/char indicating DGA, NXDOMAIN storms $> 50$ failures/min), periodic C2 beaconing ($CV_{	ext{IAT}} < 0.15$ with $\ge 20$ recurring flows), and protocol port/flag anomalies.
+**3. Purpose:** Implement explainable, rule-based deterministic threat detection modules. Detect horizontal port scans (single destination port probed across $\ge 15$ destination IPs in 60s), vertical port scans ($\ge 25$ distinct destination ports on a single host in 60s), stealth scans (SYN-only, FIN, XMAS, NULL), suspicious DNS activity (Iodine/DNScat2 TXT tunneling, high Shannon entropy domain names $> 3.8$ bits/char indicating DGA, NXDOMAIN storms $> 50$ failures/min), periodic C2 beaconing ($CV_{\text{IAT}} < 0.15$ with $\ge 20$ recurring flows), and protocol port/flag anomalies.
 **4. Topics & Subtopics:**
 - Network Reconnaissance Detection: Horizontal, vertical, and stealth TCP/UDP port scans.
 - DNS Anomaly Analysis: Shannon entropy calculation, TXT record size thresholding, and NXDOMAIN tracking.
-- Periodic C2 Beaconing Detector: Clustering recurring flows by destination IP/port/SNI and evaluating $CV_{	ext{IAT}}$.
+- Periodic C2 Beaconing Detector: Clustering recurring flows by destination IP/port/SNI and evaluating $CV_{\text{IAT}}$.
 - Protocol & Flag Anomalies: SYN+FIN combinations, NULL scans, and non-standard port communications (e.g. HTTP on port 4444).
 - Rule Explainability: Emitting exact triggering criteria, threshold values, and source flow identifiers.
 **5. Exact Tasks:**
 1. Implement port scan detector identifying horizontal, vertical, and stealth scan patterns (`scan_detector.py`).
 2. Implement DNS threat analyzer detecting DGA entropy, tunneling payloads, and NXDOMAIN bursts (`dns_threats.py`).
-3. Implement C2 beaconing detector evaluating $CV_{	ext{IAT}}$ and recurring flow periodicity (`beacon_detector.py`).
+3. Implement C2 beaconing detector evaluating $CV_{\text{IAT}}$ and recurring flow periodicity (`beacon_detector.py`).
 4. Implement protocol anomaly checker flagging abnormal TCP flag combinations and port mismatches (`protocol_anomalies.py`).
 5. Write unit tests evaluating detection accuracy across curated attack PCAP captures.
 **6. Detailed Execution Workflow:**
@@ -3403,7 +4571,7 @@ Deterministic rules produce explainable outputs without opaque black-box scoring
 **12. Acceptance Criteria:**
 - Port scan detector achieves $\ge 98\%$ recall on curated Nmap scan PCAP fixtures.
 - DNS tunnel detector identifies simulated Iodine/DNScat2 queries with $\ge 95\%$ precision.
-- Beaconing detector identifies periodic C2 heartbeats with $CV_{	ext{IAT}} < 0.15$.
+- Beaconing detector identifies periodic C2 heartbeats with $CV_{\text{IAT}} < 0.15$.
 **13. Definition of Done:**
 Threat detection modules committed and validated against benchmark test captures.
 **14. Explicit Status:** `PLANNED`
@@ -3687,7 +4855,7 @@ Reporting engine implemented and passing all dossier compilation and cryptograph
 - Benchmark Capture Corpus: Curated dataset of genuine and synthetic attack PCAPs with ground truth.
 - Bitstream Immutability Invariant: Verifying source PCAP bytes remain identical before and after analysis.
 - 5-Run Deterministic Reproducibility: Asserting identical numerical scores and findings across 5 runs.
-- Sandbox Quota Verification: Validating memory ceiling ($\le 4	ext{ GB}$) and 300s timeout enforcement under load.
+- Sandbox Quota Verification: Validating memory ceiling ($\le 4\text{ GB}$) and 300s timeout enforcement under load.
 - Air-Gapped Network Isolation: Verifying zero outbound network sockets during analysis.
 **5. Exact Tasks:**
 1. Assemble curated benchmark capture corpus under `tests/fixtures/network/` (`corpus_manifest.json`).
@@ -4548,6 +5716,19 @@ gantt
     section Image Forensics Subsystem (AIF)
     Phase 4: Image Forensics Subsystem (IFS):         p4, 2026-10-24, 2026-10-28
 
+    section AIF-IML Image Localisation Workstream
+    AIF-IML-00: Audit & Localisation Contracts:done,   ia0, 2026-10-21, 2026-10-22
+    AIF-IML-01: Classical Copy-Move CMFD     :         ia1, 2026-10-22, 2026-10-25
+    AIF-IML-02: Splicing, Noise & PRNU Maps  :         ia2, 2026-10-25, 2026-10-28
+    AIF-IML-03: Deep Localisation Baselines  :         ia3, 2026-10-28, 2026-10-31
+    AIF-IML-04: Inpainting & Regional AI     :         ia4, 2026-10-31, 2026-11-03
+    AIF-IML-05: Face-Swap & Biometric Seams  :         ia5, 2026-11-03, 2026-11-06
+    AIF-IML-06: Multi-Scale Tiling & Inversion:        ia6, 2026-11-06, 2026-11-08
+    AIF-IML-07: Mask Fusion DAG & Disagreement:        ia7, 2026-11-08, 2026-11-10
+    AIF-IML-08: Benchmark Datasets & Metrics :         ia8, 2026-11-10, 2026-11-12
+    AIF-IML-09: Examiner Workbench & BSA PDF :         ia9, 2026-11-12, 2026-11-13
+    AIF-IML-10: Security Ceilings & Release  :         ia10, 2026-11-13, 2026-11-14
+
     section AIF-GEO Geospatial Workstream
     AIF-GEO-00: Audit & Architecture Baseline:        ga0, 2026-10-21, 2026-10-23
     AIF-GEO-01: GPS Extraction & Validation :        ga1, 2026-10-23, 2026-10-25
@@ -4626,3 +5807,64 @@ The following master traceability matrix maps every canonical Cross-Modal Deepfa
 | **CDVF-18** | 12-Gate Scoped Model Approval Workflow | PRD §12.17, §12.19 | TRD §11.B.15, §12.3 | **CDVF-A10** | `CDVF-CP-10-02` | 12 mandatory approval gates transitioning model to `VALIDATED_FOR_DEFINED_SCOPE` or `REJECTED`. |
 | **CDVF-19** | Standard 24-Item WORM Evaluation Bundle | PRD §12.18, §12.19 | TRD §11.B.16, §11.B.18 | **CDVF-A11** | `CDVF-CP-11-02` | Complete compilation of 24 evaluation artifacts with root SHA-256 manifest locked into POSIX 0400 WORM vault. |
 | **CDVF-20** | Continuous Regression Testing & BSA Calibration Dossier | PRD §12.16, §12.20 | TRD §11.B.16, §11.B.20 | **CDVF-A11** | `CDVF-CP-11-01` | Golden manifest regression suite ($\Delta\operatorname{AUC} \ge -0.010$) and Section 65B/63 BSA certified calibration dossier. |
+---
+
+## 12. IMLF Master Requirement Traceability Matrix (IML-01 through IML-22)
+
+The following master traceability matrix maps every canonical Image Manipulation Localisation Framework requirement (`IML-01` through `IML-22`) to its authoritative specification in `PRD.md`, its technical contract in `TRD.md`, its designated implementation phase in `PHASES.md`, its primary verification checkpoint, and the mandatory empirical evidence required for approval:
+
+| Requirement ID | Functional Requirement Summary | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Verification Evidence |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **IML-01** | Unified Localisation Architecture & Router | PRD §13.2, §13.13 | TRD §10.11.1, §10.11.15 | **AIF-IML-00** | `AIF-IML-CP-00-01` | Architecture baseline, engine routing contracts, zero memory leaks. |
+| **IML-02** | Copy-Move Forgery Localisation | PRD §13.3, §13.13 | TRD §10.11.4 | **AIF-IML-01** | `AIF-IML-CP-01-01` | SIFT/RANSAC homography, inlier count $\ge 12$, COVERAGE benchmark. |
+| **IML-03** | Image Splicing & Compositing Localisation | PRD §13.3, §13.13 | TRD §10.11.5 | **AIF-IML-02** | `AIF-IML-CP-02-01` | Noise residual variance map, boundary gradient seams, Columbia dataset. |
+| **IML-04** | Object Removal & Inpainting Localisation | PRD §13.3, §13.13 | TRD §10.11.6 | **AIF-IML-04** | `AIF-IML-CP-04-01` | Deep inpainting heads, spectral rolloff, DEFACTO inpainting test set. |
+| **IML-05** | AI-Generated Regional Manipulation Localisation | PRD §13.3, §13.13 | TRD §10.11.6 | **AIF-IML-04** | `AIF-IML-CP-04-02` | TruFor RGB+noiseprint, unlocalised manipulation fallback. |
+| **IML-06** | Face & Portrait Manipulation Localisation | PRD §13.3, §13.13 | TRD §10.11.7 | **AIF-IML-05** | `AIF-IML-CP-05-01` | RetinaFace 68 landmarks, facial perimeter seam ribbon analysis. |
+| **IML-07** | Compression & Resampling Inconsistency | PRD §13.3, §13.13 | TRD §10.11.5, §10.11.6 | **AIF-IML-02** | `AIF-IML-CP-02-02` | ELA error map, DCT $8\times 8$ grid shift, CAT-Net compression stream. |
+| **IML-08** | Sensor Noise & PRNU Inconsistency | PRD §13.3, §13.13 | TRD §10.11.5 | **AIF-IML-02** | `AIF-IML-CP-02-03` | Camera PRNU correlation, Peak-to-Correlation Energy $\text{PCE} < 15$. |
+| **IML-09** | Multi-Scale Tiling & Inverse Mapping | PRD §13.6, §13.13 | TRD §10.11.8 | **AIF-IML-06** | `AIF-IML-CP-06-01` | $1024\text{ px}$ tiles, 25% overlap, inverse affine matrix $H^{-1}$ mapping. |
+| **IML-10** | Unified Mask, Polygon & Region Contract | PRD §13.5, §13.13 | TRD §10.11.10, §12.4 | **AIF-IML-00** | `AIF-IML-CP-00-02` | Pydantic v2 schemas pass bidirectional JSON round-trip validation. |
+| **IML-11** | Canonical Coordinate Normalisation | PRD §13.6, §13.13 | TRD §10.11.9 | **AIF-IML-00** | `AIF-IML-CP-00-03` | Top-left $(0,0)$, half-open intervals, normalized floats $[0, 1]$. |
+| **IML-12** | Confidence, Reliability & Uncertainty | PRD §13.7, §13.13 | TRD §10.11.1, §10.11.10 | **AIF-IML-07** | `AIF-IML-CP-07-01` | Distinct probability $P$, anomaly $A$, and reliability $R$ maps. |
+| **IML-13** | Multi-Detector Evidence Fusion & Conflict Handling | PRD §13.8, §13.13 | TRD §10.11.11 | **AIF-IML-07** | `AIF-IML-CP-07-02` | Pairwise IoU clustering, anti-averaging invariant, conflict logs. |
+| **IML-14** | Forensic Examiner Review Workbench | PRD §13.12, §13.13 | TRD §10.11.1 | **AIF-IML-09** | `AIF-IML-CP-09-01` | Multi-layer canvas, threshold sliders, examiner disposition tags. |
+| **IML-15** | Ground-Truth Dataset Management & Provenance | PRD §13.10, §13.13 | TRD §10.11.13 | **AIF-IML-08** | `AIF-IML-CP-08-01` | Zero-leakage source-scene partitioning ($\mathcal{G} \cap \mathcal{G}' = \emptyset$). |
+| **IML-16** | Pixel-Level Localisation Evaluation | PRD §13.13 | TRD §10.11.12 | **AIF-IML-08** | `AIF-IML-CP-08-02` | Pixel IoU, Dice, MCC, boundary F1 with zero-denominator safety. |
+| **IML-17** | Independent Image-Level Detection Evaluation | PRD §13.2, §13.13 | TRD §10.11.13 | **AIF-IML-08** | `AIF-IML-CP-08-03` | Image ROC-AUC and CDR @ 0.01 FAR evaluated independently from IoU. |
+| **IML-18** | Cross-Dataset & Unseen-Manipulation Benchmarking | PRD §13.10, §13.13 | TRD §10.11.13 | **AIF-IML-08** | `AIF-IML-CP-08-04` | Cross-corpus transfer $\Delta\operatorname{IoU}$, unseen tool degradation. |
+| **IML-19** | Robustness Sweeps & Repeated-Texture Controls | PRD §13.11, §13.13 | TRD §10.11.4, §10.11.14 | **AIF-IML-01** | `AIF-IML-CP-01-02` | 14-condition degradation sweep; false alarms $\le 0.05$ on textures. |
+| **IML-20** | First-Class Abstention & Inconclusive Outcomes | PRD §13.9, §13.13 | TRD §10.11.1 | **AIF-IML-07** | `AIF-IML-CP-07-03` | Emits `INCONCLUSIVE_LOW_QUALITY` on SNR $< 6\text{ dB}$, size $< 256\text{ px}$. |
+| **IML-21** | Evidentiary Lineage & Section 65B/63 BSA Traceability | PRD §13.4, §13.13 | TRD §10.11.1, §10.11.10 | **AIF-IML-09** | `AIF-IML-CP-09-02` | Section 63 BSA certified PDF with SHA-256 and vector overlays. |
+| **IML-22** | Security Safeguards, Resource Ceilings & Reproducibility | PRD §13.14, §13.13 | TRD §10.11.15 | **AIF-IML-10** | `AIF-IML-CP-10-01` | 100 MP decompression bomb defense, 16 GB RAM ceiling, 300s timeout. |
+
+---
+
+## 13. CFITSA Master Requirement Traceability Matrix (CFI-01 through CFI-22)
+
+Every CCTV Frame Integrity and Temporal Sequence Forensics requirement (`CFI-01` through `CFI-22`) is mapped to its PRD specification, TRD technical section, implementing engineering phase, verification checkpoint, expected evidence, and execution status:
+
+| Req ID | Requirement Title | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Validation Evidence | Status | Dependencies / Blockers |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **CFI-01** | Frame & Packet Identity Tracking | PRD §14.3, §14.12 | TRD §11.12.2 | **VISTA-CFI-01** | `VISTA-CFI-CP-01-01` | Unit test verifies 5 independent coordinate indices across 1,000 frames | `PLANNED` | `VISTA-CFI-00` |
+| **CFI-02** | Timestamp & Timebase Inspection | PRD §14.3, §14.12 | TRD §11.12.4 | **VISTA-CFI-01** | `VISTA-CFI-CP-01-02` | Zero rounding error in rational timebase math ($t_i = PTS_i \imes TB$) | `PLANNED` | `VISTA-CFI-00` |
+| **CFI-03** | Variable-Frame-Rate Cadence Analysis | PRD §14.7, §14.12 | TRD §11.12.5 | **VISTA-CFI-02** | `VISTA-CFI-CP-02-04` | Suppresses false alarms on authentic VFR streams ($z_i \le 3.5\imes MAD$) | `PLANNED` | `VISTA-CFI-01` |
+| **CFI-04** | Missing-Frame Candidate Detection | PRD §14.4.1, §14.12 | TRD §11.12.6 | **VISTA-CFI-04** | `VISTA-CFI-CP-04-01` | Detects 1, 5, 30-frame deletions; differentiates Mode A–D evidence | `PLANNED` | `VISTA-CFI-02` |
+| **CFI-05** | Duplicate-Frame Detection | PRD §14.4.2, §14.12 | TRD §11.12.7 | **VISTA-CFI-03** | `VISTA-CFI-CP-03-01` | BLAKE3 exact hash and pHash Hamming distance detect cloned loops | `PLANNED` | `VISTA-CFI-02` |
+| **CFI-06** | Inserted-Frame Candidate Detection | PRD §14.4.3, §14.12 | TRD §11.12.8 | **VISTA-CFI-04** | `VISTA-CFI-CP-04-04` | Optical warping residual $R_i$ flags AI-interpolated and spliced frames | `PLANNED` | `VISTA-CFI-03` |
+| **CFI-07** | Frozen-Sequence Detection | PRD §14.4.4, §14.12 | TRD §11.12.9 | **VISTA-CFI-03** | `VISTA-CFI-CP-03-04` | Detects freeze $\ge 1.0\text{s}$; audits audio power and OSD clock advance | `PLANNED` | `VISTA-CFI-02` |
+| **CFI-08** | Reordered-Frame Candidate Detection | PRD §14.4.5, §14.12 | TRD §11.12.10 | **VISTA-CFI-05** | `VISTA-CFI-CP-05-01` | Presentation order PTS monotonicity and ByteTrack trajectory kinematics | `PLANNED` | `VISTA-CFI-04` |
+| **CFI-09** | Motion-Continuity Analysis | PRD §14.7, §14.12 | TRD §11.12.11 | **VISTA-CFI-05** | `VISTA-CFI-CP-05-02` | Dense optical flow warping residual and trajectory momentum continuity | `PLANNED` | `VISTA-CFI-04` |
+| **CFI-10** | Codec, GOP & Bitstream Correlation | PRD §14.8, §14.12 | TRD §11.12.12 | **VISTA-CFI-06** | `VISTA-CFI-CP-06-01` | Flags truncated GOP, non-cadence I-frames, and macroblock QP pulsing | `PLANNED` | `VISTA-CFI-05` |
+| **CFI-11** | CCTV Clock & OCR Timestamp Correlation | PRD §14.9, §14.12 | TRD §11.12.13 | **VISTA-CFI-06** | `VISTA-CFI-CP-06-03` | PaddleOCR drift regression $\delta(t)$ detects $\ge 1.0\text{s}$ OSD step jumps | `PLANNED` | `VISTA-CFI-05` |
+| **CFI-12** | Recorder & Export Evidence Integration | PRD §14.9, §14.12 | TRD §11.12.12 | **VISTA-CFI-06** | `VISTA-CFI-CP-06-04` | Parses companion DVR export XML/JSON logs without DVR login | `PLANNED` | `VISTA-CFI-05` |
+| **CFI-13** | Cross-Camera Timeline Comparison | PRD §14.9, §14.12 | TRD §11.12.14 | **VISTA-CFI-07** | `VISTA-CFI-CP-07-02` | Aligns multi-camera feeds onto UTC; flags 15s secondary coverage gap | `PLANNED` | `VISTA-CFI-06` |
+| **CFI-14** | Audio-Video Timeline Correlation | PRD §14.10, §14.12 | TRD §11.12.15 | **VISTA-CFI-07** | `VISTA-CFI-CP-07-03` | AFB audio power and AVSC SyncNet lip-sync verify freeze continuity | `PLANNED` | `VISTA-CFI-06` |
+| **CFI-15** | Frame-Range Localisation & Reporting | PRD §14.6, §14.12 | TRD §11.12.16 | **VISTA-CFI-08** | `VISTA-CFI-CP-08-01` | Serializes findings into Pydantic v2 `FrameIntegrityFinding` schemas | `PLANNED` | `VISTA-CFI-07` |
+| **CFI-16** | Examiner Visualisation & Review | PRD §14.11, §14.12 | TRD §11.12.18 | **VISTA-CFI-08** | `VISTA-CFI-CP-08-02` | Interactive dual timeline, cadence plot, and similarity heatmap canvas | `PLANNED` | `VISTA-CFI-07` |
+| **CFI-17** | Ground-Truth Corpus & Annotation | PRD §14.12 | TRD §11.12.19 | **VISTA-CFI-09** | `VISTA-CFI-CP-09-01` | Controlled 1,000-sample corpus with bit-exact manipulation maps | `PLANNED` | `VISTA-CFI-08` |
+| **CFI-18** | Event & Temporal Localisation Metrics | PRD §14.12 | TRD §11.12.20 | **VISTA-CFI-09** | `VISTA-CFI-CP-09-02` | Precision, Recall, F1 $\ge 0.90$ and $tIoU \ge 0.85$ across all categories | `PLANNED` | `VISTA-CFI-08` |
+| **CFI-19** | Robustness & False-Positive Evaluation | PRD §14.12 | TRD §11.12.20 | **VISTA-CFI-09** | `VISTA-CFI-CP-09-03` | False alarm rate $\le 0.05$/hour on VFR, PTZ, and static camera controls | `PLANNED` | `VISTA-CFI-08` |
+| **CFI-20** | Evidence Lineage & CEIPL Integration | PRD §14.13 | TRD §11.12.1 | **VISTA-CFI-00** | `VISTA-CFI-CP-00-04` | Pre-decode dual hash and RFC 8785 JSON manifest DAG binding | `PLANNED` | Phase 1 Gate |
+| **CFI-21** | Security Safeguards & Resource Ceilings | PRD §14.13 | TRD §11.12.17 | **VISTA-CFI-00** | `VISTA-CFI-CP-01-01` | Worker memory $\le 4\text{ GB}$, ring buffer $\le 64$ frames, 10s timeout | `PLANNED` | Phase 0 Gate |
+| **CFI-22** | Reproducibility & Release Validation | PRD §14.12 | TRD §11.12.20 | **VISTA-CFI-09** | `VISTA-CFI-CP-09-04` | 100% deterministic report hashes across 5 runs; air-gap verified | `PLANNED` | `VISTA-CFI-08` |
