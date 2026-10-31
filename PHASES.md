@@ -288,6 +288,18 @@ flowchart TD
 | **CEIPL-EIV-09** | Cross-Subsystem & UFREDF Integration | CEIPL / EIV | `PLANNED` | EIV-08 Gate | Engine intake adapters, Section 63 BSA PDF dossier |
 | **CEIPL-EIV-10** | Security, Performance & Release Readiness | CEIPL / EIV | `PLANNED` | EIV-09 Gate | 16-mutation test suite, 500 fixtures, air-gap Docker |
 | **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15, NA13, GA10, CDVF-A11 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
+| **UFD-A0** | Repository & UX Architecture Discovery | UFD / Core UI | `PLANNED` | Phase 0 Gate | Existing API/frontend discovery map, no backend service duplication |
+| **UFD-A1** | Design System & Navigation Framework | UFD / Core UI | `PLANNED` | UFD-A0 Gate | Shared application shell, WCAG 2.2 AA tokens, navigation router |
+| **UFD-A2** | Authentication, RBAC & Case Workspace | UFD / Case Mgmt | `PLANNED` | UFD-A1 Gate | 9-role authorization, dual-control engine, case management |
+| **UFD-A3** | Evidence Inventory & Lineage Detail | UFD / Evidence | `PLANNED` | UFD-A2 Gate | Multi-modal registry, CEIPL fixity binding, Merkle DAG visualizer |
+| **UFD-A4** | Modality-Specific Examiner Workspaces | UFD / Viewports | `PLANNED` | UFD-A3 Gate | AIF dual-canvas, AURAS WebAudio, VISTA scrubber, ONTF flow |
+| **UFD-A5** | Findings & 10-State Examiner Review | UFD / Findings | `PLANNED` | UFD-A4 Gate | 10-state review lifecycle, examiner annotations, score integrity |
+| **UFD-A6** | Unified Timeline & Geospatial Canvas | UFD / CSTV & GEO | `PLANNED` | UFD-A5 Gate | CSTV multi-source scrubber, clock drift delta(t), Leaflet map |
+| **UFD-A7** | Integrity & Cross-Modal Workspaces | UFD / CEIPL & CDVF| `PLANNED` | UFD-A6 Gate | CEIPL fixity alarms, quarantine lockouts, CDVF disagreement matrix |
+| **UFD-A8** | UFREDF Report Dossier & Review Lifecycle | UFD / UFREDF | `PLANNED` | UFD-A7 Gate | Section 63 BSA draft preview, dual-signature issuance workflow |
+| **UFD-A9** | Search, Notifications & Task Queue | UFD / Operations | `PLANNED` | UFD-A8 Gate | Case-scoped full-text search, WebSocket alerts, task queue |
+| **UFD-A10** | Security Hardening, WCAG 2.2 AA & Air-Gap | UFD / Security | `PLANNED` | UFD-A9 Gate | OWASP ASVS v4.0.3 L2 audit, keyboard operability, zero external calls |
+| **UFD-A11** | End-to-End Validation & Release Readiness | UFD / Quality | `PLANNED` | UFD-A10 Gate | 7-scenario E2E test suite, latency benchmarks, examiner sign-off |
 | **Phase 8** | Web Dashboard & Examiner Workbench | UI / Presentation | `PLANNED` | Phase 7 Gate | Next.js interactive UI, multi-modal waveform viewer |
 | **Phase 9** | Security Hardening & Air-Gapped Packaging | DevOps / Security | `PLANNED` | Phase 8 Gate | Offline Docker containers, POSIX 0400 WORM scripts |
 | **Phase 10** | Final Hackathon Demonstration & Release | Quality & Release | `PLANNED` | Phase 9 Gate | Verified demonstration scripts & curated case pack |
@@ -7210,3 +7222,490 @@ flowchart TD
 | **EIV-98** | Section 63 BSA / 65B IEA Dossier Assembly: Statutory evidence schedule PDF | PRD §18.7 | TRD §19.13 | **CEIPL-EIV-09** | `EIV-CP-09-02` | Automated Test / Audit | `PLANNED` |
 | **EIV-99** | Five-Hundred-Fixture Verification Benchmark: 100% detection on 500 test fixtures | PRD §18.7 | TRD §19.17 | **CEIPL-EIV-10** | `EIV-CP-10-02` | Automated Test / Audit | `PLANNED` |
 | **EIV-100** | Air-Gapped Packaging & Security Hardening: Docker deployment with zero egress | PRD §18.7 | TRD §19.17 | **CEIPL-EIV-10** | `EIV-CP-10-04` | Automated Test / Audit | `PLANNED` |
+---
+
+## 20. Dedicated Unified Forensic Evidence Dashboard Engineering Playbook (UFD-A0 through UFD-A11)
+
+> **Document Status:** `CANONICAL ENGINEERING PLAYBOOK` — Dedicated engineering tasks, deliverables, verification gates, and checkpoints established for the Unified Forensic Evidence Dashboard & Examiner Workbench. Directly operationalizes requirements `UFD-01` through `UFD-100` and deepens Platform Phase 8.
+
+```mermaid
+flowchart LR
+    UFD_A0["UFD-A0\nUX Discovery"] --> UFD_A1["UFD-A1\nDesign System"]
+    UFD_A1 --> UFD_A2["UFD-A2\nAuth & RBAC"]
+    UFD_A2 --> UFD_A3["UFD-A3\nEvidence Inventory"]
+    UFD_A3 --> UFD_A4["UFD-A4\nModality Workspaces"]
+    UFD_A4 --> UFD_A5["UFD-A5\nFindings Review"]
+    UFD_A5 --> UFD_A6["UFD-A6\nTimeline & Geo"]
+    UFD_A6 --> UFD_A7["UFD-A7\nIntegrity & CDVF"]
+    UFD_A7 --> UFD_A8["UFD-A8\nUFREDF Reports"]
+    UFD_A8 --> UFD_A9["UFD-A9\nSearch & Queue"]
+    UFD_A9 --> UFD_A10["UFD-A10\nSecurity & WCAG"]
+    UFD_A10 --> UFD_A11["UFD-A11\nE2E Validation"]
+```
+
+---
+
+### Phase UFD-A0: Repository and UX Architecture Discovery
+
+- **Objective:** Audit the complete PS-05 backend and frontend repository to map existing FastAPI endpoints, Celery workers, and React/TypeScript components, establishing strict boundaries to guarantee that UFD acts purely as an aggregation and presentation tier without duplicating backend detection logic or storage vaults.
+- **Prerequisites:** Platform Phase 0 baseline completed; CEIPL, CMMS, CSTV, AIF, AURAS, VISTA, ONTF, CDVF, and UFREDF API contracts documented.
+- **Scope:** Complete API inventory, data flow mapping, and architectural boundary definition across all 10 integrated forensic subsystems.
+- **Detailed Tasks:**
+  1. Map all existing FastAPI routes across CEIPL, CMMS, CSTV, AIF, AURAS, VISTA, ONTF, CDVF, and UFREDF into an OpenAPI 3.1 aggregator schema.
+  2. Document database boundaries confirming that UFD creates zero duplicate tables for master evidence, metadata, or model checkpoints.
+  3. Formulate the Backend-for-Frontend (BFF) aggregation pattern with isolated circuit breakers and strict fallback timeouts.
+  4. Establish zero-cloud offline constraints, verifying that all client dependencies, fonts, and map assets can be bundled locally.
+- **Dependencies:** Platform Phase 0, CEIPL-EIV-00, CDVF-A0.
+- **Deliverables:** UFD Architectural Discovery Manifest, Subsystem Integration Map, Zero-Duplication Boundary Contract.
+- **Unit Tests:** `test_subsystem_api_coverage()`, `test_zero_duplicate_table_declarations()`.
+- **Integration Tests:** `test_bff_subsystem_reachability()`, `test_circuit_breaker_isolation()`.
+- **Security Tests:** `test_airgap_dependency_check()`, `test_no_external_cdns()`.
+- **Accessibility Tests:** Initial WCAG 2.2 AA token & semantic HTML baseline specification.
+- **Performance Tests:** Baseline discovery query benchmark ($\le 50\text{ms}$).
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFD-CP-00-01` | All 10 backend subsystems mapped with zero duplicated domain algorithms | `PLANNED` |
+  | `UFD-CP-00-02` | Air-gapped dependency tree verified with zero outbound network calls | `PLANNED` |
+- **Acceptance Criteria:** Architectural boundary signed off; 100% of subsystem integration contracts validated.
+- **Exit Criteria:** Zero duplicate service implementations; discovery manifest committed.
+- **Risks & Mitigations:** Risk of API contract drift mitigated by generating Pydantic v2 schemas directly from backend source models.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFD-A1: Design System and Navigation Framework
+
+- **Objective:** Develop a high-density, forensic-grade UI component system and navigation framework complying with WCAG 2.2 Level AA standards, featuring non-colour dependent status indicators, semantic dark mode, and case-scoped routing.
+- **Prerequisites:** Phase UFD-A0 discovery completed.
+- **Scope:** Application shell, navigation router, breadcrumbs, geometric status indicators, typography, and layout tokens.
+- **Detailed Tasks:**
+  1. Implement the UFW application shell with collapsible sidebar navigation, persistent active-case header, and breadcrumbs.
+  2. Implement semantic status tokens pairing distinct colors with text and geometric iconography (Green Circle for `VERIFIED`, Amber Triangle for `WARNING`, Red Octagon for `FAILED`, Purple Rhombus for `INCONCLUSIVE`).
+  3. Build high-density data table components supporting server-side pagination, sorting, column toggling, and keyboard navigation.
+  4. Implement an accessible focus indicator ring ($\ge 3:1$ contrast) and skip-to-content navigation links.
+- **Dependencies:** Phase UFD-A0.
+- **Deliverables:** UFW UI Design System Library, React Router Navigation Shell, Geometric Status Token Engine.
+- **Unit Tests:** `test_status_badge_icon_rendering()`, `test_table_pagination_logic()`.
+- **Integration Tests:** `test_route_preservation_on_page_refresh()`, `test_breadcrumb_navigation_flow()`.
+- **Security Tests:** `test_xss_sanitization_in_labels()`, `test_dompurify_token_sanitization()`.
+- **Accessibility Tests:** Automated Axe-core audit (0 violations); keyboard tab order validation.
+- **Performance Tests:** Application shell initial render $\le 1.2\text{s}$ First Contentful Paint.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFD-CP-01-01` | Semantic design tokens pair color with geometric shapes and text labels | `PLANNED` |
+  | `UFD-CP-01-02` | Zero Axe-core accessibility violations on all core shell components | `PLANNED` |
+- **Acceptance Criteria:** Shell operable via keyboard alone; contrast ratio $\ge 4.5:1$ across all text elements.
+- **Exit Criteria:** Design system storybook rendered locally; navigation framework verified.
+- **Risks & Mitigations:** Visual clutter mitigated by establishing strict component spacing and typography tokens.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFD-A2: Authentication, RBAC and Case Workspace
+
+- **Objective:** Implement role-aware case management supporting nine forensic practitioner roles, PostgreSQL Row-Level Security (RLS), and a multi-signature dual-control engine for sensitive operational overrides.
+- **Prerequisites:** Phase UFD-A1 navigation framework.
+- **Scope:** User authentication, JWT claims validation, case creation wizard, case overview dashboard, and dual-control workflow.
+- **Detailed Tasks:**
+  1. Implement FastAPI JWT authentication guard validating user role, session expiry, and air-gap token signatures.
+  2. Implement PostgreSQL Row-Level Security (RLS) policies scoping all case queries to authorized case members.
+  3. Build the case creation wizard capturing legal reference numbers, jurisdiction, priority, and assigned examiners.
+  4. Build the Case Overview dashboard displaying backend-calculated statistics (evidence counts, fixity status, pending jobs).
+  5. Implement the dual-control authorization engine for quarantine release and report issuance (`ufd_dual_control_requests`).
+- **Dependencies:** Phase UFD-A1, CEIPL-EIV-10.
+- **Deliverables:** RBAC Gatekeeper Middleware, Case Management Workspace, Dual-Control Multi-Sig Engine.
+- **Unit Tests:** `test_case_create_validation()`, `test_dual_control_token_generation()`.
+- **Integration Tests:** `test_case_isolation_across_different_users()`, `test_dual_control_two_actor_workflow()`.
+- **Security Tests:** `test_unauthorized_case_access_returns_403()`, `test_jwt_tampering_rejection()`.
+- **Accessibility Tests:** Form input label association (`htmlFor`), accessible error announcements via `aria-describedby`.
+- **Performance Tests:** Case overview load time $\le 500\text{ms}$ on 10,000-case database.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFD-CP-02-01` | PostgreSQL RLS strictly prevents cross-case data leakage | `PLANNED` |
+  | `UFD-CP-02-02` | Dual-control actions require valid cryptographic sign-offs from two distinct roles | `PLANNED` |
+- **Acceptance Criteria:** Zero IDOR vulnerabilities; case creation and dual-control workflows fully operational.
+- **Exit Criteria:** RBAC test matrix passes 100%; dual-control challenge-response verified.
+- **Risks & Mitigations:** Session hijacking mitigated by HTTP-only cookies, SameSite=Strict, and 30-minute idle timeouts.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFD-A3: Evidence Inventory and Evidence Detail
+
+- **Objective:** Build a unified multi-modal evidence inventory and detail workspace integrating CEIPL fixity statuses, WORM vault paths, CMMS metadata, and derivative artefact Merkle DAG lineages.
+- **Prerequisites:** Phase UFD-A2 case management.
+- **Scope:** Evidence intake registry, multi-modal inventory table, evidence detail workspace, fixity history, and lineage DAG.
+- **Detailed Tasks:**
+  1. Build the multi-modal evidence inventory table supporting Image, Audio, Video, CCTV, PCAP, Sidecar, and Geotrack filters.
+  2. Implement real-time CEIPL fixity status indicators (Pre-write SHA-256, Post-write readback SHA-256, WORM compliance).
+  3. Build the Evidence Detail workspace displaying container metadata, acquisition details, and file size metrics.
+  4. Integrate an interactive SVG/Canvas Merkle DAG visualizer displaying derivative artefact lineage originating from parent exhibits.
+  5. Enforce read-only evidence access with controlled backend file delivery, preventing direct filesystem path disclosure.
+- **Dependencies:** Phase UFD-A2, CEIPL-EIV-07, CMMS-A9.
+- **Deliverables:** Evidence Inventory Component, Evidence Detail Viewport, Merkle DAG Lineage Renderer.
+- **Unit Tests:** `test_evidence_category_filtering()`, `test_merkle_dag_node_generation()`.
+- **Integration Tests:** `test_evidence_intake_to_inventory_pipeline()`, `test_fixity_status_display()`.
+- **Security Tests:** `test_path_traversal_prevention_in_file_viewer()`, `test_no_internal_storage_path_leakage()`.
+- **Accessibility Tests:** Accessible table row headers (`scope="row"`), keyboard selection of lineage DAG nodes.
+- **Performance Tests:** Inventory pagination $\le 300\text{ms}$ across 5,000 exhibit records.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFD-CP-03-01` | Evidence acquisition timestamp strictly distinguished from filesystem mtime | `PLANNED` |
+  | `UFD-CP-03-02` | Derivative artefacts visibly link to parent exhibit SHA-256 in Merkle DAG | `PLANNED` |
+- **Acceptance Criteria:** Inventory accurately reflects CEIPL fixity; Merkle DAG correctly illustrates exhibit derivation.
+- **Exit Criteria:** Evidence detail queries pass latency budgets; zero direct storage path exposure.
+- **Risks & Mitigations:** Large inventory rendering slowdowns mitigated by virtualized windowing (React Virtual).
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFD-A4: Modality-Specific Examiner Workspaces
+
+- **Objective:** Implement specialized examiner viewports tailored to the physical characteristics of each evidentiary medium: AIF (Image), AURAS (Audio), VISTA (Video/CCTV), and ONTF (Offline Network PCAP).
+- **Prerequisites:** Phase UFD-A3 evidence detail.
+- **Scope:** Image dual-canvas viewer, WebAudio spectrogram, frame-accurate video scrubber, and PCAP flow table.
+- **Detailed Tasks:**
+  1. Build the AIF dual-canvas synchronized viewer supporting locked zoom ($10\%\text{--}3200\%$), ELA overlays, and manipulation masks.
+  2. Build the AURAS audio workspace with interactive Mel-spectrogram, Silero VAD segments, speaker diarization, and splice markers.
+  3. Build the VISTA video workspace with frame-accurate scrubber, PTS/DTS timeline, B-frame decode order flags, and CCTV sidecars.
+  4. Build the ONTF offline network inspector displaying IP 5-tuple flow hierarchies, packet timelines, and PII payload redaction.
+  5. Implement strict playback safeguards: zero autoplay, clamped audio decibel limits, and derived media watermarking.
+- **Dependencies:** Phase UFD-A3, AIF-IML-10, AURAS-AESL-10, VISTA-CFI-09, ONTF-A13.
+- **Deliverables:** AIF Dual-Canvas Viewport, AURAS WebAudio Viewport, VISTA Scrubber Viewport, ONTF Flow Table.
+- **Unit Tests:** `test_dual_canvas_zoom_sync()`, `test_pts_dts_scrubber_calculation()`, `test_pcap_flow_aggregation()`.
+- **Integration Tests:** `test_image_overlay_rendering()`, `test_spectrogram_stream_fetch()`, `test_video_frame_stepping()`.
+- **Security Tests:** `test_zero_autoplay_enforcement()`, `test_pcap_pii_redaction_rules()`.
+- **Accessibility Tests:** Keyboard scrubber shortcuts (`Left/Right Arrow`, `Space`), tabular alternatives for spectrogram data (`Alt+T`).
+- **Performance Tests:** Video frame step latency $\le 50\text{ms}$; spectrogram STFT generation $\le 200\text{ms}$ for 10-minute file.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFD-CP-04-01` | Master exhibit pixels/samples are never mutated by viewport annotations | `PLANNED` |
+  | `UFD-CP-04-02` | Normal video B-frame decode reordering is explicitly handled without false alarms | `PLANNED` |
+- **Acceptance Criteria:** All four modality viewports execute smoothly without memory leaks or audio autoplay.
+- **Exit Criteria:** Modality viewports validated against standardized forensic sample exhibits.
+- **Risks & Mitigations:** Browser memory pressure with 4K video mitigated by progressive Range request streaming.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFD-A5: Findings and Examiner Review
+
+- **Objective:** Aggregate multi-engine forensic findings into a unified, traceable inventory supporting a 10-state review lifecycle, uncalibrated score watermarks, and cryptographically signed examiner annotations.
+- **Prerequisites:** Phase UFD-A4 modality viewports.
+- **Scope:** Findings inventory, finding detail workspace, 10-state lifecycle engine, examiner annotation editor, and score calibration tags.
+- **Detailed Tasks:**
+  1. Build the unified findings inventory aggregating outputs from AIF, AURAS, VISTA, ONTF, and CDVF with severity badges.
+  2. Implement strict score semantics: raw logits, calibrated probabilities, and OOD triggers are clearly differentiated.
+  3. Build the finding detail workspace displaying detector identity, model checkpoint hash, input parameters, and limitations.
+  4. Implement the 10-state finding review state machine (`NEW` through `REVIEW_COMPLETED` and `SUPERSEDED`).
+  5. Build the examiner annotation editor recording methodology notes, alternative hypotheses, and signed adjudications.
+- **Dependencies:** Phase UFD-A4, CDVF-A11.
+- **Deliverables:** Unified Findings Inventory, Finding Detail Workspace, 10-State Review Engine, Examiner Annotation Ledger.
+- **Unit Tests:** `test_score_semantic_formatting()`, `test_finding_state_machine_transitions()`.
+- **Integration Tests:** `test_subsystem_finding_ingestion()`, `test_annotation_cryptographic_signing()`.
+- **Security Tests:** `test_annotation_immutability_no_silent_edits()`, `test_xss_in_examiner_notes()`.
+- **Accessibility Tests:** Aria announcements on state changes; high contrast for severity badges.
+- **Performance Tests:** Findings list rendering $\le 250\text{ms}$ across 2,000 finding items.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFD-CP-05-01` | Uncalibrated model scores are watermarked and never labeled as probabilities | `PLANNED` |
+  | `UFD-CP-05-02` | Examiner annotations are append-only with immutable historical revision logs | `PLANNED` |
+- **Acceptance Criteria:** 10-state lifecycle fully enforced; zero silent mutation of inconclusive results.
+- **Exit Criteria:** Review workflow verified with certified examiner test accounts.
+- **Risks & Mitigations:** Examiner annotation collisions prevented via optimistic locking with revision sequence numbers.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFD-A6: Unified Timeline and Geospatial View
+
+- **Objective:** Integrate CSTV multi-source temporal verification into an interactive cross-source timeline scrubber and embed AIF-GEO offline geospatial mapping with uncertainty bounding ellipses.
+- **Prerequisites:** Phase UFD-A5 findings review.
+- **Scope:** Multi-track timeline scrubber, clock drift regression visualizer, offline Leaflet/MapLibre map, and spatial conflict alerts.
+- **Detailed Tasks:**
+  1. Build the multi-track CSTV timeline scrubber displaying synchronized event intervals from Image, Audio, Video, CCTV, and PCAP.
+  2. Implement dual-timestamp display: raw container timestamps are shown alongside CSTV-corrected estimates with drift curves $\delta_i(t)$.
+  3. Implement temporal anomaly markers flagging out-of-order frames, NTP desynchronization, and recorder clock resets.
+  4. Build the offline geospatial workspace rendering EXIF/sidecar coordinates with HDOP/VDOP uncertainty bounding ellipses.
+  5. Enforce non-causality disclaimers: proximity of events on the timeline is explicitly disclaimed from implying causation.
+- **Dependencies:** Phase UFD-A5, CSTV-A10, AIF-GEO-10.
+- **Deliverables:** CSTV Unified Timeline Scrubber, Clock Drift Visualizer, AIF-GEO Map Canvas.
+- **Unit Tests:** `test_clock_drift_delta_t_rendering()`, `test_uncertainty_ellipse_geometry()`.
+- **Integration Tests:** `test_timeline_sync_across_multiple_exhibits()`, `test_map_marker_binding_to_image()`.
+- **Security Tests:** `test_offline_map_zero_external_tile_requests()`, `test_coordinate_precision_sanitization()`.
+- **Accessibility Tests:** Accessible table view of timeline events (`Alt+T`); keyboard scrubbing across event nodes.
+- **Performance Tests:** Timeline query and layout $\le 350\text{ms}$ for 1,000 multi-source events.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFD-CP-06-01` | Corrected timestamps are never displayed without their raw reference values | `PLANNED` |
+  | `UFD-CP-06-02` | Map markers indicate recorded metadata claims, not verified ground truth | `PLANNED` |
+- **Acceptance Criteria:** Multi-track timeline accurately reflects CSTV models; offline map renders with zero network egress.
+- **Exit Criteria:** Clock drift regression and geospatial uncertainty validated across multi-camera test fixtures.
+- **Risks & Mitigations:** Large timeline performance degradation prevented via event clustering and timeline windowing.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFD-A7: Integrity and Cross-Modal Workspaces
+
+- **Objective:** Implement the CEIPL integrity audit workspace with instant quarantine lockouts and the CDVF cross-modal correlation workspace enforcing the anti-averaging invariant and 7-code conflict taxonomy.
+- **Prerequisites:** Phase UFD-A6 timeline and geospatial.
+- **Scope:** CEIPL fixity log, quarantine lockout banner, CDVF cross-modal matrix, lip-sync mismatch inspector, and OOD cards.
+- **Detailed Tasks:**
+  1. Build the CEIPL integrity workspace displaying pre/post-write SHA-256 hashes, WORM vault status, and Merkle custody chains.
+  2. Implement the full quarantine lockout banner: any exhibit failing fixity disables analysis tools and triggers audit alerts.
+  3. Build the CDVF cross-modal correlation matrix visualizing audio-visual correspondence without composite score averaging.
+  4. Implement the 7-code conflict taxonomy display (`CORROBORATED` through `CONFLICTING` and `INCONCLUSIVE`).
+  5. Build the Inconclusive Reason breakdown card highlighting OOD boundaries, signal degradation, and compression artefacts.
+- **Dependencies:** Phase UFD-A6, CEIPL-EIV-05, CDVF-A11.
+- **Deliverables:** CEIPL Fixity Audit Viewport, Quarantine Lockout Engine, CDVF Cross-Modal Matrix Viewport.
+- **Unit Tests:** `test_quarantine_lockout_triggers()`, `test_conflict_taxonomy_code_mapping()`.
+- **Integration Tests:** `test_hash_failure_to_lockout_propagation()`, `test_cdvf_correlation_matrix_load()`.
+- **Security Tests:** `test_quarantine_bypass_prevention_at_api_level()`, `test_merkle_chain_tamper_detection()`.
+- **Accessibility Tests:** High-contrast quarantine alerts (`aria-live="assertive"`); non-colour conflict taxonomy badges.
+- **Performance Tests:** Fixity audit verification response $\le 100\text{ms}$.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFD-CP-07-01` | Integrity failures trigger an un-dismissible quarantine lockout across all tools | `PLANNED` |
+  | `UFD-CP-07-02` | Cross-modal agreement is never displayed as affirmative proof of authenticity | `PLANNED` |
+- **Acceptance Criteria:** Quarantine locks out compromised exhibits immediately; CDVF matrix preserves separate modality findings.
+- **Exit Criteria:** Hash failure injection tests trigger quarantine; cross-modal conflicts render clearly.
+- **Risks & Mitigations:** False positive fixity alarms prevented via pre-readback hash verification double-checks.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFD-A8: UFREDF Report and Review Workflow
+
+- **Objective:** Integrate UFREDF statutory report generation into an examiner review workspace supporting Section 65B IEA and Section 63 BSA dossier previews, technical review gates, and dual-signature courtroom issuance.
+- **Prerequisites:** Phase UFD-A7 integrity and cross-modal.
+- **Scope:** Report workspace, dossier PDF/A-1b preview, technical review sign-off, and dual-control issuance workflow.
+- **Detailed Tasks:**
+  1. Build the Report workspace displaying report lifecycle states (`DRAFT` through `APPROVED`, `SIGNED`, and `ISSUED`).
+  2. Implement an in-browser PDF/A-1b preview engine (PDF.js) rendering official UFREDF dossier snapshots.
+  3. Build the Technical Review approval panel allowing `ROLE-TECHREV` to verify methodology, bounds, and limitations.
+  4. Implement the dual-control statutory issuance workflow requiring independent Ed25519 signatures from `ROLE-EXAMINER` and `ROLE-REPREV`.
+  5. Guarantee zero client-side report assembly: PDF rendering, hashing, and digital signing remain strictly executed by UFREDF.
+- **Dependencies:** Phase UFD-A7, CEIPL-EIV-09.
+- **Deliverables:** Report Workspace Viewport, Dossier Preview Engine, Dual-Signoff Issuance Modal.
+- **Unit Tests:** `test_report_lifecycle_state_transitions()`, `test_dual_control_issuance_validation()`.
+- **Integration Tests:** `test_report_draft_to_issued_pipeline()`, `test_pdf_preview_snapshot_fetch()`.
+- **Security Tests:** `test_unauthorized_issuance_prevention()`, `test_ed25519_signature_verification()`.
+- **Accessibility Tests:** Accessible PDF preview controls; accessible approval confirmation dialogs.
+- **Performance Tests:** 50-page PDF/A-1b dossier preview render $\le 1.5\text{s}$.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFD-CP-08-01` | Statutory dossier issuance strictly requires dual sign-off from Examiner and Reviewer | `PLANNED` |
+  | `UFD-CP-08-02` | Dossier PDFs are compiled exclusively by the UFREDF backend service | `PLANNED` |
+- **Acceptance Criteria:** Reports cannot be issued unilaterally; PDF preview matches court-admissible standards.
+- **Exit Criteria:** End-to-end report issuance lifecycle executed successfully with two distinct test keys.
+- **Risks & Mitigations:** Dossier compilation timeouts mitigated by asynchronous Celery generation with progress polling.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFD-A9: Search, Notifications and Task Queue
+
+- **Objective:** Deploy case-scoped full-text search, WebSocket/polling notifications, and an examiner task management queue with zero cross-case data leakage.
+- **Prerequisites:** Phase UFD-A8 report workflow.
+- **Scope:** Case-scoped search engine, notification dispatch, review task queue, and task reassignment modal.
+- **Detailed Tasks:**
+  1. Implement case-scoped full-text search indexing Case IDs, Evidence IDs, filenames, and finding IDs via PostgreSQL full-text search.
+  2. Enforce zero search leakage: search queries and autocomplete results are strictly filtered by the user's active case permissions.
+  3. Implement the notification dispatch system alerting examiners to job completions, fixity failures, and review assignments.
+  4. Build the Prioritized Review Queue displaying unassigned evidence, pending reviews, and urgent integrity incidents.
+  5. Build task assignment and reassignment modals with audit trail logging.
+- **Dependencies:** Phase UFD-A8.
+- **Deliverables:** Case-Scoped Search Component, Notification Center, Prioritized Review Queue Viewport.
+- **Unit Tests:** `test_case_scoped_search_filter()`, `test_review_task_priority_sorting()`.
+- **Integration Tests:** `test_notification_event_delivery()`, `test_task_assignment_to_examiner()`.
+- **Security Tests:** `test_zero_cross_case_leakage_in_search_autocomplete()`, `test_search_sanitization_no_sql_injection()`.
+- **Accessibility Tests:** `aria-live="polite"` for non-urgent notifications; accessible task tables.
+- **Performance Tests:** Search query response $\le 150\text{ms}$ across 50,000 indexed case entities.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFD-CP-09-01` | Search autocomplete never discloses the existence of cases outside caller's scope | `PLANNED` |
+  | `UFD-CP-09-02` | Notifications strictly deliver verified backend event records with zero client fabrication | `PLANNED` |
+- **Acceptance Criteria:** Search fully isolated per case; review queue correctly dispatches tasks by role.
+- **Exit Criteria:** Search security audit passes; notification engine operates reliably under air-gap conditions.
+- **Risks & Mitigations:** WebSocket connection drops mitigated by automatic fallback to exponential backoff polling.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFD-A10: Security, Accessibility and Performance Hardening
+
+- **Objective:** Execute comprehensive security audits (OWASP ASVS v4.0.3 Level 2), WCAG 2.2 AA accessibility verification, and air-gapped performance optimization across the entire workbench.
+- **Prerequisites:** Phase UFD-A9 search and notifications.
+- **Scope:** Penetration testing, Content Security Policy (CSP), manual screen-reader testing, keyboard operability, and latency audits.
+- **Detailed Tasks:**
+  1. Audit and enforce OWASP ASVS v4.0.3 Level 2 controls: strict CSP headers, anti-CSRF tokens, and DOMPurify sanitization.
+  2. Conduct comprehensive manual keyboard navigation testing across all viewports, ensuring zero mouse dependency.
+  3. Conduct screen-reader testing (NVDA / JAWS) verifying semantic table headers, live regions, and alternative media tables.
+  4. Execute benchmark latency audits verifying that all operations satisfy the hardware profile SLAs defined in TRD §20.17.
+  5. Verify 100% offline air-gap execution: confirm zero failed DNS lookups, blocked external resources, or hardcoded cloud URLs.
+- **Dependencies:** Phase UFD-A9.
+- **Deliverables:** OWASP ASVS Level 2 Verification Report, WCAG 2.2 AA Compliance Audit, Air-Gap Validation Seal.
+- **Unit Tests:** `test_csp_header_enforcement()`, `test_xss_payload_vectors_in_all_inputs()`.
+- **Integration Tests:** `test_session_timeout_and_invalidation()`, `test_complete_keyboard_navigation_flow()`.
+- **Security Tests:** Full OWASP ASVS automated and manual penetration test suite (0 High/Critical findings).
+- **Accessibility Tests:** Manual NVDA screen-reader audit; 100% WCAG 2.2 AA success criteria satisfaction.
+- **Performance Tests:** System-wide benchmark suite execution verifying all latency budgets in TRD §20.17.
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFD-CP-10-01` | Zero OWASP ASVS Level 2 High or Critical vulnerabilities verified | `PLANNED` |
+  | `UFD-CP-10-02` | 100% of interactive controls operable via keyboard alone with visible focus rings | `PLANNED` |
+- **Acceptance Criteria:** Security, accessibility, and performance gates completely satisfied on air-gapped test rigs.
+- **Exit Criteria:** Official compliance audit certificates compiled into release dossier.
+- **Risks & Mitigations:** Browser engine discrepancies mitigated by testing across Chromium, Firefox, and WebKit runtimes.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase UFD-A11: End-to-End Validation and Release Readiness
+
+- **Objective:** Validate the integrated workbench across seven end-to-end investigation scenarios, verifying evidence integrity, modality-specific analysis, cross-modal correlation, and courtroom dossier issuance.
+- **Prerequisites:** Phase UFD-A10 security and accessibility hardening.
+- **Scope:** 7 E2E acceptance scenarios, multi-examiner load testing, air-gapped container packaging, and release sign-off.
+- **Detailed Tasks:**
+  1. Execute Scenario 1 (Image Investigation): Case creation $\to$ image registration $\to$ AIF dual-canvas $\to$ IMLF mask annotation.
+  2. Execute Scenario 2 (Audio Investigation): Audio intake $\to$ AURAS spectrogram $\to$ speech diarization $\to$ AESL splice review.
+  3. Execute Scenario 3 (CCTV Investigation): Video intake $\to$ VISTA frame scrubber $\to$ PTS cadence $\to$ timestamp overlay audit.
+  4. Execute Scenario 4 (Cross-Modal Investigation): Multi-source case $\to$ CDVF correlation matrix $\to$ conflict review $\to$ DAG inspection.
+  5. Execute Scenario 5 (Integrity Incident): Corrupted file injection $\to$ CEIPL fixity failure $\to$ immediate quarantine lockout verification.
+  6. Execute Scenario 6 (Report Preparation): Validated findings $\to$ UFREDF dossier compilation $\to$ dual-control issuance sign-off.
+  7. Execute Scenario 7 (Permission Denial): Manually crafted unauthorized API request $\to$ 403 Forbidden $\to$ audit log entry.
+- **Dependencies:** Phase UFD-A10, Platform Phase 9.
+- **Deliverables:** Integrated UFD Release Bundle, 7-Scenario E2E Verification Report, Release Sign-Off Dossier.
+- **Unit Tests:** `test_e2e_scenario_runner()`.
+- **Integration Tests:** Full automated multi-user investigation lifecycle test suite.
+- **Security Tests:** Re-validation of audit trail immutability and dual-control sign-offs across all 7 scenarios.
+- **Accessibility Tests:** Final end-to-end user journey accessibility sign-off.
+- **Performance Tests:** Multi-examiner concurrent load test (20 concurrent examiners, zero SLA violations).
+- **Checkpoints:**
+  | Checkpoint ID | Verification Criteria | Gate Status |
+  | :--- | :--- | :---: |
+  | `UFD-CP-11-01` | All seven end-to-end forensic acceptance scenarios execute with 100% success rate | `PLANNED` |
+  | `UFD-CP-11-02` | Release bundle packages 100% locally with zero external network dependencies | `PLANNED` |
+- **Acceptance Criteria:** All acceptance criteria satisfied; certified forensic examiner team sign-off obtained.
+- **Exit Criteria:** Production release bundle verified; canonical documentation finalized.
+- **Risks & Mitigations:** Production deployment regressions prevented via automated Docker container smoke tests.
+- **Current Status:** `PLANNED`
+
+---
+
+## 21. UFD Master Requirement Traceability Matrix (UFD-01 through UFD-100)
+
+| Req ID | Requirement Focus | PRD Ref | TRD Ref | Planned Phase | Checkpoint ID | Verification Method | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :---: |
+| **UFD-01** | Shared Presentation & Workflow Layer Boundary | PRD §19.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Architecture Audit | `PLANNED` |
+| **UFD-02** | Zero Duplicate Forensic Detection Algorithms | PRD §19.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Code Inspection | `PLANNED` |
+| **UFD-03** | CEIPL Authoritative Master Evidence Storage | PRD §19.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Storage Contract Test | `PLANNED` |
+| **UFD-04** | Subsystem Sovereignty for Technical Findings | PRD §19.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Schema Validation | `PLANNED` |
+| **UFD-05** | Finding Traceability to Exhibit & Activity UUID| PRD §19.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Lineage Graph Audit | `PLANNED` |
+| **UFD-06** | Honest Representation of Data Freshness & Gaps | PRD §19.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | UI State Test | `PLANNED` |
+| **UFD-07** | Nine Formal Forensic Practitioner Roles | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-01` | RBAC Matrix Test | `PLANNED` |
+| **UFD-08** | Case-Level Security & PostgreSQL RLS Scoping | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-01` | Database Security Test | `PLANNED` |
+| **UFD-09** | Separation of Evidence and Admin Access | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-01` | Privilege Escalation Test | `PLANNED` |
+| **UFD-10** | Dual-Control Custody & Quarantine Overrides | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-02` | Multi-Sig Workflow Test | `PLANNED` |
+| **UFD-11** | Dual-Control Courtroom Report Issuance | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-02` | Cryptographic Sign Test | `PLANNED` |
+| **UFD-12** | Backend Enforcement of All Role Permissions | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-01` | REST API Penetration Test | `PLANNED` |
+| **UFD-13** | Immutable Audit Trail of Privileged Actions | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-02` | Audit Log Integrity Test | `PLANNED` |
+| **UFD-14** | Live Backend-Calculated Dashboard Metrics | PRD §19.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | Database Query Audit | `PLANNED` |
+| **UFD-15** | Zero Hardcoded Metrics or Mock Numbers | PRD §19.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | Static Code Analysis | `PLANNED` |
+| **UFD-16** | Filtered Navigation from Dashboard Metric Cards| PRD §19.6 | TRD §20.2 | `UFD-A1` | `UFD-CP-01-01` | UI Navigation Test | `PLANNED` |
+| **UFD-17** | Real-Time Platform Workload & Job Monitoring | PRD §19.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | Celery Queue Monitor | `PLANNED` |
+| **UFD-18** | Distinct Processing, Integrity & Review States| PRD §19.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | UI State Mapping Test | `PLANNED` |
+| **UFD-19** | Case-Scoped Recent Activity Chronology | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Activity Feed Audit | `PLANNED` |
+| **UFD-20** | Redaction of Sensitive Preview Data in Feed | PRD §19.6 | TRD §20.16 | `UFD-A2` | `UFD-CP-02-01` | Privacy Leakage Audit | `PLANNED` |
+| **UFD-21** | Case Creation Workflow & Reference Validation | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Input Validation Test | `PLANNED` |
+| **UFD-22** | Prevention of Duplicate Legal Case Identifiers| PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Database Constraint Test | `PLANNED` |
+| **UFD-23** | Minimal Collection of PII in Case Metadata | PRD §19.6 | TRD §20.16 | `UFD-A2` | `UFD-CP-02-01` | Data Minimization Audit | `PLANNED` |
+| **UFD-24** | Case Overview Identity & Jurisdictional Scope | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Contract Verification | `PLANNED` |
+| **UFD-25** | Comprehensive Case Evidence Inventory Summary | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Aggregation Query Test | `PLANNED` |
+| **UFD-26** | Multi-Engine Investigation Status Summary | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Subsystem Status Test | `PLANNED` |
+| **UFD-27** | Section 63 BSA Report Dossier Status Summary | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Report Status Query | `PLANNED` |
+| **UFD-28** | Read-Only View of CEIPL Chain-of-Custody | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Custody Ledger Audit | `PLANNED` |
+| **UFD-29** | Support for 10 Multi-Modal Evidence Categories | PRD §19.6 | TRD §20.5 | `UFD-A3` | `UFD-CP-03-01` | Multi-Format Ingest Test | `PLANNED` |
+| **UFD-30** | Configurable Evidence Inventory Column Table | PRD §19.6 | TRD §20.4 | `UFD-A3` | `UFD-CP-03-01` | UI Component Test | `PLANNED` |
+| **UFD-31** | Separation of Acquisition and File System Time| PRD §19.6 | TRD §20.4 | `UFD-A3` | `UFD-CP-03-01` | Timestamp Semantic Test | `PLANNED` |
+| **UFD-32** | Multi-Dimensional Evidence Filter & Search | PRD §19.6 | TRD §20.14 | `UFD-A3` | `UFD-CP-03-01` | Query Filter Benchmark | `PLANNED` |
+| **UFD-33** | Server-Side Pagination for Evidence Records | PRD §19.6 | TRD §20.14 | `UFD-A3` | `UFD-CP-03-01` | Scalability Benchmark | `PLANNED` |
+| **UFD-34** | Evidence Detail Dedicated Investigation Page | PRD §19.6 | TRD §20.4 | `UFD-A3` | `UFD-CP-03-01` | Page Layout Test | `PLANNED` |
+| **UFD-35** | Visual Differentiation of Originals vs Derived | PRD §19.6 | TRD §20.4 | `UFD-A3` | `UFD-CP-03-02` | Lineage Rendering Test | `PLANNED` |
+| **UFD-36** | Permission-Controlled Evidence Export Actions | PRD §19.6 | TRD §20.16 | `UFD-A3` | `UFD-CP-03-01` | Export Permission Test | `PLANNED` |
+| **UFD-37** | AIF Synchronized Dual-Canvas Image Viewer | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Canvas Synchronization | `PLANNED` |
+| **UFD-38** | Image Metadata, EXIF, XMP & DQT Inspection | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Header Extraction Test | `PLANNED` |
+| **UFD-39** | IMLF Manipulation Heatmaps & Bounding Masks | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | IoU Overlay Test | `PLANNED` |
+| **UFD-40** | Original Pixel Coordinate Space Invariant | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Geometric Integrity Test | `PLANNED` |
+| **UFD-41** | AURAS Interactive Mel-Spectrogram & Waveform | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | WebAudio Rendering Test | `PLANNED` |
+| **UFD-42** | Silero VAD Speech & ECAPA Diarization Tracks | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Interval Alignment Test | `PLANNED` |
+| **UFD-43** | AESL Splice Markers with Sample-Index Bounds | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Splice Index Precision | `PLANNED` |
+| **UFD-44** | Strict Audio Autoplay Prevention & Decibel Clamp| PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Acoustic Safety Test | `PLANNED` |
+| **UFD-45** | VISTA Frame-Accurate Scrubber & PTS Timeline | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-02` | Frame Stepping Latency | `PLANNED` |
+| **UFD-46** | Handling B-Frame Reordering & Compression | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-02` | Codec Invariant Test | `PLANNED` |
+| **UFD-47** | CCTV Burned-In Overlay vs Sidecar Verification| PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-02` | Optical Header Audit | `PLANNED` |
+| **UFD-48** | ONTF Offline PCAP Flow Table & Redaction | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Offline Zeek Flow Test | `PLANNED` |
+| **UFD-49** | Unified Multi-Subsystem Findings Inventory | PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-01` | Aggregation Test | `PLANNED` |
+| **UFD-50** | Strict Separation of Score, Calib & Conclusion| PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-01` | Score Contract Test | `PLANNED` |
+| **UFD-51** | Finding Detail View with Model Checkpoint Hash | PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-01` | Checkpoint Traceability | `PLANNED` |
+| **UFD-52** | Ten-State Finding Review Lifecycle Machine | PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-02` | State Machine Unit Test | `PLANNED` |
+| **UFD-53** | Examiner Annotations with Cryptographic Signing | PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-02` | Digital Signature Test | `PLANNED` |
+| **UFD-54** | Zero Silent Overwriting of Examiner Notes | PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-02` | Immutability Verification| `PLANNED` |
+| **UFD-55** | Watermarking of Uncalibrated Model Outputs | PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-01` | UI Watermark Audit | `PLANNED` |
+| **UFD-56** | CSTV Multi-Source Timeline Integration | PRD §19.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | CSTV Scrubber Test | `PLANNED` |
+| **UFD-57** | Dual Timestamp Display (Raw vs CSTV Corrected) | PRD §19.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | Dual Display Audit | `PLANNED` |
+| **UFD-58** | Visual Highlighting of Temporal Anomalies | PRD §19.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | Anomaly Highlighting | `PLANNED` |
+| **UFD-59** | Interactive Event Scrubbing to Media Playback | PRD §19.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | Playhead Sync Test | `PLANNED` |
+| **UFD-60** | Non-Causality Safeguard Disclaimer on Timeline| PRD §19.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | Legal Guardrail Audit | `PLANNED` |
+| **UFD-61** | AIF-GEO Offline Leaflet Map Canvas | PRD §19.6 | TRD §20.5 | `UFD-A6` | `UFD-CP-06-02` | Offline Tile Render | `PLANNED` |
+| **UFD-62** | GPS Dilution of Precision Bounding Ellipses | PRD §19.6 | TRD §20.5 | `UFD-A6` | `UFD-CP-06-02` | Geometry Bounding Test | `PLANNED` |
+| **UFD-63** | CDVF Cross-Modal Multi-Modal Workspace | PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Cross-Modal Matrix Test | `PLANNED` |
+| **UFD-64** | Anti-Averaging Invariant (Zero Score Averaging)| PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | DAG Integrity Test | `PLANNED` |
+| **UFD-65** | Seven-Code Conflict Taxonomy Presentation | PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Taxonomy Mapping Test | `PLANNED` |
+| **UFD-66** | Prominent Audio vs Video Disagreement Banners | PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Conflict Banner Test | `PLANNED` |
+| **UFD-67** | Non-Suppression of Minority Detector Alarms | PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Detector Coverage Test | `PLANNED` |
+| **UFD-68** | First-Class Inconclusive & OOD Explanation Card| PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | OOD Breakdown Audit | `PLANNED` |
+| **UFD-69** | Independent Cross-Modal Signal Corroboration | PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Corroboration Matrix | `PLANNED` |
+| **UFD-70** | CEIPL Pre/Post-Write SHA-256 Fixity Audit | PRD §19.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Fixity Ledger Audit | `PLANNED` |
+| **UFD-71** | Real-Time Fixity Status Indicators & Digests | PRD §19.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Digest Match Test | `PLANNED` |
+| **UFD-72** | Un-Dismissible Quarantine Lockout on Failure | PRD §19.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Quarantine Injection | `PLANNED` |
+| **UFD-73** | Dual-Control Quarantine Exception Workflow | PRD §19.6 | TRD §20.3 | `UFD-A7` | `UFD-CP-07-01` | Dual-Sig Override Test | `PLANNED` |
+| **UFD-74** | Read-Only Presentation of CEIPL Custody Ledger | PRD §19.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Immutable History Audit| `PLANNED` |
+| **UFD-75** | Merkle DAG Audit Proof Visualizer | PRD §19.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Merkle Path Validation | `PLANNED` |
+| **UFD-76** | Zero Direct UI Mutation of Custody Chains | PRD §19.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Security Policy Audit | `PLANNED` |
+| **UFD-77** | UFREDF Section 65B/63 BSA Report Workspace | PRD §19.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-01` | Report Workspace Test | `PLANNED` |
+| **UFD-78** | In-Browser PDF/A-1b Dossier Snapshot Preview | PRD §19.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-02` | PDF.js Preview Test | `PLANNED` |
+| **UFD-79** | Zero Client-Side PDF Compilation (BFF Only) | PRD §19.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-02` | Architecture Audit | `PLANNED` |
+| **UFD-80** | Independent Technical Review Approval Gate | PRD §19.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-01` | Peer Review Test | `PLANNED` |
+| **UFD-81** | Dual-Signature Courtroom Dossier Issuance | PRD §19.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-01` | Multi-Sig PDF Sign Test| `PLANNED` |
+| **UFD-82** | Prevention of Unilateral Report Status Changes| PRD §19.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-01` | RBAC Enforcement Test | `PLANNED` |
+| **UFD-83** | Case-Scoped Full-Text Search Engine | PRD §19.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-01` | Full-Text Search Query | `PLANNED` |
+| **UFD-84** | Zero Cross-Case Data Leakage in Autocomplete | PRD §19.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-01` | Autocomplete Leak Audit| `PLANNED` |
+| **UFD-85** | Verification Event Notifications & WebSocket | PRD §19.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-02` | WebSocket Alert Test | `PLANNED` |
+| **UFD-86** | Prioritized Examiner Review & Task Queue | PRD §19.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-02` | Task Queue Dispatch | `PLANNED` |
+| **UFD-87** | Task Assignment & Reassignment Audit Trails | PRD §19.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-02` | Reassignment Log Test | `PLANNED` |
+| **UFD-88** | Complete Keyboard Operability (Zero Mouse) | PRD §19.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | Manual Keyboard Audit | `PLANNED` |
+| **UFD-89** | High-Contrast Visible Focus Rings (>= 3:1) | PRD §19.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | CSS Focus Style Audit | `PLANNED` |
+| **UFD-90** | Screen-Reader Semantic Headings & ARIA Live | PRD §19.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | NVDA Screen Reader Test| `PLANNED` |
+| **UFD-91** | Non-Colour Status Encoding (Shapes + Text) | PRD §19.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | Visual Accessibility | `PLANNED` |
+| **UFD-92** | Tabular HTML Alternatives for Media Visuals | PRD §19.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | Table Alternative Test | `PLANNED` |
+| **UFD-93** | Text Scaling up to 200% Without Layout Loss | PRD §19.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | 200% Zoom Reflow Audit | `PLANNED` |
+| **UFD-94** | OWASP ASVS v4.0.3 Level 2 Security Compliance | PRD §19.7 | TRD §20.16 | `UFD-A10` | `UFD-CP-10-01` | ASVS L2 Penetration Test|`PLANNED` |
+| **UFD-95** | Strict Content Security Policy (Zero Unsafe) | PRD §19.7 | TRD §20.16 | `UFD-A10` | `UFD-CP-10-01` | CSP Header Validation | `PLANNED` |
+| **UFD-96** | DOMPurify Sanitization of Metadata & Notes | PRD §19.7 | TRD §20.16 | `UFD-A10` | `UFD-CP-10-01` | XSS Attack Suite | `PLANNED` |
+| **UFD-97** | 100% Offline Air-Gapped Zero-Egress Guarantee | PRD §19.7 | TRD §20.16 | `UFD-A10` | `UFD-CP-10-01` | Network Sniffer Audit | `PLANNED` |
+| **UFD-98** | System Latency Budgets & SLA Compliance | PRD §19.7 | TRD §20.17 | `UFD-A11` | `UFD-CP-11-01` | Benchmark Test Suite | `PLANNED` |
+| **UFD-99** | Seven End-to-End Investigation Scenarios | PRD §19.8 | TRD §20.11 | `UFD-A11` | `UFD-CP-11-01` | 7 E2E Scenario Suite | `PLANNED` |
+| **UFD-100**| Release Readiness & Examiner Acceptance Sign-Off| PRD §19.8| TRD §20.18 | `UFD-A11` | `UFD-CP-11-02` | Acceptance Dossier Review|`PLANNED` |

@@ -9470,3 +9470,968 @@ flowchart TD
 14. **Derivative Parent Hash Divergence:** Change recorded parent hash; assert lineage verification failure.
 15. **Path Traversal Injection in Package:** Inject `../../etc/passwd` path; assert sanitization rejection.
 16. **WORM Overwrite Penetration:** Attempt `open(path, 'wb')` on POSIX `0400` file; assert `PermissionError`.
+---
+
+## 20. Unified Forensic Evidence Dashboard & Examiner Workbench (UFD / UFW) — Technical Architecture & Detailed Specification
+
+> **Document Status:** `CANONICAL TECHNICAL SPECIFICATION` — Architecture, data contracts, modality viewports, state machines, REST APIs, database schemas, accessibility specifications, and verification requirements formally specified. Implementation mapped to engineering phases `UFD-A0` through `UFD-A11`.
+
+---
+
+### 20.1 System Context & Component Architecture
+
+The **Unified Forensic Evidence Dashboard (UFD)** and its practitioner user interface, the **Unified Forensic Workbench (UFW)**, constitute the shared presentation, navigation, and investigation-workflow layer for the entire PS-05 platform. UFD does not implement forensic detection algorithms, calculate deepfake inferences, or act as an authoritative evidence vault. Instead, it securely consumes, coordinates, and visualizes authoritative records produced by backend subsystems: **CEIPL** (integrity, hashing, WORM fixity, Merkle custody), **CMMS** (metadata extraction & normalization), **CSTV** (cross-source timeline verification & clock drift), **AIF** (image tampering maps & ELA), **AURAS** (audio waveform, spectrogram, voice spoofing & splice localisation), **VISTA** (video/CCTV frame cadence, PTS/DTS timeline, temporal anomalies), **ONTF** (offline network packet capture flows), **AIF-GEO** (geospatial evidence mapping), **CDVF** (model calibration, OOD gating & model governance), and **UFREDF** (statutory Section 65B/63 BSA dossier compilation).
+
+```mermaid
+flowchart TD
+    subgraph PRACTITIONER_TIER["Authenticated Practitioner Access (TLS 1.3 / Air-Gap Localhost)"]
+        SYSADMIN["System Administrator\n(ROLE-SYSADMIN)"]
+        CASEADMIN["Case Administrator\n(ROLE-CASEADMIN)"]
+        IO["Investigating Officer\n(ROLE-IO)"]
+        EXAMINER["Forensic Examiner\n(ROLE-EXAMINER)"]
+        CUSTODIAN["Evidence Custodian\n(ROLE-CUSTODIAN)"]
+        TECHREV["Technical Reviewer\n(ROLE-TECHREV)"]
+        REPREV["Report Reviewer\n(ROLE-REPREV)"]
+        AUDITOR["Independent Auditor\n(ROLE-AUDITOR)"]
+        MODELADMIN["Model Administrator\n(ROLE-MODELADMIN)"]
+    end
+
+    subgraph UFW_FRONTEND["Unified Forensic Workbench (UFW Client Shell — React / TypeScript / Vite)"]
+        SHELL["UFW Application Shell & Navigation Router\n(WCAG 2.2 AA / Semantic Tokens / Zero-CDN)"]
+        STATE_MGR["Local State Manager & Cache Engine\n(TanStack Query / Optimistic UI / Source-Version Aware)"]
+
+        subgraph MODALITY_VIEWPORTS["Modality-Specific Viewports"]
+            VIEW_AIF["AIF Image Viewer\n(Dual-Canvas / ELA / IoU Overlays)"]
+            VIEW_AURAS["AURAS Audio Player\n(WebAudio / Mel-Spectrogram / VAD)"]
+            VIEW_VISTA["VISTA Frame Scrubber\n(PTS/DTS / B-Frame / CCTV Sync)"]
+            VIEW_ONTF["ONTF Flow Inspector\n(PCAP Timeline / 5-Tuple / Zeek)"]
+            VIEW_GEO["AIF-GEO Map Canvas\n(Offline Leaflet / Bounding Ellipses)"]
+        end
+
+        subgraph WORKSPACE_PANELS["Core Investigation Workspaces"]
+            PANEL_OVERVIEW["Global Dashboard Overview"]
+            PANEL_CASE["Case Management Workspace"]
+            PANEL_INVENTORY["Evidence Inventory & Lineage DAG"]
+            PANEL_FINDINGS["Unified Findings & 10-State Review"]
+            PANEL_TIMELINE["CSTV Unified Timeline Scrubber"]
+            PANEL_INTEGRITY["CEIPL Fixity & Custody Audit"]
+            PANEL_CROSSMODAL["CDVF Cross-Modal Disagreement Matrix"]
+            PANEL_REPORT["UFREDF Dossier & Approval Workspace"]
+            PANEL_QUEUE["Task Dispatch & Review Queue"]
+        end
+    end
+
+    subgraph UFD_BFF["UFD Backend-for-Frontend & Aggregation Layer (FastAPI / Pydantic v2)"]
+        AUTH_GUARD["Authentication & RBAC Gatekeeper\n(JWT / Ed25519 Tokens / PostgreSQL RLS)"]
+        AGG_SERVICE["Aggregation & State Transformation Engine\n(Partial Failure Resilient / Strict Caching)"]
+        SEARCH_ENGINE["Case-Scoped Search & Filter Engine\n(PostgreSQL Full-Text / Zero Leakage)"]
+        NOTIF_DISPATCH["WebSocket / Polling Notification Dispatch\n(Event Streams / Prioritized Alarms)"]
+    end
+
+    subgraph AUTHORITATIVE_BACKENDS["Authoritative Subsystem Services (Backend Source of Truth)"]
+        CEIPL_SRV["CEIPL: Integrity & WORM Custody"]
+        CMMS_SRV["CMMS: Metadata Normalization"]
+        CSTV_SRV["CSTV: Temporal Verification"]
+        AIF_SRV["AIF: Image Forensics Engine"]
+        AURAS_SRV["AURAS: Audio Forensics Engine"]
+        VISTA_SRV["VISTA: Video Forensics Engine"]
+        ONTF_SRV["ONTF: Offline PCAP Engine"]
+        GEO_SRV["AIF-GEO: Geospatial Engine"]
+        CDVF_SRV["CDVF: Model Calibration & Governance"]
+        UFREDF_SRV["UFREDF: Legal Dossier Compiler"]
+    end
+
+    PRACTITIONER_TIER --> SHELL
+    SHELL --> AUTH_GUARD
+    AUTH_GUARD --> AGG_SERVICE & SEARCH_ENGINE & NOTIF_DISPATCH
+    AGG_SERVICE --> STATE_MGR
+    STATE_MGR --> MODALITY_VIEWPORTS & WORKSPACE_PANELS
+
+    AGG_SERVICE --> CEIPL_SRV & CMMS_SRV & CSTV_SRV & AIF_SRV & AURAS_SRV & VISTA_SRV & ONTF_SRV & GEO_SRV & CDVF_SRV & UFREDF_SRV
+```
+
+---
+
+### 20.2 Information Architecture & Navigation Hierarchy
+
+The workbench enforces a strict, hierarchical Information Architecture (IA). The active forensic case establishes the primary security boundary and navigational context:
+
+```mermaid
+flowchart TD
+    ROOT["Unified Forensic Workbench (UFW Application Root)"]
+
+    ROOT --> NAV_GLOBAL["Global Tier (Cross-Case Context)"]
+    ROOT --> NAV_CASE["Case Tier (Scoped to Active Case ID)"]
+    ROOT --> NAV_ADMIN["System Governance Tier (Restricted)"]
+
+    subgraph GLOBAL_TIER["Global Navigation Modules"]
+        NAV_GLOBAL --> G_OVERVIEW["Dashboard Overview (Workload & Alerts)"]
+        NAV_GLOBAL --> G_CASES["Case Directory (Search, Filter, Create)"]
+        NAV_GLOBAL --> G_QUEUE["Prioritized Review Queue (Tasks & Reassignments)"]
+        NAV_GLOBAL --> G_AUDIT["Global Audit Ledger (Auditor Read-Only)"]
+    end
+
+    subgraph CASE_TIER["Case-Scoped Investigation Workspace (Context: /cases/{case_id})"]
+        NAV_CASE --> C_SUMMARY["Case Overview & Executive Summary"]
+        NAV_CASE --> C_EVIDENCE["Evidence Inventory & Lineage DAG"]
+        NAV_CASE --> C_WORKSPACES["Modality-Specific Workspaces"]
+        NAV_CASE --> C_FINDINGS["Unified Findings & Examiner Annotations"]
+        NAV_CASE --> C_TIMELINE["CSTV Multi-Source Timeline"]
+        NAV_CASE --> C_INTEGRITY["CEIPL Integrity, Fixity & Chain-of-Custody"]
+        NAV_CASE --> C_CROSSMODAL["CDVF Cross-Modal Disagreement Analysis"]
+        NAV_CASE --> C_REPORTS["UFREDF Dossier Compilation & Approval"]
+
+        C_WORKSPACES --> W_IMG["Image Forensic Workspace (AIF)"]
+        C_WORKSPACES --> W_AUD["Audio Forensic Workspace (AURAS)"]
+        C_WORKSPACES --> W_VID["Video & CCTV Workspace (VISTA)"]
+        C_WORKSPACES --> W_NET["Offline Network Workspace (ONTF)"]
+        C_WORKSPACES --> W_GEO["Geospatial Workspace (AIF-GEO)"]
+    end
+
+    subgraph ADMIN_TIER["Governance & System Administration"]
+        NAV_ADMIN --> A_USERS["User Directory & RBAC Roles"]
+        NAV_ADMIN --> A_MODELS["Model Registry & CDVF Validation Gates"]
+        NAV_ADMIN --> A_HEALTH["Service Health & Celery Worker Telemetry"]
+        NAV_ADMIN --> A_POLICY["Air-Gap & Retention Configuration"]
+    end
+```
+
+---
+
+### 20.3 Practitioner Roles, RBAC & Dual-Control Engine
+
+#### 20.3.1 Role Permission Matrix
+
+UFD enforces fine-grained authorization across nine distinct practitioner roles. Every REST endpoint independently enforces permission checks against the caller's verified JWT claims and PostgreSQL Row-Level Security (RLS) policies:
+
+| Permission Scope | SYSADMIN | CASEADMIN | IO | EXAMINER | CUSTODIAN | TECHREV | REPREV | AUDITOR | MODELADMIN |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **System Configuration & Health** | **CRUD** | - | - | - | - | - | - | R | - |
+| **Case Creation & Scoping** | - | **CRUD** | R | - | - | - | - | R | - |
+| **Evidence Registration (Intake)** | - | R | **CRU** | R | **CRU** | R | - | R | - |
+| **Evidence Viewing (Media/Streams)**| - | R | R | **R** | R | **R** | R | R | - |
+| **Tool Execution & Processing** | - | - | - | **CRUD** | - | - | - | - | - |
+| **Finding Annotation & Review** | - | - | - | **CRU** | - | **CRU** | R | R | - |
+| **Chain-of-Custody Modifications**| - | - | - | - | **CRUD** | - | - | R | - |
+| **Integrity Quarantine Override** | - | **Dual** | - | - | **Dual** | - | - | R | - |
+| **Draft Report Creation** | - | - | - | **CRU** | - | - | - | R | - |
+| **Technical Report Review** | - | - | - | - | - | **CRU** | R | R | - |
+| **Report Approval & Sign-Off** | - | - | - | - | - | - | **CRU** | R | - |
+| **Report Statutory Issuance** | - | - | - | **Dual** | - | - | **Dual** | R | - |
+| **Model Registry Governance** | - | - | - | - | - | - | - | R | **CRUD** |
+| **Immutable Audit Inspection** | R | R | R | R | R | R | R | **R** | - |
+
+#### 20.3.2 Dual-Control Cryptographic Workflow
+
+Sensitive actions cannot be performed unilaterally. The dual-control engine enforces a multi-signature challenge-response workflow:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor ACTOR1 as Initiating Examiner (ROLE-EXAMINER)
+    participant BFF as UFD BFF (/api/v1/cases/{id}/reports/{rid}/issue)
+    participant SEC as Cryptographic KeyStore / Token Engine
+    participant DB as UFD Persistence (ufd_dual_control_requests)
+    actor ACTOR2 as Approving Reviewer (ROLE-REPREV)
+    participant UFREDF as UFREDF Backend Engine
+
+    ACTOR1->>BFF: POST /reports/{rid}/issue-request {reason, nonce, private_key_sig}
+    BFF->>SEC: Verify ACTOR1 Ed25519 signature & role
+    BFF->>DB: Create DUAL_CONTROL_REQUEST (state: PENDING_SECOND_SIGNATURE, expires_in: 3600s)
+    BFF-->>ACTOR1: Return 202 Accepted {request_id, challenge_token, expires_at}
+
+    Note over BFF,ACTOR2: Out-of-band notification dispatched to Reviewer Queue
+
+    ACTOR2->>BFF: POST /reports/{rid}/issue-confirm {request_id, approver_sig, decision: APPROVE}
+    BFF->>SEC: Verify ACTOR2 Ed25519 signature & distinct role (ACTOR2 != ACTOR1)
+    BFF->>DB: Update DUAL_CONTROL_REQUEST (state: CONSUMED, approver: ACTOR2)
+    BFF->>UFREDF: Execute Statutory Dossier Issuance (Signatures: [ACTOR1, ACTOR2])
+    UFREDF-->>BFF: Dossier Issued (Status: ISSUED, Merkle Hash: 0x8f2a...)
+    BFF-->>ACTOR2: Return 200 OK {status: ISSUED, dossier_urn, issued_at}
+```
+
+---
+
+### 20.4 Case Creation, Evidence Intake & Navigation Workflow
+
+#### 20.4.1 Case Creation & Evidence Registration Sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor IO as Investigating Officer (ROLE-IO)
+    participant BFF as UFD BFF API
+    participant CEIPL as CEIPL Evidence Vault
+    participant CMMS as CMMS Metadata Engine
+    participant CELERY as Redis / Celery Task Queue
+    participant DB as Postgres Master (Cases & Exhibits)
+
+    IO->>BFF: POST /api/v1/cases {case_number, title, jurisdiction, priority}
+    BFF->>DB: INSERT INTO cases (status: OPEN, created_by: IO.id)
+    BFF-->>IO: Return 201 Created {case_id: "CASE-2026-BH-0842"}
+
+    IO->>BFF: POST /api/v1/cases/{case_id}/evidence/register (multipart/form-data: Exhibit File)
+    BFF->>CEIPL: Ingest Raw Bitstream (Pre-write SHA-256 calculation)
+    CEIPL->>CEIPL: Write WORM Storage (POSIX 0400 / S3 Object Lock)
+    CEIPL->>CEIPL: Post-write Readback Fixity Audit (Match SHA-256)
+    CEIPL->>DB: Record Exhibit Ingestion & Fixity Record
+    CEIPL-->>BFF: Ingest Confirmed {evidence_id: "EVID-IMG-0012", sha256: "3a7b...", status: VERIFIED}
+
+    BFF->>CELERY: Dispatch Background Tasks (CMMS Metadata Extraction, Fixity Audit)
+    CELERY->>CMMS: Extract & Normalize Binary Headers (EXIF/XMP/IPTC/RIFF/ISOBMFF)
+    CMMS->>DB: Record Normalized Metadata Manifest
+    BFF-->>IO: Return 201 Created {evidence_id, fixity: VERIFIED, processing_state: QUEUED}
+```
+
+---
+
+### 20.5 Modality-Specific Examiner Workspaces
+
+A forensic workbench must respect the physical properties of distinct evidentiary media rather than forcing all media types into an identical visual template.
+
+#### 20.5.1 Image Forensic Workspace (AIF)
+1. **Synchronized Dual-Canvas Viewport:** Side-by-side rendering of the master exhibit and derived forensic artefacts (Error Level Analysis [ELA] maps, noise residual heatmaps, copy-move clone vector arrows). Panning and zoom ratios ($10\% \text{ to } 3200\%$) remain locked across canvases.
+2. **Interactive Manipulation Overlays:** Suspicious regions localised by IMLF are rendered as non-destructive SVG bounding boxes with Intersection-over-Union (IoU) scores, pixel coordinate tuples, and model confidence scores.
+3. **Quantization & Chrominance Inspector:** Visualisation of JPEG Discrete Cosine Transform (DCT) coefficient histograms, double compression blocking artefacts, and quantization tables (DQT).
+4. **Master Pixel Immutability:** Canvas interactions execute purely in GPU framebuffers via WebGL/Canvas2D shaders; master evidence bitstreams are strictly mounted read-only (`POSIX 0400`).
+
+#### 20.5.2 Audio Forensic Workspace (AURAS)
+1. **Interactive WebAudio Spectrogram:** Renders time-frequency representations (STFT, Mel-scale, Log-frequency) up to $24\text{ kHz}$ with dynamic contrast, colormap selection (Viridis, Magma, Grayscale), and frequency zoom.
+2. **Speech Interval & Diarization Tracks:** Visual tracks for Silero Voice Activity Detection (VAD) segments, ECAPA-TDNN speaker turn intervals, and language identification intervals.
+3. **Splice & Edit Markers:** Candidate splice boundaries localised by AESL are flagged with sample-accurate index markers, uncertainty bounds ($\pm \Delta s$), and phase discontinuity indicators.
+4. **Audio Playback Safeguards:** Zero autoplay under all conditions; playback volume is clamped to safe acoustic thresholds; derived denoised or bandpass-filtered streams are prominently watermarked and visually differentiated from the raw exhibit stream.
+
+#### 20.5.3 Video & CCTV Workspace (VISTA)
+1. **Frame-Accurate Scrubber:** Scrubber timeline synchronized to Presentation Timestamps (PTS) and Decode Timestamps (DTS), distinguishing frame display order from bitstream storage order.
+2. **Temporal Compression Diagnostics:** Explicit categorization of frame types (Intra [I], Predicted [P], Bi-directional [B]). Normal B-frame reordering is explicitly handled to prevent false tampering alarms.
+3. **CCTV Metadata & Overlay Verification:** Extraction and optical inspection of burned-in timestamp overlays compared against container timing headers and camera export sidecars.
+4. **Lip-Sync & Deepfake Localisation:** Visual lip-sync correspondence tracks (SyncNet confidence curves) aligned with facial landmark bounding boxes and suspicious temporal sequences.
+
+#### 20.5.4 Offline Network Forensics Workspace (ONTF)
+1. **PCAP Flow Hierarchy:** Interactive flow table displaying IP 5-tuples (Source IP, Source Port, Destination IP, Destination Port, Transport Protocol), packet counts, byte counts, and TCP state flags.
+2. **Air-Gapped Offline Processing:** Network captures are parsed 100% locally via offline Zeek and PyShark engines with zero outbound network connectivity.
+3. **Privacy Redaction:** Sensitive application-layer payloads (passwords, PII) are automatically masked in the UI view unless explicitly unlocked by `ROLE-CASEADMIN`.
+
+#### 20.5.5 Geospatial Workspace (AIF-GEO)
+1. **Offline Tile Canvas:** Map rendering using local vector/raster tiles (Leaflet/MapLibre) packaged directly within the air-gapped system.
+2. **GPS Uncertainty Ellipses:** Coordinates extracted from EXIF tags or sidecars are rendered with horizontal and vertical dilution of precision (HDOP/VDOP) uncertainty boundaries.
+3. **Metadata Claim vs. Ground Truth:** Map markers are explicitly labeled as "Metadata Reported Claim" and are never presented as verified capture ground truth without independent temporal and environmental corroboration.
+
+---
+
+### 20.6 Unified Findings Engine & 10-State Review Lifecycle
+
+Every forensic finding generated by AIF, AURAS, VISTA, ONTF, or CDVF is ingested into a unified, traceable finding lifecycle.
+
+```mermaid
+stateDiagram-v2
+    [*] --> NEW: Subsystem Analysis Completes
+    NEW --> UNASSIGNED: Ingested into Findings Register
+    UNASSIGNED --> ASSIGNED: Case Admin Allocates to Examiner
+    ASSIGNED --> UNDER_REVIEW: Examiner Opens Finding
+
+    state UNDER_REVIEW {
+        [*] --> Inspecting
+        Inspecting --> Annotating: Add Observation / Methodology
+        Annotating --> EvaluatingCalibration: Check OOD / Calibration Curve
+    }
+
+    UNDER_REVIEW --> CORROBORATED: Independent Subsystem Confirms
+    UNDER_REVIEW --> CONTRADICTED: Subsystem or Physics Contradicts
+    UNDER_REVIEW --> INCONCLUSIVE: Signal Degraded / OOD Triggered
+    UNDER_REVIEW --> REQUIRES_FURTHER_ANALYSIS: Request Additional Engine Run
+
+    REQUIRES_FURTHER_ANALYSIS --> ASSIGNED: Re-queued for Processing
+
+    CORROBORATED --> REVIEW_COMPLETED: Examiner Completes Technical Sign-Off
+    CONTRADICTED --> REVIEW_COMPLETED: Examiner Rejects Finding with Explanation
+    INCONCLUSIVE --> REVIEW_COMPLETED: Examiner Notes Technical Limitation
+
+    REVIEW_COMPLETED --> SUPERSEDED: Retested with Higher-Fidelity Model
+    SUPERSEDED --> [*]
+    REVIEW_COMPLETED --> [*]
+```
+
+#### 20.6.1 Finding Review States
+
+1. `NEW`: Finding generated by backend analysis engine; pending ingestion review.
+2. `UNASSIGNED`: Ingested into case findings inventory; awaiting examiner assignment.
+3. `ASSIGNED`: Assigned to a certified forensic examiner for evaluation.
+4. `UNDER_REVIEW`: Examiner actively inspecting overlays, spectra, or raw features.
+5. `CORROBORATED`: Finding verified by cross-subsystem evidence or independent analysis.
+6. `CONTRADICTED`: Finding refuted by contradictory metadata, physics, or multi-modal mismatch.
+7. `INCONCLUSIVE`: Insufficient evidence, degraded signal quality, or model OOD boundary triggered.
+8. `REQUIRES_FURTHER_ANALYSIS`: Additional tool execution or manual laboratory analysis requested.
+9. `REVIEW_COMPLETED`: Formal technical review completed and locked against further edits.
+10. `SUPERSEDED`: Finding replaced by a higher-fidelity model run; historical record preserved.
+
+---
+
+### 20.7 Unified Timeline & Cross-Source Temporal Verification (CSTV)
+
+The timeline workspace reconstructs the temporal sequence of events across diverse media exhibits:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor EXAMINER as Forensic Examiner
+    participant UI as UFW Timeline Scrubber
+    participant BFF as UFD BFF (/api/v1/cases/{id}/timeline)
+    participant CSTV as CSTV Temporal Engine
+    participant DB as Postgres Exhibits & Events
+
+    EXAMINER->>UI: Select Exhibits (Image-1, Audio-1, CCTV-1, PCAP-1)
+    UI->>BFF: GET /cases/{id}/timeline?evidence_ids=...&align=true
+    BFF->>CSTV: Request Multi-Source Timeline Alignment & Clock Drift Models
+    CSTV->>DB: Query Raw Timestamps, PTS Offsets, NTP Flags, Flash Events
+    CSTV->>CSTV: Compute Clock Drift Regression: delta_i(t) = alpha_i * t + beta_i
+    CSTV->>CSTV: Construct Allen Interval Algebra Temporal Relations
+    CSTV-->>BFF: Return Aligned Timeline Manifest (Raw + Corrected Timestamps + Uncertainty)
+    BFF-->>UI: 200 OK (TimelineEvent Collection)
+    UI->>UI: Render Multi-Track Interactive Scrubber
+    Note over UI: Displays Raw vs Corrected Time; highlights temporal anomalies in amber
+```
+
+---
+
+### 20.8 Cross-Modal Deepfake Validation & Disagreement Analysis (CDVF)
+
+The cross-modal workspace evaluates multi-modal authenticity without collapsing separate signals into deceptive composite scores:
+
+```mermaid
+flowchart TD
+    subgraph MULTIMODAL_INPUTS["Multi-Modal Evidence Inputs"]
+        AUD_FEAT["AURAS Audio Findings\n(Voice Clone / Pitch Jump / Splice)"]
+        VID_FEAT["VISTA Video Findings\n(Face Warp / Blinking / Frame Cadence)"]
+        LIP_FEAT["Cross-Modal Lip-Sync\n(SyncNet Distance / Landmark Offsets)"]
+        META_FEAT["CMMS Metadata Manifest\n(Encoding Tools / Container Signatures)"]
+    end
+
+    subgraph CDVF_ENGINE["CDVF Correlation & Calibration Engine"]
+        ALIGN["Temporal & Spatial Alignment\n(Audio-Video Timestamp Synchronizer)"]
+        CALIB["Model Calibration & OOD Gating\n(Temperature Scaling / Platt Scaling)"]
+        CONFLICT_MATRIX["Cross-Modal Disagreement Matrix\n(7-Code Conflict Taxonomy)"]
+    end
+
+    subgraph WORKBENCH_PRESENTATION["Unified Forensic Workbench Presentation"]
+        DAG_VIEW["Evidence DAG Node Visualizer\n(Zero Composite Score Averaging)"]
+        CONFLICT_BANNER["Prominent Conflict Warning Banner\n(Highlights Audio vs Video Discrepancies)"]
+        INCONC_CARD["Inconclusive Reason Breakdown\n(OOD / Low SNR / High Compression)"]
+    end
+
+    AUD_FEAT & VID_FEAT & LIP_FEAT & META_FEAT --> ALIGN
+    ALIGN --> CALIB
+    CALIB --> CONFLICT_MATRIX
+    CONFLICT_MATRIX --> DAG_VIEW & CONFLICT_BANNER & INCONC_CARD
+```
+
+#### 20.8.1 Seven-Code Conflict Taxonomy
+1. `CORROBORATED`: Modalities independently corroborate manipulation in identical temporal/spatial regions.
+2. `PARTIALLY_CORROBORATED`: One modality indicates manipulation while secondary modality shows anomalous but non-diagnostic signals.
+3. `CONFLICTING`: Deepfake detected in audio while video is verified authentic camera output (or vice versa).
+4. `CORRELATION_NOT_ESTABLISHED`: Evidence tracks cannot be aligned temporally with sufficient precision ($\Delta t > 250\text{ ms}$).
+5. `INSUFFICIENT_DATA`: One or more modalities missing, corrupted, or lacking sufficient bandwidth.
+6. `OUTSIDE_VALIDATED_SCOPE`: Input data exceeds model operational bounds (e.g. compression ratio too high, OOD background noise).
+7. `INCONCLUSIVE`: Analysis yielded ambiguous probabilities ($0.40 \le P_{\text{cal}} \le 0.60$) requiring human examiner adjudication.
+
+---
+
+### 20.9 Evidence Integrity & Custody Lockout Engine (CEIPL)
+
+When CEIPL detects an evidence integrity mismatch (pre-decode hash failure, post-write readback mismatch, or broken Merkle chain), the workbench instantly locks out standard workflows:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor EXAMINER as Forensic Examiner
+    participant UI as UFW Application Shell
+    participant BFF as UFD BFF API
+    participant CEIPL as CEIPL Evidence Vault
+    actor CUSTODIAN as Evidence Custodian (ROLE-CUSTODIAN)
+
+    EXAMINER->>UI: Navigate to Evidence Detail (/cases/{id}/evidence/{eid})
+    UI->>BFF: GET /api/v1/cases/{id}/evidence/{eid}/integrity
+    BFF->>CEIPL: Query Live Fixity Status & Merkle Audit Proof
+    CEIPL->>CEIPL: Check SHA-256 against Recorded Intake Digest
+    alt Hash Verification Matches (Observed == Expected)
+        CEIPL-->>BFF: Status: VERIFIED (Digest: 3a7b..., Signed: Ed25519)
+        BFF-->>UI: 200 OK (Integrity Verified Badge: Green Circle + Text)
+    else Hash Verification Fails (Observed != Expected)
+        CEIPL-->>BFF: Status: FAILED (Observed: 9f1c..., Expected: 3a7b...)
+        BFF-->>UI: 200 OK (Status: INTEGRITY_VIOLATION, Quarantined: True)
+        UI->>UI: Trigger Full Quarantine Lockout Banner (Red Octagon)
+        UI->>UI: Disable Analysis Tool Execution & Report Export Buttons
+        UI-->>EXAMINER: Display Incident ID & Require Custodian Resolution
+    end
+```
+
+---
+
+### 20.10 UFREDF Report Dossier Compilation & Approval Lifecycle
+
+The workbench manages the Section 65B/63 BSA report workflow without implementing client-side PDF generation:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor EXAMINER as Forensic Examiner (ROLE-EXAMINER)
+    participant UI as UFW Report Workspace
+    participant BFF as UFD BFF API
+    participant UFREDF as UFREDF Backend Engine
+    actor TECHREV as Technical Reviewer (ROLE-TECHREV)
+    actor REPREV as Report Reviewer (ROLE-REPREV)
+
+    EXAMINER->>UI: Create Draft Dossier (Select Findings, Timeline, Exhibits)
+    UI->>BFF: POST /api/v1/cases/{id}/reports {type: "SECTION_63_BSA", finding_ids: [...]}
+    BFF->>UFREDF: Compile Draft Snapshot (State: DRAFT)
+    UFREDF-->>BFF: Draft Created {report_id: "REP-2026-0042", version: 1}
+    BFF-->>UI: Return 201 Created
+
+    EXAMINER->>UI: Submit for Technical Review
+    UI->>BFF: POST /api/v1/reports/{report_id}/submit-review
+    BFF->>UFREDF: Transition State -> UNDER_REVIEW
+
+    TECHREV->>UI: Review Technical Methodology & Calibration Bounds
+    TECHREV->>BFF: POST /api/v1/reports/{report_id}/technical-approve {notes, sig}
+    BFF->>UFREDF: Transition State -> APPROVED_TECHNICAL
+
+    REPREV->>UI: Perform Formal Legal & Statutory Review
+    REPREV->>BFF: POST /api/v1/reports/{report_id}/final-approve {cert_notes, sig}
+    BFF->>UFREDF: Transition State -> APPROVED
+
+    Note over EXAMINER,REPREV: Dual-Control Issuance Workflow Initiated
+    EXAMINER->>BFF: POST /api/v1/reports/{report_id}/issue-initiate
+    REPREV->>BFF: POST /api/v1/reports/{report_id}/issue-confirm
+    BFF->>UFREDF: Generate Immutable PDF/A-1b & Detached Ed25519 Signatures
+    UFREDF-->>BFF: Dossier Issued (State: ISSUED, SHA-256: 0x4a9e...)
+    BFF-->>UI: Report Issued Successfully (Court-Admissible Package Ready)
+```
+
+---
+
+### 20.11 Backend-for-Frontend (BFF) Aggregation & Partial Failure Resilience
+
+To prevent the workbench from crashing when a single backend subsystem experiences downtime, the BFF aggregation engine enforces isolated async fetching with strict circuit breakers:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant UI as UFW Case Workspace
+    participant BFF as UFD BFF Aggregation Controller
+    participant CEIPL as CEIPL API (Latency: 20ms)
+    participant AIF as AIF API (Latency: 45ms)
+    participant VISTA as VISTA API (Timeout / 503 Outage)
+    participant UFREDF as UFREDF API (Latency: 15ms)
+
+    UI->>BFF: GET /api/v1/cases/{id}/overview
+    par Parallel Subsystem Queries
+        BFF->>CEIPL: GET /integrity-status
+        BFF->>AIF: GET /image-findings
+        BFF->>VISTA: GET /video-findings
+        BFF->>UFREDF: GET /report-status
+    end
+
+    CEIPL-->>BFF: 200 OK {fixity: VERIFIED}
+    AIF-->>BFF: 200 OK {findings_count: 3}
+    VISTA--xBFF: 504 Gateway Timeout (Circuit Breaker Tripped)
+    UFREDF-->>BFF: 200 OK {draft_reports: 1}
+
+    BFF->>BFF: Synthesize CaseOverviewResponse
+    Note over BFF: VISTA module flagged as 'UNAVAILABLE'; remaining modules intact
+    BFF-->>UI: 200 OK {status: "PARTIAL_SUCCESS", modules: {ceipl: OK, aif: OK, vista: UNAVAILABLE, ufredf: OK}}
+    UI->>UI: Render Case Overview; VISTA widget displays graceful retry button; case remains 100% operational
+```
+
+---
+
+### 20.12 Pydantic v2 API & Contract Schemas
+
+```python
+"""UFD Pydantic v2 API Data Contracts & Workbench Schemas."""
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+from pydantic import BaseModel, Field, HttpUrl, UUID4
+
+
+# --- Core Enumerations ---
+
+class UserRole(str, Enum):
+    SYSADMIN = "ROLE-SYSADMIN"
+    CASEADMIN = "ROLE-CASEADMIN"
+    IO = "ROLE-IO"
+    EXAMINER = "ROLE-EXAMINER"
+    CUSTODIAN = "ROLE-CUSTODIAN"
+    TECHREV = "ROLE-TECHREV"
+    REPREV = "ROLE-REPREV"
+    AUDITOR = "ROLE-AUDITOR"
+    MODELADMIN = "ROLE-MODELADMIN"
+
+
+class EvidenceCategory(str, Enum):
+    IMAGE = "IMAGE"
+    AUDIO = "AUDIO"
+    VIDEO = "VIDEO"
+    CCTV = "CCTV"
+    PCAP = "PCAP"
+    SIDECAR = "SIDECAR"
+    GEOTRACK = "GEOTRACK"
+    LOG = "LOG"
+    DOCUMENT = "DOCUMENT"
+
+
+class FixityStatus(str, Enum):
+    VERIFIED = "VERIFIED"
+    WARNING = "WARNING"
+    FAILED = "FAILED"
+    PENDING = "PENDING"
+    UNVERIFIED = "UNVERIFIED"
+
+
+class FindingReviewState(str, Enum):
+    NEW = "NEW"
+    UNASSIGNED = "UNASSIGNED"
+    ASSIGNED = "ASSIGNED"
+    UNDER_REVIEW = "UNDER_REVIEW"
+    CORROBORATED = "CORROBORATED"
+    CONTRADICTED = "CONTRADICTED"
+    INCONCLUSIVE = "INCONCLUSIVE"
+    REQUIRES_FURTHER_ANALYSIS = "REQUIRES_FURTHER_ANALYSIS"
+    REVIEW_COMPLETED = "REVIEW_COMPLETED"
+    SUPERSEDED = "SUPERSEDED"
+
+
+class ConflictTaxonomy(str, Enum):
+    CORROBORATED = "CORROBORATED"
+    PARTIALLY_CORROBORATED = "PARTIALLY_CORROBORATED"
+    CONFLICTING = "CONFLICTING"
+    CORRELATION_NOT_ESTABLISHED = "CORRELATION_NOT_ESTABLISHED"
+    INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
+    OUTSIDE_VALIDATED_SCOPE = "OUTSIDE_VALIDATED_SCOPE"
+    INCONCLUSIVE = "INCONCLUSIVE"
+
+
+class ReportLifecycleState(str, Enum):
+    DRAFT = "DRAFT"
+    GENERATED = "GENERATED"
+    UNDER_REVIEW = "UNDER_REVIEW"
+    REVIEW_REJECTED = "REVIEW_REJECTED"
+    APPROVED = "APPROVED"
+    SIGNED = "SIGNED"
+    ISSUED = "ISSUED"
+    SUPERSEDED = "SUPERSEDED"
+    WITHDRAWN = "WITHDRAWN"
+
+
+# --- Case Management Contracts ---
+
+class CaseCreateRequest(BaseModel):
+    case_number: str = Field(..., min_length=3, max_length=64, description="Police case reference")
+    title: str = Field(..., min_length=5, max_length=255)
+    description: Optional[str] = Field(None, max_length=4000)
+    category: str = Field(..., description="e.g. CYBER_FRAUD, DEEPFAKE_FORGERY")
+    jurisdiction: str = Field(..., description="Police station or FSL unit")
+    priority: str = Field(default="NORMAL", description="LOW, NORMAL, HIGH, URGENT")
+    assigned_examiner_ids: List[UUID4] = Field(default_factory=list)
+
+
+class CaseResponse(BaseModel):
+    case_id: UUID4
+    case_number: str
+    title: str
+    status: str
+    priority: str
+    created_at: datetime
+    updated_at: datetime
+    assigned_examiners: List[str]
+    evidence_count: int
+    findings_count: int
+    has_integrity_incidents: bool
+
+
+class CaseOverviewResponse(BaseModel):
+    case_id: UUID4
+    case_number: str
+    title: str
+    status: str
+    total_evidence: int
+    verified_evidence: int
+    quarantined_evidence: int
+    total_findings: int
+    unreviewed_findings: int
+    cross_modal_conflicts: int
+    active_reports_count: int
+    subsystem_health: Dict[str, str]
+
+
+# --- Evidence Inventory & Detail Contracts ---
+
+class EvidenceInventoryItem(BaseModel):
+    evidence_id: UUID4
+    case_id: UUID4
+    original_filename: str
+    category: EvidenceCategory
+    detected_mime: str
+    file_size_bytes: int
+    sha256_digest: str
+    acquisition_timestamp: Optional[datetime]
+    fixity_status: FixityStatus
+    processing_state: str
+    findings_count: int
+    is_quarantined: bool
+
+
+class EvidenceDetailResponse(BaseModel):
+    evidence_id: UUID4
+    case_id: UUID4
+    original_filename: str
+    category: EvidenceCategory
+    detected_mime: str
+    file_size_bytes: int
+    pre_write_sha256: str
+    post_write_sha256: str
+    storage_uri: str
+    fixity_status: FixityStatus
+    is_quarantined: bool
+    quarantine_reason: Optional[str]
+    custody_events_count: int
+    derived_artifacts_count: int
+    findings_count: int
+    metadata_summary: Dict[str, Any]
+
+
+# --- Modality Workspace Contracts ---
+
+class AIFWorkspaceResponse(BaseModel):
+    evidence_id: UUID4
+    image_width: int
+    image_height: int
+    color_channels: int
+    has_exif: bool
+    manipulation_heatmaps: List[Dict[str, Any]]
+    suspicious_regions: List[Dict[str, Any]]
+    ela_available: bool
+    dqt_analysis: Dict[str, Any]
+
+
+class AURASWorkspaceResponse(BaseModel):
+    evidence_id: UUID4
+    duration_seconds: float
+    sample_rate_hz: int
+    channels: int
+    waveform_uri: str
+    spectrogram_uri: str
+    speech_intervals: List[Dict[str, Any]]
+    diarization_intervals: List[Dict[str, Any]]
+    splice_candidates: List[Dict[str, Any]]
+
+
+class VISTAWorkspaceResponse(BaseModel):
+    evidence_id: UUID4
+    total_frames: int
+    duration_seconds: float
+    frame_rate_fps: float
+    codec_fourcc: str
+    has_cctv_overlay: bool
+    b_frame_count: int
+    suspicious_sequences: List[Dict[str, Any]]
+    pts_dts_alignment_ok: bool
+
+
+# --- Unified Findings & Annotations ---
+
+class FindingSummary(BaseModel):
+    finding_id: UUID4
+    case_id: UUID4
+    evidence_id: UUID4
+    source_subsystem: str
+    detector_id: str
+    severity: str
+    raw_score: float
+    calibrated_probability: Optional[float]
+    is_ood: bool
+    review_state: FindingReviewState
+    assigned_examiner: Optional[str]
+    created_at: datetime
+
+
+class ExaminerAnnotationCreate(BaseModel):
+    finding_id: UUID4
+    annotation_type: str = Field(..., description="OBSERVATION, METHODOLOGY, LIMITATION")
+    content: str = Field(..., min_length=5, max_length=5000)
+    decision: Optional[FindingReviewState] = None
+
+
+class FindingReviewTransitionRequest(BaseModel):
+    target_state: FindingReviewState
+    justification: str = Field(..., min_length=10, max_length=2000)
+
+
+# --- Unified Timeline Contracts ---
+
+class TimelineEventItem(BaseModel):
+    event_id: UUID4
+    evidence_id: UUID4
+    modality: EvidenceCategory
+    raw_timestamp: datetime
+    normalized_utc_timestamp: datetime
+    corrected_timestamp: Optional[datetime]
+    uncertainty_window_seconds: float
+    event_description: str
+    is_temporal_anomaly: bool
+
+
+class TimelineQueryResponse(BaseModel):
+    case_id: UUID4
+    total_events: int
+    drift_models: Dict[str, Any]
+    events: List[TimelineEventItem]
+
+
+# --- Cross-Modal & CDVF Contracts ---
+
+class CrossModalCorrelationItem(BaseModel):
+    correlation_id: UUID4
+    evidence_ids: List[UUID4]
+    modalities_compared: List[EvidenceCategory]
+    conflict_code: ConflictTaxonomy
+    lip_sync_confidence: Optional[float]
+    summary_explanation: str
+    inconclusive_reasons: List[str]
+
+
+class CrossModalMatrixResponse(BaseModel):
+    case_id: UUID4
+    correlations: List[CrossModalCorrelationItem]
+    has_active_conflicts: bool
+
+
+# --- Reports & Dossier Contracts ---
+
+class ReportSummaryItem(BaseModel):
+    report_id: UUID4
+    case_id: UUID4
+    report_number: str
+    title: str
+    report_type: str
+    lifecycle_state: ReportLifecycleState
+    compiled_by: str
+    approved_by: Optional[str]
+    issued_at: Optional[datetime]
+
+
+class DualControlIssueRequest(BaseModel):
+    report_id: UUID4
+    reason: str = Field(..., min_length=10)
+    initiator_signature: str = Field(..., description="Base64 Ed25519 signature")
+
+
+class DualControlIssueConfirm(BaseModel):
+    request_id: UUID4
+    approver_decision: str = Field(..., description="APPROVE or REJECT")
+    approver_signature: str = Field(..., description="Base64 Ed25519 signature")
+    justification: str = Field(..., min_length=10)
+```
+
+---
+
+### 20.13 Database & Persistence Model
+
+The dashboard avoids duplicating forensic detection tables or master evidence manifests. It persists only user preferences, review state annotations, search filters, and task assignments:
+
+```sql
+-- UFD Workbench Persistent Tables (PostgreSQL 16+)
+
+-- 1. Examiner Workspace Preferences
+CREATE TABLE ufd_user_preferences (
+    user_id UUID PRIMARY KEY,
+    theme VARCHAR(32) DEFAULT 'forensic-dark',
+    default_spectrogram_colormap VARCHAR(32) DEFAULT 'viridis',
+    default_panning_ratio NUMERIC(5,2) DEFAULT 1.0,
+    keyboard_shortcuts_enabled BOOLEAN DEFAULT TRUE,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. Case Search & Filter Presets
+CREATE TABLE ufd_saved_filters (
+    filter_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    case_id UUID REFERENCES cases(id) ON DELETE CASCADE,
+    filter_name VARCHAR(128) NOT NULL,
+    filter_criteria JSONB NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 3. Examiner Annotations & Adjudications
+CREATE TABLE ufd_examiner_annotations (
+    annotation_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    finding_id UUID NOT NULL,
+    case_id UUID NOT NULL,
+    examiner_id UUID NOT NULL,
+    examiner_role VARCHAR(64) NOT NULL,
+    annotation_type VARCHAR(64) NOT NULL,
+    content TEXT NOT NULL,
+    previous_state VARCHAR(64),
+    new_state VARCHAR(64),
+    cryptographic_signature TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. Prioritized Task & Review Queue
+CREATE TABLE ufd_review_tasks (
+    task_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    case_id UUID NOT NULL,
+    evidence_id UUID,
+    finding_id UUID,
+    assigned_role VARCHAR(64) NOT NULL,
+    assigned_user_id UUID,
+    priority VARCHAR(32) DEFAULT 'NORMAL',
+    task_type VARCHAR(64) NOT NULL,
+    status VARCHAR(32) DEFAULT 'PENDING',
+    due_date TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    completed_at TIMESTAMPTZ
+);
+
+-- 5. Dual-Control Authorization Requests
+CREATE TABLE ufd_dual_control_requests (
+    request_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    case_id UUID NOT NULL,
+    action_type VARCHAR(64) NOT NULL,
+    target_entity_id UUID NOT NULL,
+    initiator_user_id UUID NOT NULL,
+    initiator_signature TEXT NOT NULL,
+    initiator_timestamp TIMESTAMPTZ DEFAULT NOW(),
+    approver_user_id UUID,
+    approver_signature TEXT,
+    approver_timestamp TIMESTAMPTZ,
+    status VARCHAR(32) DEFAULT 'PENDING_SECOND_SIGNATURE',
+    expires_at TIMESTAMPTZ NOT NULL
+);
+
+-- Indexes for Case Scoping & RLS
+CREATE INDEX idx_ufd_annotations_finding ON ufd_examiner_annotations(finding_id);
+CREATE INDEX idx_ufd_annotations_case ON ufd_examiner_annotations(case_id);
+CREATE INDEX idx_ufd_tasks_assigned_user ON ufd_review_tasks(assigned_user_id, status);
+CREATE INDEX idx_ufd_dual_control_pending ON ufd_dual_control_requests(status) WHERE status = 'PENDING_SECOND_SIGNATURE';
+```
+
+---
+
+### 20.14 Proposed Logical REST API Specifications
+
+The following endpoints specify the complete UFD BFF route contract:
+
+| Method | Route Path | Authorized Roles | Request Contract | Response Contract | Error Codes |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/dashboard/overview` | All authenticated | Query params | `DashboardOverviewResponse` | `401, 403` |
+| `GET` | `/api/v1/cases` | All authenticated | Pagination / Filter | `List[CaseResponse]` | `401, 403` |
+| `POST`| `/api/v1/cases` | CASEADMIN | `CaseCreateRequest` | `CaseResponse` | `400, 401, 403, 409` |
+| `GET` | `/api/v1/cases/{case_id}` | Assigned roles | Path `case_id` | `CaseResponse` | `401, 403, 404` |
+| `GET` | `/api/v1/cases/{case_id}/overview` | Assigned roles | Path `case_id` | `CaseOverviewResponse` | `401, 403, 404` |
+| `GET` | `/api/v1/cases/{case_id}/evidence` | Assigned roles | Pagination / Filter | `List[EvidenceInventoryItem]`| `401, 403, 404` |
+| `GET` | `/api/v1/evidence/{evidence_id}` | Assigned roles | Path `evidence_id` | `EvidenceDetailResponse` | `401, 403, 404` |
+| `GET` | `/api/v1/evidence/{evidence_id}/aif` | EXAMINER, TECHREV | Path `evidence_id` | `AIFWorkspaceResponse` | `401, 403, 404` |
+| `GET` | `/api/v1/evidence/{evidence_id}/auras`| EXAMINER, TECHREV | Path `evidence_id` | `AURASWorkspaceResponse`| `401, 403, 404` |
+| `GET` | `/api/v1/evidence/{evidence_id}/vista`| EXAMINER, TECHREV | Path `evidence_id` | `VISTAWorkspaceResponse`| `401, 403, 404` |
+| `GET` | `/api/v1/cases/{case_id}/findings` | Assigned roles | Filter by severity | `List[FindingSummary]` | `401, 403, 404` |
+| `POST`| `/api/v1/findings/{finding_id}/annotations` | EXAMINER, TECHREV | `ExaminerAnnotationCreate`| `FindingSummary` | `400, 401, 403, 404` |
+| `POST`| `/api/v1/findings/{finding_id}/review` | EXAMINER, TECHREV | `FindingReviewTransitionRequest`| `FindingSummary`| `400, 401, 403, 409` |
+| `GET` | `/api/v1/cases/{case_id}/timeline` | Assigned roles | Filter by modalities | `TimelineQueryResponse` | `401, 403, 404` |
+| `GET` | `/api/v1/cases/{case_id}/cross-modal`| Assigned roles | Filter by conflict | `CrossModalMatrixResponse` | `401, 403, 404` |
+| `GET` | `/api/v1/cases/{case_id}/reports` | Assigned roles | Filter by state | `List[ReportSummaryItem]` | `401, 403, 404` |
+| `POST`| `/api/v1/reports/{report_id}/issue-request` | EXAMINER | `DualControlIssueRequest`| `DualControlResponse` | `400, 401, 403, 409` |
+| `POST`| `/api/v1/reports/{report_id}/issue-confirm` | REPREV | `DualControlIssueConfirm`| `ReportSummaryItem` | `400, 401, 403, 409` |
+| `GET` | `/api/v1/review-queue` | EXAMINER, TECHREV | Priority / Status | `List[ReviewQueueTaskItem]` | `401, 403` |
+| `GET` | `/api/v1/audit/events` | AUDITOR, SYSADMIN | Date / Case filter | `List[AuditEventItem]` | `401, 403` |
+
+---
+
+### 20.15 Accessibility Architecture (WCAG 2.2 Level AA)
+
+The workbench is strictly engineered to satisfy **W3C WCAG 2.2 Level AA**:
+
+1. **Non-Colour Dependent Status Encoding (SC 1.4.1):** All evidence and finding states use distinct geometric shapes and explicit text labels alongside semantic colors:
+   - `VERIFIED`: Solid Green Circle ($\bullet$) + Text `"VERIFIED"`
+   - `WARNING`: Amber Upright Triangle ($\blacktriangle$) + Text `"WARNING"`
+   - `FAILED / QUARANTINED`: Red Octagon ($\mkern1mu\blacklozenge\mkern-1mu$) + Text `"INTEGRITY FAILURE"`
+   - `INCONCLUSIVE`: Purple Rhombus ($\blacklozenge$) + Text `"INCONCLUSIVE"`
+2. **Keyboard Operability (SC 2.1.1 & 2.1.2):** Full keyboard navigation without mouse reliance:
+   - Video Scrubber: `Left/Right Arrow` (1 frame), `Shift + Left/Right` (1 second), `Space` (Play/Pause).
+   - Audio Zoom: `+` / `-` keys; `[` and `]` for interval selection.
+   - Dual-Canvas Image Panning: `W/A/S/D` for synchronized pan; `Z` / `Shift+Z` for zoom.
+3. **High Contrast & Typography (SC 1.4.3 & 1.4.11):** Contrast ratio of $\ge 4.5:1$ for body text and $\ge 3:1$ for UI control boundaries and focus indicators.
+4. **Tabular Alternatives for Media (SC 1.1.1):** Waveforms, spectrograms, and timeline graphs expose an underlying structured HTML table toggleable via `Alt+T` for screen-reader accessibility.
+5. **Screen Reader Live Regions (SC 4.1.3):** Background task completions and integrity alerts announce via `aria-live="assertive"`.
+
+---
+
+### 20.16 Security, Privacy & Air-Gap Compliance (OWASP ASVS v4.0.3 Level 2)
+
+1. **Strict Content Security Policy (CSP):** `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; form-action 'self';`
+2. **Anti-XSS & HTML Sanitization:** All extracted EXIF text, user annotations, and sidecar headers are sanitized using DOMPurify before DOM insertion.
+3. **Session Management:** Secure HTTP-only, SameSite=Strict cookies; absolute session timeout at $12\text{ hours}$; idle timeout at $30\text{ minutes}$.
+4. **Air-Gap Guarantee:** Zero calls to external CDNs, Google Fonts, telemetry servers, or cloud AI endpoints. All map tiles, fonts, and model weights are packaged locally.
+5. **Zero Cross-Case Data Leakage:** PostgreSQL Row-Level Security (RLS) dynamically filters all queries by the caller's authorized case membership.
+
+---
+
+### 20.17 Performance Benchmarks & Latency Budgets
+
+| Benchmark Scenario | Metric | Maximum Latency SLA | Evaluation Hardware Profile |
+| :--- | :--- | :---: | :--- |
+| **Initial Shell Load** | First Contentful Paint (FCP) | $\le 1.2\text{ s}$ | Baseline Air-Gapped Workstation |
+| **Dashboard Overview Render** | Time to Interactive (TTI) | $\le 1.8\text{ s}$ | (Intel Xeon 8-Core, 32GB RAM, |
+| **Case Inventory Query (1000 items)**| API Response + Render | $\le 300\text{ ms}$ | PCIe NVMe Storage, Localhost API) |
+| **Video Frame Scrub Step** | Scrubber Frame Step Latency | $\le 50\text{ ms}$ | Chrome / Edge Chromium WebGL2 |
+| **Audio Spectrogram Generation** | 10-minute audio file render | $\le 200\text{ ms}$ | Multi-threaded WebAudio STFT |
+| **Timeline Query (500 events)** | API Response + Layout | $\le 350\text{ ms}$ | PostgreSQL B-Tree Indexed |
+| **Dual-Canvas Synchronized Pan** | Frame Rate | $\ge 60\text{ FPS}$ | WebGL2 Hardware Accelerated |
+| **Dossier PDF Preview Render** | 50-page PDF/A-1b preview | $\le 1.5\text{ s}$ | Local PDF.js Canvas Rendering |
+
+---
+
+### 20.18 Twenty Scientific, Security & Operational Safeguards
+
+1. **Presentation Layer Invariant:** The dashboard is strictly a presentation and workflow layer; it never computes forensic algorithms or alters evidentiary data.
+2. **Backend Authority Invariant:** Backend subsystems remain the sole authoritative sources of truth for hashes, metadata, timestamps, and findings.
+3. **Honest Data State Invariant:** An unavailable service is never represented as a passed check; missing findings are never presented as authentic media.
+4. **Zero Silent Inconclusive Mutation:** An `INCONCLUSIVE` finding must never be converted or displayed as an affirmative `AUTHENTIC` verdict.
+5. **Score Semantic Integrity:** Model scores are strictly displayed according to their true semantic type; uncalibrated logits are never presented as calibrated probabilities.
+6. **Anti-Averaging Invariant:** Cross-modal agreement does not prove authenticity; multi-modal findings are presented as distinct nodes in an evidence DAG.
+7. **Master Evidence Immutability:** Interactive dashboard annotations, zoom operations, or filters never modify underlying WORM storage bitstreams.
+8. **Derived Artefact Lineage:** Every visualized derived representation (e.g. spectrogram, crop, denoised audio) links directly to its parent exhibit SHA-256.
+9. **Prominent Integrity Quarantine:** An exhibit failing CEIPL fixity displays an un-dismissible quarantine banner, disabling routine analysis workflows.
+10. **Custody Audit Independence:** The UI activity log does not replace the immutable, append-only CEIPL custody ledger.
+11. **Dual Timestamp Presentation:** Corrected timestamps from CSTV drift models are always presented alongside exact raw timestamps.
+12. **Metadata Attribution Transparency:** Externally enriched metadata is visually distinct from embedded binary tags.
+13. **Separation of Examiner Notes:** Human examiner annotations are stored in separate, immutable audit records, never overwriting automated findings.
+14. **Dual-Control Authorization:** Sensitive operational overrides require dual independent cryptographic sign-offs.
+15. **Backend-Enforced Authorization:** All permissions are validated on backend API endpoints; frontend UI element hiding is never treated as security.
+16. **Zero Cross-Case Data Leakage:** Search indexing, cache stores, and push notifications are strictly scoped by case authorization tokens.
+17. **Graceful Subsystem Degradation:** Failure of a single subsystem renders a localized error state without disabling the broader case workbench.
+18. **UFREDF Report Sovereignty:** Report compilation, signing, and issuance remain strictly governed by UFREDF backend lifecycle gates.
+19. **Air-Gap Operational Guarantee:** All workbench modules, map tiles, and waveform renderers execute 100% locally with zero external network calls.
+20. **OWASP ASVS Level 2 Compliance:** All endpoints enforce strict anti-CSRF, anti-XSS, parameterized queries, and secure session termination.
+
+---
+
+### 20.19 Technical Traceability Matrix (UFD-01 through UFD-100)
+
+| Requirement ID | Technical Specification Section | Target API Route / Contract | Target Persistence Entity | Verification Method | Planned Phase | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UFD-01 to UFD-06** | TRD §20.1, §20.2 (Architecture & Boundaries) | `/api/v1/dashboard/overview` | `cases`, `evidence` | Architecture Review / Contract Test | `UFD-A0`, `UFD-A1` | `PLANNED` |
+| **UFD-07 to UFD-13** | TRD §20.3 (RBAC & Dual-Control) | `/api/v1/cases`, JWT Tokens | `ufd_dual_control_requests` | Automated RBAC / Auth Matrix Test | `UFD-A2` | `PLANNED` |
+| **UFD-14 to UFD-20** | TRD §20.3, §20.11 (Overview & Metrics) | `/api/v1/dashboard/overview` | Live DB Aggregation Queries | API Benchmark & Accuracy Audit | `UFD-A1` | `PLANNED` |
+| **UFD-21 to UFD-28** | TRD §20.4, §20.12 (Case Management) | `/api/v1/cases/{case_id}/*` | `cases`, `ufd_saved_filters` | End-to-End Case Lifecycle Test | `UFD-A2` | `PLANNED` |
+| **UFD-29 to UFD-36** | TRD §20.4, §20.12 (Evidence Inventory) | `/api/v1/cases/{id}/evidence` | `evidence`, `evidence_fixity` | Ingestion & Lineage DAG Validation | `UFD-A3` | `PLANNED` |
+| **UFD-37 to UFD-48** | TRD §20.5, §20.12 (Modality Workspaces) | `/api/v1/evidence/{id}/*` | Modality Tables (AIF/AURAS/VISTA)| Canvas / WebAudio / Scrubber Tests | `UFD-A4` | `PLANNED` |
+| **UFD-49 to UFD-55** | TRD §20.6, §20.12 (Findings Review) | `/api/v1/findings/{id}/*` | `ufd_examiner_annotations` | 10-State Transition & Sig Tests | `UFD-A5` | `PLANNED` |
+| **UFD-56 to UFD-62** | TRD §20.7, §20.12 (Unified Timeline) | `/api/v1/cases/{id}/timeline` | CSTV Drift & Events Tables | Multi-Source Clock Drift Scrubber | `UFD-A6` | `PLANNED` |
+| **UFD-63 to UFD-69** | TRD §20.8, §20.12 (Cross-Modal / CDVF) | `/api/v1/cases/{id}/cross-modal`| CDVF Correlation Results | Disagreement Matrix & DAG Tests | `UFD-A7` | `PLANNED` |
+| **UFD-70 to UFD-76** | TRD §20.9, §20.12 (Integrity & Custody) | `/api/v1/evidence/{id}/integrity`| CEIPL WORM & Merkle Tables | Fixity Lockout & Quarantine Tests | `UFD-A7` | `PLANNED` |
+| **UFD-77 to UFD-82** | TRD §20.10, §20.12 (UFREDF Reports) | `/api/v1/reports/{id}/*` | UFREDF Dossier Tables | Section 63 BSA Dual-Signoff Test | `UFD-A8` | `PLANNED` |
+| **UFD-83 to UFD-87** | TRD §20.13, §20.14 (Search & Queue) | `/api/v1/review-queue`, Search | `ufd_review_tasks`, Full-Text | Search Scope & Dispatch Tests | `UFD-A9` | `PLANNED` |
+| **UFD-88 to UFD-93** | TRD §20.15 (WCAG 2.2 AA Accessibility) | Frontend Shell & Overlays | Static Assets / CSS Tokens | Axe Core & Screen Reader Audit | `UFD-A10` | `PLANNED` |
+| **UFD-94 to UFD-97** | TRD §20.16 (Security & Air-Gap) | All API Endpoints & Auth Guard| `ufd_case_audit_events` | OWASP ASVS v4.0.3 L2 Security Audit | `UFD-A10` | `PLANNED` |
+| **UFD-98 to UFD-100**| TRD §20.17 (Performance & E2E Tests) | System-Wide Benchmark Suite | Benchmark Telemetry Logs | E2E Acceptance & Latency Tests | `UFD-A11` | `PLANNED` |
