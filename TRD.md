@@ -84,7 +84,7 @@ flowchart TB
     INGEST --> DISPATCH
     DISPATCH --> REDIS
     REDIS --> ENGINES
-    AFB -.->|Extracted Audio Stream (DAG Linked)| AURAS
+    AFB -.->|"Extracted Audio Stream (DAG Linked)"| AURAS
     ENGINES --> DERIVED
     ENGINES --> PG
     PG --> JINJA
@@ -2594,8 +2594,8 @@ flowchart LR
     end
 
     QUERY --> GATEWAY
-    GATEWAY -->|Offline Mode (Default)| OFFLINE_TIER
-    GATEWAY -->|Online Mode (Explicit Admin Token)| RATE_LIMIT
+    GATEWAY -->|"Offline Mode (Default)"| OFFLINE_TIER
+    GATEWAY -->|"Online Mode (Explicit Admin Token)"| RATE_LIMIT
     RATE_LIMIT --> NOMINATIM
     RATE_LIMIT --> OPEN_METEO
     RATE_LIMIT --> AUDIT_LOG

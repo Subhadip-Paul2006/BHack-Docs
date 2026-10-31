@@ -162,7 +162,7 @@ flowchart TB
     CDVF_LAYER -.->|Model Governance, Calibration & OOD Gating| AURAS & AIF & VISTA
     CMMS_BLOCK -.->|Structured Metadata Records| AIF & AURAS & VISTA & ONTF
     CRYPTO -.->|Integrity & Provenance Layer| INTAKE & AIF & AURAS & VISTA & ONTF & CDVF_LAYER & REPORT
-    AFB -.->|Extracted Audio Stream (DAG Linked)| AURAS
+    AFB -.->|"Extracted Audio Stream (DAG Linked)"| AURAS
     AURAS & AIF & VISTA & ONTF --> AGG
     CDVF_LAYER -->|Evaluation Dossier & Scope Bounds| AGG
     AGG --> ARCHIFY
