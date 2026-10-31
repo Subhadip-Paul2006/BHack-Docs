@@ -6235,7 +6235,7 @@ Every Cross-Media Metadata Service requirement (`CMMS-01` through `CMMS-78`) is 
 
 ---
 
-## 14. Dedicated Cross-Source Timestamp Verification Engineering Playbook (CSTV-A0 through CSTV-A10)
+## 15. Dedicated Cross-Source Timestamp Verification Engineering Playbook (CSTV-A0 through CSTV-A10)
 
 The Cross-Source Timestamp Verification (CSTV) subsystem executes across eleven disciplined, sequential engineering phases:
 
@@ -6588,7 +6588,7 @@ flowchart TD
 
 ---
 
-## 15. CSTV Master Requirement Traceability Matrix (CSTV-01 through CSTV-84)
+## 16. CSTV Master Requirement Traceability Matrix (CSTV-01 through CSTV-84)
 
 Every Cross-Source Timestamp Verification requirement (`CSTV-01` through `CSTV-84`) is mapped to its PRD specification, TRD technical section, implementing engineering phase, verification checkpoint, expected evidence, and execution status:
 
