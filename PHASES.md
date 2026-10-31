@@ -4921,7 +4921,7 @@ flowchart TD
         A0["Phase CDVF-A0: Repository Discovery & Validation Architecture\n(Detector inventory, capability reconciliation, boundary map)"]
         A1["Phase CDVF-A1: Unified Finding & Model Registry Contracts\n(Pydantic schemas, SHA-256 weight hasher, 9-state lifecycle)"]
         A2["Phase CDVF-A2: Dataset Registry & Leakage-Proof Splitting\n(Dataset cards, GroupKFold disjoint partitions, WORM manifests)"]
-        
+
         subgraph BENCHMARK_SUITES["Per-Modality Evaluation Harnesses"]
             A3["Phase CDVF-A3: Multi-Modal 19-Parameter Benchmark Runner\n(Bootstrap CIs, automated metrics, execution logs)"]
             A4["Phase CDVF-A4: AIF Image Deepfake & Manipulation Suite\n(Pixel IoU, Dice, Boundary F1, image-level ROC-AUC)"]
@@ -6316,10 +6316,10 @@ flowchart TD
     AESL_02 --> AESL_03["AURAS-AESL-03: Noise Floor & Acoustic Environment\n(Minimum Statistics, RIR, RT60, DRR Shifts)"]
     AESL_02 --> AESL_04["AURAS-AESL-04: Compression & Codec Forensics\n(MP3/AAC MDCT scalefactors, double-compression)"]
     AESL_02 --> AESL_05["AURAS-AESL-05: Copy-Move & Repeated-Segment Engine\n(Acoustic Fingerprints, DTW Syllable Matching)"]
-    
+
     AESL_02 & AESL_03 & AESL_04 & AESL_05 --> AESL_06["AURAS-AESL-06: Statistical Boundary Detection\n(PELT Change-Point Search, Multi-Branch Stacking)"]
     AESL_01 & AESL_06 --> AESL_07["AURAS-AESL-07: Learned Temporal Localisation\n(TCN / CRNN Suspicion Curves, ASLNet Evaluation)"]
-    
+
     AESL_06 & AESL_07 --> AESL_08["AURAS-AESL-08: Boundary Refinement & Branch Fusion\n(Zero-crossing sample snap, Hysteresis, 20 Findings)"]
     AESL_08 --> AESL_09["AURAS-AESL-09: CEIPL, MVSI & Legal Reporting\n(WORM 0400 Vault, Section 65B/63 BSA Dossier)"]
     AESL_09 --> AESL_10["AURAS-AESL-10: Benchmarking & Release Readiness\n(500 Fixtures, tIoU >= 0.75, Boundary MAE <= 15ms)"]

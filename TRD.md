@@ -4452,9 +4452,9 @@ flowchart TD
 
 ## 11.B Cross-Modal Deepfake Validation Framework (CDVF) Technical Specification
 
-> **Component Scope:** Shared Validation, Calibration, OOD Gating, Cross-Modal Evidence Correlation & Model Governance  
-> **Target Subsystems:** AIF (Images), AURAS (Audio), VISTA (Video/CCTV)  
-> **Shared Dependencies:** CEIPL (Custody & Provenance), CMMS (Metadata Context), CSTV (Temporal Verification), UFREDF (Legal Reporting)  
+> **Component Scope:** Shared Validation, Calibration, OOD Gating, Cross-Modal Evidence Correlation & Model Governance
+> **Target Subsystems:** AIF (Images), AURAS (Audio), VISTA (Video/CCTV)
+> **Shared Dependencies:** CEIPL (Custody & Provenance), CMMS (Metadata Context), CSTV (Temporal Verification), UFREDF (Legal Reporting)
 > **Implementation Phases:** Planned across `CDVF-A0` through `CDVF-A11`
 
 ---
@@ -4484,7 +4484,7 @@ flowchart TD
 
     subgraph CDVF_FRAMEWORK["CDVF: Cross-Modal Deepfake Validation Framework (Shared Service)"]
         IN_ADAPT["Unified Finding Ingestion Adapter\n(Standardized Pydantic Result Contracts)"]
-        
+
         subgraph REGISTRIES["Registry & Provenance Engine"]
             MOD_REG["Model & Checkpoint Registry\n(SHA-256 Verification, Tensor Contracts)"]
             DAT_REG["Dataset Registry & Provenance\n(GroupKFold Splitting, Zero-Leakage)"]
@@ -4627,20 +4627,20 @@ class DetectorResultContract(BaseModel):
     evidence_id: str = Field(..., description="CEIPL evidence exhibit UUID")
     modality: str = Field(..., description="IMAGE, AUDIO, VIDEO, or CCTV")
     forensic_task: str = Field(..., description="Exact task (e.g. FACE_SYNTHESIS, AUDIO_SPLICING, LIP_SYNC)")
-    
+
     provenance: ModelProvenance = Field(..., description="Cryptographic model provenance")
     raw_score: float = Field(..., description="Raw model output (logit, anomaly score, distance)")
     score_semantics: ScoreSemantics = Field(..., description="Semantic type of the score")
     calibrated_probability: Optional[float] = Field(None, description="Calibrated probability in [0, 1] if calibrated")
     calibration_status: CalibrationStatus = Field(default=CalibrationStatus.NOT_CALIBRATED)
-    
+
     ood_score: Optional[float] = Field(None, description="Calculated OOD distance score")
     ood_status: OODStatus = Field(default=OODStatus.OOD_NOT_EVALUATED)
     decision_state: CDVFDecisionState = Field(..., description="Selected decision or abstention outcome")
-    
+
     spatial_localisation: Optional[SpatialLocalisation] = None
     temporal_localisation: Optional[TemporalLocalisation] = None
-    
+
     supporting_observations: List[str] = Field(default_factory=list)
     limitations: List[str] = Field(default_factory=list)
     created_at: datetime = Field(..., description="UTC timestamp of inference execution")
@@ -4907,7 +4907,7 @@ OOD detection identifies inputs outside the validated manifold, triggering selec
 flowchart TD
     A[Input Media Exhibit] --> B[Primary Forensic Feature Extractor]
     B --> C[Extract Penultimate Feature Embedding h(x)]
-    
+
     C --> D[Compute Mahalanobis Distance to Training Class Centroids]
     C --> E[Compute Free Energy Score: E(x) = -T * log(sum(exp(z_k / T)))]
     C --> F[Compute Predictive Shannon Entropy: H(p) = -sum(p_k * log(p_k))]
@@ -4949,7 +4949,7 @@ flowchart TD
     B --> C{Detectors Agree?}
     C -- Yes --> D[Corroborated Finding: Record Agreement Metric]
     C -- No --> E[Classify Disagreement Category]
-    
+
     E --> F1[MODALITY_RESULT_CONFLICT\n(e.g. Video Fake, Audio Real)]
     E --> F2[DETECTOR_RESULT_CONFLICT\n(e.g. TruFor Flags Inpainting, CAT-Net Negative)]
     E --> F3[LOCALISATION_CONFLICT\n(e.g. Mismatched Tampering Coordinates)]
@@ -4972,7 +4972,7 @@ flowchart TD
     A[Candidate Model Commit / Weights Update] --> B[Automated Regression Runner]
     B --> C[Execute Frozen 500-Sample Regression Benchmark]
     C --> D[Measure Delta AUC and Delta ECE vs Frozen Manifest]
-    
+
     D --> E{Delta AUC < -0.01 OR Delta ECE > +0.01?}
     E -- Yes --> F[REGRESSION DETECTED: Model Promotion Blocked]
     E -- No --> G[Check Determinism: Assert Identical PRNG Bit Output]
@@ -6304,6 +6304,185 @@ class AESLAnalysisResult(BaseModel):
     software_commit_hash: str = Field(...)
 ```
 
+### 12.10 Evidence Integrity Verification (EIV) Pydantic v2 Contract Schemas
+
+```python
+from datetime import datetime
+from typing import List, Optional, Dict, Any
+from enum import Enum
+from pydantic import BaseModel, Field, ConfigDict
+
+class HashScopeEnum(str, Enum):
+    COMPLETE_ORIGINAL_OBJECT = "COMPLETE_ORIGINAL_OBJECT"
+    CHUNK_SEGMENT = "CHUNK_SEGMENT"
+    DERIVED_ARTIFACT = "DERIVED_ARTIFACT"
+    CANONICAL_MANIFEST = "CANONICAL_MANIFEST"
+
+class HashAlgorithmEnum(str, Enum):
+    SHA256 = "SHA-256"
+    SHA512 = "SHA-512"
+    SHA3_256 = "SHA3-256"
+    SHA3_512 = "SHA3-512"
+    LEGACY_MD5 = "LEGACY_MD5"
+    LEGACY_SHA1 = "LEGACY_SHA1"
+
+class SingleHashRecord(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    algorithm: HashAlgorithmEnum = Field(...)
+    digest: str = Field(..., pattern=r"^[a-fA-F0-9]{32,128}$", description="Hexadecimal hash digest")
+    scope: HashScopeEnum = Field(default=HashScopeEnum.COMPLETE_ORIGINAL_OBJECT)
+    computed_at: datetime = Field(...)
+    total_bytes_processed: int = Field(..., ge=0)
+    execution_duration_ms: float = Field(..., ge=0.0)
+
+class HashRecord(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    hash_record_id: str = Field(...)
+    evidence_id: str = Field(...)
+    acquisition_id: str = Field(...)
+    primary_hash: SingleHashRecord = Field(..., description="Primary SHA-256 digest")
+    secondary_hash: SingleHashRecord = Field(..., description="Secondary SHA-512 or SHA3-256 digest")
+    byte_count: int = Field(..., ge=0)
+    streaming_buffer_size_kb: int = Field(default=64)
+    completion_status: str = Field(default="STREAM_COMPLETED_SUCCESSFULLY")
+
+class ChunkDigestRecord(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    chunk_index: int = Field(..., ge=0)
+    byte_offset_start: int = Field(..., ge=0)
+    byte_offset_end: int = Field(..., ge=0)
+    chunk_length_bytes: int = Field(..., ge=0)
+    chunk_sha256: str = Field(..., pattern=r"^[a-fA-F0-9]{64}$")
+
+class MerkleProofRecord(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    chunk_index: int = Field(..., ge=0)
+    audit_path: List[str] = Field(..., description="Ordered list of sibling SHA-256 digests")
+    merkle_root_sha256: str = Field(..., pattern=r"^[a-fA-F0-9]{64}$")
+    tree_depth: int = Field(..., ge=1)
+
+class DetachedSignatureRecord(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    signature_id: str = Field(...)
+    algorithm: str = Field(default="Ed25519")
+    signer_key_id: str = Field(...)
+    signer_role: str = Field(...)
+    signature_bytes_base64: str = Field(...)
+    signed_at: datetime = Field(...)
+    canonicalization_standard: str = Field(default="RFC 8785 (JCS)")
+    certificate_reference: Optional[str] = None
+
+class TrustedTimestampRecord(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    timestamp_id: str = Field(...)
+    tsa_identity: str = Field(...)
+    policy_oid: str = Field(...)
+    serial_number: str = Field(...)
+    gen_time_utc: datetime = Field(...)
+    message_imprint_sha256: str = Field(...)
+    tsa_token_der_base64: str = Field(...)
+    verification_status: str = Field(default="TOKEN_VERIFIED")
+
+class EvidenceManifest(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    manifest_version: str = Field(default="1.0")
+    evidence_id: str = Field(...)
+    case_id: str = Field(...)
+    acquisition_id: str = Field(...)
+    original_filename: str = Field(...)
+    byte_count: int = Field(..., ge=0)
+    detected_mime_type: str = Field(...)
+    hashes: List[SingleHashRecord] = Field(..., min_length=2)
+    merkle_root_sha256: Optional[str] = None
+    chunks_count: Optional[int] = None
+    storage_vault_urn: str = Field(...)
+    worm_retention_policy: str = Field(...)
+    worm_retention_until: Optional[datetime] = None
+    initial_custody_event_id: str = Field(...)
+    signatures: List[DetachedSignatureRecord] = Field(default_factory=list)
+    timestamp_attestations: List[TrustedTimestampRecord] = Field(default_factory=list)
+    sealed_at: datetime = Field(...)
+
+class CustodyEventRecord(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    event_id: str = Field(...)
+    evidence_id: str = Field(...)
+    case_id: str = Field(...)
+    sequence_number: int = Field(..., ge=1)
+    event_type: str = Field(..., description="CUSTODY_ACQUIRED, EVIDENCE_VERIFIED, WORM_LOCKED, etc.")
+    actor_id: str = Field(...)
+    actor_role: str = Field(...)
+    acting_service_id: Optional[str] = None
+    event_timestamp_utc: datetime = Field(...)
+    timestamp_source: str = Field(default="NTP_SYNCHRONIZED_SYSTEM_CLOCK")
+    reason_purpose: str = Field(...)
+    input_object_urn: Optional[str] = None
+    output_object_urn: Optional[str] = None
+    input_hash_sha256: Optional[str] = None
+    output_hash_sha256: Optional[str] = None
+    previous_event_hash: str = Field(..., description="Cryptographic chain reference H(Event_{i-1})")
+    current_event_hash: str = Field(..., description="Chained hash E_i = H(Canonical(Event_i) || E_{i-1})")
+    signature: Optional[DetachedSignatureRecord] = None
+
+class VerificationDimensionOutcome(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    dimension_code: str = Field(..., description="BYTE_INTEGRITY, MANIFEST_INTEGRITY, SIGNATURE_VALIDITY, etc.")
+    passed: bool = Field(...)
+    expected_reference: str = Field(...)
+    observed_value: str = Field(...)
+    detail_message: str = Field(...)
+
+class VerificationRunResult(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    verification_id: str = Field(...)
+    evidence_id: str = Field(...)
+    lifecycle_stage: str = Field(..., description="POST_WRITE_READBACK, SCHEDULED_FIXITY, PRE_ANALYSIS, etc.")
+    overall_outcome: str = Field(..., description="VERIFIED, INTEGRITY_MISMATCH, QUARANTINED, etc.")
+    evaluated_dimensions: List[VerificationDimensionOutcome] = Field(...)
+    total_bytes_verified: int = Field(..., ge=0)
+    execution_duration_ms: float = Field(..., ge=0.0)
+    executed_by_service: str = Field(...)
+    verification_timestamp_utc: datetime = Field(...)
+    storage_vault_urn: str = Field(...)
+
+class QuarantineIncidentRecord(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    incident_id: str = Field(...)
+    evidence_id: str = Field(...)
+    case_id: str = Field(...)
+    triggered_by_verification_id: str = Field(...)
+    failure_type: str = Field(..., description="BYTE_CORRUPTION, TRUNCATION, SIGNATURE_INVALID, WORM_BYPASS")
+    expected_sha256: str = Field(...)
+    observed_sha256: str = Field(...)
+    byte_discrepancy_count: int = Field(...)
+    quarantined_object_urn: str = Field(...)
+    incident_timestamp_utc: datetime = Field(...)
+    incident_status: str = Field(default="ACTIVE_QUARANTINE")
+    investigating_custodian_id: Optional[str] = None
+    resolution_notes: Optional[str] = None
+
+class PackageItemRecord(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    item_id: str = Field(...)
+    relative_path: str = Field(..., description="Normalized relative path without traversal")
+    byte_count: int = Field(..., ge=0)
+    sha256_digest: str = Field(...)
+    sha512_digest: str = Field(...)
+    item_role: str = Field(..., description="ORIGINAL_EVIDENCE, SIDECAR_METADATA, MANIFEST, SIGNATURE, REPORT")
+
+class PackageManifestRecord(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    package_id: str = Field(...)
+    case_id: str = Field(...)
+    package_version: str = Field(default="1.0")
+    created_at_utc: datetime = Field(...)
+    items: List[PackageItemRecord] = Field(..., min_length=1)
+    package_merkle_root_sha256: str = Field(...)
+    total_package_bytes: int = Field(..., ge=0)
+    export_operator_id: str = Field(...)
+    section_63_bsa_schedule_id: Optional[str] = None
+```
+
 ## 13. Testing, Benchmark & Validation Architecture
 
 The PS-05 testing framework enforces strict separation between software reliability, mathematical correctness, and machine learning generalization across both audio and video forensic domains:
@@ -6626,6 +6805,19 @@ All signal analysis, candidate boundary generation, and suspicious region report
 6. **Mandatory Alternative Explanation Audit Invariant:** Under no circumstances may AESL output a definitive "Tampered" finding without programmatically auditing and documenting 18 benign alternative explanations (speaker movement, AGC pumping, legitimate lossy compression, etc.).
 7. **Non-Destructive Deletion Reporting Invariant:** A detected deletion indicates an observed signal discontinuity; it does not claim to recover or reconstruct lost audio content without an authentic reference recording.
 8. **Section 65B IEA / Section 63 BSA Traceability Invariant:** Every generated finding, boundary interval, spectrogram plot, and report annexure must bind cryptographically to the master exhibit SHA-256 digest, parser versions, software commit hash, and examiner digital signature.
+
+### 15.8 Evidence Integrity Verification (EIV) Security, Immutability & Custody Invariants
+
+All cryptographic processing, evidence handling, storage operations, and reporting within the EIV framework are governed by eight immutable security and evidentiary invariants:
+
+1. **Original Evidence Bitstream Immutability Invariant:** Original digital evidence exhibits stored within the CEIPL WORM repository are permanently locked with POSIX `0400` read-only permissions and S3 Object Lock compliance/governance mode. Modifying, overwriting, renaming, or truncating original evidence files in place is strictly prohibited under all system states.
+2. **Pre-Decode Streaming Dual-Hashing Invariant:** Cryptographic digests (SHA-256 and SHA-512 / SHA3-256) must be computed over the raw incoming byte sequence before any decoder, demuxer, metadata parser, or forensic engine touches the file. Decoding, re-encoding, or metadata extraction must never precede initial baseline hash computation.
+3. **Non-Conflation of Byte Identity & Legal Authenticity Invariant:** A cryptographic hash match proves byte-level constancy relative to intake; it does *not* prove that the underlying real-world event occurred, that the file was authentic when created, or that the acquisition was legally valid. The platform must never output a monolithic declaration of authenticity based solely on hash verification.
+4. **Append-Only Hash-Chained Custody Invariant:** Every evidence handling, retrieval, verification, and export action must be logged in an append-only custody ledger where every event cryptographically chains to its predecessor ($E_i = H(\text{Canonical}(Event_i) \parallel E_{i-1})$) with strictly monotonic sequence numbers. Deleting, modifying, or retroactively re-ordering custody events is prohibited.
+5. **Derivative Merkle Lineage Invariant:** Every derivative forensic artifact (extracted audio, extracted frames, spectrograms, crops, feature embeddings, OCR text, reports) must be registered in the CEIPL Merkle DAG with explicit references to parent exhibit IDs, parent SHA-256 hashes, exact transformation parameters, and software version commit hashes.
+6. **Fail-Closed Quarantine Invariant:** Any evidence object that fails post-write readback, retrieval verification, or scheduled fixity checks must immediately transition to the `QUARANTINED` state. Downstream analysis and export must be instantly blocked (HTTP 423 Locked). Silent repair, automatic rehashing, or overwriting reference hashes is strictly prohibited.
+7. **Verified Backup Restoration Invariant:** Restoring damaged evidence from backup media requires independent dual-hash verification of the candidate replica against the established intake `HashRecord`. A backup copy must never be restored into the active vault without verified cryptographic match against the baseline reference.
+8. **Standalone Offline Verifiability Invariant:** Every exported evidence package must be independently verifiable in an air-gapped environment using standard open-source tools (Python / OpenSSL) without requiring network connectivity, API access, or trust in the PS-05 production database.
 
 ## 16. Cross-Media Metadata Service (CMMS) — Technical Architecture & Specification
 
@@ -8233,16 +8425,16 @@ flowchart LR
 ```mermaid
 flowchart TD
     STFT_IN["STFT Spectrogram X(m,k)"] --> NOISE_TRACK["Minimum Statistics Noise Floor Tracking\nP_N(m,k) = min_{m' in [m-D, m]} |X(m',k)|^2"]
-    
+
     NOISE_TRACK --> NOISE_DIFF["Noise Power Step Calculation:\nDelta P_N[m] = |P_N[m] - P_N[m-1]|"]
     NOISE_DIFF --> FLAT_ENTROPY["Spectral Flatness (SFM) & Spectral Entropy (SE)\nIdentify Noise Tonality Shifts"]
-    
+
     STFT_IN --> RIR_MODEL["Room Impulse Response (RIR) Estimation\nEnergy Decay Curve: EDC(t) = integral_t^inf h^2(tau) dtau"]
     RIR_MODEL --> RT60_CALC["Reverberation Decay Time (RT60):\nSchroeder Integration from -5 dB to -35 dB"]
     RIR_MODEL --> DRR_CALC["Direct-to-Reverberant Ratio (DRR):\n10 * log10(E_direct / E_reverb)"]
-    
+
     NOISE_DIFF & FLAT_ENTROPY & RT60_CALC & DRR_CALC --> ENV_DIST["Acoustic Environment Distance D_env(A, B)\nSymmetric Kullback-Leibler Divergence"]
-    
+
     ENV_DIST --> ENV_DECISION{"D_env > tau_env ?\n(tau_env = 0.65)"}
     ENV_DECISION -->|Yes: Significant Shift| ENV_FIND["Emit Finding: AUDIO_EDIT_ENVIRONMENT_MISMATCH\nDelta RT60, Delta P_N, D_env Score"]
     ENV_DECISION -->|No: Consistent Room| ENV_PASS["Pass: Stationarity Confirmed"]
@@ -8307,13 +8499,13 @@ flowchart TD
     RAW_REGION["Coarse Candidate Region [n_start_raw, n_end_raw]\n(Resolution: 10-20ms Frame Level)"] --> REFINE_ORCH["Boundary Refinement Orchestrator"]
 
     REFINE_ORCH --> EXTRACT_WINDOW["Extract High-Resolution Window:\n[n_start_raw - 500, n_start_raw + 500] Native Samples"]
-    
+
     EXTRACT_WINDOW --> STEP1["1. Zero-Crossing Alignment:\nLocate nearest zero-crossing index n_zc"]
     EXTRACT_WINDOW --> STEP2["2. First-Order Derivative Peak:\nLocate max |d[n]| = |x[n] - x[n-1]|"]
     EXTRACT_WINDOW --> STEP3["3. Phase Inversion Check:\nExamine sign change in short-time autocorrelation"]
-    
+
     STEP1 & STEP2 & STEP3 --> OPT_BOUNDARY["Refined Boundary Coordinate: n_refined\nt_refined = n_refined / fs\nUncertainty: +/- sigma_n samples (+/- sigma_ms ms)"]
-    
+
     OPT_BOUNDARY --> EMIT_OBJ["Construct EditBoundaryCandidate Object\n- boundary_id, sample_index, uncertainty_ms\n- trigger_detector, discontinuity_magnitude"]
 ```
 
@@ -8343,21 +8535,21 @@ sequenceDiagram
 ```mermaid
 flowchart TD
     START["Examiner Opens AESL Investigation Canvas"] --> LOAD["Load Synchronized Dual Waveform & Spectrogram"]
-    
+
     LOAD --> REGIONS["Render Suspicious Region Overlays (AESL-REG-001..N)\nColour-coded by Confidence: High (Red), Med (Amber), Low (Yellow)"]
-    
+
     REGIONS --> SELECT["Examiner Clicks Candidate Region"]
-    
+
     SELECT --> ZOOM["Zoom to Native Sample-Level View (+/- 200ms)"]
     ZOOM --> INSPECT["Inspect Multi-Modal Diagnostic Curves:\n- Waveform Amplitude Derivative d[n]\n- STFT Spectral Flux & Spectrogram Slice\n- Pre/Post Noise-Floor Power Delta P_N\n- RT60 Reverberation Decay Curves\n- Inter-Channel Phase Coherence rho_max"]
-    
+
     INSPECT --> QC_PANEL["Evaluate 18 Benign Alternative Explanations Checklist"]
-    
+
     QC_PANEL --> DECISION{"Examiner Action"}
     DECISION -->|Confirm Splice| CONFIRM["Set Status: EXAMINER_CONFIRMED\nRecord mandatory justification note"]
     DECISION -->|Dismiss False Alarm| REJECT["Set Status: DISMISSED_NATURAL_EVENT\nRecord rationale (e.g. plosive consonant)"]
     DECISION -->|Adjust Boundaries| ADJUST["Drag boundary marker to refine sample coordinate\nUpdate n_refined and uncertainty bounds"]
-    
+
     CONFIRM & REJECT & ADJUST --> AUDIT["Append-Only Audit Log: Examiner ID, Timestamp, Signature"]
     AUDIT --> EXPORT["Export Court-Certified Section 65B/63 BSA Dossier"]
 ```
@@ -8495,3 +8687,786 @@ def refine_boundaries(self, evidence_id: str, candidate_samples: List[int]) -> L
    - Region-level $\text{tIoU} \ge 0.75$ on clean uncompressed splices.
    - Boundary $\text{MAE} \le 15\text{ ms}$ on hard cuts; $\le 35\text{ ms}$ on concealed crossfades.
    - False alarm rate $\le 0.05$ false regions per audio hour on authentic speech controls.
+
+## 19. Evidence Integrity Verification (EIV) - Technical Architecture & Detailed Specification
+
+### 19.1 CEIPL / EIV System Architecture & Platform Positioning
+
+The **Evidence Integrity Verification (EIV)** subsystem is architected as an integral capability of the **Cryptographic Evidence Integrity and Provenance Layer (CEIPL)**—the shared cryptographic foundation of the PS-05 platform. EIV does not instantiate an independent forensic analysis engine; rather, it governs the cryptographic lifecycle of raw evidence exhibits, derived forensic representations, metadata snapshots, and chain-of-custody ledgers across all platform operations.
+
+```mermaid id="eivarch"
+flowchart TD
+    subgraph Intake["Evidence Intake & Pre-Decode Layer"]
+        IN1["Raw Evidence Bitstream<br/>(Image, CCTV, Audio, PCAP)"] --> STR["Streaming Dual-Hasher<br/>(SHA-256 + SHA-512 / SHA3-256)"]
+        IN1 --> STG["Secure Ingestion Staging Buffer<br/>(Temp POSIX 0600)"]
+    end
+
+    subgraph CEIPL["CEIPL Shared Cryptographic Layer"]
+        STR --> MAN["RFC 8785 Canonical Evidence Manifest<br/>(JCS JSON Canonicalization)"]
+        MAN --> SIG["Detached Digital Signer<br/>(RFC 8032 Ed25519)"]
+        MAN --> TSA["RFC 3161 TSA Client<br/>(Trusted Timestamp Token)"]
+        STR --> CHK["Chunk Hashing & Merkle Engine<br/>(4MB Chunks + Tree Roots)"]
+        CUST["Append-Only Custody Ledger<br/>E_i = H(Event_i || E_i-1)"]
+    end
+
+    subgraph Storage["Immutable Storage Vault Tier"]
+        STG --> RBG{"Post-Write Readback Gate<br/>Read Vault Bytes == Intake Digest?"}
+        RBG -->|Match| WRM["WORM Evidence Vault<br/>POSIX 0400 / S3 Object Lock Compliance"]
+        RBG -->|Mismatch| QRN["Quarantine Isolation Vault<br/>HTTP 423 Locked + Incident Log"]
+    end
+
+    subgraph Engines["Forensic Analysis Subsystems"]
+        WRM -->|Read-Only Stream| AIF["AIF Image Forensics<br/>(Crops, Heatmaps, Masks)"]
+        WRM -->|Read-Only Stream| AURAS["AURAS Audio Forensics<br/>(Stems, Splicing Regions)"]
+        WRM -->|Read-Only Stream| VISTA["VISTA Video Forensics<br/>(Demuxed Audio, Extracted Frames)"]
+        WRM -->|Read-Only Stream| ONTF["Offline Network Forensics<br/>(Flow Summaries, Zeek Logs)"]
+    end
+
+    subgraph Lineage["Provenance & Court Reporting Tier"]
+        AIF --> DAG["Merkle DAG Lineage Registry<br/>(Parent Hash, Tool Version, Command)"]
+        AURAS --> DAG
+        VISTA --> DAG
+        ONTF --> DAG
+        DAG --> UFR["UFREDF Reporting Engine<br/>(Section 63 BSA / 65B IEA Certified Dossier)"]
+        CUST --> UFR
+        MAN --> UFR
+    end
+
+    SIG -.-> MAN
+    TSA -.-> MAN
+    CUST -.-> DAG
+```
+
+#### Architectural Invariants:
+1. **Zero Pre-Decode Transformation:** Raw container bytes are streamed directly into hashing pipelines before any demuxing, decoding, or parsing library opens the file.
+2. **Single Shared Service:** All forensic subsystems (AIF, AURAS, VISTA, ONTF) interact with a single unified CEIPL evidence intake interface; custom or engine-specific hashing implementations are prohibited.
+3. **Decoupled Verification:** Integrity verification operations execute independently of forensic model execution, enabling lightweight background fixity and fast ad-hoc verification.
+
+---
+
+### 19.2 Evidence Identity, Pre-Decode Streaming Dual-Hashing & Buffer Management
+
+```mermaid id="eivacqseq"
+sequenceDiagram
+    autonumber
+    actor Officer as Investigating Officer / API
+    participant Ingest as Ingestion Service
+    participant Hasher as Streaming Dual Hasher
+    participant Staging as Secure Staging Buffer
+    participant WORM as WORM Storage Vault
+    participant Custody as Custody Ledger Service
+    participant DB as PostgreSQL DB
+
+    Officer->>Ingest: POST /api/v1/evidence/register (Stream Bytes, Case ID)
+    Ingest->>DB: Validate Case & Generate UUIDs (evidence_id, acquisition_id)
+    activate Ingest
+    par Streaming Pre-Decode Pipeline
+        Ingest->>Hasher: Pipe Byte Chunk (64KB Buffer)
+        Hasher->>Hasher: Update SHA-256 & SHA-512 contexts
+    and
+        Ingest->>Staging: Write Byte Chunk (POSIX 0600)
+    end
+    Ingest->>Hasher: Finalize Stream
+    Hasher-->>Ingest: Return (sha256_digest, sha512_digest, byte_count)
+    Ingest->>Staging: Sync to Disk & Set Read-Only
+    Ingest->>WORM: Commit File to WORM Vault (POSIX 0400 / Object Lock)
+    deactivate Ingest
+
+    activate WORM
+    WORM->>WORM: Read Stored Bytes Directly
+    WORM->>Hasher: Compute Readback SHA-256
+    Hasher-->>WORM: Return readback_sha256
+    alt Hashes Match
+        WORM->>DB: Register HashRecord & EvidenceManifest
+        WORM->>Custody: Append CUSTODY_ACQUIRED & EVIDENCE_STORED Events
+        WORM-->>Officer: HTTP 201 Created (Evidence ID, Manifest, Status: VERIFIED)
+    else Hashes Mismatch
+        WORM->>WORM: Move to Quarantine Vault (.corrupt)
+        WORM->>DB: Log QuarantineIncidentRecord
+        WORM->>Custody: Append INTEGRITY_FAILURE Event
+        WORM-->>Officer: HTTP 422 Unprocessable (Integrity Mismatch Quarantine)
+    end
+    deactivate WORM
+```
+
+#### 19.2.1 Mathematical Formulation of Pre-Decode Dual Hashing
+For an incoming raw evidence byte stream $M \in \{0, 1\}^*$ of length $L = |M|$ bytes, partitioned into discrete streaming chunks $m_1, m_2, \dots, m_k$ such that:
+$$M = m_1 \parallel m_2 \parallel \dots \parallel m_k, \quad |m_i| \le B_{\text{chunk}}$$
+where $B_{\text{chunk}} = 65,536 \text{ bytes}$ (64 KB bounded buffer).
+
+The dual digests $H_1$ (NIST FIPS 180-4 SHA-256) and $H_2$ (NIST FIPS 180-4 SHA-512) are computed concurrently:
+$$H_1(M) = \text{SHA-256}(M) \in \{0, 1\}^{256}$$
+$$H_2(M) = \text{SHA-512}(M) \in \{0, 1\}^{512}$$
+
+In high-assurance configurations, SHA3-256 (NIST FIPS 202 Keccak sponge construction) is computed as an algorithmically independent third digest:
+$$H_3(M) = \text{SHA3-256}(M) = \text{SPONGE}[f, \text{pad}, r, c](M, 256)$$
+
+Both hashes MUST be evaluated over the identical raw bitstream before any decoder or container parser is invoked.
+
+```mermaid id="eivdualhash"
+flowchart LR
+    RAW["Raw Evidence Stream<br/>M = m_1 || m_2 || ... || m_k"] --> SPLIT["Bounded Buffer Multiplexer<br/>(64 KB RAM Buffer)"]
+    SPLIT --> H1["NIST FIPS 180-4 SHA-256<br/>H_1(M)"]
+    SPLIT --> H2["NIST FIPS 180-4 SHA-512<br/>H_2(M)"]
+    SPLIT --> STG["Encrypted Staging Buffer<br/>(AES-256-GCM)"]
+
+    H1 --> MAN["Canonical Evidence Manifest<br/>RFC 8785 JCS"]
+    H2 --> MAN
+    MAN --> SEAL["Detached Ed25519 Sign<br/>+ RFC 3161 TSA Token"]
+```
+
+---
+
+### 19.3 Chunk Hashing, Merkle Tree Construction & Proof Verification
+
+Large digital evidence exhibits (e.g., 64 GB continuous CCTV exports, 100 GB forensic disk images, 20 GB PCAP captures) require granular sub-file integrity tracking to detect localized corruption and support incremental verification over network transfers.
+
+```mermaid id="eivmerkle"
+flowchart TD
+    subgraph MerkleTree["Balanced Binary Merkle Tree (RFC 6962 Domain Separation)"]
+        ROOT["Merkle Root Digest<br/>R = H(0x01 || P_12 || P_34)"]
+        P12["Parent Node P_12<br/>H(0x01 || L_1 || L_2)"]
+        P34["Parent Node P_34<br/>H(0x01 || L_3 || L_4)"]
+        L1["Leaf L_1<br/>H(0x00 || C_1)"]
+        L2["Leaf L_2<br/>H(0x00 || C_2)"]
+        L3["Leaf L_3<br/>H(0x00 || C_3)"]
+        L4["Leaf L_4<br/>H(0x00 || C_4)"]
+
+        ROOT --> P12
+        ROOT --> P34
+        P12 --> L1
+        P12 --> L2
+        P34 --> L3
+        P34 --> L4
+    end
+
+    subgraph Chunks["Raw File Chunk Slices (4MB / 16MB)"]
+        C1["Chunk C_1 [0 .. 4MB]"] --> L1
+        C2["Chunk C_2 [4MB .. 8MB]"] --> L2
+        C3["Chunk C_3 [8MB .. 12MB]"] --> L3
+        C4["Chunk C_4 [12MB .. 16MB]"] --> L4
+    end
+```
+
+#### 19.3.1 Mathematical Specification of Chunk Merkle Tree
+1. **Chunking Scheme:** A file $M$ of length $L$ bytes is partitioned into chunks $C_1, C_2, \dots, C_N$ of fixed size $S_{\text{chunk}} = 4,194,304 \text{ bytes}$ (4 MB):
+   $$N = \left\lceil \frac{L}{S_{\text{chunk}}} \right\rceil$$
+2. **Domain Separation & Leaf Construction (RFC 6962):** To prevent second-preimage attacks between leaves and internal nodes, single-byte prefixes are enforced:
+   $$L_i = \text{SHA-256}(0\text{x}00 \parallel C_i), \quad i \in \{1, \dots, N\}$$
+3. **Internal Parent Construction:**
+   $$P_{i,j} = \text{SHA-256}(0\text{x}01 \parallel L_i \parallel L_j)$$
+4. **Odd Leaf Handling:** If at any layer the number of nodes $K$ is odd, the terminal node $K$ is promoted to the next tree layer without duplicate hashing:
+   $$P_{\text{promoted}} = \text{Node}_K$$
+5. **Inclusion Proof Verification:** To prove that chunk $C_k$ belongs to the file with Merkle root $R$, an auditor requires only the chunk $C_k$ and the audit path of sibling digests $\{S_1, S_2, \dots, S_{\lceil \log_2 N \rceil}\}$:
+   $$\text{VerifyProof}(C_k, \text{Path}_k, R) \implies \text{True / False}$$
+
+*Primacy Rule:* Merkle tree verification serves for incremental chunk-level transfer checking; it never supersedes the whole-file $H_1$ and $H_2$ digests as the authoritative legal reference.
+
+---
+
+### 19.4 Canonical Evidence Manifest & RFC 8785 JSON Canonicalization
+
+Evidence manifests bind all cryptographic digests, metadata snapshots, and custody references. To ensure byte-level deterministic reproducibility across heterogeneous platforms (Python, Node.js, Go, Rust), manifests MUST be serialized using the **RFC 8785 JSON Canonicalization Scheme (JCS)**.
+
+#### 19.4.1 RFC 8785 Serialization Invariants
+1. **Character Encoding:** UTF-8 without Byte Order Mark (BOM).
+2. **Deterministic Key Sorting:** Object keys are sorted strictly by lexicographical UTF-16 code unit order.
+3. **Zero Superfluous Whitespace:** No spaces or newlines outside of JSON string literals (delimiters are `:` and `,`).
+4. **Number Formatting:** Integers serialized without exponent (`1000`, not `1e3`); IEEE 754 floating-point values serialized in shortest exact representation without trailing zeros.
+5. **String Escaping:** Only quotation mark (`"`), reverse solidus (`\`), and control characters (U+0000 to U+001F) are escaped.
+
+```json
+{
+  "acquisition_id": "0192e21b-8714-7f12-9c31-89a12b34cd56",
+  "byte_count": 52428800,
+  "case_id": "0192e21b-86d1-7001-a12b-34cd56ef7890",
+  "detected_mime_type": "video/mp4",
+  "evidence_id": "0192e21b-8700-7abc-8123-456789abcdef",
+  "hashes": [
+    {
+      "algorithm": "SHA-256",
+      "computed_at": "2026-10-31T12:00:00Z",
+      "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "execution_duration_ms": 342.15,
+      "scope": "COMPLETE_ORIGINAL_OBJECT",
+      "total_bytes_processed": 52428800
+    },
+    {
+      "algorithm": "SHA-512",
+      "computed_at": "2026-10-31T12:00:00Z",
+      "digest": "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+      "execution_duration_ms": 381.42,
+      "scope": "COMPLETE_ORIGINAL_OBJECT",
+      "total_bytes_processed": 52428800
+    }
+  ],
+  "initial_custody_event_id": "0192e21b-8722-7def-8901-234567890abc",
+  "manifest_version": "1.0",
+  "merkle_root_sha256": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+  "original_filename": "CCTV_CAM04_20261031.mp4",
+  "sealed_at": "2026-10-31T12:00:05Z",
+  "signatures": [],
+  "storage_vault_urn": "urn:ceipl:vault:originals:0192e21b-8700-7abc-8123-456789abcdef",
+  "timestamp_attestations": [],
+  "worm_retention_policy": "COMPLIANCE_MODE_7_YEARS",
+  "worm_retention_until": "2033-10-31T12:00:00Z"
+}
+```
+
+The canonical SHA-256 fingerprint of the manifest is computed directly over these canonical bytes:
+$$M_{\text{fingerprint}} = \text{SHA-256}(\text{JCS}(\text{EvidenceManifest}))$$
+
+---
+
+### 19.5 Digital Signatures (Ed25519) & Cryptographic Attestation
+
+```mermaid id="eivsig"
+flowchart TD
+    subgraph ManifestPrep["Canonical Manifest Preparation"]
+        EM["EvidenceManifest Pydantic Model"] --> JCS["RFC 8785 Canonicalizer (JCS)"]
+        JCS --> MBYTES["Canonical Manifest Bytes"]
+        MBYTES --> MDIGEST["Manifest Digest<br/>SHA-256(JCS(Manifest))"]
+    end
+
+    subgraph SignerService["Detached Ed25519 Signer"]
+        KMS["Secure Key Storage<br/>(OS Keystore / PKCS#11 HSM)"] -->|Extract PrivKey| SIGN["RFC 8032 Ed25519 Sign<br/>Sign(PrivKey, Manifest Bytes)"]
+        MBYTES --> SIGN
+        SIGN --> SIG["64-byte Detached Signature<br/>(Base64 Encoded)"]
+    end
+
+    subgraph TSAService["RFC 3161 Trusted Timestamp Authority"]
+        MDIGEST --> TREQ["TimeStampReq<br/>(MessageImprint = Manifest Digest)"]
+        TREQ --> NET["TSA Server / HSM Clock"]
+        NET --> TRESP["TimeStampResp<br/>(RFC 3161 Token ContentInfo)"]
+    end
+
+    SIG --> SEALED["Sealed Evidence Package<br/>(Manifest + Sig + TSA Token)"]
+    TRESP --> SEALED
+```
+
+#### 19.5.1 Detached Signature Architecture
+1. **Algorithm:** RFC 8032 Ed25519 (Edwards-curve Digital Signature Algorithm over Curve25519).
+2. **Scope of Signature:** The signature is calculated directly over the canonical RFC 8785 bytes of `EvidenceManifest`.
+3. **Key Lifecycle Invariants:**
+   - Private signing keys reside strictly inside hardware HSMs (PKCS#11) or OS-level secure credential stores (Windows DPAPI-NG / Linux Keyutils).
+   - Private keys are NEVER stored on disk, never logged, and never included in evidence packages.
+   - Every signing operation records `signer_key_id`, `signer_role`, algorithm name, and UTC timestamp.
+4. **Historical Signature Verification:** When signing keys rotate, past public keys are retained in an immutable registry (`eiv_signing_keys`) to guarantee that historical signatures remain verifiable throughout multi-year judicial proceedings.
+
+---
+
+### 19.6 RFC 3161 Trusted Timestamp Attestation & Air-Gapped Modes
+
+```mermaid id="eivtsa"
+sequenceDiagram
+    autonumber
+    participant App as CEIPL Manifest Service
+    participant TSA as Authorized RFC 3161 TSA
+    participant Storage as Cryptographic Vault
+
+    App->>App: Compute Manifest Digest D = SHA-256(JCS(Manifest))
+    App->>App: Build ASN.1 TimeStampReq (Hash = D, Nonce = Cryptographic Nonce)
+    alt Online TSA Mode
+        App->>TSA: HTTP POST /tsa-endpoint (Content-Type: application/timestamp-query)
+        TSA-->>App: HTTP 200 OK (TimeStampResp DER Payload)
+        App->>App: Verify TSA Signature, X.509 Certificate Chain, Policy OID
+        App->>App: Verify Message Imprint == D
+        App->>Storage: Store Token as `manifest.tst`
+    else Air-Gapped Field Mode
+        App->>App: Query Monotonic Hardware Clock
+        App->>Storage: Record Timestamp Record (Status: LOCAL_UNTRUSTED_CLOCK)
+        Note over App,Storage: Deferred TSA attestation queued for docking
+    end
+```
+
+#### 19.6.1 Timestamp Verification Sequence
+1. Extract ASN.1 `TSTInfo` structure from `TimeStampToken`.
+2. Verify `MessageImprint.hashedMessage` matches exact manifest digest $M_{\text{fingerprint}}$.
+3. Verify TSA digital signature using TSA public key from X.509 certificate.
+4. Validate TSA certificate path against trusted root CA bundle.
+5. Assert revocation status via embedded OCSP response or CRL.
+
+---
+
+### 19.7 WORM Storage Architecture, Object Lock & Multi-Layer Vaulting
+
+```mermaid id="eivworm"
+stateDiagram-v2
+    [*] --> IngestionStaging: Upload Evidence Stream
+    IngestionStaging --> ReadbackGate: Stream Completed
+    ReadbackGate --> Quarantined: Readback Hash Mismatch
+    ReadbackGate --> ActiveWORMVault: Readback Hash Validated
+
+    state ActiveWORMVault {
+        [*] --> ReadOnlyPOSIX: Apply POSIX 0400 & chattr +i
+        ReadOnlyPOSIX --> RetentionLocked: Apply S3 Object Lock (Compliance Mode)
+        RetentionLocked --> LegalHoldActive: Case Placed Under Legal Hold
+        LegalHoldActive --> RetentionLocked: Legal Hold Released
+    }
+
+    ActiveWORMVault --> VerifiedBackup: Automated Daily Sync
+    Quarantined --> UnderExaminerReview: Custodian Incident Review
+    UnderExaminerReview --> RestoredFromBackup: Backup Replica Verified
+    RestoredFromBackup --> ActiveWORMVault: Restored & Sealed
+```
+
+#### 19.7.1 The Seven Logical Storage Zones
+1. **Zone 1: Ingestion Staging (`staging/`):** Ephemeral staging area (POSIX `0600`). Files reside here strictly during upload and pre-decode hashing. Automatically purged upon commit or abort.
+2. **Zone 2: Original Evidence Vault (`originals/`):** Permanent WORM vault. Stored objects receive POSIX `0400` read-only mode, Linux immutable flag (`chattr +i`), or S3 Object Lock in Compliance Mode. Overwrites and deletes are blocked at the storage layer.
+3. **Zone 3: Derived Artefact Storage (`derivatives/`):** Preserves all outputs generated by forensic engines (extracted audio, extracted frames, spectrograms, crops, feature embeddings).
+4. **Zone 4: Cryptographic Manifest Storage (`manifests/`):** Preserves versioned canonical JSON manifests, detached Ed25519 signatures, and RFC 3161 TSA tokens.
+5. **Zone 5: Custody Event Ledger Storage (`custody/`):** Append-only storage for serialized custody ledger blocks and daily signed Merkle root anchors.
+6. **Zone 6: Verification Results Storage (`verification_runs/`):** Stores logs, performance metrics, and diagnostic outputs from all scheduled fixity audits and ad-hoc verification checks.
+7. **Zone 7: Disaster Recovery & Backup Vault (`backups/`):** Encrypted off-site or secondary replica store with independent readback validation manifests.
+
+---
+
+### 19.8 Verification Lifecycle, Continuous Fixity Checking & SLAs
+
+```mermaid id="eivfixity"
+flowchart TD
+    BEAT["Celery Beat Scheduler<br/>(Cron: Daily 02:00 UTC)"] --> QUERY["Query Registered Evidence Items<br/>(Filter: Last Verified > 30 Days)"]
+    QUERY --> BATCH["Dispatch Batch Fixity Tasks<br/>(Concurrency = 8 Workers)"]
+
+    BATCH --> READ["Stream Vault Bytes directly from Disk/S3<br/>(64 KB Bounded Buffer)"]
+    READ --> HASH["Compute Fresh Dual Digests<br/>SHA-256 + SHA-512"]
+    HASH --> CMP{"Observed Hashes == Stored HashRecord?"}
+
+    CMP -->|Yes| PASS["Log VerificationRunResult<br/>(Status: VERIFIED)"]
+    PASS --> AUD["Append FIXITY_CHECK_PASSED to Custody Ledger"]
+
+    CMP -->|No| FAIL["Trigger Immediate Quarantine<br/>(Status: INTEGRITY_MISMATCH)"]
+    FAIL --> INC["Log QuarantineIncidentRecord"]
+    INC --> ALERT["Dispatch High-Priority Alert to Custodian"]
+    ALERT --> ISOLATE["Lock Evidence Object (HTTP 423)"]
+```
+
+#### 19.8.1 The Twelve Mandatory Lifecycle Verification Gates
+1. **Gate 1 (Initial Intake):** Pre-decode streaming dual-hashing during stream reception.
+2. **Gate 2 (Staging Write):** Immediate hash check upon closing temporary staging file.
+3. **Gate 3 (WORM Registration Readback):** Readback verification reading raw bytes directly from WORM vault.
+4. **Gate 4 (Storage Retrieval):** In-memory hash check before passing stream to forensic engines.
+5. **Gate 5 (Replica Ingestion):** Re-verify hashes across storage cluster replication nodes.
+6. **Gate 6 (Backup Creation):** Validate backup replica bytes before marking backup job complete.
+7. **Gate 7 (Disaster Recovery Restoration):** Independent readback verification before re-activating restored exhibit.
+8. **Gate 8 (Pre-Analysis Validation):** Verify exhibit hashes immediately before executing heavy AI pipelines.
+9. **Gate 9 (Post-Derivation Registration):** Compute streaming dual-hashes over all output derivative artifacts.
+10. **Gate 10 (Export Packaging):** Recalculate and verify hashes of every file included in an export archive.
+11. **Gate 11 (Independent Transfer):** Post-transfer verification following inter-agency network transmission.
+12. **Gate 12 (Statutory Report Compilation):** Re-validate all hashes linked in Section 63 BSA forensic certificates.
+
+---
+
+### 19.9 Integrity Failure, Incident Logging & Quarantine Workflow
+
+```mermaid id="eivquarantine"
+flowchart TD
+    VER["Integrity Verification Run"] --> RES{"Hashes Match Baseline?"}
+    RES -->|Match| OK["Update Last Verified Timestamp<br/>Status: VERIFIED"]
+    RES -->|Mismatch / Corrupt| Q1["Lock Object Permissions<br/>Status: QUARANTINED (HTTP 423)"]
+
+    Q1 --> INC["Create QuarantineIncidentRecord<br/>(Expected vs Observed Digests, Offset)"]
+    INC --> CUST["Append INTEGRITY_FAILURE Event to Custody Ledger"]
+    CUST --> NOTIF["Dispatch Alert to Case Supervisor & Custodian"]
+
+    NOTIF --> REV["Investigate Candidate Backup Replicas"]
+    REV --> BKVER{"Backup Replica Passes Hash Verification?"}
+
+    BKVER -->|Yes| RESTORE["Restore Verified Replica to WORM Vault"]
+    RESTORE --> ARCHIVE["Archive Corrupted Copy as .corrupt for Diagnostics"]
+    ARCHIVE --> EVREST["Append EVIDENCE_RESTORED_FROM_BACKUP Custody Event"]
+    EVREST --> UNLOCK["Unlock Exhibit (Status: VERIFIED)"]
+
+    BKVER -->|No| LOSS["Escalate to Unrecoverable Storage Incident"]
+    LOSS --> RECORD["Record Irrevocable Integrity Breach in Final Dossier"]
+```
+
+#### Incident Management Invariants:
+1. **Never Overwrite Baseline Hashes:** Under no circumstances may an observed mismatched digest be written to the database as the new reference hash.
+2. **Preserve Damaged Bytes:** Corrupted evidence files are retained with extension `.corrupt` to enable low-level storage forensic analysis (e.g., investigating hardware bit flips or controller bugs).
+3. **Transparent Court Disclosures:** Any exhibit that experienced a quarantine incident must disclose the incident history, duration, and restoration verification details in the final forensic report.
+
+---
+
+### 19.10 Tamper-Evident Append-Only Chain-of-Custody Ledger
+
+To ensure that evidence handling is completely auditable and defense-resilient under judicial cross-examination, EIV implements an append-only, hash-chained custody ledger.
+
+```mermaid id="eivledger"
+flowchart LR
+    subgraph Event1["Custody Event #1 (Acquisition)"]
+        D1["Data_1: {event_id, evidence_id, seq: 1, action: 'ACQUIRE', ...}"]
+        P1["PrevHash: 0000...0000"]
+        E1["Chained Hash E_1<br/>H(Canonical(Data_1) || PrevHash)"]
+    end
+
+    subgraph Event2["Custody Event #2 (WORM Store)"]
+        D2["Data_2: {event_id, evidence_id, seq: 2, action: 'WORM_STORE', ...}"]
+        P2["PrevHash: E_1"]
+        E2["Chained Hash E_2<br/>H(Canonical(Data_2) || E_1)"]
+    end
+
+    subgraph Event3["Custody Event #3 (Analysis)"]
+        D3["Data_3: {event_id, evidence_id, seq: 3, action: 'ANALYZE', ...}"]
+        P3["PrevHash: E_2"]
+        E3["Chained Hash E_3<br/>H(Canonical(Data_3) || E_2)"]
+    end
+
+    E1 --> P2
+    E2 --> P3
+```
+
+#### 19.10.1 Mathematical Chaining Formulation
+For event $i \in \{1, 2, \dots, K\}$ in the evidence custody lifecycle:
+$$E_i = \text{SHA-256}\left( \text{JCS}(\text{EventData}_i) \parallel E_{i-1} \right)$$
+where $E_0 = 0000000000000000000000000000000000000000000000000000000000000000_{16}$ (64 zero hex characters for the genesis event).
+
+Sequence numbers increment strictly monotonically:
+$$\text{Seq}(Event_i) = \text{Seq}(Event_{i-1}) + 1$$
+
+Any modification, deletion, or insertion of historical events invalidates all subsequent $E_j$ hashes ($j \ge i$), instantly exposing tampering during custody verification audits.
+
+---
+
+### 19.11 Derivative Artifact Lineage (Merkle DAG) & Multi-File Packages
+
+```mermaid id="eivlineagegraph"
+flowchart TD
+    ORIG["Original Evidence Exhibit<br/>(CCTV_CAM01.mp4)<br/>SHA-256: a1b2..."] -->|VISTA AFB Demux| DER1["Derived Audio Stream<br/>(extracted_audio.wav)<br/>SHA-256: c3d4..."]
+    ORIG -->|VISTA VRE Extract| DER2["Key Video Frames<br/>(frame_00412.png)<br/>SHA-256: e5f6..."]
+
+    DER1 -->|AURAS AESL Analysis| DER3["Spectrogram Heatmap<br/>(splice_spec.png)<br/>SHA-256: 7a8b..."]
+    DER1 -->|AURAS MVSI Diarization| DER4["Speaker Segments JSON<br/>(speakers.json)<br/>SHA-256: 9c0d..."]
+
+    DER2 -->|AIF Face Crop| DER5["Isolated Face ROI<br/>(face_crop_01.png)<br/>SHA-256: 1e2f..."]
+
+    DER3 --> REP["UFREDF Section 63 BSA Report<br/>(forensic_dossier.pdf)<br/>SHA-256: 3a4b..."]
+    DER4 --> REP
+    DER5 --> REP
+```
+
+Every derived artifact row in PostgreSQL stores:
+- `derivative_id`: Unique UUIDv7.
+- `parent_evidence_id`: Link to parent exhibit.
+- `parent_sha256`: Parent hash verified prior to transformation.
+- `derivative_sha256`: Digest of the output file.
+- `transformation_type`: Canonical operation name (`AUDIO_DEMUX`, `FRAME_EXTRACTION`, etc.).
+- `execution_command`: Exact CLI or Python invocation string.
+- `software_commit_hash`: Git SHA of the executing code.
+- `operator_id`: User or Celery service worker ID.
+
+---
+
+### 19.12 Independent Portable & Offline Verifier Architecture
+
+```mermaid id="eivstandalone"
+flowchart TD
+    PKG["Court Export Package Directory<br/>/evidence_export_CASE104/"] --> CLI["Standalone Verifier CLI<br/>verify_evidence.py (Zero PyPI Dependencies)"]
+
+    subgraph Checks["14 Sequential Integrity Verifications"]
+        CLI --> C1["1. Verify Manifest Schema & Version"]
+        C1 --> C2["2. Compute RFC 8785 Canonical JCS Bytes"]
+        C2 --> C3["3. Verify Manifest Digest Matches JCS"]
+        C3 --> C4["4. Verify Whole-File SHA-256 Digest"]
+        C4 --> C5["5. Verify Whole-File SHA-512 Digest"]
+        C5 --> C6["6. Verify File Byte Length Matches Manifest"]
+        C6 --> C7["7. Verify Chunk Hashes & Merkle Root"]
+        C7 --> C8["8. Verify Ed25519 Detached Signature"]
+        C8 --> C9["9. Verify Signer Key in Public Key Certificate"]
+        C9 --> C10["10. Verify RFC 3161 TSA Token Signature"]
+        C10 --> C11["11. Verify TSA Token Message Imprint == Manifest Digest"]
+        C11 --> C12["12. Verify Append-Only Custody Chain (E_i = H(Ev_i || E_i-1))"]
+        C12 --> C13["13. Verify All Derived Artifact Parent Hashes"]
+        C13 --> C14["14. Verify Relative Paths (Path Traversal / Symlink Audit)"]
+    end
+
+    Checks --> OUT{"All 14 Checks Passed?"}
+    OUT -->|Yes| PASS["Print GREEN Verification Dossier<br/>(Exit Code 0: VERIFIED)"]
+    OUT -->|No| FAIL["Print RED Diagnostic Report<br/>Pinpoint Exact Byte Discrepancy or Signature Gap<br/>(Exit Code 1: FAILED)"]
+```
+
+---
+
+### 19.13 Cross-Subsystem Integrity Integration
+
+| Subsystem | Input Artifact to CEIPL | Primary Verification Gate | Derived Artifact Registered | Report Linkage |
+| :--- | :--- | :--- | :--- | :--- |
+| **AIF (Image)** | Raw JPEG, PNG, TIFF, RAW | Gate 1 Pre-Decode Dual Hash | Crops, ELA heatmaps, PRNU noise residual, face masks | Binds crop SHA-256 to raw image SHA-256 |
+| **AURAS (Audio)** | Raw WAV, MP3, AAC, FLAC | Gate 1 Pre-Decode Dual Hash | Resampled 16kHz PCM, STFT spectrograms, splice boundaries | Binds splice interval sample offsets to raw audio hash |
+| **VISTA (Video/CCTV)** | Raw MP4, MKV, AVI, proprietary CCTV | Gate 1 Pre-Decode Dual Hash | Lossless demuxed audio, keyframe rasters, motion vectors | Binds frame timestamp offsets to raw container hash |
+| **ONTF (Network)** | Raw PCAP, PCAPNG | Gate 1 Pre-Decode Dual Hash | Flow tables, Zeek connection logs, reassembled payloads | Binds flow summaries to raw capture hash |
+| **CMMS (Metadata)** | Raw EXIF, FFprobe, MP4 atoms | Gate 8 Pre-Analysis Parse | Canonical metadata JSON snapshot | Binds metadata snapshot hash to raw file hash |
+| **CSTV (Timestamps)** | Multi-source timestamps | Gate 8 Clock Model Fit | Clock drift regression curve, timeline conflict graph | Binds corrected timeline to raw exhibit hashes |
+| **UFREDF (Reporting)**| Forensic sub-reports | Gate 12 Final Compilation | Section 63 BSA certified PDF, Archify visualization IR | Binds all evidence, derivative, and event hashes |
+
+---
+
+### 19.14 PostgreSQL Relational DDL for EIV Entities
+
+```sql
+-- 1. Evidence Manifest Table
+CREATE TABLE eiv_evidence_manifests (
+    manifest_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    evidence_id UUID NOT NULL,
+    case_id UUID NOT NULL,
+    acquisition_id UUID NOT NULL,
+    manifest_version VARCHAR(16) NOT NULL DEFAULT '1.0',
+    original_filename VARCHAR(512) NOT NULL,
+    byte_count BIGINT NOT NULL CHECK (byte_count >= 0),
+    detected_mime_type VARCHAR(128) NOT NULL,
+    canonical_jcs_sha256 CHAR(64) NOT NULL,
+    merkle_root_sha256 CHAR(64),
+    storage_vault_urn VARCHAR(512) NOT NULL,
+    worm_retention_policy VARCHAR(64) NOT NULL,
+    worm_retention_until TIMESTAMPTZ,
+    manifest_payload JSONB NOT NULL,
+    sealed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT uq_eiv_manifest_evidence UNIQUE (evidence_id, manifest_version)
+);
+
+-- 2. Pre-Decode Hash Records Table
+CREATE TABLE eiv_hash_records (
+    hash_record_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    evidence_id UUID NOT NULL REFERENCES eiv_evidence_manifests(evidence_id) ON DELETE RESTRICT,
+    sha256_digest CHAR(64) NOT NULL,
+    sha512_digest CHAR(128) NOT NULL,
+    sha3_256_digest CHAR(64),
+    byte_count BIGINT NOT NULL CHECK (byte_count >= 0),
+    computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    execution_duration_ms NUMERIC(10, 2) NOT NULL,
+    streaming_buffer_size_kb INT NOT NULL DEFAULT 64,
+    completion_status VARCHAR(64) NOT NULL DEFAULT 'COMPLETED',
+    CONSTRAINT uq_eiv_hash_evidence UNIQUE (evidence_id)
+);
+
+-- 3. Append-Only Custody Events Table
+CREATE TABLE eiv_custody_events (
+    event_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    evidence_id UUID NOT NULL,
+    case_id UUID NOT NULL,
+    sequence_number BIGINT NOT NULL CHECK (sequence_number >= 1),
+    event_type VARCHAR(64) NOT NULL,
+    actor_id VARCHAR(128) NOT NULL,
+    actor_role VARCHAR(64) NOT NULL,
+    acting_service_id VARCHAR(128),
+    event_timestamp_utc TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    timestamp_source VARCHAR(64) NOT NULL DEFAULT 'SYSTEM_NTP',
+    reason_purpose TEXT NOT NULL,
+    input_hash_sha256 CHAR(64),
+    output_hash_sha256 CHAR(64),
+    previous_event_hash CHAR(64) NOT NULL,
+    current_event_hash CHAR(64) NOT NULL,
+    event_payload JSONB,
+    CONSTRAINT uq_eiv_custody_seq UNIQUE (evidence_id, sequence_number)
+);
+
+-- Database Trigger Preventing Modification of Custody Events
+CREATE OR REPLACE FUNCTION trg_prevent_custody_tampering()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'Cryptographic Custody Invariant Violation: eiv_custody_events is append-only. UPDATE and DELETE operations are strictly forbidden.';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_custody_immutable
+BEFORE UPDATE OR DELETE ON eiv_custody_events
+FOR EACH ROW EXECUTE FUNCTION trg_prevent_custody_tampering();
+
+-- 4. Verification Runs Table
+CREATE TABLE eiv_verification_runs (
+    verification_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    evidence_id UUID NOT NULL,
+    lifecycle_stage VARCHAR(64) NOT NULL,
+    overall_outcome VARCHAR(64) NOT NULL,
+    total_bytes_verified BIGINT NOT NULL,
+    execution_duration_ms NUMERIC(10, 2) NOT NULL,
+    executed_by_service VARCHAR(128) NOT NULL,
+    verification_timestamp_utc TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    storage_vault_urn VARCHAR(512) NOT NULL,
+    dimension_results JSONB NOT NULL
+);
+
+-- 5. Quarantine Incidents Table
+CREATE TABLE eiv_quarantine_incidents (
+    incident_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    evidence_id UUID NOT NULL,
+    case_id UUID NOT NULL,
+    triggered_by_verification_id UUID NOT NULL REFERENCES eiv_verification_runs(verification_id),
+    failure_type VARCHAR(64) NOT NULL,
+    expected_sha256 CHAR(64) NOT NULL,
+    observed_sha256 CHAR(64) NOT NULL,
+    byte_discrepancy_count BIGINT NOT NULL,
+    quarantined_object_urn VARCHAR(512) NOT NULL,
+    incident_timestamp_utc TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    incident_status VARCHAR(64) NOT NULL DEFAULT 'ACTIVE_QUARANTINE',
+    investigating_custodian_id VARCHAR(128),
+    resolution_notes TEXT
+);
+
+-- 6. Derived Artifacts Lineage Table
+CREATE TABLE eiv_derived_artifacts (
+    derivative_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    parent_evidence_id UUID NOT NULL,
+    parent_sha256 CHAR(64) NOT NULL,
+    derivative_sha256 CHAR(64) NOT NULL,
+    derivative_sha512 CHAR(128) NOT NULL,
+    transformation_type VARCHAR(64) NOT NULL,
+    execution_command TEXT NOT NULL,
+    software_commit_hash VARCHAR(64) NOT NULL,
+    created_at_utc TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    storage_urn VARCHAR(512) NOT NULL,
+    operator_id VARCHAR(128) NOT NULL
+);
+
+-- 7. Multi-File Package Manifest Table
+CREATE TABLE eiv_package_manifests (
+    package_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    case_id UUID NOT NULL,
+    package_version VARCHAR(16) NOT NULL DEFAULT '1.0',
+    package_merkle_root_sha256 CHAR(64) NOT NULL,
+    total_package_bytes BIGINT NOT NULL,
+    export_operator_id VARCHAR(128) NOT NULL,
+    created_at_utc TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    package_items JSONB NOT NULL
+);
+```
+
+---
+
+### 19.15 REST API Endpoints & Celery Worker Task Signatures
+
+```python
+# FastAPI Route Signatures
+@router.post("/api/v1/evidence/register", response_model=EvidenceRegistrationResponse, status_code=201)
+async def register_evidence(
+    case_id: UUID = Form(...),
+    original_filename: str = Form(...),
+    file: UploadFile = File(...),
+    current_user: User = Depends(require_role("ACQUISITION_OPERATOR"))
+) -> EvidenceRegistrationResponse: ...
+
+@router.get("/api/v1/evidence/{evidence_id}/integrity", response_model=EvidenceIntegrityStatusResponse)
+async def get_evidence_integrity(
+    evidence_id: UUID,
+    current_user: User = Depends(get_current_user)
+) -> EvidenceIntegrityStatusResponse: ...
+
+@router.post("/api/v1/evidence/{evidence_id}/verify", response_model=VerificationRunResult)
+async def verify_evidence_adhoc(
+    evidence_id: UUID,
+    verification_scope: str = Query(default="COMPLETE_OBJECT"),
+    current_user: User = Depends(require_role("FORENSIC_EXAMINER"))
+) -> VerificationRunResult: ...
+
+@router.get("/api/v1/evidence/{evidence_id}/manifest", response_model=EvidenceManifest)
+async def get_evidence_manifest(
+    evidence_id: UUID,
+    current_user: User = Depends(get_current_user)
+) -> EvidenceManifest: ...
+
+@router.post("/api/v1/evidence/{evidence_id}/manifest/sign", response_model=DetachedSignatureRecord)
+async def sign_evidence_manifest(
+    evidence_id: UUID,
+    current_user: User = Depends(require_role("CASE_SUPERVISOR"))
+) -> DetachedSignatureRecord: ...
+
+@router.get("/api/v1/evidence/{evidence_id}/custody", response_model=List[CustodyEventRecord])
+async def get_custody_chain(
+    evidence_id: UUID,
+    current_user: User = Depends(get_current_user)
+) -> List[CustodyEventRecord]: ...
+
+@router.get("/api/v1/evidence/{evidence_id}/lineage", response_model=List[DerivedArtifactRecord])
+async def get_derivative_lineage(
+    evidence_id: UUID,
+    current_user: User = Depends(get_current_user)
+) -> List[DerivedArtifactRecord]: ...
+
+@router.post("/api/v1/evidence/{evidence_id}/fixity-check", response_model=VerificationRunResult)
+async def trigger_fixity_check(
+    evidence_id: UUID,
+    current_user: User = Depends(require_role("EVIDENCE_CUSTODIAN"))
+) -> VerificationRunResult: ...
+
+@router.post("/api/v1/evidence/{evidence_id}/export", response_model=PackageManifestRecord)
+async def export_evidence_package(
+    evidence_id: UUID,
+    include_derivatives: bool = Query(default=True),
+    current_user: User = Depends(require_role("CASE_SUPERVISOR"))
+) -> PackageManifestRecord: ...
+
+# Celery Worker Task Signatures
+@celery_app.task(name="eiv.tasks.predecode_hash_stream", bind=True)
+def predecode_hash_stream_task(self, staging_path: str, evidence_id: str) -> Dict[str, Any]: ...
+
+@celery_app.task(name="eiv.tasks.readback_verify", bind=True)
+def readback_verify_task(self, evidence_id: str, vault_urn: str) -> Dict[str, Any]: ...
+
+@celery_app.task(name="eiv.tasks.scheduled_fixity_audit", bind=True)
+def scheduled_fixity_audit_task(self, batch_size: int = 50) -> Dict[str, Any]: ...
+
+@celery_app.task(name="eiv.tasks.sign_manifest_ed25519", bind=True)
+def sign_manifest_ed25519_task(self, evidence_id: str, signer_role: str) -> Dict[str, Any]: ...
+
+@celery_app.task(name="eiv.tasks.request_rfc3161_tsa", bind=True)
+def request_rfc3161_tsa_task(self, evidence_id: str, manifest_digest: str) -> Dict[str, Any]: ...
+
+@celery_app.task(name="eiv.tasks.assemble_export_package", bind=True)
+def assemble_export_package_task(self, evidence_id: str, output_dir: str) -> Dict[str, Any]: ...
+```
+
+---
+
+### 19.16 Technology Evaluation Matrix & Cryptographic Standards Alignment
+
+| Technical Area | Evaluated Standard / Library | Selection Status | Operational & Cryptographic Rationale |
+| :--- | :--- | :--- | :--- |
+| **Primary Hash** | NIST FIPS 180-4 SHA-256 | **SELECTED** | Universal legal recognition (Section 63 BSA / 65B IEA), hardware acceleration via Intel SHA-NI |
+| **Secondary Hash** | NIST FIPS 180-4 SHA-512 | **SELECTED** | 64-bit word architecture, high throughput, zero shared state with SHA-256 |
+| **Agile Hash** | NIST FIPS 202 SHA3-256 | **SELECTED (CONFIGURABLE)**| Keccak sponge construction; algorithmically independent of Merkle-Damgard |
+| **Legacy Hashes** | MD5 / SHA-1 | **LEGACY COMPARISON ONLY** | Strictly barred as primary integrity references; retained solely for legacy cross-matching |
+| **Digital Signature**| RFC 8032 Ed25519 | **SELECTED** | Fast constant-time signing, immune to side-channel timing attacks, 64-byte compact signatures |
+| **Timestamp Protocol**| RFC 3161 / RFC 5816 | **SELECTED** | International standard for proof-of-existence time assertions binding hash to TSA certificate |
+| **Canonical JSON** | RFC 8785 (JCS) | **SELECTED** | Standardized, cross-language deterministic JSON byte serialization |
+| **Storage Vault** | POSIX `0400` + MinIO S3 Object Lock | **SELECTED** | Hardware-level and filesystem-level Write-Once retention locking |
+| **Database** | PostgreSQL 16 + Immutability Triggers | **SELECTED** | ACID compliance, append-only triggers, relational indexing on UUIDs and sequence numbers |
+| **Queue / Workers** | Redis 7 + Celery 5.3+ | **SELECTED** | Asynchronous background streaming, non-blocking fixity audits, fault-tolerant retry |
+
+---
+
+### 19.17 Testing, Mutation Test Suites & Benchmark Methodology
+
+```mermaid id="eivtestsuite"
+flowchart TD
+    subgraph TestSuites["EIV Comprehensive Test Architecture"]
+        U1["Unit Tests<br/>(FIPS 180-4 KATs, RFC 8785 Vectors, RFC 8032 Ed25519)"]
+        M1["16 Mutation Tests<br/>(1-Bit Flips, Truncation, Replacement, Insertion)"]
+        S1["WORM Immutability Tests<br/>(Unauthorised Overwrite / Delete / Truncate)"]
+        L1["Custody Chain Tests<br/>(Sequence Gaps, Reordering, Tampered Event Hash)"]
+        P1["Performance & Memory Benchmarks<br/>(50GB Large File, RAM <= 64MB, >= 150MB/s)"]
+    end
+
+    U1 --> CI["CI/CD Automated Gate<br/>100% Pass Required for Release"]
+    M1 --> CI
+    S1 --> CI
+    L1 --> CI
+    P1 --> CI
+```
+
+#### 19.17.1 The Sixteen Mutation Test Cases
+1. **Single-Bit Flip Mutation:** Toggle bit 0 of byte offset 1024; assert `INTEGRITY_MISMATCH`.
+2. **Byte Insertion Mutation:** Insert 1 byte at middle offset; assert byte count divergence and hash failure.
+3. **Byte Deletion Mutation:** Delete 1 byte at middle offset; assert truncation detection.
+4. **Terminal Truncation Mutation:** Remove final 128 bytes; assert stream truncation detected.
+5. **Byte Appending Mutation:** Append 512 zero bytes to EOF; assert hash mismatch.
+6. **Chunk Reordering Mutation:** Swap Chunk 1 and Chunk 2; assert Merkle root divergence.
+7. **Metadata Header Edit Mutation:** Modify 1 EXIF byte; assert pre-decode hash mismatch.
+8. **In-Place File Substitution:** Replace file with different content having same name; assert hash failure.
+9. **Manifest Digest Tampering:** Edit 1 character in manifest JSON; assert signature verification failure.
+10. **Signature Bit Flip:** Invert 1 bit in Ed25519 signature; assert cryptographic rejection.
+11. **TSA Message Imprint Mismatch:** Attach TSA token from different file; assert token imprint mismatch.
+12. **Custody Sequence Break:** Delete event #2 in sequence 1, 2, 3; assert sequence gap detected.
+13. **Custody Chaining Mutation:** Modify historical event description; assert chained hash break.
+14. **Derivative Parent Hash Divergence:** Change recorded parent hash; assert lineage verification failure.
+15. **Path Traversal Injection in Package:** Inject `../../etc/passwd` path; assert sanitization rejection.
+16. **WORM Overwrite Penetration:** Attempt `open(path, 'wb')` on POSIX `0400` file; assert `PermissionError`.

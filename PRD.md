@@ -145,6 +145,21 @@ The **AESL (Audio Edit and Splice Localisation)** capability embedded within the
 
 ---
 
+### 3.9 Dedicated Evidence Integrity Verification (EIV) Product Objectives
+The **EIV (Evidence Integrity Verification)** capability, owned by the **CEIPL (Cryptographic Evidence Integrity and Provenance Layer)** shared platform layer, fulfills ten foundational forensic integrity objectives:
+1. **OBJ-EIV-01 (Pre-Decode Streaming Integrity):** Ingest and hash raw original bitstreams using modern streaming dual algorithms (SHA-256 and SHA-512 / SHA3-256) strictly *before* any decoder, demuxer, metadata parser, or forensic engine accesses the file, guaranteeing zero pre-decode alteration.
+2. **OBJ-EIV-02 (Decoupled Identity & Anti-Conflation):** Decouple evidence identity from file paths, filenames, storage locations, and algorithms across 10 distinct entities (Evidence, Acquisition, File, Hash, Metadata, Derivative, Custody, Manifest, Verification, Case), preserving distinct provenance histories even for byte-identical files.
+3. **OBJ-EIV-03 (WORM Storage & True Retention Locking):** Preserve all original evidence in hardware- or storage-enforced Write-Once Read-Many (WORM) vaults (POSIX `0400` read-only mode, S3 Object Lock compliance/governance mode), preventing deletion or modification even by privileged administrative users.
+4. **OBJ-EIV-04 (Canonical Manifests & RFC 8785 Serialization):** Bind evidence metadata, dual digests, acquisition context, and custody references into versioned JSON manifests canonicalized via RFC 8785 JSON Canonicalization Scheme (JCS) for deterministic byte-reproducibility across heterogeneous platforms.
+5. **OBJ-EIV-05 (Cryptographic Detached Attestation):** Seal canonical manifests and custody events with detached Ed25519 digital signatures and RFC 3161 trusted timestamp tokens, providing non-repudiation and proof-of-existence without relying on local system clocks.
+6. **OBJ-EIV-06 (Append-Only Hash-Chained Custody Ledger):** Record every evidence handling, retrieval, analysis, and export operation in a tamper-evident, append-only custody ledger where each event cryptographically chains to its predecessor ($E_i = H(\text{Canonical}(Event_i) \parallel E_{i-1})$).
+7. **OBJ-EIV-07 (Multi-Modal Derivative Lineage DAG):** Track every derivative forensic artifact (extracted audio, video frames, spectrograms, crops, feature embeddings, OCR text, reports) in an immutable Merkle Directed Acyclic Graph (DAG) with explicit parent hashes, transformation parameters, and software version records.
+8. **OBJ-EIV-08 (Continuous Fixity & Multi-Stage Lifecycle Verification):** Enforce mandatory hash verification across 12 lifecycle stages (acquisition, staging write, WORM registration, retrieval, replication, backup, restore, pre-analysis, post-derivation, export, transfer, reporting) and execute scheduled background fixity audits to detect bit rot or storage corruption.
+9. **OBJ-EIV-09 (Fail-Closed Quarantine & Incident Recovery):** Isolate any evidence failing hash verification into a quarantined state without silent repair or digest recalculation, preserving conflicting versions and orchestrating verified restoration from independent backup copies.
+10. **OBJ-EIV-10 (Independent Portable Verification & Section 63 BSA Assurance):** Enable self-contained, air-gapped evidence package verification without requiring access to the platform's production database or web service, generating defensible technical dossiers for Section 63 Bharatiya Sakshya Adhiniyam (BSA 2023) / Section 65B IEA judicial scrutiny.
+
+---
+
 ## 4. Target User Personas & User Journeys
 
 ### 4.1 Target Personas
@@ -3587,7 +3602,7 @@ AESL resolves these challenges by providing an evidence-preserving, multi-branch
   1. AESL applies multi-resolution spectral entropy and minimum statistics noise tracking across the entire recording.
   2. The examiner selects candidate boundary at $t = 45.2	ext{ s}$ for deep inspection.
   3. AESL renders a dual noise-floor comparison: the 2.0-second interval prior to the boundary exhibits engine rumble concentrated at $120	ext{ Hz}$ ($SNR = 14	ext{ dB}$), while the 2.0-second interval following exhibits HVAC broadband noise at $2.4	ext{ kHz}$ ($SNR = 22	ext{ dB}$).
-  4. AESL computes the acoustic environment distance ($D_{	ext{env}} = 0.78$), issuing finding `AUDIO_EDIT_ENVIRONMENT_MISMATCH`.
+  4. AESL computes the acoustic environment distance ($D_{\text{env}} = 0.78$), issuing finding `AUDIO_EDIT_ENVIRONMENT_MISMATCH`.
   5. The examiner exports the comparative spectral density curve directly into the courtroom report.
 
 ##### Journey AESL-J05: Investigating a Cross-Recording Insertion
@@ -3665,7 +3680,7 @@ AESL resolves these challenges by providing an evidence-preserving, multi-branch
 | **AESL-31** | Room Impulse Response (RIR) Characteristic Modeling| P1 | ARE Acoustic | RIR parameter estimation test | AESL-A3 | `PLANNED` |
 | **AESL-32** | Reverberation Decay Time (RT60) Discontinuity | P0 | ARE Acoustic | Reverberation step jump test | AESL-A3 | `PLANNED` |
 | **AESL-33** | Direct-to-Reverberant Ratio (DRR) Tracking | P1 | ARE Acoustic | DRR distance transition test | AESL-A3 | `PLANNED` |
-| **AESL-34** | Ambient Background Signature Distance ($D_{	ext{env}}$)| P0 | ARE Acoustic | Environment mismatch fixtures | AESL-A3 | `PLANNED` |
+| **AESL-34** | Ambient Background Signature Distance ($D_{\text{env}}$)| P0 | ARE Acoustic | Environment mismatch fixtures | AESL-A3 | `PLANNED` |
 | **AESL-35** | Microphone Handling & Distance Shift Safeguard | P0 | ARE Acoustic | Natural movement rejection test | AESL-A3 | `PLANNED` |
 | **AESL-36** | High-Resolution Short-Time Fourier Transform (STFT)| P0 | ARE Spectral | Exact time-frequency STFT test | AESL-A2 | `PLANNED` |
 | **AESL-37** | Spectral Centroid & Bandwidth Tracking | P1 | ARE Spectral | Centroid step discontinuity test | AESL-A2 | `PLANNED` |
@@ -3725,10 +3740,10 @@ AESL resolves these challenges by providing an evidence-preserving, multi-branch
 
 ### 17.7 Multi-Resolution Segmentation & Sample-Index Coordinates
 1. **Coordinate Formulation:** Time $t$ is calculated from sample index $n$ and native sampling rate $f_s$:
-   $$t = 
+   $$t =
 rac{n}{f_s}$$
    A candidate interval covering $[n_{	ext{start}}, n_{	ext{end}}]$ has duration:
-   $$\Delta t = 
+   $$\Delta t =
 rac{n_{	ext{end}} - n_{	ext{start}}}{f_s}$$
 2. **Four Concurrently Evaluated Window Scales:**
    - **Scale 1 (Short: 10–20 ms, hop 5 ms):** Captures hard sample discontinuities, phase flips, and waveform clipping.
@@ -3739,20 +3754,20 @@ rac{n_{	ext{end}} - n_{	ext{start}}}{f_s}$$
 ### 17.8 Multi-Branch Signal Analysis Specifications
 
 #### 17.8.1 Branch A: Time-Domain Continuity
-- **Short-Time Energy:** $E[m] = 
+- **Short-Time Energy:** $E[m] =
 rac{1}{N} \sum_{n=0}^{N-1} x[mH + n]^2$, $RMS[m] = \sqrt{E[m]}$.
-- **Crest Factor:** $C[m] = 
+- **Crest Factor:** $C[m] =
 rac{\max |x[mH + n]|}{RMS[m]}$.
-- **Zero-Crossing Rate (ZCR):** $ZCR[m] = 
+- **Zero-Crossing Rate (ZCR):** $ZCR[m] =
 rac{1}{2N} \sum_{n=1}^{N-1} |\operatorname{sgn}(x[mH + n]) - \operatorname{sgn}(x[mH + n - 1])|$.
 - **First-Order Difference:** $d[n] = x[n] - x[n-1]$.
 
 #### 17.8.2 Branch B: Frequency-Domain & Spectral Forensics
 - **STFT Formulation:** $X(m,k) = \sum_{n=0}^{N-1} x[mH + n] w[n] e^{-j 2\pi k n / N}$.
 - **Spectral Flux:** $SF[m] = \sum_k (|X(m,k)| - |X(m-1,k)|)^2$.
-- **Spectral Centroid:** $f_c[m] = 
+- **Spectral Centroid:** $f_c[m] =
 rac{\sum_k f_k |X(m,k)|}{\sum_k |X(m,k)|}$.
-- **Spectral Flatness:** $SFM[m] = 
+- **Spectral Flatness:** $SFM[m] =
 rac{\exp\left(
 rac{1}{K} \sum_k \ln |X(m,k)|^2
 ight)}{
@@ -3760,16 +3775,16 @@ rac{1}{K} \sum_k |X(m,k)|^2}$.
 
 #### 17.8.3 Branch C: Acoustic Environment & Noise Inconsistency
 - **Reverberation Decay ($RT60$):** Energy Decay Curve $EDC(t) = \int_t^\infty h^2(	au) d	au$, Schroeder integration.
-- **Direct-to-Reverberant Ratio:** $DRR = 10 \log_{10} 
+- **Direct-to-Reverberant Ratio:** $DRR = 10 \log_{10}
 rac{\int_0^{t_d} h^2(	au) d	au}{\int_{t_d}^\infty h^2(	au) d	au}$.
-- **Environment Distance:** $D_{	ext{env}}(A, B) = 
-rac{1}{2} D_{	ext{KL}}(P_A \parallel P_B) + 
-rac{1}{2} D_{	ext{KL}}(P_B \parallel P_A)$.
+- **Environment Distance:** $D_{\text{env}}(A, B) =
+rac{1}{2} D_{\text{KL}}(P_A \parallel P_B) +
+rac{1}{2} D_{\text{KL}}(P_B \parallel P_A)$.
 
 #### 17.8.4 Branch D: Channel & Phase Consistency
 - **Cross-Channel Correlation:** $R_{xy}(	au) = \sum_n x[n] y[n + 	au]$.
 - **Normalized Peak Coherence:** $
-ho_{\max} = 
+ho_{\max} =
 rac{\max_	au R_{xy}(	au)}{\sqrt{\sum x^2[n] \sum y^2[n]}}$.
 
 #### 17.8.5 Branch E: Learned Temporal Representation
@@ -3849,4 +3864,556 @@ Every generated finding must evaluate whether the observed acoustic change can b
 | **AESL-79 to AESL-83** | Finding Taxonomy, 14 Decision States & UI | TRD §12.9, §18.19 | Phase AURAS-AESL-08 / AESL-09 |
 | **AESL-84 to AESL-87** | CEIPL Provenance, WORM Vault & Security Limits| TRD §15.7, §18.14 | Phase AURAS-AESL-01 / AESL-09 |
 | **AESL-88 to AESL-90** | UFREDF Legal Reporting & 500-Fixture Benchmark | TRD §18.18, §18.19 | Phase AURAS-AESL-09 / AESL-10 |
+
+## 18. Evidence Integrity Verification & Cryptographic Provenance (EIV) - Product Requirements
+
+### 18.1 Problem Statement & Real-World Forensic Integrity Risks
+In contemporary digital forensic investigations, electronic evidence—spanning CCTV recordings, seized smartphone extractions, intercepted voice calls, forensic disk images, and network packet captures—is exposed to severe lifecycle vulnerabilities. Without cryptographic guarantees and tamper-evident controls, digital evidence is vulnerable to:
+1. **Bit-Level Modifications & Silent Corruption:** Undetected bit rot, storage sector degradation, or partial overwrites during file handling.
+2. **File Substitution & In-Place Replacement:** Replacing a seized audio or video recording with an altered or truncated copy bearing the exact same filename and filesystem timestamps.
+3. **Pre-Decode Manipulation:** Altering media streams inside decoders, transcoders, or normalisation pipelines before initial forensic analysis occurs.
+4. **Broken Chain of Custody:** Unrecorded access, unaccounted transfers between agencies or workstations, and backdated handling logs that collapse in judicial cross-examination.
+5. **Derivative Disconnection:** Generating forensic crops, spectrograms, or transcoded frames that cannot be mathematically proven to originate from the seized original exhibit.
+6. **Manifest & Digest Tampering:** Modifying stored checksum records to match an altered evidence file, masking intentional fabrication.
+7. **Unverified Backups & Restoration Errors:** Restoring corrupted evidence copies from unvalidated backup media and representing them as genuine originals.
+8. **Premature Legal Declarations:** Presenting simple hash comparisons as conclusive proof of the real-world truth of an event, rather than proof of byte-level constancy.
+
+The **Evidence Integrity Verification (EIV)** capability within the **Cryptographic Evidence Integrity and Provenance Layer (CEIPL)** solves these risks by providing an end-to-end, mathematically verifiable assurance architecture.
+
+---
+
+### 18.2 Goals and Non-Goals
+
+#### 18.2.1 Product Goals (Ten Foundational Evidentiary Questions)
+EIV is architected to provide mathematically defensible, independently reproducible answers to ten core investigative questions:
+1. **Acquisition Identity:** What exact file, stream, or package was acquired, under what initial parameters, and by whom?
+2. **Intake Digest:** What exact cryptographic digests (dual SHA-256 and SHA-512 / SHA3-256) were computed over the raw byte sequence prior to decoding?
+3. **Post-Acquisition Immutability:** Has the original evidence experienced any bit-level modification, truncation, or insertion since intake?
+4. **Storage Fixity:** Does the physical object currently residing in the storage vault match its baseline intake integrity reference?
+5. **Transfer Fidelity:** Does the evidence object retrieved or transferred over the network remain byte-for-byte identical to the acquired original?
+6. **Derivative Traceability:** Can every derived audio snippet, video frame, facial crop, feature embedding, or forensic report be cryptographically traced back to its specific parent exhibit?
+7. **Custody Auditability:** Can every access, transfer, analysis, and export event be independently audited in an append-only, tamper-evident ledger?
+8. **Attestation Validity:** Are the digital signatures (Ed25519) and trusted timestamp tokens (RFC 3161) affixed to the evidence manifest cryptographically valid and unexpired?
+9. **Storage Immutability Enforcement:** Has the storage subsystem actively enforced Write-Once Read-Many (WORM) retention locks against unauthorised deletion or overwrites?
+10. **Independent Verifiability:** Can a complete evidence package be verified offline by a defense counsel, magistrate, or independent auditor without trusting the platform software?
+
+#### 18.2.2 Explicit Non-Goals
+1. **No Assertion of Real-World Event Truth:** EIV certifies byte-level integrity and chain-of-custody consistency; it does *not* assert that recorded real-world events are authentic, un-staged, or factual.
+2. **No Automatic Legal Admissibility Declaration:** EIV provides verifiable technical records conforming to Section 63 BSA / Section 65B IEA; it does *not* replace the statutory declaration of the human officer in charge.
+3. **No Independent Engine Classification:** EIV is an integrity layer embedded within CEIPL, not a new detection engine (it is neither a 6th VISTA engine nor a 4th AURAS engine).
+4. **No Blockchain Marketing Dependency:** EIV utilizes verifiable cryptographic Merkle trees, hash-linked ledgers, and detached digital signatures; it avoids distributed blockchain overhead.
+5. **No In-Place Modification or Silent Healing:** EIV strictly forbids silent overwriting, automatic re-hashing, or hidden repair of corrupted evidence.
+
+---
+
+### 18.3 Measurable Security Objectives
+
+| Objective ID | Security Dimension | Measurable Target | Operational Verification |
+| :--- | :--- | :--- | :--- |
+| **SEC-OBJ-01** | **Byte Integrity** | 100% detection of single-bit mutations, byte insertions, deletions, and truncations | Automated SHA-256 + SHA-512 streaming readback |
+| **SEC-OBJ-02** | **Attestation Authenticity** | Cryptographic validation of detached Ed25519 signatures and RFC 3161 TSA tokens | Asymmetric public key and X.509 TSA certificate chain validation |
+| **SEC-OBJ-03** | **Decoupled Identity** | Complete separation of Evidence ID from paths, filenames, storage keys, and algorithms | Persistent UUIDv5 / UUIDv7 assignment across 10 distinct entities |
+| **SEC-OBJ-04** | **Custody Continuity** | 100% unbroken sequence in append-only custody event chains ($E_i = H(\text{Event}_i \parallel E_{i-1})$) | Cryptographic chain validation and sequence continuity audits |
+| **SEC-OBJ-05** | **Lineage Traceability** | 100% of derived artifacts linked to parent exhibits via Merkle DAG references | Parent hash verification prior to forensic reporting |
+| **SEC-OBJ-06** | **Storage Immutability** | Zero unauthorized writes, deletions, or rollbacks during retention periods | POSIX `0400` read-only mode and S3 Object Lock compliance mode |
+| **SEC-OBJ-07** | **Availability & Survivability** | Recoverability of verified evidence from independent backups following storage failure | Automated readback comparison against original baseline digest |
+| **SEC-OBJ-08** | **Confidentiality & Isolation** | Cryptographic case-level isolation and zero plaintext exposure of signing keys | Encrypted keystore (OS DPAPI / PKCS#11 HSM) and RBAC scoping |
+| **SEC-OBJ-09** | **Non-Repudiation** | Defense-resilient audit trail binding operator identity to evidence actions | Detached signatures over canonical RFC 8785 event representations |
+| **SEC-OBJ-10** | **Independent Verification** | 100% standalone verification using standard open-source tools (OpenSSL, Python) | Air-gapped verification CLI consuming JSON manifests and raw bytes |
+| **SEC-OBJ-11** | **Fail-Closed Quarantine** | Zero downstream processing permitted for exhibits failing integrity checks | Automatic isolation to quarantine vault with examiner escalation |
+
+---
+
+### 18.4 Formal Threat Model
+
+```mermaid id="eivthreat"
+flowchart TD
+    subgraph Threats["EIV Forensic Threat Vectors"]
+        T1["A. Evidence Modification<br/>(Bit rot, truncation, replacement, insertion)"]
+        T2["B. Storage Threats<br/>(WORM bypass, admin deletion, media decay)"]
+        T3["C. Transfer Threats<br/>(Incomplete upload, network corruption, replay)"]
+        T4["D. Provenance Threats<br/>(Custody gaps, backdated logs, false origin)"]
+        T5["E. Cryptographic Threats<br/>(Weak hashes, key compromise, invalid TSA)"]
+        T6["F. Operational Threats<br/>(API traversal, unsafe temp, race writes)"]
+    end
+
+    subgraph Defense["CEIPL / EIV Security Controls"]
+        C1["Pre-Decode Streaming Dual Hashing<br/>(SHA-256 + SHA-512)"]
+        C2["WORM Object Vault<br/>(POSIX 0400 / S3 Object Lock)"]
+        C3["Post-Write Readback & Fixity Audits"]
+        C4["Append-Only Hash-Linked Ledger<br/>(E_i = H(Event_i || E_i-1))"]
+        C5["Detached Ed25519 Signatures & RFC 3161 TSA"]
+        C6["Decoupled Identity & Quarantine Isolation"]
+    end
+
+    T1 --> C1
+    T2 --> C2
+    T3 --> C3
+    T4 --> C4
+    T5 --> C5
+    T6 --> C6
+```
+
+#### Category A: Evidence Modification Threats
+- **Single-Bit & Byte Alterations:** Accidental or malicious toggling of byte values within video macroblocks, audio samples, or EXIF metadata.
+- **File Truncation:** Premature stream termination during network transfer or physical disk disconnect resulting in missing terminal frames.
+- **Byte Insertion & Appending:** Injecting malicious payloads, metadata tags, or extra audio segments without updating file length.
+- **File Substitution & In-Place Overwrites:** Swapping a seized exhibit with a modified recording bearing an identical filename and directory path.
+- **Evidence Package Reordering:** Altering the sequence of individual image frames or PCAP segment files within a multi-file forensic collection.
+
+#### Category B: Storage Threats
+- **Bit Rot & Magnetic Decay:** Latent sector degradation on magnetic platters or solid-state storage over multi-year retention cycles.
+- **Unauthorised Deletion & Overwrite:** Privileged rogue administrator attempting to delete incriminating exhibits or replace them with scrubbed versions.
+- **Storage Rollback & Snapshot Reversion:** Rolling back storage volumes to an earlier snapshot to erase custody events or newly registered exhibits.
+- **Backup Corruption & Replica Inconsistency:** Asynchronous replication lag or damaged backup media resulting in desynchronised evidence states.
+- **WORM Policy Tampering:** Premature termination of retention locks or unauthorised modification of governance rules.
+
+#### Category C: Transfer Threats
+- **Network Interruption & Partial Uploads:** Packet loss or socket timeout leading to truncated evidence ingestion without server-side error trapping.
+- **Transfer Corruption:** Bit flips introduced by faulty network switches, non-ECC memory buffers, or interrupted TLS tunnels.
+- **Destination & Manifest Substitution:** Intercepting an upload and redirecting it to an unmanaged directory or swapping the manifest payload.
+- **Unverified Post-Transfer Ingestion:** Ingesting evidence without verifying that the received byte count matches the source byte count.
+
+#### Category D: Provenance & Custody Threats
+- **Missing Acquisition Metadata:** Seizing digital media without capturing the seizing officer ID, physical device serial number, or extraction method.
+- **False Source Attribution:** Falsely attributing an audio recording to a suspect phone rather than a wiretap extraction.
+- **Backdated & Fabricated Custody Logs:** Retroactively creating or editing custody entries to paper over unrecorded handling gaps.
+- **Broken Derivative Parentage:** Exporting a cropped face or filtered audio file without cryptographic binding to the seized original.
+- **Cross-Case Contamination:** Associating an evidence exhibit with an incorrect case ID or merging distinct evidence files due to identical filenames.
+
+#### Category E: Cryptographic Threats
+- **Collision & Pre-Image Vulnerabilities:** Relying on broken or deprecated hash functions (MD5, SHA-1) susceptible to collision attacks.
+- **Digest Substitution in Database:** Updating a stored hash record in PostgreSQL to match an altered file, bypassing naive checks.
+- **Signature Forgery & Private Key Theft:** Compromise of platform signing keys stored insecurely in plaintext files or source repositories.
+- **Expired Certificates & Unanchored Timestamps:** Manifest signatures lacking long-term verification (LTV) data or verifiable TSA proof-of-existence.
+
+#### Category F: Application & Operational Threats
+- **Path Traversal (`../` Attacks):** Insecure file handling allowing uploads to overwrite core operating system binaries or evidence outside the vault.
+- **Race Conditions in Multi-Threaded Ingestion:** Simultaneous writes to the same evidence path leading to interleaved byte streams.
+- **Decoder Modification of Source Files:** Transcoding libraries (FFmpeg, OpenCV) opening original files in read-write mode and updating metadata tags.
+- **Incomplete Audit Trails:** Omitting automated background operations (fixity checks, virus scans, index generation) from the custody ledger.
+
+---
+
+### 18.5 Evidence Identity & Decoupled Identifier Architecture
+
+To prevent ambiguity, collision, and provenance corruption, EIV enforces strict decoupling between the logical identity of an exhibit and its physical storage or naming attributes.
+
+```mermaid id="eivids"
+classDiagram
+    class Case {
+        +UUID case_id
+        +String case_number
+    }
+    class EvidenceObject {
+        +UUID evidence_id
+        +UUID case_id
+        +String evidence_label
+        +String intake_status
+    }
+    class AcquisitionRecord {
+        +UUID acquisition_id
+        +UUID evidence_id
+        +String operator_id
+        +DateTime acquired_at
+        +String method
+    }
+    class OriginalFileObject {
+        +UUID file_id
+        +UUID evidence_id
+        +String original_filename
+        +Int64 byte_count
+        +String storage_urn
+    }
+    class HashRecord {
+        +UUID hash_id
+        +UUID file_id
+        +String sha256_digest
+        +String sha512_digest
+        +DateTime computed_at
+    }
+    class ManifestRecord {
+        +UUID manifest_id
+        +UUID evidence_id
+        +Int32 version
+        +String canonical_jcs_sha256
+    }
+    class CustodyEvent {
+        +UUID event_id
+        +UUID evidence_id
+        +Int64 sequence_number
+        +String event_type
+        +String previous_event_hash
+        +String current_event_hash
+    }
+    class DerivedArtifact {
+        +UUID derivative_id
+        +UUID parent_evidence_id
+        +String transformation_type
+        +String derivative_sha256
+    }
+
+    Case "1" --> "*" EvidenceObject
+    EvidenceObject "1" --> "*" AcquisitionRecord
+    EvidenceObject "1" --> "1" OriginalFileObject
+    OriginalFileObject "1" --> "1" HashRecord
+    EvidenceObject "1" --> "*" ManifestRecord
+    EvidenceObject "1" --> "*" CustodyEvent
+    EvidenceObject "1" --> "*" DerivedArtifact
+```
+
+#### 18.5.1 The Ten Decoupled Identifiers
+1. **Case ID (`case_id`):** Scopes all evidence, acquisitions, users, and reports to an official police FIR or judicial case number.
+2. **Evidence ID (`evidence_id`):** Persistent, immutable UUID identifying the logical piece of evidence regardless of physical copies.
+3. **Acquisition ID (`acquisition_id`):** Identifies the specific seizure or ingestion operation (who seized it, where, and when).
+4. **File / Object ID (`file_id`):** Identifies the raw byte stream as stored within the underlying physical or object storage tier.
+5. **Original Hash Record ID (`hash_id`):** Strongly typed record binding pre-decode cryptographic digests (SHA-256 and SHA-512) to the file bytes.
+6. **Metadata Snapshot ID (`metadata_snapshot_id`):** Cryptographic digest of the raw EXIF/FFprobe/PCAP header metadata extracted at intake.
+7. **Derived Artefact ID (`derivative_id`):** Unique identifier for every secondary file produced by forensic processing (crops, frames, audio stems).
+8. **Custody Event ID (`custody_event_id`):** Sequence-numbered identifier for every auditable action executed upon the evidence.
+9. **Manifest ID (`manifest_id`):** Versioned identifier for the canonical JSON manifest binding all evidence references together.
+10. **Verification Run ID (`verification_id`):** Identifies an individual scheduled fixity check or ad-hoc integrity verification audit.
+
+#### 18.5.2 Duplicate Evidence & Deduplication Invariant
+In forensic investigations, two distinct seizures (e.g., suspect phone and victim phone) may contain byte-for-byte identical files. EIV enforces:
+- **Zero Provenance Merging:** Both files receive distinct `evidence_id`, `acquisition_id`, and independent chain-of-custody ledgers.
+- **Storage-Level Content Deduplication:** The storage subsystem may store a single physical blob to optimize disk space, but the application layer strictly preserves separate metadata, ownership, and legal custody contexts.
+- **Non-Conflation Invariant:** Content identity (matching SHA-256) indicates identical bytes; it *never* implies shared acquisition history or identical legal custody.
+
+---
+
+### 18.6 Ten Core Investigator User Workflows
+
+#### Workflow 1: Registering New Evidence & Pre-Decode Streaming Hashing
+1. Investigating Officer submits raw evidence stream via secure ingestion API or physical intake portal.
+2. Platform validates user authorization, case active status, and assigns permanent `case_id`, `evidence_id`, and `acquisition_id`.
+3. Raw byte stream is piped simultaneously into:
+   - Streaming SHA-256 hasher.
+   - Streaming SHA-512 hasher.
+   - Secure temporary staging buffer.
+4. Total byte count and completion status are recorded.
+5. Hashes and byte length are validated; initial `EvidenceManifest` is assembled.
+6. Object is committed to WORM storage vault with POSIX `0400` read-only lock.
+7. Initial `CUSTODY_ACQUIRED` event is created in the custody ledger.
+
+#### Workflow 2: Verifying Evidence After Storage (Post-Write Readback)
+1. Immediately upon committing an object to the WORM storage vault, an automated asynchronous verification worker triggers.
+2. The worker streams the stored file directly from WORM storage into memory.
+3. Both SHA-256 and SHA-512 digests are re-computed and compared against the intake `HashRecord`.
+4. If digests match: Status transitions to `VERIFIED`; downstream forensic analysis pipelines are unblocked.
+5. If digests mismatch: Immediate transition to `QUARANTINED`; storage alert dispatched to Custodian.
+
+#### Workflow 3: Continuous Fixity Auditing & Modification Detection
+1. Celery periodic fixity beat executes across registered evidence items based on configured verification policies (e.g., 30-day cycle).
+2. The engine reads vault bytes, re-computes dual digests, and checks WORM retention lock flags.
+3. If hashes match: Appends a `FIXITY_CHECK_PASSED` record with timestamp and duration.
+4. If byte mismatch or truncation is detected: System immediately halts normal access, generates an `INTEGRITY_MISMATCH` incident, and isolates the object.
+
+#### Workflow 4: Quarantining a Failed Object & Incident Generation
+1. Detection of byte corruption, hash divergence, or manifest signature invalidity triggers immediate fail-closed quarantine.
+2. The evidence status transitions to `QUARANTINED`; API read requests return HTTP 423 Locked with diagnostic payload.
+3. An `INTEGRITY_INCIDENT` record is logged with expected hash, observed hash, affected byte offsets, and storage node ID.
+4. The corrupted physical file is preserved in-place for forensic analysis of the storage failure.
+5. System notifies the Evidence Custodian and Case Supervisor; silent overwriting is strictly blocked.
+
+#### Workflow 5: Recovering from a Verified Backup Copy
+1. Evidence Custodian initiates disaster recovery workflow specifying the damaged `evidence_id`.
+2. System retrieves candidate backup replica from cold or secondary storage.
+3. System executes independent dual-hash verification of the candidate replica against the original baseline `HashRecord`.
+4. If backup replica matches original baseline: System restores replica to WORM vault, assigns new storage reference, logs `EVIDENCE_RESTORED_FROM_BACKUP` custody event with operator ID and judicial authorization reference.
+5. If backup replica also fails verification: Incident escalated to `UNRECOVERABLE_STORAGE_FAILURE`; incident report compiled.
+
+#### Workflow 6: Signing an Evidence Manifest (Ed25519 Detached Attestation)
+1. Upon successful WORM registration and post-write readback, the system extracts the canonical representation of `EvidenceManifest`.
+2. Canonicalization is executed strictly conforming to RFC 8785 JSON Canonicalization Scheme (JCS).
+3. The platform signing service (backed by OS keystore or hardware HSM) computes detached Ed25519 signature over canonical bytes.
+4. Signature payload, key identifier, algorithm identifier, and signing timestamp are appended to the manifest metadata.
+5. Public key certificate reference is bound for long-term independent verification.
+
+#### Workflow 7: Verifying RFC 3161 Trusted Timestamp Tokens
+1. The platform constructs a DER-encoded `TimeStampReq` containing the SHA-256 digest of the canonical manifest and cryptographic nonce.
+2. Request is transmitted to an authorized Time Stamping Authority (TSA) or offline hardware clock server.
+3. TSA returns DER-encoded `TimeStampResp` containing `PKIStatus` and `ContentInfo` (RFC 3161 token).
+4. System validates TSA signature, X.509 certificate chain, policy OID, and matches message imprint against manifest digest.
+5. Air-Gapped Mode: In disconnected field deployments, system logs local monotonic hardware clock and flags timestamp status as `LOCAL_UNTRUSTED_CLOCK`, with deferred TSA stamping upon docking.
+
+#### Workflow 8: Creating & Registering Derived Forensic Artifacts (Merkle DAG)
+1. A forensic engine (AIF, AURAS, VISTA, ONTF) performs an operation (e.g., extracting an audio stream from CCTV video).
+2. Engine computes streaming dual hashes of the output artifact.
+3. System registers a new `DerivedArtifact` record binding:
+   - `derivative_id`
+   - `parent_evidence_id`
+   - `parent_sha256`
+   - `derivative_sha256`
+   - Transformation metadata (FFmpeg version, parameters, command string, execution duration).
+4. System appends node to the case Merkle DAG; no derived artifact can exist without cryptographic parent linkage.
+
+#### Workflow 9: Auditing Custody Continuity & Event Chain Validation
+1. Examiner or defense counsel requests complete Chain of Custody audit for an exhibit.
+2. Platform extracts all `CustodyEvent` records for `evidence_id` ordered strictly by `sequence_number`.
+3. Verifier iterates through records, recalculating expected event hash:
+   $$E_i = H(\text{Canonical}(Event_i) \parallel E_{i-1})$$
+4. Verifier asserts:
+   - Sequence numbers increment by exactly 1 without gaps.
+   - Timestamp monotonicity holds ($T_i \ge T_{i-1}$).
+   - Recorded `previous_event_hash` matches calculated digest of event $i-1$.
+5. Outputs a cryptographic custody report indicating unbroken chain or pinpointing exact sequence gap.
+
+#### Workflow 10: Exporting an Independently Verifiable Evidence Package
+1. Investigator requests court export package for an exhibit or case.
+2. System packages:
+   - Raw original evidence bitstream.
+   - All derived artifacts and inspection heatmaps.
+   - Canonical `EvidenceManifest.json`.
+   - Detached Ed25519 signature file (`manifest.sig`).
+   - RFC 3161 TSA token (`timestamp.tst`).
+   - Complete custody ledger export (`custody_chain.json`).
+   - Self-contained standalone Python/Bash offline verifier script.
+3. Computes package-level Merkle tree and seals container with Section 63 BSA compliance dossier.
+
+---
+
+### 18.7 Complete Numbered Functional Requirements Register (EIV-01 through EIV-100)
+
+```mermaid id="eivreqgroups"
+mindmap
+  root((EIV Requirements Register<br/>EIV-01 to EIV-100))
+    Architecture & Ownership
+      EIV-01 to EIV-06: CEIPL Boundaries & Invariants
+    Identity & Registration
+      EIV-07 to EIV-14: Decoupled IDs & Deduplication
+    Pre-Decode Dual Hashing
+      EIV-15 to EIV-23: Streaming Buffers & Algorithms
+    Chunk & Merkle Verification
+      EIV-24 to EIV-29: Merkle Trees & Inclusions
+    Manifest & Serialization
+      EIV-30 to EIV-37: RFC 8785 Canonical JCS
+    Signatures & Key Management
+      EIV-38 to EIV-46: Ed25519 & Keystores
+    Trusted Timestamps
+      EIV-47 to EIV-52: RFC 3161 TSA & Air-Gap
+    WORM & Immutable Storage
+      EIV-53 to EIV-61: POSIX 0400 & S3 Lock
+    Lifecycle & Fixity
+      EIV-62 to EIV-70: 12-Stage Audits & Fixity
+    Failure & Quarantine
+      EIV-71 to EIV-78: Incident Logs & Recovery
+    Chain of Custody
+      EIV-79 to EIV-85: Hash-Linked Ledger
+    Lineage & Multi-File Packages
+      EIV-86 to EIV-91: Merkle DAG & Packages
+    Independent Verification & APIs
+      EIV-92 to EIV-96: Standalone CLI & REST
+    Security & Legal Assurance
+      EIV-97 to EIV-100: RBAC & Section 63 BSA
+```
+
+| Req ID | Requirement Description | Priority | Owning Component | Dependencies | Input Contract | Expected Output Contract | TRD Ref | Verification Method | Acceptance Criteria | Planned Phase | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **EIV-01** | CEIPL Platform Ownership: Reside strictly in CEIPL shared platform layer without duplicating engine logic | P0 | CEIPL / Core | None | Engine intake requests | Unified integrity service invocation | §19.1 | Architecture Review | Zero duplicate hashing services in AIF/AURAS/VISTA | CEIPL-EIV-00 | PLANNED |
+| **EIV-02** | Non-Destructive Raw Bitstream Preservation: Ingest raw bytes without file conversion or header modification | P0 | CEIPL / Ingestion | Ingestion API | Raw evidence file stream | Unaltered raw file in staging | §19.2 | Unit / Mutation Test | Byte-for-byte identity confirmed | CEIPL-EIV-01 | PLANNED |
+| **EIV-03** | Engine-Independent Execution: Execute integrity verification without dependencies on media decoders | P0 | CEIPL / Core | None | Evidence byte stream | Cryptographic digest records | §19.1 | Test Suite | Operates on unknown binary formats | CEIPL-EIV-01 | PLANNED |
+| **EIV-04** | Separation of Integrity from Authenticity: Enforce semantic separation between hash match and factual truth | P0 | CEIPL / Reporting | None | Verification run results | Typed multi-dimensional result | §18.9, §19.8 | Contract Audit | API never emits bare `authentic: true` | CEIPL-EIV-00 | PLANNED |
+| **EIV-05** | Zero Silent Repair: Forbid automatic rehashing, overwriting, or silent fixing of corrupt files | P0 | CEIPL / Storage | Storage drivers | Mismatched hash result | Hard error & quarantine event | §19.9 | Security Test | Mismatched files permanently flagged | CEIPL-EIV-04 | PLANNED |
+| **EIV-06** | Universal Modality Support: Ingest image, video, audio, PCAP, and documents uniformly | P0 | CEIPL / Ingestion | Ingestion API | Binary evidence objects | Normalized evidence registry entry | §19.1 | Integration Test | All 5 modalities processed via same API | CEIPL-EIV-01 | PLANNED |
+| **EIV-07** | Permanent UUIDv7 Evidence Identification: Generate cryptographically random, time-sortable Evidence UUID | P0 | CEIPL / Identity | DB UUID Gen | Ingestion request metadata | Immutable `evidence_id` | §19.2 | Unit Test | Unique UUIDv7 generated per exhibit | CEIPL-EIV-01 | PLANNED |
+| **EIV-08** | Name & Path Independence: Maintain evidence identity invariant to filename, extension, or folder changes | P0 | CEIPL / Identity | Storage mapping | Renamed/relocated exhibit | Unchanged `evidence_id` | §19.2 | Integration Test | Renaming file preserves identity | CEIPL-EIV-01 | PLANNED |
+| **EIV-09** | Storage Key Decoupling: Decouple logical `evidence_id` from physical storage URN/path | P0 | CEIPL / Identity | Storage adapter | Storage URN change | Stable evidence identity reference | §19.2 | Unit Test | Storage migration leaves ID intact | CEIPL-EIV-01 | PLANNED |
+| **EIV-10** | Algorithm-Independent Identity: Identity unaffected by deprecation or upgrade of hash algorithms | P0 | CEIPL / Identity | Hash manager | Additional hash computed | Same `evidence_id` across algorithms | §19.2 | Unit Test | Adding SHA3 leaves ID unchanged | CEIPL-EIV-01 | PLANNED |
+| **EIV-11** | Ten-Entity Entity Separation: Maintain distinct IDs across Case, Evidence, Acquisition, File, Hash, etc. | P0 | CEIPL / Identity | DB Schema | Intake transaction | 10 distinct typed UUID fields | §19.2 | Schema Validation | Zero identifier conflation across entities | CEIPL-EIV-01 | PLANNED |
+| **EIV-12** | Duplicate Evidence Provenance Preservation: Distinct seizures of identical bytes retain separate custody | P0 | CEIPL / Identity | DB Schema | Byte-identical uploads | 2 distinct `evidence_id` & ledgers | §18.5, §19.2 | Integration Test | Both custody histories preserved | CEIPL-EIV-01 | PLANNED |
+| **EIV-13** | Storage-Level Deduplication Isolation: Allow shared disk blocks without merging case metadata | P1 | CEIPL / Storage | Storage adapter | Deduplicated write | Distinct DB ownership rows | §19.2 | Storage Test | Case deletion does not delete shared blob | CEIPL-EIV-04 | PLANNED |
+| **EIV-14** | Case Scoping & Tenant Isolation: Every evidence object bound strictly to authorized `case_id` | P0 | CEIPL / Identity | RBAC Context | User case context | Scoped evidence registration | §19.14 | Security Test | Cross-case access blocked with HTTP 403 | CEIPL-EIV-01 | PLANNED |
+| **EIV-15** | Pre-Decode Streaming Hashing: Stream raw bytes into hashers before any decoding or demuxing | P0 | CEIPL / Hashing | Streaming buffer | Ingestion socket stream | Pre-decode digests | §19.2 | Functional Test | Hasher completes before decoder invoked | CEIPL-EIV-02 | PLANNED |
+| **EIV-16** | Mandatory Dual-Hashing Pipeline: Concurrently compute SHA-256 and SHA-512 over identical byte stream | P0 | CEIPL / Hashing | OpenSSL / hashlib | Raw byte stream | Dual hex digest records | §19.2 | Unit Test | Known-answer test vectors pass | CEIPL-EIV-02 | PLANNED |
+| **EIV-17** | Secondary Algorithm Agility (SHA3-256 / SHA3-512): Support SHA-3 family for algorithm independence | P1 | CEIPL / Hashing | Cryptography lib | Algorithm policy flag | NIST FIPS 202 compliant digest | §19.2 | Unit Test | FIPS 202 test vectors pass | CEIPL-EIV-02 | PLANNED |
+| **EIV-18** | Legacy Hash Segregation: Restrict MD5/SHA-1 to historical comparison; never use as sole integrity reference | P0 | CEIPL / Hashing | Hash validator | Legacy import stream | Marked `LEGACY_REFERENCE_ONLY` | §19.2 | Security Audit | Rejection of MD5 as primary reference | CEIPL-EIV-02 | PLANNED |
+| **EIV-19** | Bounded Memory Streaming Buffer: Hash processing bounded to $\le 64 \text{ MB}$ RAM regardless of file size | P0 | CEIPL / Hashing | Chunked reader | 50 GB test payload | Peak RAM $\le 64 \text{ MB}$ | §19.2 | Memory Profile | Memory flatline across 50 GB stream | CEIPL-EIV-02 | PLANNED |
+| **EIV-20** | Byte-Count Verification: Calculate exact total byte count and verify against source content-length header | P0 | CEIPL / Hashing | Socket stream | Byte stream + length | Byte count equality verified | §19.2 | Unit Test | 1-byte discrepancy raises truncation | CEIPL-EIV-02 | PLANNED |
+| **EIV-21** | Stream Interruption & Abort Cleanup: Safely abort, purge temporary files, and log failure on socket drop | P0 | CEIPL / Ingestion | Temp file mgr | Truncated network stream | Clean temp dir & failure logged | §19.2 | Chaos Test | Zero orphaned temporary files | CEIPL-EIV-02 | PLANNED |
+| **EIV-22** | Hash Computation Performance SLA: Streaming throughput $\ge 150 \text{ MB/s}$ on NVMe / SSD storage | P1 | CEIPL / Hashing | System IO | 10 GB test file | Processing time $\le 67 \text{ s}$ | §19.17 | Benchmark | Throughput verified under load | CEIPL-EIV-02 | PLANNED |
+| **EIV-23** | Strongly Typed Hash Result Contract: Emit structured `HashRecord` with execution environment details | P0 | CEIPL / Hashing | Pydantic Schema | Hashing completion | Valid `HashRecord` Pydantic model | §12.10, §19.2 | Contract Test | Complete schema validation | CEIPL-EIV-02 | PLANNED |
+| **EIV-24** | Configurable Chunking Engine: Partition large files into fixed-size chunks (default 4MB or 16MB) | P1 | CEIPL / Merkle | File chunker | Raw file $\ge 1 \text{ GB}$ | Ordered list of `ChunkDigest` | §19.3 | Unit Test | Chunks assemble to exact byte count | CEIPL-EIV-02 | PLANNED |
+| **EIV-25** | Deterministic Chunk Hashing: Compute SHA-256 for each chunk with byte offset and sequence index | P1 | CEIPL / Merkle | Cryptography lib | Raw byte chunk | `ChunkRecord` with digest | §19.3 | Unit Test | Chunk hash matches known slice hash | CEIPL-EIV-02 | PLANNED |
+| **EIV-26** | Merkle Tree Construction: Construct balanced binary Merkle tree with RFC 6962 leaf/node prefixes | P1 | CEIPL / Merkle | Tree builder | List of chunk digests | Merkle tree with Root Hash | §19.3 | Unit Test | Known tree root matches calculation | CEIPL-EIV-02 | PLANNED |
+| **EIV-27** | Merkle Inclusion Proof Generation: Generate verifiable $O(\log N)$ inclusion proof for any individual chunk | P1 | CEIPL / Merkle | Tree query | Chunk index $k$ | Audit path array of sibling hashes | §19.3 | Unit Test | Proof validates against Root Hash | CEIPL-EIV-02 | PLANNED |
+| **EIV-28** | Partial File & Segment Verification: Verify specific byte ranges of large CCTV/PCAP using Merkle proofs | P1 | CEIPL / Merkle | Merkle verifier | Byte range $[a, b]$ + proof | Range integrity confirmed | §19.3 | Integration Test | Verifies 10MB chunk inside 50GB file | CEIPL-EIV-02 | PLANNED |
+| **EIV-29** | Whole-File Primacy Rule: Merkle roots supplement, never replace, authoritative whole-file digests | P0 | CEIPL / Core | Validation policy | Merkle manifest | Whole-file hash verified first | §19.3 | Policy Audit | Rejection of Merkle-only verification | CEIPL-EIV-02 | PLANNED |
+| **EIV-30** | Versioned Evidence Manifest Schema: Maintain structured JSON manifest binding all evidence metadata | P0 | CEIPL / Manifest | Pydantic Schema | Evidence intake data | Valid `EvidenceManifest` v1.0 | §12.10, §19.4 | Schema Test | Pydantic v2 serialization valid | CEIPL-EIV-03 | PLANNED |
+| **EIV-31** | RFC 8785 Canonical JSON Representation: Canonicalize JSON manifests via RFC 8785 (JCS) | P0 | CEIPL / Manifest | JCS library | Raw manifest dictionary | Deterministic byte stream | §19.4 | Unit Test | RFC 8785 test vectors match | CEIPL-EIV-03 | PLANNED |
+| **EIV-32** | Deterministic Key Ordering & UTF-8 Encoding: Enforce UTF-8 without BOM, sorted keys, no whitespace | P0 | CEIPL / Manifest | JCS serializer | Manifest dictionary | Standard canonical bytes | §19.4 | Unit Test | Cross-platform byte-reproducibility | CEIPL-EIV-03 | PLANNED |
+| **EIV-33** | IEEE 754 Number Representation: Serialize numbers canonically avoiding floating-point divergence | P0 | CEIPL / Manifest | JCS serializer | Floating-point metrics | Deterministic integer/float string | §19.4 | Unit Test | No platform-specific precision diff | CEIPL-EIV-03 | PLANNED |
+| **EIV-34** | Sensitive Data Exclusion Invariant: Forbid private keys, passwords, or credentials in manifests | P0 | CEIPL / Manifest | Linter / Validator | Manifest payload | Zero secret keys in JSON | §19.4 | Security Scan | High-entropy secret detection passes | CEIPL-EIV-03 | PLANNED |
+| **EIV-35** | Manifest Versioning & Evolution: Support backward-compatible schema versioning (`manifest_version`) | P1 | CEIPL / Manifest | Migration runner | Legacy manifest v1.0 | Successful v1.0 load into v2.0 | §19.4 | Regression Test | Old manifests parse without errors | CEIPL-EIV-03 | PLANNED |
+| **EIV-36** | Manifest Immutability Post-Sealing: Prevent modification of manifest once signed and sealed | P0 | CEIPL / Manifest | Storage vault | Update request on sealed | HTTP 409 Conflict | §19.4 | Integration Test | Manifest update attempts rejected | CEIPL-EIV-03 | PLANNED |
+| **EIV-37** | Manifest Fingerprint Computation: Compute SHA-256 over canonical JCS bytes as manifest digest | P0 | CEIPL / Manifest | Cryptography lib | Canonical JCS bytes | 64-char hex `manifest_digest` | §19.4 | Unit Test | Digest matches SHA-256 of bytes | CEIPL-EIV-03 | PLANNED |
+| **EIV-38** | Detached Manifest Digital Signing: Generate detached Ed25519 digital signature over canonical manifest | P0 | CEIPL / Signer | Cryptography lib | Canonical manifest bytes | 64-byte Ed25519 signature | §19.5 | Cryptographic Test | OpenSSL verifies detached signature | CEIPL-EIV-03 | PLANNED |
+| **EIV-39** | Standards-Compliant Signature Algorithms: Support RFC 8032 Ed25519 and ECDSA (FIPS 186-5) | P0 | CEIPL / Signer | Cryptography lib | Signing algorithm enum | Standards-compliant signature | §19.5 | Standards Audit | FIPS 186-5 / RFC 8032 conformance | CEIPL-EIV-03 | PLANNED |
+| **EIV-40** | Secure Private Key Storage: Enforce private key protection via OS Keystore (DPAPI/Keyring) or HSM | P0 | CEIPL / KMS | OS Keystore / HSM | Signing operation request | Hardware/OS-protected signing | §19.5 | Security Review | Zero plaintext keys on filesystem | CEIPL-EIV-03 | PLANNED |
+| **EIV-41** | Cryptographic Key Lifecycle Records: Maintain immutable registry of key ID, activation, and rotation | P0 | CEIPL / KMS | DB Schema | Key generation event | Typed `KeyLifecycleRecord` | §19.5 | Audit Review | Full key history traceable | CEIPL-EIV-03 | PLANNED |
+| **EIV-42** | Historical Signature Verification: Preserve historical public keys to verify legacy signatures | P0 | CEIPL / KMS | Key repository | Historical signature | Successful verification using past key | §19.5 | Regression Test | Rotated keys still verify past exhibits | CEIPL-EIV-03 | PLANNED |
+| **EIV-43** | Signer Authorization Verification: Verify signer public key mapped to authorized officer role | P0 | CEIPL / Signer | RBAC Service | Signer key ID + user role | Signer authorization validated | §19.5 | Integration Test | Unauthorized key rejected | CEIPL-EIV-03 | PLANNED |
+| **EIV-44** | Public Key & Certificate Embedding: Export public key and X.509 cert reference in export package | P0 | CEIPL / Export | Export packager | Evidence export request | Included `public_key.pem` | §19.5 | Package Test | Standalone verifier consumes public key | CEIPL-EIV-08 | PLANNED |
+| **EIV-45** | Separation of Document vs Manifest Signatures: Distinguish PDF signing from raw manifest signing | P0 | CEIPL / Signer | PDF Signer / Core | Verification request | Distinct verification paths | §19.5 | Architecture Test | PAdES vs Ed25519 distinct contracts | CEIPL-EIV-03 | PLANNED |
+| **EIV-46** | Key Revocation Enforcement: Immediately invalidate compromised keys via revocation list (CRL) | P0 | CEIPL / KMS | CRL Manager | Revoked key ID | Signature marked `KEY_REVOKED` | §19.5 | Security Test | Signatures signed after revocation fail | CEIPL-EIV-03 | PLANNED |
+| **EIV-47** | RFC 3161 Timestamp Protocol Support: Request and verify RFC 3161 timestamp tokens from TSA | P1 | CEIPL / TSA | HTTP TSA client | Manifest SHA-256 digest | DER-encoded `TimeStampResp` | §19.6 | Unit Test | RFC 3161 token parses and verifies | CEIPL-EIV-03 | PLANNED |
+| **EIV-48** | Message Imprint Verification: Verify TSA token message imprint matches exact manifest digest | P1 | CEIPL / TSA | ASN.1 parser | Timestamp token + digest | Message imprint equality verified | §19.6 | Unit Test | Discrepancy flags invalid token | CEIPL-EIV-03 | PLANNED |
+| **EIV-49** | TSA Certificate Chain & Policy Validation: Validate TSA X.509 certificate trust anchor and policy OID | P1 | CEIPL / TSA | X.509 Validator | TSA response | Certificate chain validity confirmed | §19.6 | Integration Test | Expired/untrusted TSA flagged | CEIPL-EIV-03 | PLANNED |
+| **EIV-50** | Seven-Tier Timestamp Disambiguation: Rigorously distinguish acquisition, server, TSA, and media times | P0 | CEIPL / Temporal | CSTV Integration | Timestamp inputs | Distinct typed timestamp fields | §18.6, §19.6 | Contract Test | Never overwrite acquisition with TSA | CEIPL-EIV-03 | PLANNED |
+| **EIV-51** | Air-Gapped Offline Timestamp Mode: Support local hardware clock with explicit untrusted status | P0 | CEIPL / TSA | Clock adapter | Disconnected ingestion | Tagged `LOCAL_UNTRUSTED_CLOCK` | §19.6 | Air-Gap Test | No network block during offline intake | CEIPL-EIV-03 | PLANNED |
+| **EIV-52** | Deferred Timestamp Attestation: Allow attaching RFC 3161 token upon docking air-gapped unit | P1 | CEIPL / TSA | TSA docking job | Docking synchronization | Appended TSA token with custody log | §19.6 | Integration Test | Deferred token binds to original digest | CEIPL-EIV-03 | PLANNED |
+| **EIV-53** | True WORM Storage Enforcement: Store original exhibits in storage-enforced Write-Once vaults | P0 | CEIPL / WORM | POSIX / S3 Driver | Committed file object | Read-only object with retention lock | §19.7 | Security Test | Write/delete operations fail | CEIPL-EIV-04 | PLANNED |
+| **EIV-54** | POSIX Local Filesystem WORM: Enforce POSIX `0400` read-only mode and immutable attribute (`chattr +i`) | P0 | CEIPL / WORM | Linux / POSIX | Local vault path | Filesystem permissions `0400` | §19.7 | OS Integration Test | `rm` or write fails with Permission Denied | CEIPL-EIV-04 | PLANNED |
+| **EIV-55** | S3 Object Lock Compliance Mode: Support AWS/MinIO Object Lock in Compliance retention mode | P1 | CEIPL / WORM | S3 Client | S3 bucket upload | Object Lock retained until expiry | §19.7 | Cloud/MinIO Test | DeleteObject API call rejected by S3 | CEIPL-EIV-04 | PLANNED |
+| **EIV-56** | S3 Object Lock Governance Mode: Support Governance mode with privileged bypass auditing | P1 | CEIPL / WORM | S3 Client | Retention policy config | Governance lock with audit trail | §19.7 | Integration Test | Privileged bypass logged in custody | CEIPL-EIV-04 | PLANNED |
+| **EIV-57** | Legal Hold Support: Apply non-expiring legal hold flags to exhibits involved in active litigation | P0 | CEIPL / WORM | Legal hold API | Case litigation flag | Indefinite retention lock applied | §19.7 | Functional Test | Expiry timer disabled while held | CEIPL-EIV-04 | PLANNED |
+| **EIV-58** | Seven Logical Storage Zones: Separate staging, originals, derivatives, manifests, custody, and backup | P0 | CEIPL / Storage | Storage manager | Multi-zone architecture | Strict folder/bucket segregation | §19.7 | Security Audit | Zero mixed storage between raw & derived | CEIPL-EIV-04 | PLANNED |
+| **EIV-59** | Storage Administrator Misuse Mitigation: Constrain and audit administrative access to storage | P0 | CEIPL / Security | Audit Logger | S3 / OS admin command | Cryptographic audit record emitted | §19.7 | Security Test | Admin cannot erase audit trail | CEIPL-EIV-04 | PLANNED |
+| **EIV-60** | At-Rest Storage Encryption: Encrypt all stored evidence objects via AES-256-GCM / XTS | P0 | CEIPL / Storage | Storage encryption | Raw byte write | Encrypted ciphertext on disk | §19.7 | Security Audit | Disk dump reveals zero plaintext | CEIPL-EIV-04 | PLANNED |
+| **EIV-61** | Storage Immutability Verification Suite: Automated test suite validating write/delete rejection | P0 | CEIPL / WORM | Test runner | Penetration test harness | All unauthorized write tests rejected | §19.7 | CI/CD Test | Build fails if WORM test fails | CEIPL-EIV-04 | PLANNED |
+| **EIV-62** | Twelve Lifecycle Verification Checkpoints: Enforce hash verification at 12 critical lifecycle stages | P0 | CEIPL / Fixity | Verification engine | Lifecycle stage transition | Verified hash comparison result | §19.8 | Integration Test | All 12 checkpoints execute check | CEIPL-EIV-05 | PLANNED |
+| **EIV-63** | Post-Write Readback Gate: Mandatory readback verification before unblocking downstream processing | P0 | CEIPL / Ingestion | Storage readback | Staged file commit | Readback SHA-256 == Intake SHA-256 | §19.8 | Functional Test | Analysis blocked if readback fails | CEIPL-EIV-05 | PLANNED |
+| **EIV-64** | Retrieval Verification Gate: Re-verify dual hashes upon reading evidence for forensic analysis | P0 | CEIPL / Access | Storage reader | Engine read request | In-memory hash verification | §19.8 | Performance Test | Verifies before handing stream to engine | CEIPL-EIV-05 | PLANNED |
+| **EIV-65** | Continuous Fixity Scheduling: Automated Celery beat job executing scheduled periodic fixity checks | P1 | CEIPL / Fixity | Celery beat | Periodic cron schedule | Execution of fixity audit across vault | §19.8 | Task Test | Vault audit executed without backlog | CEIPL-EIV-05 | PLANNED |
+| **EIV-66** | Fixity Job Throughput SLA: Background fixity auditing throughput $\ge 200 \text{ MB/s}$ on NVMe | P1 | CEIPL / Fixity | Multi-worker IO | Scheduled audit batch | Throughput metrics recorded | §19.17 | Benchmark | Meets throughput threshold | CEIPL-EIV-05 | PLANNED |
+| **EIV-67** | Typed Verification Result Record: Emit structured `VerificationRunResult` with diagnostic data | P0 | CEIPL / Fixity | Pydantic Schema | Verification execution | Valid `VerificationRunResult` model | §12.10, §19.8 | Contract Test | Schema validation passes | CEIPL-EIV-05 | PLANNED |
+| **EIV-68** | Export Manifest Verification: Recalculate and verify hashes of all package items prior to export | P0 | CEIPL / Export | Export packager | Export request | Export package verification report | §19.8 | Functional Test | Corrupted item halts export | CEIPL-EIV-08 | PLANNED |
+| **EIV-69** | Final Report Linkage Verification: Validate that all hashes in UFREDF report match current references | P0 | CEIPL / Reporting | UFREDF Generator | Report compile request | Report hash table verified | §19.8 | Integration Test | Mismatched hash prevents report seal | CEIPL-EIV-09 | PLANNED |
+| **EIV-70** | Asynchronous Non-Blocking Fixity: Execute scheduled audits without degrading interactive query latency | P1 | CEIPL / Fixity | Worker isolation | Background fixity load | Interactive API p95 $\le 200 \text{ ms}$ | §19.8 | Performance Test | Zero UI stutter during fixity | CEIPL-EIV-05 | PLANNED |
+| **EIV-71** | Automated Quarantine State Transition: Instantly transition corrupted exhibit to `QUARANTINED` state | P0 | CEIPL / Quarantine | State Machine | Hash mismatch detection | Status set to `QUARANTINED` | §19.9 | Security Test | Immediate access block on mismatch | CEIPL-EIV-05 | PLANNED |
+| **EIV-72** | Fail-Closed Downstream Blocking: Prevent analysis, reporting, and export for quarantined exhibits | P0 | CEIPL / Quarantine | API Middleware | Request on quarantined item | HTTP 423 Locked with error details | §19.9 | API Test | All processing endpoints reject item | CEIPL-EIV-05 | PLANNED |
+| **EIV-73** | Conflicting Version In-Place Preservation: Preserve corrupted object for forensic failure analysis | P0 | CEIPL / Quarantine | Storage Driver | Quarantine trigger | Corrupted file retained with `.corrupt` | §19.9 | Storage Test | Corrupted bytes never deleted | CEIPL-EIV-05 | PLANNED |
+| **EIV-74** | Automated Integrity Incident Logging: Emit structured `IntegrityIncident` record with diagnostics | P0 | CEIPL / Quarantine | DB Logger | Mismatch event | Persistent `IntegrityIncident` row | §19.9 | Audit Test | Incident visible in admin dashboard | CEIPL-EIV-05 | PLANNED |
+| **EIV-75** | Independent Backup Replica Verification: Verify candidate backup replica against baseline digest | P0 | CEIPL / Recovery | Backup adapter | Recovery trigger | Backup hash comparison result | §19.9 | Disaster Test | Unverified backup rejected | CEIPL-EIV-08 | PLANNED |
+| **EIV-76** | Verified Recovery Copy Deployment: Restore validated backup copy into WORM vault with audit record | P0 | CEIPL / Recovery | Storage manager | Validated backup replica | Restored vault object + custody event | §19.9 | Recovery Test | Status returns to `VERIFIED` | CEIPL-EIV-08 | PLANNED |
+| **EIV-77** | Unrecoverable Corruption Escalation: Escalate to supervisor when all backup replicas are invalid | P0 | CEIPL / Recovery | Incident manager | All replicas corrupt | Permanent incident status recorded | §19.9 | Process Test | Transparent declaration of loss | CEIPL-EIV-08 | PLANNED |
+| **EIV-78** | Prohibition of Digest Inversion: Strictly forbid overwriting reference hash with corrupted digest | P0 | CEIPL / Security | DB Constraint | Update on reference hash | DB constraint violation (Aborted) | §19.9 | DB Security Test | SQL UPDATE on hash rejected | CEIPL-EIV-04 | PLANNED |
+| **EIV-79** | Twenty-One Mandatory Custody Events: Track 21 defined lifecycle events in custody ledger | P0 | CEIPL / Custody | Event dispatcher | Evidence lifecycle actions | Structured `CustodyEvent` rows | §19.10 | Integration Test | All 21 events dispatchable | CEIPL-EIV-06 | PLANNED |
+| **EIV-80** | Strongly Typed Custody Event Schema: Emit typed event models with actor, role, and hashes | P0 | CEIPL / Custody | Pydantic Schema | Event dispatch payload | Valid `CustodyEventRecord` | §12.10, §19.10 | Contract Test | Schema passes validation | CEIPL-EIV-06 | PLANNED |
+| **EIV-81** | Hash-Chained Event History: Cryptographically chain each event to predecessor ($E_i = H(Ev_i \parallel E_{i-1})$) | P0 | CEIPL / Custody | Ledger engine | New event record | Chained hash stored in record | §19.10 | Cryptographic Test | Chain verification algorithm passes | CEIPL-EIV-06 | PLANNED |
+| **EIV-82** | Strictly Monotonic Sequence Numbers: Enforce contiguous integer sequence incrementing by exactly 1 | P0 | CEIPL / Custody | DB Sequence Gen | Concurrent event writes | Contiguous sequence numbers | §19.10 | Concurrency Test | Zero sequence gaps under concurrent writes | CEIPL-EIV-06 | PLANNED |
+| **EIV-83** | Tamper-Evident Ledger Auditing: Rapidly verify entire custody chain integrity and detect modifications | P0 | CEIPL / Custody | Audit verifier | Chain verification request | Verified status or gap localization | §19.10 | Unit Test | Modifying historical row detected | CEIPL-EIV-06 | PLANNED |
+| **EIV-84** | User Description vs Machine Data Separation: Separate subjective notes from automated telemetry | P0 | CEIPL / Custody | UI / Event form | Manual entry + system info | Typed separation in DB schema | §19.10 | Data Model Test | Examiner cannot edit system fields | CEIPL-EIV-06 | PLANNED |
+| **EIV-85** | Periodic Merkle Root Anchoring: Periodically compute Merkle root of custody events and sign | P1 | CEIPL / Custody | Anchor service | 24-hour event batch | Signed daily custody anchor block | §19.10 | Integration Test | Anchor validates batch integrity | CEIPL-EIV-06 | PLANNED |
+| **EIV-86** | Distinct Derivative Artifact Identity: Assign unique `derivative_id` and hash to every analysis output | P0 | CEIPL / Lineage | Forensic engines | Analysis output file | Registered `DerivedArtifact` record | §19.11 | Integration Test | Extracted audio receives distinct ID | CEIPL-EIV-07 | PLANNED |
+| **EIV-87** | Cryptographic Parent Binding: Record exact `parent_evidence_id` and `parent_sha256` in derivative | P0 | CEIPL / Lineage | Lineage manager | Transformation execution | Verified parent hash in lineage row | §19.11 | Data Model Test | Derivative references exact parent | CEIPL-EIV-07 | PLANNED |
+| **EIV-88** | Complete Transformation Audit Metadata: Record tool name, version, CLI args, and parameters | P0 | CEIPL / Lineage | Engine wrapper | FFmpeg / OpenCV execution | Detailed transformation metadata | §19.11 | Audit Test | Exact reproduction params stored | CEIPL-EIV-07 | PLANNED |
+| **EIV-89** | Multi-Generational Lineage DAG: Support recursive derivative chains (e.g., Video -> Audio -> Stem -> Report) | P0 | CEIPL / Lineage | Graph database / DB | Multi-tier processing | Verifiable Merkle DAG structure | §19.11 | Graph Test | Full traversal back to original | CEIPL-EIV-07 | PLANNED |
+| **EIV-90** | Package-Level Integrity Verification: Calculate top-level Merkle root over multi-file export packages | P1 | CEIPL / Package | Package builder | Multi-file case export | Package manifest with root hash | §19.11 | Integration Test | Verifier validates entire package | CEIPL-EIV-07 | PLANNED |
+| **EIV-91** | Path Traversal & Symlink Defense: Canonicalize relative paths in packages and block unsafe symlinks | P0 | CEIPL / Package | Path sanitizer | Malicious ZIP / TAR upload | Safe extraction without traversal | §19.11 | Security Test | Path traversal attempts raise error | CEIPL-EIV-07 | PLANNED |
+| **EIV-92** | Standalone Portable Offline Verifier: Provide self-contained Python CLI script requiring no internet | P0 | CEIPL / Verifier | Standalone CLI | Export package directory | Terminal verification report | §19.12 | Air-Gap Test | Runs on air-gapped Linux/Windows | CEIPL-EIV-08 | PLANNED |
+| **EIV-93** | Fourteen Offline Verification Checks: Implement 14 sequential integrity checks in independent CLI | P0 | CEIPL / Verifier | Standalone CLI | Export package files | Detailed 14-point audit output | §19.12 | Functional Test | Catches any corrupted item in package | CEIPL-EIV-08 | PLANNED |
+| **EIV-94** | Fifteen Dedicated REST API Endpoints: Expose complete EIV capabilities via versioned FastAPI routes | P0 | CEIPL / API | FastAPI framework | HTTP client requests | Typed JSON responses | §19.15 | API Test | All 15 endpoints return 200 OK | CEIPL-EIV-08 | PLANNED |
+| **EIV-95** | Asynchronous Celery Worker Integration: Delegate intensive hashing, fixity, and verification to Celery | P0 | CEIPL / Workers | Celery / Redis | Background task enqueue | Async job ID + status polling | §19.15 | Concurrency Test | Handles 100 concurrent jobs | CEIPL-EIV-05 | PLANNED |
+| **EIV-96** | OpenAPI 3.1 & TypeScript Contract Sync: Synchronize Pydantic models with OpenAPI schema & TS types | P1 | CEIPL / API | OpenAPI generator | Pydantic v2 models | Updated `schema.json` & TS types | §12.10, §19.15 | Build Test | Frontend TS builds with zero errors | CEIPL-EIV-08 | PLANNED |
+| **EIV-97** | Seven-Tier Role-Based Access Control: Enforce strict separation between Operator, Examiner, Admin | P0 | CEIPL / Security | RBAC Middleware | User JWT token | Authorized endpoint access | §19.14 | Security Test | Operators cannot modify WORM policies | CEIPL-EIV-10 | PLANNED |
+| **EIV-98** | Section 63 BSA / 65B IEA Dossier Assembly: Assemble technical evidence schedule for statutory reports | P0 | CEIPL / Legal | UFREDF Integration | Case verification data | Court-admissible technical dossier | §19.13 | Legal Review | Conforms to BSA 2023 Schedule | CEIPL-EIV-09 | PLANNED |
+| **EIV-99** | Five-Hundred-Fixture Verification Benchmark: Validate test suite across 500 diverse corrupted files | P1 | CEIPL / Benchmarks | Test harness | 500 mutation fixtures | 100% correct failure detection | §19.17 | Benchmark Test | Passes all 500 test fixtures | CEIPL-EIV-10 | PLANNED |
+| **EIV-100** | Air-Gapped Packaging & Security Hardening: Package complete EIV service for air-gapped deployment | P0 | CEIPL / Release | Docker / Compose | Air-gapped container image | Functional system with no WAN access | §19.17 | Air-Gap Deploy | Starts and verifies in offline sandbox | CEIPL-EIV-10 | PLANNED |
+
+---
+
+### 18.8 Non-Functional Requirements & Performance SLAs
+
+1. **Streaming Ingestion Throughput (NFR-EIV-01):** The streaming dual-hasher must sustain $\ge 150 \text{ MB/s}$ on local NVMe storage and $\ge 80 \text{ MB/s}$ across 1 Gbps LAN connections.
+2. **Bounded Memory Footprint (NFR-EIV-02):** Memory consumption during ingestion and verification must remain strictly bounded to $\le 64 \text{ MB}$ RAM per stream, verified with files up to 50 GB.
+3. **Post-Write Readback Latency (NFR-EIV-03):** Readback verification must initiate within $\le 500 \text{ ms}$ of upload completion and complete at disk read speed.
+4. **Fixity Audit Scalability (NFR-EIV-04):** The periodic fixity checker must process $\ge 1 \text{ TB}$ of archived evidence per hour per worker node.
+5. **Zero Silent Modification Tolerance (NFR-EIV-05):** 100% detection rate for any 1-bit mutation, byte insertion, deletion, or truncation across all supported file sizes.
+6. **Air-Gapped Operation (NFR-EIV-06):** 100% of core ingestion, dual hashing, WORM preservation, local custody logging, and independent verification capabilities must function with zero external internet connectivity.
+7. **Storage Overhead Efficiency (NFR-EIV-07):** Cryptographic manifests, chunk records, and custody chains must introduce $\le 2\%$ total storage overhead relative to raw evidence file size.
+8. **Concurrency & Thread Safety (NFR-EIV-08):** Custody event logging must support $\ge 200$ concurrent write operations per second with zero sequence number collisions.
+
+---
+
+### 18.9 Ten-Dimension Verification Result Model & Eleven Outcome States
+
+EIV strictly prohibits reducing complex evidence verification to a single uncalibrated boolean flag (`authentic: true/false`). Instead, the platform evaluates ten distinct, orthogonal verification dimensions:
+
+| Dimension Code | Verification Dimension | Evaluated Invariant |
+| :--- | :--- | :--- |
+| **`BYTE_INTEGRITY`** | Raw Byte Stream Concurrency | Do current file bytes match intake SHA-256 and SHA-512 digests? |
+| **`MANIFEST_INTEGRITY`** | Canonical Manifest Consistency | Does canonical JCS representation match manifest SHA-256 fingerprint? |
+| **`SIGNATURE_VALIDITY`** | Cryptographic Signature Math | Is the detached Ed25519 digital signature mathematically valid? |
+| **`SIGNER_TRUST`** | Signer Authority & Revocation | Is the signer public key recognized, unexpired, and unrevoked in the KMS? |
+| **`TIMESTAMP_VALIDITY`** | RFC 3161 Token Correctness | Is the TSA token cryptographically valid and matches message imprint? |
+| **`CUSTODY_CONTINUITY`** | Audit Ledger Chain Continuity | Is the hash-linked custody chain unbroken with monotonic sequence numbers? |
+| **`STORAGE_IMMUTABILITY`** | Storage Vault Retention Status | Are POSIX `0400` / S3 Object Lock retention locks actively enforced? |
+| **`DERIVATIVE_LINEAGE`** | Parent-Child Merkle Binding | Are all derived artifacts cryptographically bound to parent hashes? |
+| **`PACKAGE_INTEGRITY`** | Container Item Completeness | Do all package files match relative paths and individual digests? |
+| **`VERIFICATION_SCOPE`** | Completeness of Evaluation | Were all required checks successfully executed without timeouts or skips? |
+
+#### The Eleven Canonical Outcome States
+Based on the synthesis of the 10 dimensions, the evaluation returns one of eleven machine-readable outcome states:
+1. **`VERIFIED`:** All 10 dimensions successfully validated; evidence is mathematically pristine.
+2. **`VERIFIED_WITH_WARNINGS`:** Byte integrity verified, but non-critical warnings present (e.g., local untrusted clock used instead of RFC 3161 TSA).
+3. **`PARTIALLY_VERIFIED`:** Chunk-level Merkle verification succeeded for specified byte range, but whole-file readback pending.
+4. **`INTEGRITY_MISMATCH`:** Byte-level corruption, bit rot, or unauthorized modification detected. Immediate quarantine.
+5. **`SIGNATURE_FAILURE`:** Manifest signature invalid, key revoked, or canonical bytes modified post-signing.
+6. **`CUSTODY_GAP`:** Sequence break, missing event, or hash divergence detected in the custody ledger.
+7. **`LINEAGE_FAILURE`:** Derivative artifact cannot be verified against recorded parent hash.
+8. **`REFERENCE_MISSING`:** Baseline hash record, manifest, or custody record absent from database.
+9. **`UNVERIFIABLE`:** Hash algorithm deprecated or unsupported in current environment; required verification key missing.
+10. **`QUARANTINED`:** Object actively isolated due to unresolved integrity incident.
+11. **`UNDER_EXAMINER_REVIEW`:** Conflicting evidence versions undergoing manual forensic inspection.
+
+---
+
+### 18.10 Twenty Explicit Forensic and Cryptographic Limitations
+1. **Byte Integrity $\ne$ Event Truth:** A hash match mathematically proves byte-level constancy relative to intake; it does *not* prove that recorded real-world events occurred.
+2. **Intake Integrity Only:** Hashing cannot detect manipulations executed on the recording medium *prior* to forensic intake.
+3. **Attestation Scope:** An Ed25519 signature confirms that a specific private key signed the manifest; it does *not* prove the keyholder personally witnessed the crime.
+4. **Timestamp Semantic Limits:** An RFC 3161 TSA token establishes proof-of-existence no later than the token time; it does *not* prove the exact real-world capture time.
+5. **WORM Storage Context:** WORM retention prevents unauthorized modification within the vault; it does *not* prevent capture-stage tampering outside the vault.
+6. **Custody Ledger Completeness:** An append-only ledger verifies recorded events; it cannot automatically record unmonitored physical handling outside the platform.
+7. **No Automatic Admissibility:** Technical integrity verification does *not* automatically confer judicial admissibility under Section 63 BSA / 65B IEA.
+8. **Dual-Hash Independence Limit:** Dual hashes from the same family (e.g., SHA-256 and SHA-512) do not protect against theoretical systematic design flaws in Merkle-Damgard.
+9. **Merkle Chunk Proofs:** Merkle inclusion proofs certify specific chunks; they must never be presented as proof of the complete file without root verification.
+10. **Derivative Validity:** A valid hash of a derived artifact confirms byte integrity of the output; it does *not* certify that the transformation was scientifically valid.
+11. **Backup Verification Requirement:** A successful storage backup operation is meaningless without verified post-backup restoration readback.
+12. **Inversion Prohibition:** Under no circumstances may a newly computed hash of a corrupted file overwrite the established baseline hash reference.
+13. **Key Management Dependency:** Cryptographic security collapses if private signing keys are compromised, shared, or insecurely stored.
+14. **Algorithm Migration Continuity:** Migrating to post-quantum or newer hash algorithms must preserve historical digest records for ongoing verification.
+15. **Offline Clock Uncertainty:** Local hardware clocks in air-gapped deployments lack independent trust and must be clearly labeled as unverified.
+16. **Silent Repair Ban:** Damaged evidence must never be silently healed, interpolated, or replaced without an auditable recovery incident.
+17. **Deduplication Provenance Risk:** Storage deduplication must never collapse independent chain-of-custody ledgers into a single provenance history.
+18. **Human Certification Invariant:** Statutory forensic certificates must be issued by authorized human examiners, never autonomously by platform software.
+19. **Network Boundary Limits:** TLS transport security does not guarantee end-to-end evidence integrity if the server endpoint memory is unverified.
+20. **Courtroom Explanation Requirement:** All mathematical outputs, hashes, and verification outcomes must be accompanied by plain-language explanations.
+
+---
+
+### 18.11 Security, Privacy, RBAC & Custody Invariants
+1. **Strict Role-Based Access Control (RBAC):** Seven discrete roles govern platform actions:
+   - *Acquisition Operator:* Permitted to ingest evidence, trigger pre-decode hashing, and initiate transfer.
+   - *Forensic Examiner:* Permitted to read verified evidence, execute analysis pipelines, and register derived artifacts.
+   - *Evidence Custodian:* Authorized to manage WORM retention policies, legal holds, and quarantine release workflows.
+   - *Cryptographic Key Administrator:* Authorized to manage KMS key lifecycle, rotation, and certificate provisioning.
+   - *Storage Administrator:* Manages physical storage infrastructure; strictly barred from updating database hash references.
+   - *Case Supervisor:* Authorized to review integrity incidents, approve verified restorations, and seal case dossiers.
+   - *Independent Auditor:* Read-only access to manifests, signatures, verification histories, and custody ledgers.
+2. **Zero Plaintext Secret Exposure:** Private keys, database credentials, and API secrets are never stored in evidence manifests, logs, or exports.
+3. **Database Immutability Constraints:** Database triggers prevent `UPDATE` or `DELETE` operations on `HashRecord`, `EvidenceManifest`, and `CustodyEvent` tables.
+4. **Append-Only Tamper-Evident Logging:** Every privileged administrative operation is written to an append-only audit trail anchored in the custody ledger.
+
+---
+
+### 18.12 Requirement Traceability Matrix (EIV-01 through EIV-100)
+
+| Requirement Range | Focus Area | Technical Section | Implementation Phase |
+| :--- | :--- | :--- | :--- |
+| **EIV-01 to EIV-06** | CEIPL Platform Ownership & Architectural Invariants | TRD §19.1 | CEIPL-EIV-00 / EIV-01 |
+| **EIV-07 to EIV-14** | Evidence Identity, Ten-Entity Model & Deduplication | TRD §19.2 | CEIPL-EIV-01 |
+| **EIV-15 to EIV-23** | Pre-Decode Streaming Dual Hashing & Memory Buffers | TRD §19.2 | CEIPL-EIV-02 |
+| **EIV-24 to EIV-29** | Chunk Hashing, Merkle Trees & Inclusion Proofs | TRD §19.3 | CEIPL-EIV-02 |
+| **EIV-30 to EIV-37** | Evidence Manifests, RFC 8785 JCS & Canonicalization | TRD §19.4 | CEIPL-EIV-03 |
+| **EIV-38 to EIV-46** | Detached Digital Signatures, Ed25519 & KMS Lifecycle | TRD §19.5 | CEIPL-EIV-03 |
+| **EIV-47 to EIV-52** | RFC 3161 Trusted Timestamps & Air-Gapped Modes | TRD §19.6 | CEIPL-EIV-03 |
+| **EIV-53 to EIV-61** | WORM Vaults, POSIX 0400 & S3 Object Lock Immutability | TRD §19.7 | CEIPL-EIV-04 |
+| **EIV-62 to EIV-70** | Twelve Lifecycle Verification Gates & Fixity Audits | TRD §19.8 | CEIPL-EIV-05 |
+| **EIV-71 to EIV-78** | Integrity Failure, Quarantine Isolation & Incident Recovery | TRD §19.9 | CEIPL-EIV-05 / EIV-08 |
+| **EIV-79 to EIV-85** | Tamper-Evident Append-Only Chain-of-Custody Ledger | TRD §19.10 | CEIPL-EIV-06 |
+| **EIV-86 to EIV-91** | Derivative Artifact Lineage DAG & Multi-File Packages | TRD §19.11 | CEIPL-EIV-07 |
+| **EIV-92 to EIV-96** | Standalone Offline Verifier, REST APIs & Worker Jobs | TRD §19.12, §19.15 | CEIPL-EIV-08 |
+| **EIV-97 to EIV-100**| RBAC Security, Section 63 BSA Dossier & Benchmarks | TRD §19.14, §19.17 | CEIPL-EIV-09 / EIV-10 |
 

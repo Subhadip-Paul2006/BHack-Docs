@@ -1343,19 +1343,19 @@ flowchart TD
     subgraph ARE_AESL["3. ARE / AESL Multi-Branch Localisation Pipeline"]
         MULTI_RES["Multi-Resolution Windowing (10ms, 20ms, 50ms, 200ms)"]
         ART_A --> MULTI_RES
-        
+
         BRANCH_TIME["Branch A: Time-Domain Continuity\n(Short-Time RMS, Zero-Crossing, Slope |d[n]|)"]
         BRANCH_SPEC["Branch B: STFT Spectral Forensics\n(Hann STFT, Spectral Flux SF[m], Centroid)"]
         BRANCH_NOISE["Branch C: Acoustic Environment & Noise\n(Minimum Statistics P_N, RIR, RT60, DRR)"]
         BRANCH_CHAN["Branch D: Multi-Channel Coherence\n(Cross-Correlation R_xy(tau), ITD, Phase Inversion)"]
         BRANCH_MODEL["Branch E: Learned Temporal Localiser\n(TCN / CRNN Suspicion Curves, ASLNet Evaluation)"]
-        
+
         MULTI_RES --> BRANCH_TIME & BRANCH_SPEC & BRANCH_NOISE & BRANCH_CHAN
         ART_B --> BRANCH_MODEL
-        
+
         CHANGE_PT["Change-Point Engine (PELT & CUSUM Segmentation)"]
         BRANCH_TIME & BRANCH_SPEC & BRANCH_NOISE & BRANCH_CHAN & BRANCH_MODEL --> CHANGE_PT
-        
+
         REFINE["Sample-Accurate Boundary Refinement\n(Narrow-Window Zero-Crossing Snap +/- 500 Samples)"]
         CHANGE_PT --> REFINE
     end
@@ -1450,6 +1450,152 @@ AESL answers these questions by producing evidence-linked suspicious-region cand
 Source code implementation is **explicitly out of scope** for this documentation release.
 See `PRD.md Section 17`, `TRD.md Section 18`, and `PHASES.md Section 16` for full specifications.
 
+
+## 4.30 Unified Forensic Evidence Dashboard & Examiner Workbench (UFD / UFW)
+
+> **Shared Presentation, Navigation & Examiner Workflow Layer — Not a Forensic Engine**
+
+The **Unified Forensic Dashboard (UFD)** and its practitioner interface, the **Unified Forensic Workbench (UFW)**, provide the shared, secure, examiner-oriented presentation and workflow tier for the entire PS-05 platform. UFD unifies the investigation lifecycle into an unbroken, auditable operational chain:
+
+$$\text{Case Creation} \longrightarrow \text{Evidence Registration} \longrightarrow \text{Integrity Verification} \longrightarrow \text{Forensic Processing} \longrightarrow \text{Findings Review} \longrightarrow \text{Cross-Modal Correlation} \longrightarrow \text{Examiner Assessment} \longrightarrow \text{Report Issuance}$$
+
+UFD does **not** execute forensic detection algorithms, perform deepfake classifications, or store authoritative evidence bitstreams. Instead, it securely consumes, coordinates, and visualizes authoritative data from existing platform subsystems: **CEIPL** (custody, hashing, WORM fixity), **CMMS** (metadata extraction & normalization), **CSTV** (cross-source timeline verification), **AIF** (image tampering maps & masks), **AURAS** (audio waveform/spectrogram & voice spoofing), **VISTA** (video/CCTV frame cadence & temporal anomalies), **ONTF** (offline network capture flows), **AIF-GEO** (geospatial evidence mapping), **CDVF** (detector calibration, OOD gating & model governance), and **UFREDF** (court-admissible Section 65B/63 BSA dossier compilation).
+
+### 4.30.1 Architecture & Subsystem Integration
+
+```mermaid
+flowchart TD
+    subgraph PRACTITIONER["Authorised Forensic Practitioner Roles"]
+        INVESTIGATOR["Investigating Officer\n(Case Context & Registration)"]
+        EXAMINER["Forensic Examiner\n(Technical Analysis & Annotations)"]
+        CUSTODIAN["Evidence Custodian\n(Fixity, Custody & WORM Oversight)"]
+        REVIEWER["Technical / Legal Reviewer\n(Independent Audit & Approval)"]
+    end
+
+    subgraph UFW_CORE["Unified Forensic Workbench (UFW / UFD Application Shell)"]
+        AUTH_RBAC["Role-Based Access Control & Case Scoping\n(JWT, Session Guard, Zero Cross-Case Leakage)"]
+
+        subgraph WORKSPACES["Unified Investigation Workspaces"]
+            WS_CASE["Case Management Workspace\n(Metadata, Assignment, Progress)"]
+            WS_EVID["Evidence Inventory & Registry\n(Hash Verification, Modality Filter)"]
+            WS_MODAL["Modality-Specific Workspaces\n(AIF Image, AURAS Audio, VISTA Video, ONTF Network)"]
+            WS_FIND["Unified Findings Review\n(10-State Review Lifecycle, Examiner Annotations)"]
+            WS_TIME["Unified Timeline Workspace\n(CSTV Multi-Source Intervals, Clock Drift delta_t)"]
+            WS_GEO["Geospatial Workspace\n(AIF-GEO Location Mapping, Track Analysis)"]
+            WS_INTEG["Evidence Integrity & Custody\n(CEIPL WORM Fixity, Merkle DAG Audit)"]
+            WS_CROSS["Cross-Modal Investigation\n(CDVF Anti-Averaging DAG, Disagreement Analysis)"]
+            WS_REP["Report & Dossier Workspace\n(UFREDF Section 65B/63 BSA Approval Lifecycle)"]
+            WS_QUEUE["Review Queue & Task Dispatch\n(Prioritized Examiner Tasking)"]
+        end
+    end
+
+    subgraph BACKEND_SERVICES["PS-05 Authoritative Forensic Subsystems"]
+        CEIPL_SVC["CEIPL: Hashing, Fixity & Custody"]
+        CMMS_SVC["CMMS: Cross-Media Metadata Service"]
+        CSTV_SVC["CSTV: Cross-Source Temporal Verification"]
+        AIF_SVC["AIF: Advanced Image Forensics"]
+        AURAS_SVC["AURAS: Advanced Audio Forensics"]
+        VISTA_SVC["VISTA: Video & CCTV Forensics"]
+        ONTF_SVC["ONTF: Offline Network Forensics"]
+        GEO_SVC["AIF-GEO: Geospatial Forensics"]
+        CDVF_SVC["CDVF: Model Calibration & Governance"]
+        UFREDF_SVC["UFREDF: Forensic Dossier Framework"]
+    end
+
+    INVESTIGATOR & EXAMINER & CUSTODIAN & REVIEWER --> AUTH_RBAC
+    AUTH_RBAC --> WORKSPACES
+
+    WS_CASE & WS_EVID --> CEIPL_SVC & CMMS_SVC
+    WS_MODAL --> AIF_SVC & AURAS_SVC & VISTA_SVC & ONTF_SVC
+    WS_FIND --> AIF_SVC & AURAS_SVC & VISTA_SVC & CDVF_SVC
+    WS_TIME --> CSTV_SVC
+    WS_GEO --> GEO_SVC
+    WS_INTEG --> CEIPL_SVC
+    WS_CROSS --> CDVF_SVC
+    WS_REP --> UFREDF_SVC
+```
+
+### 4.30.2 Core Investigation Workspaces
+
+| Workspace Module | Primary Capabilities & Integrated Subsystem | Evidentiary Guardrails |
+| :--- | :--- | :--- |
+| **Global Overview** | Platform health, pending analysis jobs, unassigned tasks, urgent integrity incidents. | Zero hardcoded demo metrics; counts derived strictly from live backend database. |
+| **Case Management** | Case creation, jurisdictional assignment, priority queues, chain-of-custody overview. | Case identifiers validated; cross-case data leakage strictly prevented via PostgreSQL RLS. |
+| **Evidence Inventory** | Multi-modal registry (Image, Audio, Video, CCTV, PCAP, Sidecars), fixity status, file size, ingestion timestamps. | Distinguishes acquisition timestamp from filesystem modification time; read-only mounts. |
+| **Image Workspace (AIF)** | Synchronized dual-canvas viewer, ELA, noise residual heatmaps, spatial masks (IoU), EXIF/DQT inspection. | Overlays bound to original image coordinate space; master pixels are never mutated. |
+| **Audio Workspace (AURAS)** | WebAudio waveform, interactive mel-spectrogram, Silero VAD speech intervals, ECAPA diarization, splice markers. | Autoplay strictly disabled; derived denoised audio clearly flagged from original exhibit. |
+| **Video Workspace (VISTA)** | Frame-accurate scrubber, presentation timestamp (PTS) mapping, B-frame decode order separation, CCTV sidecar binding. | PTS/DTS timing preserved; normal B-frame reordering never reported as temporal tampering. |
+| **Network Workspace (ONTF)** | Offline PCAP packet timeline, protocol distribution, IP 5-tuple flow summaries, Zeek connection states. | Sensitive payload bodies excluded by default; 100% offline air-gap processing. |
+| **Geospatial Workspace (AIF-GEO)** | Offline Leaflet/MapLibre map canvas, GPS EXIF coordinates, uncertainty bounding ellipses, trajectory tracking. | Map markers indicate recorded metadata claims, not verified ground truth. |
+| **Unified Findings Review** | Multi-engine finding aggregator, severity tags, calibrated probabilities, 10-state review lifecycle. | Uncalibrated scores watermarked; severity never conflated with mathematical probability. |
+| **Unified Timeline (CSTV)** | Multi-source event intervals, clock drift regression $\delta(t)$, NTP desynchronization markers, Allen algebra relations. | Corrected timestamps displayed alongside raw timestamps; non-causality disclaimer active. |
+| **Cross-Modal Review (CDVF)** | Cross-modal correlation matrix, lip-sync mismatch analysis, speaker correspondence, 7 conflict taxonomy codes. | Anti-averaging invariant enforced; separate modality findings preserved in DAG. |
+| **Integrity & Custody (CEIPL)** | WORM storage fixity log, pre/post-write SHA-256 checks, Ed25519 signatures, Merkle DAG lineage tree. | Prominent quarantine banner on integrity mismatch; normal workflows locked out. |
+| **Reports & Dossiers (UFREDF)**| Section 65B IEA / Section 63 BSA dossier preview, examiner annotation editor, approval & issuance workflow. | PDF generation delegated strictly to UFREDF backend; no client-side report assembly. |
+
+### 4.30.3 Role-Based Access Control & Separation of Duties
+
+UFD enforces fine-grained permissions across nine specialized practitioner roles:
+1. **System Administrator:** Platform infrastructure, worker cgroup quotas, air-gap network policy.
+2. **Case Administrator:** Case creation, officer assignment, case-level permission scoping.
+3. **Investigating Officer:** Evidence registration, acquisition context, investigator notes.
+4. **Forensic Examiner:** In-depth media analysis, tool execution, candidate finding annotation.
+5. **Evidence Custodian:** Evidence intake hashing, WORM vault custody, fixity incident resolution.
+6. **Technical Reviewer:** Independent verification of examiner methodology and calibration bounds.
+7. **Report Reviewer:** Formal review and sign-off on draft forensic dossiers.
+8. **Independent Auditor:** Read-only access to immutable Merkle audit trails and access logs.
+9. **Model Administrator:** Model registry curation, checkpoint SHA-256 verification, 6-gate promotion.
+
+**Dual-Control Invariant:** High-impact operations—including evidence quarantine release, chain-of-custody overrides, and final Section 63 BSA report issuance—mandate cryptographically signed dual-authorization from two independent authorized roles.
+
+### 4.30.4 Accessibility & Forensic Usability (WCAG 2.2 AA)
+
+UFD is engineered to comply with **W3C WCAG 2.2 Level AA** standards:
+- **Non-Colour Dependent Status:** Every status indicator pairs semantic colours with explicit textual labels and distinct geometric iconography (e.g. green circle for `VERIFIED`, amber triangle for `WARNING`, red octagon for `FAILED`).
+- **Complete Keyboard Operability:** All scrubber controls, zoom canvases, modal dialogs, and table filters are fully operable via standard keyboard sequences (`Tab`, `Shift+Tab`, `Space`, `Enter`, arrow keys).
+- **Tabular Alternatives for Media Visualisations:** Complex visual graphs (waveforms, spectrograms, cadence plots) provide accessible, tabular data alternatives accessible to screen readers.
+- **Strict Information Density & Contrast:** Enforces a minimum contrast ratio of $4.5:1$ for body text and $3:1$ for UI components, maintaining high information density without visual clutter.
+
+### 4.30.5 Twenty Scientific, Security & Operational Invariants
+
+1. **Presentation Layer Invariant:** The dashboard is strictly a presentation and workflow layer; it never computes forensic algorithms or alters evidentiary data.
+2. **Backend Authority Invariant:** Backend subsystems remain the sole authoritative sources of truth for hashes, metadata, timestamps, and findings.
+3. **Honest Data State Invariant:** An unavailable service is never represented as a passed check; missing findings are never presented as authentic media.
+4. **Zero Silent Inconclusive Mutation:** An `INCONCLUSIVE` finding must never be converted or displayed as an affirmative `AUTHENTIC` verdict.
+5. **Score Semantic Integrity:** Model scores are strictly displayed according to their true semantic type; uncalibrated logits are never presented as calibrated probabilities.
+6. **Anti-Averaging Invariant:** Cross-modal agreement does not prove authenticity; multi-modal findings are presented as distinct nodes in an evidence DAG.
+7. **Master Evidence Immutability:** Interactive dashboard annotations, zoom operations, or filters never modify underlying WORM storage bitstreams.
+8. **Derived Artefact Lineage:** Every visualized derived representation (e.g. spectrogram, crop, denoised audio) links directly to its parent exhibit SHA-256.
+9. **Prominent Integrity Quarantine:** An exhibit failing CEIPL fixity displays an un-dismissible quarantine banner, disabling routine analysis workflows.
+10. **Custody Audit Independence:** The UI activity log does not replace the immutable, append-only CEIPL custody ledger.
+11. **Dual Timestamp Presentation:** Corrected timestamps from CSTV drift models are always presented alongside exact raw timestamps.
+12. **Metadata Attribution Transparency:** Externally enriched metadata is visually distinct from embedded binary tags.
+13. **Separation of Examiner Notes:** Human examiner annotations are stored in separate, immutable audit records, never overwriting automated findings.
+14. **Dual-Control Authorization:** Sensitive operational overrides require dual independent cryptographic sign-offs.
+15. **Backend-Enforced Authorization:** All permissions are validated on backend API endpoints; frontend UI element hiding is never treated as security.
+16. **Zero Cross-Case Data Leakage:** Search indexing, cache stores, and push notifications are strictly scoped by case authorization tokens.
+17. **Graceful Subsystem Degradation:** Failure of a single subsystem renders a localized error state without disabling the broader case workbench.
+18. **UFREDF Report Sovereignty:** Report compilation, signing, and issuance remain strictly governed by UFREDF backend lifecycle gates.
+19. **Air-Gap Operational Guarantee:** All workbench modules, map tiles, and waveform renderers execute 100% locally with zero external network calls.
+20. **OWASP ASVS Level 2 Compliance:** All endpoints enforce strict anti-CSRF, anti-XSS, parameterized queries, and secure session termination.
+
+### 4.30.6 Implementation Status
+
+| Capability / Module | Implementation Phase | Current Status |
+| :--- | :--- | :--- |
+| UFD UX Architecture & Shared Shell Specifications (`UFD-01`..`06`) | UFD-A0 / UFD-A1 | `PLANNED` |
+| Authentication, RBAC & Case Management Workspace (`UFD-07`..`28`) | UFD-A2 | `PLANNED` |
+| Evidence Inventory & Modality-Specific Workspaces (`UFD-29`..`48`) | UFD-A3 / UFD-A4 | `PLANNED` |
+| Unified Findings Review & Examiner Annotation (`UFD-49`..`55`) | UFD-A5 | `PLANNED` |
+| Unified Timeline & Geospatial Workspaces (`UFD-56`..`62`) | UFD-A6 | `PLANNED` |
+| Evidence Integrity & Cross-Modal Workspaces (`UFD-63`..`76`) | UFD-A7 | `PLANNED` |
+| UFREDF Report Dossier & Review Lifecycle (`UFD-77`..`82`) | UFD-A8 | `PLANNED` |
+| Search, Notifications & Prioritized Review Queue (`UFD-83`..`87`) | UFD-A9 | `PLANNED` |
+| Security Hardening, WCAG 2.2 AA & Air-Gap Compliance (`UFD-88`..`97`) | UFD-A10 | `PLANNED` |
+| End-to-End Workbench Validation & Release Readiness (`UFD-98`..`100`) | UFD-A11 | `PLANNED` |
+
+Source code implementation is **explicitly out of scope** for this documentation release.
+See `PRD.md Section 19`, `TRD.md Section 19`, and `PHASES.md Section 19` for full specifications.
 
 ## 5. Implementation Status
 
