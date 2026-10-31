@@ -116,7 +116,7 @@ flowchart TB
 | **VISTA - VDF Engine** | `ps05.engines.vista.vdf` | Frame-level (Xception/EfficientNet) and temporal sequence (FTCN/VideoMAE) deepfake detection, multi-family heads, Platt calibration, OOD distance. | Normalized face crops, 16-frame sliding windows. | Calibrated deepfake probabilities, suspicious frame ranges, OOD flags. |
 | **VISTA - VCI Engine** | `ps05.engines.vista.vci` | Hierarchical video taxonomy (15 categories), YOLOv8/v10 & SAM 2 detection, ByteTrack tracking, unique people counting, PaddleOCR OSD clocks. | Decoded RGB frames (sampled cadence). | Video source category, unique person count, object tracklets, OCR timestamp log. |
 | **VISTA - CCTV Profile**| `ps05.engines.vista.cctv`| Automated CCTV source triage, pre-questioning metadata extraction, adaptive questionnaire (A-E), clock drift regression, ONVIF/seal audit. | Raw surveillance stream, sidecars, OSD crops. | CCTV classification confidence, clock drift curve, native seal validation status. |
-| **Legal Reporting & Archify**| `ps05.reporting` | Cross-engine finding aggregation, Archify JSON IR generation, Section 65B/63 BSA certified PDF compilation. | Structured findings, case audit log.| Court-admissible PDF report, signed JSON audit manifest. |
+| **Legal Reporting & Archify**| `ps05.reporting` | Cross-engine finding aggregation, Archify JSON IR generation, Section 63 BSA certificate schedule preparation. | Structured findings, case audit log.| Structured PDF report, signed JSON audit manifest. |
 
 ---
 
@@ -322,7 +322,7 @@ d:/NextHackathon/
 │       │       ├── timestamp_ocr.py   # Tesseract OCR vs metadata timeline correlation
 │       │       └── audio_extractor.py # Audio stream extraction with cryptographic binding
 │       │
-│       ├── reporting/                 # Court-Admissible Reporting & Export
+│       ├── reporting/                 # Structured Dossier Reporting & Export
 │       │   ├── __init__.py
 │       │   ├── compiler.py            # Cross-engine finding aggregation
 │       │   ├── cert_65b.py            # Section 65B IEA / Sec 63 BSA legal template logic
@@ -1165,7 +1165,7 @@ CREATE TABLE IF NOT EXISTS cdvf_calibration_artifacts (
 
 CREATE INDEX IF NOT EXISTS idx_cdvf_cal_model ON cdvf_calibration_artifacts(model_id);
 
--- 6. Model Validation Approvals Table (12-gate release governance & signed scope bounds)
+-- 6. Model Validation Approvals Table (6-gate release governance across 12 verification checks & signed scope bounds)
 CREATE TABLE IF NOT EXISTS cdvf_validation_approvals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     model_id UUID NOT NULL REFERENCES cdvf_model_registry(id) ON DELETE RESTRICT,
@@ -2411,7 +2411,7 @@ This section provides the rigorous mathematical formulation for all geodetic, ki
   - $R_E = 6,371,008.8\text{ meters}$ (Mean Volumetric Earth Radius, IUGG).
   - Assumptions: Assumes a perfectly spherical Earth; introduces up to $0.5\%$ error ($\approx 5\text{ m/km}$) depending on latitude due to Earth oblateness.
 - **Method 2: WGS84 Ellipsoidal Geodesic (Karney's Algorithm):**
-  Used for all evidentiary distance determinations, velocity calculations, and court-admissible findings via `pyproj.Geod(ellps='WGS84')`.
+  Used for all evidentiary distance determinations, velocity calculations, and rigorous forensic findings via `pyproj.Geod(ellps='WGS84')`.
   - Solves the inverse geodesic problem on the WGS84 oblate ellipsoid of revolution:
     - Semi-major axis $a = 6,378,137.0\text{ meters}$.
     - Reciprocal flattening $1/f = 298.257223563$.
@@ -2625,7 +2625,7 @@ The AIF-GEO subsystem is implemented across eleven sequential engineering phases
 ### 10.11 Image Manipulation Localisation Framework (IMLF) Technical Specification
 
 #### 10.11.1 Component Boundaries & Execution Architecture
-The **Image Manipulation Localisation Framework (IMLF)** operates as the centralized spatial coordination and evidence fusion layer within the Advanced Image Forensics (AIF) subsystem. It does not replace the specialized detection logic of IRE, AIM, IVE, or FPA; rather, it standardizes their spatial outputs, normalizes coordinate frames, evaluates localization uncertainty, and fuses multi-modal spatial cues into court-admissible forensic masks.
+The **Image Manipulation Localisation Framework (IMLF)** operates as the centralized spatial coordination and evidence fusion layer within the Advanced Image Forensics (AIF) subsystem. It does not replace the specialized detection logic of IRE, AIM, IVE, or FPA; rather, it standardizes their spatial outputs, normalizes coordinate frames, evaluates localization uncertainty, and fuses multi-modal spatial cues into examiner-reviewed forensic masks.
 
 ```mermaid
 flowchart TD
@@ -2877,7 +2877,7 @@ sequenceDiagram
     end
 
     Core->>DB: INSERT INTO custody_events (event_type='MANIFEST_SIGNED', event_data_hash, ed25519_signature)
-    Core-->>Officer: Canonical Manifest Sealed & Court-Admissible
+    Core-->>Officer: Canonical Manifest Sealed & Cryptographically Verifiable
     deactivate Core
 ```
 
@@ -3726,7 +3726,7 @@ sequenceDiagram
 
 ### 11.8 CEIPL Integration for Video Exhibits & Derived Artifacts
 
-The Cryptographic Evidence Integrity & Provenance Layer (CEIPL) provides the cryptographic trust anchor for all video evidence, enforcing strict bitstream preservation, verifiable derivation tracking, and court-admissible audit logging in compliance with Section 65B of the Indian Evidence Act (IEA) and Section 63 of the Bharatiya Sakshya Adhiniyam (BSA 2023).
+The Cryptographic Evidence Integrity & Provenance Layer (CEIPL) provides the cryptographic trust anchor for all video evidence, enforcing strict bitstream preservation, verifiable derivation tracking, and structured audit logging in compliance with Section 63 of the Bharatiya Sakshya Adhiniyam (BSA 2023) and Section 65B of the Indian Evidence Act (IEA).
 
 #### 11.8.1 Pre-Decode Dual Hashing & Ingestion Record
 - **Raw Bitstream Hashing:** Prior to container demuxing, header inspection, or codec decoding, the raw ingested byte stream passes through parallel SHA-256 and SHA3-512 cryptographic accumulators.
@@ -3797,7 +3797,7 @@ flowchart TD
 #### 11.8.3 Canonical Manifests, Ed25519 Signing & Merkle Custody
 - **RFC 8785 Canonical JSON Serialization (JCS):** All intermediate and final analysis manifests are normalized using RFC 8785 before hashing to guarantee that dictionary key ordering, whitespace variations, and floating-point representations produce bit-identical SHA-256 digests across heterogeneous architectures.
 - **Ed25519 Digital Signatures:** Manifests are sealed using Edwards-curve Digital Signature Algorithm (Ed25519) keys conforming to RFC 8032. Keys are backed by Hardware Security Modules (HSM) or cloud KMS with strict role separation; examiners never possess direct access to raw private keys.
-- **RFC 3161 Trusted Timestamps:** Signed manifests are bound to external RFC 3161 Time-Stamp Authority (TSA) tokens, establishing court-admissible proof of existence prior to a certified UTC time.
+- **RFC 3161 Trusted Timestamps:** Signed manifests are bound to external RFC 3161 Time-Stamp Authority (TSA) tokens, establishing cryptographically verifiable proof of existence prior to a certified UTC time.
 - **Append-Only Merkle Audit Log:** State transitions, examiner questionnaire inputs, and analysis completions are appended to a SHA-256 Merkle tree log. Audit consistency proofs ($O(\log N)$) allow verification that no historical custody records have been altered or deleted.
 
 #### 11.8.4 Standardized Cryptographic Failure Codes (CEIPL-STATUS)
@@ -4059,7 +4059,7 @@ The following comparative selection matrices detail the algorithmic, mathematica
 | `ps05.shared.ceipl.hasher` | Pre-decode dual cryptographic hashing | **OpenSSL / Python `hashlib`** | FIPS PUB 180-4, FIPS PUB 202 | OpenSSL / PSF License | Binary stream in 64KB chunks | Hex-encoded SHA-256 and SHA3-512 digests | Bitstream integrity verification | CPU (Hardware SHA-NI) | Python standard library `hashlib` | Throughput measurement on 10GB video file ($> 500\text{ MB/s}$) | I/O bus saturation on slow mechanical drives | Native Python C extensions | `PLANNED` | BLAKE3 (where legally permissible) |
 | `ps05.shared.ceipl.signer` | Manifest sealing & digital signature verification | **Ed25519 (`cryptography` / `PyNaCl`)** | RFC 8032; Bernstein et al., 2012 | Apache 2.0 / BSD | Canonical JSON byte buffer (RFC 8785) | 64-byte Ed25519 signature string | Manifest authenticity sealing & tamper evidence | CPU (1 core) | `cryptography` Python package $\ge 42.0$ | Sign/verify latency ($< 1\text{ ms}$ per manifest) | Signature failure if JSON canonicalization differs by one space | `cryptography` library | `PLANNED` | RSA-PSS 4096, ECDSA P-256 |
 | `ps05.shared.ceipl.canonical`| RFC 8785 JSON canonicalization | **`canonicaljson` / `rfc8785` Python** | RFC 8785 (JCS standard) | Apache 2.0 | Arbitrary JSON-serializable dictionary | Deterministic UTF-8 byte string | Manifest normalization prior to hashing/signing | CPU (1 core) | `canonicaljson` 2.0.x | Cross-platform byte-equality check across Windows/Linux | Non-serializable objects (datetime, UUID) require strict string mapping | Pure Python / C extension | `PLANNED` | Custom recursive key sorter |
-| `ps05.shared.ceipl.tsa` | External RFC 3161 trusted timestamp binding | **`pyRFC3161` client** | RFC 3161 / RFC 5816 | Apache 2.0 | SHA-256 digest of signed manifest | ASN.1 DER-encoded TimeStampToken | Court-admissible proof of temporal existence | Network access to certified TSA | Pinned X.509 TSA root CA certificate | Verification of TSA response signature and chain of trust | TSA endpoint network failure or latency timeout ($> 5\text{ s}$) | PyOpenSSL, Requests | `PLANNED` | Local hardware TSA appliance |
+| `ps05.shared.ceipl.tsa` | External RFC 3161 trusted timestamp binding | **`pyRFC3161` client** | RFC 3161 / RFC 5816 | Apache 2.0 | SHA-256 digest of signed manifest | ASN.1 DER-encoded TimeStampToken | Cryptographically verifiable proof of temporal existence | Network access to certified TSA | Pinned X.509 TSA root CA certificate | Verification of TSA response signature and chain of trust | TSA endpoint network failure or latency timeout ($> 5\text{ s}$) | PyOpenSSL, Requests | `PLANNED` | Local hardware TSA appliance |
 | `ps05.shared.ceipl.vault` | Hardware/Kernel-enforced WORM storage | **POSIX `0400` / AWS S3 Object Lock** | POSIX standard / AWS S3 Compliance API | N/A (Infrastructure) | Seized binary media payload | Immutable S3 object URI + Version ID | Non-rewritable evidence vault archiving | Storage Appliance | S3 API v4 / Linux filesystem | Tamper test: attempt PUT/DELETE on locked object returns HTTP 403 | Premature retention expiration if policy configured incorrectly | MinIO / AWS S3 SDK | `PLANNED` | Ceph WORM, optical WORM media |
 ### 11.11 Performance, Resource & Execution Architecture
 
@@ -5146,7 +5146,7 @@ Every CDVF requirement is mapped to its TRD implementation section, Pydantic sch
 | **CDVF-97** | 7 Conflict Taxonomy Codes | §11.B.13 | Conflict classification engine | 7 conflict code assignments | CDVF-A9 | `PLANNED` |
 | **CDVF-98** | Automated Regression Runner | §11.B.14 | Continuous regression harness | Regression gate clearance test | CDVF-A11 | `PLANNED` |
 | **CDVF-99** | RFC 8785 24-Item WORM Bundle | §11.B.15 | Canonical JSON bundle builder | 24-item manifest verification | CDVF-A11 | `PLANNED` |
-| **CDVF-100**| Section 65B/63 BSA Dossier | §11.B.16 | UFREDF validation report builder| Court-ready PDF generation | CDVF-A11 | `PLANNED` |
+| **CDVF-100**| Section 65B/63 BSA Dossier | §11.B.16 | UFREDF validation report builder| Structured PDF generation | CDVF-A11 | `PLANNED` |
 ## 12. Pydantic v2 API & Contract Schemas
 
 ### 12.6 CCTV Frame Integrity & Temporal Sequence Forensics Schemas
@@ -6320,8 +6320,10 @@ class HashScopeEnum(str, Enum):
 
 class HashAlgorithmEnum(str, Enum):
     SHA256 = "SHA-256"
-    SHA512 = "SHA-512"
-    SHA3_256 = "SHA3-256"
+    SHA256 = "SHA-256"
+    SHA3_512 = "SHA3-512"
+    SHA512 = "SHA-512"  # Legacy manifest compatibility
+    SHA3_256 = "SHA3-256"  # Legacy manifest compatibility
     SHA3_512 = "SHA3-512"
     LEGACY_MD5 = "LEGACY_MD5"
     LEGACY_SHA1 = "LEGACY_SHA1"
@@ -6341,7 +6343,7 @@ class HashRecord(BaseModel):
     evidence_id: str = Field(...)
     acquisition_id: str = Field(...)
     primary_hash: SingleHashRecord = Field(..., description="Primary SHA-256 digest")
-    secondary_hash: SingleHashRecord = Field(..., description="Secondary SHA-512 or SHA3-256 digest")
+    secondary_hash: SingleHashRecord = Field(..., description="Secondary SHA3-512 digest (NIST FIPS 202 Keccak sponge)")
     byte_count: int = Field(..., ge=0)
     streaming_buffer_size_kb: int = Field(default=64)
     completion_status: str = Field(default="STREAM_COMPLETED_SUCCESSFULLY")
@@ -6644,7 +6646,7 @@ flowchart TD
         T9["9. Cross-Modal Fusion & Anti-Averaging\n(test_cdvf_cross_modal_fusion.py)"]
         T10["10. Subgroup Fairness & Disparity Suite\n(test_cdvf_subgroup_evaluation.py)"]
         T11["11. Continuous Regression Test Suite\n(test_cdvf_regression_suite.py)"]
-        T12["12. 12-Gate Scoped Approval & Dossier\n(test_cdvf_model_approval_gates.py)"]
+        T12["12. 6-Gate Scoped Approval & Dossier\n(test_cdvf_model_approval_gates.py)"]
     end
 
     subgraph FIXTURES["Curated Multi-Modal Validation Corpora"]
@@ -6748,7 +6750,7 @@ All geospatial forensic processing within AIF-GEO is governed by eight immutable
 5. **Multi-Tenant Row-Level Security (RLS):** Geospatial database tables (`geospatial_observations`, `geospatial_candidates`, `geospatial_tracks`) enforce strict PostgreSQL Row-Level Security. Investigators can query only coordinates belonging to cases for which their session holds an active cryptographic Case Authorization Token.
 6. **Non-Destructive Processing Invariant:** Reading, parsing, or normalizing GPS metadata must never modify the original evidence bitstream. Coordinate transformations and normalized values are stored exclusively as derived artifact manifests linked via CEIPL DAG.
 7. **Prohibition of Monolithic "Truth" Verdicts:** Machine-learning models (GeoCLIP, SigLIP) must never output an absolute verdict claiming an image was "proven" to be taken at a specific coordinate. Uncalibrated scores must be explicitly reported as ranking metrics, and candidate areas must state their bounding uncertainty.
-8. **Mandatory Inconclusive Attribution:** When metadata is absent and visual scene clues are insufficient or ambiguous, the platform must report **"Location Inconclusive / Insufficient Geospatial Telemetry"** as the court-admissible finding, rather than speculating.
+8. **Mandatory Inconclusive Attribution:** When metadata is absent and visual scene clues are insufficient or ambiguous, the platform must report **"Location Inconclusive / Insufficient Geospatial Telemetry"** as the examiner-reviewed finding, rather than speculating.
 
 
 ### 15.5 CCTV Frame Integrity, Temporal Analysis & Forensic Security Invariants
@@ -6811,7 +6813,7 @@ All signal analysis, candidate boundary generation, and suspicious region report
 All cryptographic processing, evidence handling, storage operations, and reporting within the EIV framework are governed by eight immutable security and evidentiary invariants:
 
 1. **Original Evidence Bitstream Immutability Invariant:** Original digital evidence exhibits stored within the CEIPL WORM repository are permanently locked with POSIX `0400` read-only permissions and S3 Object Lock compliance/governance mode. Modifying, overwriting, renaming, or truncating original evidence files in place is strictly prohibited under all system states.
-2. **Pre-Decode Streaming Dual-Hashing Invariant:** Cryptographic digests (SHA-256 and SHA-512 / SHA3-256) must be computed over the raw incoming byte sequence before any decoder, demuxer, metadata parser, or forensic engine touches the file. Decoding, re-encoding, or metadata extraction must never precede initial baseline hash computation.
+2. **Pre-Decode Streaming Dual-Hashing Invariant:** Cryptographic digests (SHA-256 and SHA3-512) must be computed over the raw incoming byte sequence before any decoder, demuxer, metadata parser, or forensic engine touches the file. Decoding, re-encoding, or metadata extraction must never precede initial baseline hash computation.
 3. **Non-Conflation of Byte Identity & Legal Authenticity Invariant:** A cryptographic hash match proves byte-level constancy relative to intake; it does *not* prove that the underlying real-world event occurred, that the file was authentic when created, or that the acquisition was legally valid. The platform must never output a monolithic declaration of authenticity based solely on hash verification.
 4. **Append-Only Hash-Chained Custody Invariant:** Every evidence handling, retrieval, verification, and export action must be logged in an append-only custody ledger where every event cryptographically chains to its predecessor ($E_i = H(\text{Canonical}(Event_i) \parallel E_{i-1})$) with strictly monotonic sequence numbers. Deleting, modifying, or retroactively re-ordering custody events is prohibited.
 5. **Derivative Merkle Lineage Invariant:** Every derivative forensic artifact (extracted audio, extracted frames, spectrograms, crops, feature embeddings, OCR text, reports) must be registered in the CEIPL Merkle DAG with explicit references to parent exhibit IDs, parent SHA-256 hashes, exact transformation parameters, and software version commit hashes.
@@ -7556,7 +7558,7 @@ erDiagram
 
 ### 16.12 Unified Forensic Reporting (UFREDF) Integration
 
-CMMS formats and exports metadata evidence into the court-admissible UFREDF reporting pipeline.
+CMMS formats and exports metadata evidence into the structured UFREDF reporting pipeline.
 
 #### 16.12.1 Section 65B / Section 63 BSA Report Invariants
 1. **Source Categorization:** Reports must explicitly distinguish `MACHINE_EXTRACTED` bitstream metadata from `OPERATOR_REPORTED` interview values and `MODEL_INFERRED` scores.
@@ -8353,7 +8355,7 @@ flowchart TD
         REFINE_ENG --> FUSE_LOGIC --> QC_CHECK
     end
 
-    subgraph OUTPUT_REPORTS["5. Court-Certified Evidentiary Deliverables"]
+    subgraph OUTPUT_REPORTS["5. Structured Evidentiary Deliverables"]
         WORKBENCH["Examiner Interactive Workbench (Sample-Accurate Scrubbing Canvas)"]
         UFREDF_PDF["UFREDF Section 65B/63 BSA Certified PDF Dossier"]
         QC_CHECK --> WORKBENCH --> UFREDF_PDF
@@ -8527,7 +8529,7 @@ sequenceDiagram
     WORKER->>CEIPL: Register AudioSpliceFinding records in Merkle DAG
     CEIPL->>DAG: Link Finding Node -> Derived Artifact Node -> Parent Exhibit Node
     DAG-->>WORKER: Return cryptographic inclusion proof & DAG node hash
-    WORKER->>UFREDF: Transmit verified findings and Merkle proof for legal certification
+    WORKER->>UFREDF: Transmit verified findings and Merkle proof for statutory certificate preparation
 ```
 
 ### 18.11 Examiner Review Workflow & Interactive Canvas
@@ -8551,7 +8553,7 @@ flowchart TD
     DECISION -->|Adjust Boundaries| ADJUST["Drag boundary marker to refine sample coordinate\nUpdate n_refined and uncertainty bounds"]
 
     CONFIRM & REJECT & ADJUST --> AUDIT["Append-Only Audit Log: Examiner ID, Timestamp, Signature"]
-    AUDIT --> EXPORT["Export Court-Certified Section 65B/63 BSA Dossier"]
+    AUDIT --> EXPORT["Export Structured Section 63 BSA Dossier"]
 ```
 
 ### 18.12 PostgreSQL Relational Persistence Schema
@@ -8697,7 +8699,7 @@ The **Evidence Integrity Verification (EIV)** subsystem is architected as an int
 ```mermaid id="eivarch"
 flowchart TD
     subgraph Intake["Evidence Intake & Pre-Decode Layer"]
-        IN1["Raw Evidence Bitstream<br/>(Image, CCTV, Audio, PCAP)"] --> STR["Streaming Dual-Hasher<br/>(SHA-256 + SHA-512 / SHA3-256)"]
+        IN1["Raw Evidence Bitstream<br/>(Image, CCTV, Audio, PCAP)"] --> STR["Streaming Dual-Hasher<br/>(SHA-256 + SHA3-512)"]
         IN1 --> STG["Secure Ingestion Staging Buffer<br/>(Temp POSIX 0600)"]
     end
 
@@ -8762,7 +8764,7 @@ sequenceDiagram
     activate Ingest
     par Streaming Pre-Decode Pipeline
         Ingest->>Hasher: Pipe Byte Chunk (64KB Buffer)
-        Hasher->>Hasher: Update SHA-256 & SHA-512 contexts
+        Hasher->>Hasher: Update SHA-256 & SHA3-512 contexts
     and
         Ingest->>Staging: Write Byte Chunk (POSIX 0600)
     end
@@ -8794,12 +8796,12 @@ For an incoming raw evidence byte stream $M \in \{0, 1\}^*$ of length $L = |M|$ 
 $$M = m_1 \parallel m_2 \parallel \dots \parallel m_k, \quad |m_i| \le B_{\text{chunk}}$$
 where $B_{\text{chunk}} = 65,536 \text{ bytes}$ (64 KB bounded buffer).
 
-The dual digests $H_1$ (NIST FIPS 180-4 SHA-256) and $H_2$ (NIST FIPS 180-4 SHA-512) are computed concurrently:
+The dual digests $H_1$ (NIST FIPS 180-4 SHA-256) and $H_2$ (NIST FIPS 202 SHA3-512) are computed concurrently over raw bitstream $M$:
 $$H_1(M) = \text{SHA-256}(M) \in \{0, 1\}^{256}$$
-$$H_2(M) = \text{SHA-512}(M) \in \{0, 1\}^{512}$$
+$$H_2(M) = \text{SHA3-512}(M) = \text{SPONGE}[f, \text{pad}, r, c](M, 512) \in \{0, 1\}^{512}$$
 
-In high-assurance configurations, SHA3-256 (NIST FIPS 202 Keccak sponge construction) is computed as an algorithmically independent third digest:
-$$H_3(M) = \text{SHA3-256}(M) = \text{SPONGE}[f, \text{pad}, r, c](M, 256)$$
+This pairs Merkle-Damgard with the Keccak sponge construction for complete structural algorithm independence.
+
 
 Both hashes MUST be evaluated over the identical raw bitstream before any decoder or container parser is invoked.
 
@@ -8807,7 +8809,7 @@ Both hashes MUST be evaluated over the identical raw bitstream before any decode
 flowchart LR
     RAW["Raw Evidence Stream<br/>M = m_1 || m_2 || ... || m_k"] --> SPLIT["Bounded Buffer Multiplexer<br/>(64 KB RAM Buffer)"]
     SPLIT --> H1["NIST FIPS 180-4 SHA-256<br/>H_1(M)"]
-    SPLIT --> H2["NIST FIPS 180-4 SHA-512<br/>H_2(M)"]
+    SPLIT --> H2["NIST FIPS 202 SHA3-512<br/>H_2(M)"]
     SPLIT --> STG["Encrypted Staging Buffer<br/>(AES-256-GCM)"]
 
     H1 --> MAN["Canonical Evidence Manifest<br/>RFC 8785 JCS"]
@@ -8892,7 +8894,7 @@ Evidence manifests bind all cryptographic digests, metadata snapshots, and custo
       "total_bytes_processed": 52428800
     },
     {
-      "algorithm": "SHA-512",
+      "algorithm": "SHA3-512",
       "computed_at": "2026-10-31T12:00:00Z",
       "digest": "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
       "execution_duration_ms": 381.42,
@@ -9029,7 +9031,7 @@ flowchart TD
     QUERY --> BATCH["Dispatch Batch Fixity Tasks<br/>(Concurrency = 8 Workers)"]
 
     BATCH --> READ["Stream Vault Bytes directly from Disk/S3<br/>(64 KB Bounded Buffer)"]
-    READ --> HASH["Compute Fresh Dual Digests<br/>SHA-256 + SHA-512"]
+    READ --> HASH["Compute Fresh Dual Digests<br/>SHA-256 + SHA3-512"]
     HASH --> CMP{"Observed Hashes == Stored HashRecord?"}
 
     CMP -->|Yes| PASS["Log VerificationRunResult<br/>(Status: VERIFIED)"]
@@ -9168,7 +9170,7 @@ flowchart TD
         C1 --> C2["2. Compute RFC 8785 Canonical JCS Bytes"]
         C2 --> C3["3. Verify Manifest Digest Matches JCS"]
         C3 --> C4["4. Verify Whole-File SHA-256 Digest"]
-        C4 --> C5["5. Verify Whole-File SHA-512 Digest"]
+        C4 --> C5["5. Verify Whole-File SHA3-512 Digest"]
         C5 --> C6["6. Verify File Byte Length Matches Manifest"]
         C6 --> C7["7. Verify Chunk Hashes & Merkle Root"]
         C7 --> C8["8. Verify Ed25519 Detached Signature"]
@@ -9422,8 +9424,8 @@ def assemble_export_package_task(self, evidence_id: str, output_dir: str) -> Dic
 | Technical Area | Evaluated Standard / Library | Selection Status | Operational & Cryptographic Rationale |
 | :--- | :--- | :--- | :--- |
 | **Primary Hash** | NIST FIPS 180-4 SHA-256 | **SELECTED** | Universal legal recognition (Section 63 BSA / 65B IEA), hardware acceleration via Intel SHA-NI |
-| **Secondary Hash** | NIST FIPS 180-4 SHA-512 | **SELECTED** | 64-bit word architecture, high throughput, zero shared state with SHA-256 |
-| **Agile Hash** | NIST FIPS 202 SHA3-256 | **SELECTED (CONFIGURABLE)**| Keccak sponge construction; algorithmically independent of Merkle-Damgard |
+| **Secondary Hash** | NIST FIPS 202 SHA3-512 | **SELECTED** | Keccak sponge construction; 512-bit digest; full structural algorithm independence from SHA-2. |
+| **Legacy Support** | NIST FIPS 180-4 SHA-512 | **LEGACY_COMPATIBLE** | Retained for backward verification of historical manifests only; not used for new ingest. |
 | **Legacy Hashes** | MD5 / SHA-1 | **LEGACY COMPARISON ONLY** | Strictly barred as primary integrity references; retained solely for legacy cross-matching |
 | **Digital Signature**| RFC 8032 Ed25519 | **SELECTED** | Fast constant-time signing, immune to side-channel timing attacks, 64-byte compact signatures |
 | **Timestamp Protocol**| RFC 3161 / RFC 5816 | **SELECTED** | International standard for proof-of-existence time assertions binding hash to TSA certificate |
@@ -9904,7 +9906,7 @@ sequenceDiagram
     REPREV->>BFF: POST /api/v1/reports/{report_id}/issue-confirm
     BFF->>UFREDF: Generate Immutable PDF/A-1b & Detached Ed25519 Signatures
     UFREDF-->>BFF: Dossier Issued (State: ISSUED, SHA-256: 0x4a9e...)
-    BFF-->>UI: Report Issued Successfully (Court-Admissible Package Ready)
+    BFF-->>UI: Report Issued Successfully (Verifiable Evidence Package Ready)
 ```
 
 ---
@@ -10792,7 +10794,7 @@ CREATE INDEX idx_ufredf_urn ON ufredf_reports(dossier_urn);
 
 1. **Reporting Layer Invariant:** UFREDF is strictly an attestation, synthesis, and reporting engine; it never computes detection algorithms or alters master evidence.
 2. **Backend Authority Invariant:** Backend subsystems remain the sole authoritative sources of truth for findings, timestamps, and fixity records.
-3. **Dual-Digest Integrity Invariant:** Reports must document both `SHA-256` and `SHA3-512` (or hardware-accelerated `SHA-512`) pre-decode digests for all referenced exhibits.
+3. **Dual-Digest Integrity Invariant:** Reports must document both `SHA-256` and `SHA3-512` pre-decode digests for all referenced exhibits.
 4. **Immutable Snapshots Invariant:** Once a report snapshot is compiled, its contents and digests are frozen; in-place overwriting is strictly prohibited.
 5. **Anti-Averaging Invariant:** Multi-modal probabilities are presented as separate nodes in an evidence DAG; scalar score averaging is forbidden.
 6. **Mandatory Limitation Disclosure:** Every report must include competing technical hypotheses and physical limitations (e.g. compression, lighting, noise).

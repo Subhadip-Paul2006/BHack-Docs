@@ -134,7 +134,7 @@ flowchart TD
         CA4 & CA5 & CA6 --> CA7["CDVF-A7: Cross-Dataset & Unseen-Generators (Modes A-G)"]
         CA7 --> CA8["CDVF-A8: Confidence Calibration (ECE <= 0.05) & OOD Gating"]
         CA8 --> CA9["CDVF-A9: Abstention Policy & Cross-Modal DAG Fusion"]
-        CA9 --> CA10["CDVF-A10: Subgroup Fairness, Robustness & 12-Gate Scoped Approval"]
+        CA9 --> CA10["CDVF-A10: Subgroup Fairness, Robustness & 6-Gate Scoped Model Approval"]
         CA10 --> CA11["CDVF-A11: Continuous Regression, 24-Item Bundle & Release Readiness"]
     end
 
@@ -152,7 +152,7 @@ flowchart TD
         EA9 --> EA10["CEIPL-EIV-10: Security, Performance & Release Readiness"]
     end
 
-    subgraph PLATFORM_DELIVERY["🚀 Platform Delivery & Legal Certification"]
+    subgraph PLATFORM_DELIVERY["🚀 Platform Delivery & Statutory Certificate Preparation"]
         A10 & VA13 & IA15 & NA13 & GA10 & CA11 & EA10 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
         P7 --> P8["Phase 8: Web Dashboard & Examiner Workbench"]
         P8 --> P9["Phase 9: Security Hardening & Air-Gapped Packaging"]
@@ -252,7 +252,7 @@ flowchart TD
 | **ONTF-A9** | Optional Temporal Sequence & Graph Models | ONTF Advanced | `PLANNED` | ONTF-A5, A6 Gates | NetworkX communication graph, graph centrality, LSTM sequences, world-model |
 | **ONTF-A10**| Multi-Stage Attack Correlation & ATT&CK | ONTF Correlation | `PLANNED` | ONTF-A7..A9 Gates| Attack scenario synthesizer, MITRE ATT&CK v14 mapping, evidence pointers |
 | **ONTF-A11**| Forensic Investigation Workbench & Graph UI | UI / Presentation | `PLANNED` | ONTF-A4, A6, A10 | Timeline scrubber, force-directed graph UI, target card, flow inspection table |
-| **ONTF-A12**| Section 65B/63 BSA Legal Dossier | Reporting / ONTF | `PLANNED` | ONTF-A10, A11 Gates| 11-part court-admissible PDF dossier, Ed25519 signature, TSA timestamp |
+| **ONTF-A12**| Section 63 BSA Forensic Dossier | Reporting / ONTF | `PLANNED` | ONTF-A10, A11 Gates| 11-part structured PDF dossier, Ed25519 signature, TSA timestamp |
 | **ONTF-A13**| End-to-End Network Validation & Benchmark | Validation / Release | `PLANNED` | ONTF-A12 Gate | Regression suite, immutability check, 5-run determinism, air-gap audit |
 | **CDVF-A0** | Repository Audit, Model Reconciliation & Validation Baseline | Shared CDVF | `IMPLEMENTED_AND_VERIFIED` | Phase 0 Gate | Complete gap audit, model reconciliation matrix, baseline specs |
 | **CDVF-A1** | Model Registry, Cryptographic Provenance & Licensing | CDVF Registry | `PLANNED` | CDVF-A0 Gate | `ModelRegistryEntry`, SHA-256 verifier, 12 revalidation triggers, WORM |
@@ -264,7 +264,7 @@ flowchart TD
 | **CDVF-A7** | Cross-Dataset (Modes A-G) & Unseen-Generator Protocols | CDVF Protocols | `PLANNED` | CDVF-A4..A6 Gates | Transfer gap delta-AUC, unseen generator vulnerability (UG-Score) |
 | **CDVF-A8** | Confidence Calibration Engine & OOD Domain Shift Gating | CDVF Calibration | `PLANNED` | CDVF-A7 Gate | Platt/Temp/Isotonic scaling, 15-bin ECE <= 0.05, Mahalanobis OOD gating |
 | **CDVF-A9** | First-Class Abstention Policy & Cross-Modal Fusion DAG | CDVF Abstention | `PLANNED` | CDVF-A8 Gate | 7 canonical states, risk vs coverage, DAG anti-averaging fusion |
-| **CDVF-A10** | Subgroup Fairness, Robustness & 12-Gate Scoped Approval | CDVF Governance | `PLANNED` | CDVF-A9 Gate | Subgroup disparity audit, 12-gate release review, Ed25519 approval record |
+| **CDVF-A10** | Subgroup Fairness, Robustness & 6-Gate Scoped Model Approval | CDVF Governance | `PLANNED` | CDVF-A9 Gate | Subgroup disparity audit, 6-gate release review, Ed25519 approval record |
 | **CDVF-A11** | Continuous Regression, 24-Item WORM Bundle & Release Readiness| CDVF Release | `PLANNED` | CDVF-A10 Gate | Automated regression test, 24-item WORM bundle, Sec 65B/63 BSA dossier |
 | **CMMS-A0** | Repository Discovery, Architecture Baseline & Integration Map | Shared Core / CMMS | `PLANNED` | Phase 0 Gate | Existing metadata capabilities audit, integration boundary map, zero duplicate architecture |
 | **CMMS-A1** | Metadata Contracts, Canonical Schema & Pydantic v2 Models | CMMS Contracts | `PLANNED` | CMMS-A0 Gate | `EvidenceMetadataSnapshot`, `MetadataField`, `FieldProvenance`, JSON Schema Draft 2020-12 |
@@ -278,7 +278,7 @@ flowchart TD
 | **CMMS-A9** | Testing Suite, Adversarial Fixtures, Benchmarking & Release | Validation/Release | `PLANNED` | CMMS-A8 Gate | 500-fixture corpus, malformed file fuzzing suite, latency SLAs, air-gap packet audit |
 | **CEIPL-EIV-00** | Repo & Integrity Architecture Discovery | CEIPL / EIV | `PLANNED` | Phase 0 Gate | Architectural gap analysis, boundary specs |
 | **CEIPL-EIV-01** | Evidence Identity & Acquisition Contract | CEIPL / EIV | `PLANNED` | EIV-00 Gate | Decoupled 10-entity UUIDs, Pydantic v2 contracts |
-| **CEIPL-EIV-02** | Pre-Decode Dual-Hashing Pipeline | CEIPL / EIV | `PLANNED` | EIV-01 Gate | Streaming SHA-256 + SHA-512, 4MB Merkle trees |
+| **CEIPL-EIV-02** | Pre-Decode Dual-Hashing Pipeline | CEIPL / EIV | `PLANNED` | EIV-01 Gate | Streaming SHA-256 + SHA3-512, 4MB Merkle trees |
 | **CEIPL-EIV-03** | Manifest & Cryptographic Attestation | CEIPL / EIV | `PLANNED` | EIV-02 Gate | RFC 8785 JCS, Ed25519 signer, RFC 3161 TSA |
 | **CEIPL-EIV-04** | WORM Vault & Immutable Storage | CEIPL / EIV | `PLANNED` | EIV-03 Gate | POSIX 0400, S3 Object Lock Compliance Mode |
 | **CEIPL-EIV-05** | Integrity Verification Lifecycle | CEIPL / EIV | `PLANNED` | EIV-04 Gate | Readback gate, Celery fixity, quarantine engine |
@@ -869,7 +869,7 @@ Modules `src/ps05/engines/audio/adde/calibration.py`, `ensemble.py`, `ood.py`, a
 **Status:** `PLANNED`
 
 **Objective:**
-Unify independent findings from ARE, MVSI, and ADDE into a consolidated forensic timeline; implement Celery task dispatching, partial-failure recovery, reviewer annotation capabilities, Archify JSON IR formatting, and court-admissible electronic evidence reporting (Section 65B IEA / Section 63 BSA).
+Unify independent findings from ARE, MVSI, and ADDE into a consolidated forensic timeline; implement Celery task dispatching, partial-failure recovery, reviewer annotation capabilities, Archify JSON IR formatting, and structured electronic evidence reporting (Section 63 BSA / legacy Section 65B IEA).
 
 **Scope:**
 - *Included:* Audio job orchestrator, cross-engine timeline alignment, finding merger, reviewer verdict overrides, Archify JSON IR generation, WeasyPrint PDF compilation.
@@ -887,7 +887,7 @@ Phases AURAS-A2, AURAS-A5, and AURAS-A8 Gates passed; all three audio engines op
    - Case B: Single detector spike + no signal discontinuity + low-SNR $\to$ *Acoustic Anomaly / Inconclusive*.
 5. **Human Examiner Reviewer Workflow:** Provide review endpoints allowing certified examiners to inspect flagged intervals, annotate findings, and record formal conclusions.
 6. **Archify JSON IR Serialization:** Export complete case graph into Archify-compatible intermediate representation (`archify.report.json`).
-7. **Court-Admissible PDF Certificate Generation:** Compile Section 65B IEA / Section 63 BSA certified PDF using Jinja2 and WeasyPrint, embedding exhibit hashes, environment details, and spectral visuals.
+7. **Structured PDF Certificate Schedule Generation:** Compile Section 63 BSA certificate schedule PDF using Jinja2 and WeasyPrint, embedding exhibit hashes, environment details, and spectral visuals.
 8. **Digital Signature Sealing:** Sign generated PDF and JSON manifest using PKCS#7 / X.509 digital certificates.
 9. **Tamper-Evident Audit Logging:** Log all examiner reviews and report generations to append-only Merkle hash chain.
 10. **REST API Endpoint Integration:** Implement `POST /api/v1/evidence/{id}/analyze` and `GET /api/v1/jobs/{id}/results`.
@@ -1611,7 +1611,7 @@ Fusion engine operational, conflict matrix verified on synthetic multi-modal tes
 
 **1. Phase ID & Title:** `VISTA-A12: Video Legal Reporting, Examiner Review & Sec 65B/63 BSA Dossier`
 **2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the judicial reporting and examiner review architecture: generate the complete 11-part court-admissible forensic dossier in machine-readable RFC 8785 canonical JSON and human-readable PDF formats, embed mandatory Section 65B IEA and Section 63 BSA legal certificates, provide an interactive examiner workbench review flow, seal reports with Ed25519 digital signatures, and attach RFC 3161 TSA tokens.
+**3. Purpose:** Implement the judicial reporting and examiner review architecture: generate the complete 11-part structured forensic dossier in machine-readable RFC 8785 canonical JSON and human-readable PDF formats, embed mandatory Section 63 BSA and Section 65B IEA legal schedule templates, provide an interactive examiner workbench review flow, seal reports with Ed25519 digital signatures, and attach RFC 3161 TSA tokens.
 **4. Topics & Subtopics:**
 - 11-Part Legal Dossier Structure: Compiling technical, visual, acoustic, sync, CCTV, and cryptographic sections.
 - Section 65B IEA / Section 63 BSA Certification: Generating statutory legal certificate with hardware environment hashes.
@@ -2078,7 +2078,7 @@ Ingest Multi-Camera Exhibits -> Align to UTC via OSD Clocks -> Compute Relative 
 
 **1. Phase ID & Title:** `VISTA-CFI-08: Unified Findings Synthesis & Examiner Review Workbench`
 **2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the cross-evidence finding synthesis engine, examiner interactive visualization workbench, and court-admissible reporting. Merge frame, packet, cadence, motion, bitstream, OSD clock, and cross-camera observations into Pydantic v2 `FrameIntegrityFinding` records; render interactive dual-timelines, cadence plots, and similarity heatmaps; export Section 65B/63 BSA certified dossiers.
+**3. Purpose:** Implement the cross-evidence finding synthesis engine, examiner interactive visualization workbench, and structured forensic reporting. Merge frame, packet, cadence, motion, bitstream, OSD clock, and cross-camera observations into Pydantic v2 `FrameIntegrityFinding` records; render interactive dual-timelines, cadence plots, and similarity heatmaps; export Section 65B/63 BSA certified dossiers.
 **4. Topics & Subtopics:**
 - Cross-Evidence Finding Synthesis: Multi-detector consensus and anti-averaging fusion.
 - Interactive Dual-Timeline Canvas: Presentation order vs OSD clock visualization.
@@ -3012,7 +3012,7 @@ Complete cryptographic hardening suite operational; integration tests passing; c
 **Status:** `PLANNED`
 
 **1. Purpose:**
-Implement the cross-engine finding aggregator, Archify JSON IR visual compiler, and Section 65B IEA / Section 63 BSA court-admissible PDF certificate generator with digital signature sealing.
+Implement the cross-engine finding aggregator, Archify JSON IR visual compiler, and Section 63 BSA structured PDF certificate generator with digital signature sealing.
 
 **2. Topics & Subtopics:**
 Cross-engine finding fusion (IVE + IRE + AIM + FPA + CEIPL), uncertainty calibration, detector conflict resolution, Archify JSON IR schema, Section 65B/63 BSA PDF compilation via WeasyPrint.
@@ -3024,7 +3024,7 @@ Cross-engine finding fusion (IVE + IRE + AIM + FPA + CEIPL), uncertainty calibra
 1. Implement finding aggregation engine correlating visual taxonomy, metadata anomalies, CMFD cloned patches, and inpainting heatmaps.
 2. Implement conflict resolution matrix: handle cases where metadata suggests camera capture but AIM detects generative inpainting.
 3. Implement Archify JSON IR compiler formatting image provenance flow, localization heatmaps, and finding graphs into `archify.report.json`.
-4. Implement court-admissible PDF generator compiling Section 65B IEA / Section 63 BSA electronic evidence certificates with device custody declarations.
+4. Implement structured PDF generator compiling Section 63 BSA electronic evidence certificate schedules with device custody declarations.
 5. Apply cryptographic sealing: embed Ed25519 signature, SHA-256 exhibit checksums, and RFC 3161 timestamp token into the exported PDF.
 
 **5. Execution Workflow:**
@@ -3062,7 +3062,7 @@ Reporting pipeline operational; sample certificates reviewed and verified; check
 | :--- | :--- | :--- | :--- | :--- |
 | **AIF14-CP-01** | Cross-Engine Finding Aggregation Matrix | Correlates IVE, IRE, and AIM findings into unified evidence summary | `NOT_STARTED` | Handles detector disagreement |
 | **AIF14-CP-02** | Archify JSON IR Image Dossier Compiler | Compiles visual provenance and anomaly heatmaps into Archify schema | `NOT_STARTED` | Deterministic JSON output |
-| **AIF14-CP-03** | Section 65B / 63 BSA Certified PDF Export | Generates court-admissible certificate with mandatory custody clauses | `NOT_STARTED` | Compliant with Indian Evidence Act |
+| **AIF14-CP-03** | Section 63 BSA Certificate Schedule Export | Generates structured certificate schedule with mandatory custody clauses | `NOT_STARTED` | Compliant with Bharatiya Sakshya Adhiniyam |
 | **AIF14-CP-04** | Cryptographic PDF Sealing & Verification | Embeds Ed25519 signature and SHA-256 exhibit hashes into final PDF | `NOT_STARTED` | Verified by standalone verifier tool |
 
 ---
@@ -3128,7 +3128,7 @@ All 16 AIF phases validated; benchmark report compiled; all 64 checkpoints initi
 
 ## 5.B Dedicated Image Manipulation Localisation Engineering Playbook (AIF-IML-00 through AIF-IML-10)
 
-The **Image Manipulation Localisation Framework (IMLF)** establishes an empirical, multi-detector spatial reasoning capability embedded directly within the Advanced Image Forensics (AIF) subsystem. It orchestrates existing specialist engines (IRE, AIM, IVE, FPA) to detect, localize, segment, and corroborate suspicious pixel regions. The workstream defines eleven sequential engineering phases establishing copy-move keypoint/block matching, noise residual and PRNU inconsistency mapping, deep localization baselines (TruFor, CAT-Net v2), inpainting and diffusion patch detection, biometric facial seam profiling, multi-scale high-resolution tiling ($H^{-1}$ inverse mapping), multi-detector evidence fusion DAGs, ground-truth benchmarking (CASIA, NIST, COVERAGE), examiner review workbenches, and court-admissible Section 65B/63 BSA dossiers:
+The **Image Manipulation Localisation Framework (IMLF)** establishes an empirical, multi-detector spatial reasoning capability embedded directly within the Advanced Image Forensics (AIF) subsystem. It orchestrates existing specialist engines (IRE, AIM, IVE, FPA) to detect, localize, segment, and corroborate suspicious pixel regions. The workstream defines eleven sequential engineering phases establishing copy-move keypoint/block matching, noise residual and PRNU inconsistency mapping, deep localization baselines (TruFor, CAT-Net v2), inpainting and diffusion patch detection, biometric facial seam profiling, multi-scale high-resolution tiling ($H^{-1}$ inverse mapping), multi-detector evidence fusion DAGs, ground-truth benchmarking (CASIA, NIST, COVERAGE), examiner review workbenches, and structured Section 63 BSA dossiers:
 
 ---
 
@@ -3186,7 +3186,7 @@ All four canonical architecture documents updated, cross-referenced, verified, a
 | **AIF-IML-CP-00-01** | Engine Spatial Capability Audit & Gap Matrix | Documented matrix separating genuine spatial mask outputs from scalar classification scores | `IMPLEMENTED_AND_VERIFIED` | Completed in master architecture task |
 | **AIF-IML-CP-00-02** | Pydantic v2 Data Contracts Validation | `IMLRegionCandidate` and `IMLLocalizationResult` pass bidirectional JSON serialization tests | `IMPLEMENTED_AND_VERIFIED` | Locked in TRD §12.4 |
 | **AIF-IML-CP-00-03** | Canonical Spatial Coordinate Invariant | Half-open interval $[y_{\min}, x_{\min}, y_{\max}, x_{\max})$ and top-left $(0, 0)$ origin locked in TRD/PRD | `IMPLEMENTED_AND_VERIFIED` | Locked in TRD §10.11.9 |
-| **AIF-IML-CP-00-04** | Zero-Mask-Fabrication Architectural Rule | Explicit invariant prohibiting synthetic heatmaps from scalar whole-image scores locked | `IMPLEMENTED_AND_VERIFIED` | Locked in PRD §13.2 |
+| **AIF-IML-CP-00-04** | Zero-Mask-Fabrication Architectural Rule | Explicit invariant prohibiting synthetic heatmaps from scalar whole-image scores locked | `IMPLEMENTED_AND_VERIFIED` | Locked in PRD §14.2 |
 
 ---
 
@@ -3695,7 +3695,7 @@ Benchmark runner, metric calculator, and leakage checker implemented, verified o
 
 **1. Phase ID & Title:** `AIF-IML-09: Forensic Examiner Review Workbench & Section 65B/63 BSA Dossier`
 **2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the examiner-facing interactive review workbench and court-admissible legal dossier generator under `src/ps05/engines/image/iml/ui/` and `src/ps05/engines/image/iml/reporting/`. Build the multi-layer canvas allowing investigators to toggle and blend between original exhibits, probability maps, binary masks, anomaly heatmaps, and reliability masks with dynamic opacity and threshold sliders ($< 50\text{ ms}$ latency). Implement the examiner disposition workflow (`ACCEPTED`, `REJECTED`, `MODIFIED`) with mandatory audit logging. Generate Section 65B IEA / Section 63 BSA certified PDF dossiers containing exhibit SHA-256 hashes, vector polygon overlays, calibrated ECE records, detector provenance, and examiner digital signatures.
+**3. Purpose:** Implement the examiner-facing interactive review workbench and structured legal dossier generator under `src/ps05/engines/image/iml/ui/` and `src/ps05/engines/image/iml/reporting/`. Build the multi-layer canvas allowing investigators to toggle and blend between original exhibits, probability maps, binary masks, anomaly heatmaps, and reliability masks with dynamic opacity and threshold sliders ($< 50\text{ ms}$ latency). Implement the examiner disposition workflow (`ACCEPTED`, `REJECTED`, `MODIFIED`) with mandatory audit logging. Generate Section 63 BSA certified PDF dossiers containing exhibit SHA-256 hashes, vector polygon overlays, calibrated ECE records, detector provenance, and examiner digital signatures.
 **4. Topics & Subtopics:**
 - Interactive Multi-Layer Canvas: Original exhibit, calibrated probability map, binary mask, anomaly map, and reliability map.
 - Real-Time Opacity & Threshold Sliders: Interactive threshold filtering ($\tau \in [0.0, 1.0], R_{\min} \in [0.0, 1.0]$) rendering vector contours.
@@ -3718,7 +3718,7 @@ flowchart TD
     DispositionTag --> AuditLog["Append Examiner Rationale to Tamper-Proof Audit Trail"]
     AuditLog --> DossierGen["Compile Section 65B / 63 BSA Legal Dossier"]
     DossierGen --> SignDossier["Sign PDF with Examiner Ed25519 Key & TSA Timestamp"]
-    SignDossier --> CourtReady["Court-Ready Certified Evidentiary PDF Export"]
+    SignDossier --> CourtReady["Structured Evidentiary PDF Export"]
 ```
 **7. Technologies, Tools & Frameworks:**
 Python 3.12, FastAPI, Archify JSON IR, WeasyPrint / ReportLab, Ed25519 cryptography, Jinja2.
@@ -3748,7 +3748,7 @@ Workbench adapter, disposition manager, and legal dossier compiler implemented, 
 | :--- | :--- | :--- | :--- | :--- |
 | **AIF-IML-CP-09-01** | Multi-Layer Examiner Canvas & Slider Engine | Workbench adapter generates Archify JSON IR layers supporting dynamic threshold sliders | `NOT_STARTED` | Awaits phase activation |
 | **AIF-IML-CP-09-02** | Examiner Disposition Audit Trail Manager | System records reviewer accept/reject decisions with Ed25519 examiner signatures | `NOT_STARTED` | Awaits phase activation |
-| **AIF-IML-CP-09-03** | Section 65B/63 BSA Certified Legal Dossier | Dossier compiler generates court-ready PDF with vector overlays and SHA-256 manifests | `NOT_STARTED` | Awaits phase activation |
+| **AIF-IML-CP-09-03** | Section 63 BSA Certified Legal Dossier | Dossier compiler generates structured PDF with vector overlays and SHA-256 manifests | `NOT_STARTED` | Awaits phase activation |
 | **AIF-IML-CP-09-04** | Synchronized Split-View Panning Engine | UI adapter supports synchronized panning/zooming across donor and recipient regions | `NOT_STARTED` | Awaits phase activation |
 
 ---
@@ -4126,7 +4126,7 @@ flowchart TD
 ---
 
 ### Phase AIF-GEO-09: Investigator Geospatial Workbench & Reporting Integration
-- **Phase Objective:** Integrate the complete geospatial evidence workspace into the forensic dashboard; provide synchronized map-timeline views and evidence drill-down; compile court-admissible Section 65B/63 BSA certified PDF reports and Archify JSON IR manifests.
+- **Phase Objective:** Integrate the complete geospatial evidence workspace into the forensic dashboard; provide synchronized map-timeline views and evidence drill-down; compile structured Section 63 BSA certified PDF reports and Archify JSON IR manifests.
 - **Primary Requirements Covered:** GEO-04 (UI Workbench), GEO-24 (Graph Viewer), Reporting Contracts.
 - **Topics & Subtopics:**
   - Frontend geospatial workbench (original image viewer, metadata panel, interactive map, candidate ranking, conflict graph).
@@ -4152,7 +4152,7 @@ flowchart TD
 | :--- | :--- | :--- | :--- | :--- |
 | **AIF-GEO-09-C1** | Geospatial REST API Endpoints | Serves observations, candidate locations, tracks, and GeoJSON layers. | FastAPI route integration tests | `NOT_STARTED` |
 | **AIF-GEO-09-C2** | Archify Geospatial JSON IR Adapter | Serializes observations, candidates, and conflict graphs to Archify IR. | Archify schema validator test | `NOT_STARTED` |
-| **AIF-GEO-09-C3** | Section 65B/63 BSA PDF Compiler | Compiles court-admissible PDF report with maps, hashes, and findings. | WeasyPrint compilation audit | `NOT_STARTED` |
+| **AIF-GEO-09-C3** | Section 63 BSA PDF Compiler | Compiles structured PDF report with maps, hashes, and findings. | WeasyPrint compilation audit | `NOT_STARTED` |
 | **AIF-GEO-09-C4** | Investigator Disposition Workflow | Supports review dispositions (`ACCEPTED`, `REJECTED`, `INCONCLUSIVE`). | Review state lifecycle test | `NOT_STARTED` |
 
 ---
@@ -4858,7 +4858,7 @@ Workbench components implemented, tested, and integrated into the platform exami
 
 **1. Phase ID & Title:** `ONTF-A12: Section 65B/63 BSA Legal Dossier & Forensic Certification`
 **2. Current Status:** `PLANNED`
-**3. Purpose:** Implement the automated legal reporting engine compiling the court-admissible electronic evidence forensic certificate and technical annexure in PDF (WeasyPrint) and JSON-LD formats. Generate the complete 11-part dossier: (1) Seizure metadata, (2) Dual SHA-256 and SHA3-512 hashes, (3) Capture environment and tool versions manifest, (4) Operational mode (Mode A / Mode B), (5) Target device profile with attribution tier, (6) 9 mandatory attribution caveats, (7) Protocol and volume statistics, (8) Suspicious flow findings with source packet references, (9) MITRE ATT&CK mapping matrix, (10) Evidence communication graph snapshot, and (11) Examiner declaration with Ed25519 digital signature and RFC 3161 TSA timestamp.
+**3. Purpose:** Implement the automated legal reporting engine compiling the structured electronic evidence forensic certificate and technical annexure in PDF (WeasyPrint) and JSON-LD formats. Generate the complete 11-part dossier: (1) Seizure metadata, (2) Dual SHA-256 and SHA3-512 hashes, (3) Capture environment and tool versions manifest, (4) Operational mode (Mode A / Mode B), (5) Target device profile with attribution tier, (6) 9 mandatory attribution caveats, (7) Protocol and volume statistics, (8) Suspicious flow findings with source packet references, (9) MITRE ATT&CK mapping matrix, (10) Evidence communication graph snapshot, and (11) Examiner declaration with Ed25519 digital signature and RFC 3161 TSA timestamp.
 **4. Topics & Subtopics:**
 - 11-Part Legal Dossier Structure: Standardized sections compliant with Indian courtroom standards.
 - Section 65B IEA & Section 63 BSA Compliance: Formulating statutory examiner certificates.
@@ -4872,7 +4872,7 @@ Workbench components implemented, tested, and integrated into the platform exami
 4. Implement Ed25519 signature and RFC 3161 TSA binding module (`crypto_sealer.py`).
 5. Write integration tests validating PDF rendering, field completeness, and signature verification.
 **6. Detailed Execution Workflow:**
-Analysis Telemetry Aggregated -> Dossier Context Assembled -> HTML Rendered -> WeasyPrint PDF Generated -> Ed25519 Signature & TSA Timestamp Applied -> Court-Ready Dossier Saved.
+Analysis Telemetry Aggregated -> Dossier Context Assembled -> HTML Rendered -> WeasyPrint PDF Generated -> Ed25519 Signature & TSA Timestamp Applied -> Structured Dossier Saved.
 **7. Technologies, Tools & Models:**
 Python 3.12, WeasyPrint, Jinja2, cryptography (Ed25519), RFC 3161 client.
 **8. Prerequisites & Dependencies:**
@@ -5247,13 +5247,13 @@ flowchart TD
   2. Enforce regression gates: fail promotion if $\Delta\operatorname{AUC} < -0.01$ or $\Delta\operatorname{ECE} > +0.01$; assert bit-identical outputs on fixed seeds.
   3. Implement canonical evaluation artifact bundle serializer emitting all 24 mandatory artifacts in RFC 8785 canonical JSON.
   4. Seal artifact bundle in CEIPL WORM vault; generate root SHA-256 bundle manifest and RFC 3161 timestamp token.
-  5. Implement UFREDF legal validation dossier generator rendering court-ready PDF with reliability curves, ROC plots, and examiner notes.
+  5. Implement UFREDF legal validation dossier generator rendering structured PDF with reliability curves, ROC plots, and examiner notes.
   6. Finalize engineering documentation and execute formal release sign-off for Phase CDVF-A11.
 - **Dependencies:** `CDVF-A10`, CEIPL, UFREDF, WeasyPrint / Jinja2.
 - **Deliverables:** Continuous regression harness, 24-item WORM bundle builder, Section 65B/63 BSA validation dossier generator.
 - **Dataset Requirements:** Frozen 500-sample regression corpus with verified bit-exact metric expectations.
 - **Tests:** Automated regression tests; RFC 8785 canonical JSON hashing tests; PDF dossier compilation and digital signature verification.
-- **Checkpoints:** `CDVF-CP-11-01` (Complete CDVF framework validated; 24-item bundle sealed; court-admissible dossier exported).
+- **Checkpoints:** `CDVF-CP-11-01` (Complete CDVF framework validated; 24-item bundle sealed; structured validation dossier exported).
 - **Acceptance Criteria:** 100% of regression assertions pass; legal dossier validated against Section 63 BSA evidentiary rules.
 - **Exit Criteria:** CDVF certified for production deployment across PS-05 forensic platform.
 - **Risks:** PDF rendering inconsistencies across platforms (mitigated via standardized WeasyPrint Docker environment).
@@ -5639,7 +5639,7 @@ gantt
     CDVF-A7: Cross-Dataset & Unseen (Modes A-G):       ca7, 2026-11-06, 2026-11-08
     CDVF-A8: Calibration (ECE<=0.05) & OOD   :         ca8, 2026-11-08, 2026-11-10
     CDVF-A9: Abstention Policy & Fusion DAG  :         ca9, 2026-11-10, 2026-11-12
-    CDVF-A10: Subgroup Fairness & 12 Gates   :         ca10, 2026-11-12, 2026-11-13
+    CDVF-A10: Subgroup Fairness & 6 Gates   :         ca10, 2026-11-12, 2026-11-13
     CDVF-A11: Regression & 24-Item WORM Bundle:        ca11, 2026-11-13, 2026-11-14
 
     section Platform Delivery
@@ -5657,134 +5657,134 @@ Every Cross-Modal Deepfake Validation Framework requirement (`CDVF-01` through `
 
 | Req ID | Requirement Title | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Validation Evidence | Status | Dependencies / Blockers |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **CDVF-01** | Shared Validation Architecture | PRD §12.6 | TRD §11.B.1 | **CDVF-A0** | `CDVF-CP-00-01` | Architecture boundary linting confirms single shared validation framework across engines | `PLANNED` | Phase 0 Gate |
-| **CDVF-02** | Preserve Detector Ownership | PRD §12.6 | TRD §11.B.1 | **CDVF-A0** | `CDVF-CP-00-01` | Subsystem routing interfaces enforce image in AIF, audio in AURAS, video in VISTA | `PLANNED` | `CDVF-A0` |
-| **CDVF-03** | CEIPL Custody Integration | PRD §12.6 | TRD §11.B.1, §11.B.15| **CDVF-A0** | `CDVF-CP-00-01` | CEIPL DAG manifest pointers assert pre-execution exhibit SHA-256 and lineage | `PLANNED` | Phase 0 Gate |
-| **CDVF-04** | CMMS Metadata Ingestion | PRD §12.6 | TRD §11.B.1 | **CDVF-A0** | `CDVF-CP-00-01` | Ingests `EvidenceMetadataSnapshot` for camera, codec, and structural context | `PLANNED` | `CMMS-A0` |
-| **CDVF-05** | CSTV Temporal Ingestion | PRD §12.6 | TRD §11.B.1 | **CDVF-A0** | `CDVF-CP-00-01` | Ingests `CrossSourceTimeline` and clock drift $\delta(t)$ for multi-source alignment | `PLANNED` | `CSTV-A0` |
-| **CDVF-06** | UFREDF Legal Reporting | PRD §12.6 | TRD §11.B.1, §11.B.16| **CDVF-A0** | `CDVF-CP-00-01` | Emits validated multi-modal findings into court-admissible Section 65B/63 BSA dossier | `PLANNED` | Phase 0 Gate |
-| **CDVF-07** | Standard Pydantic Contract | PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | `DetectorResultContract` schema validates 100% of simulated multi-modal outputs | `PLANNED` | `CDVF-A0` |
-| **CDVF-08** | Explicit Score Semantics | PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | Typed `ScoreSemantics` enum strictly distinguishes raw logits from calibrated probabilities | `PLANNED` | `CDVF-A0` |
-| **CDVF-09** | Cryptographic Model Provenance| PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | `ModelProvenance` sub-record asserts checkpoint SHA-256 and preprocessing version | `PLANNED` | `CDVF-A0` |
-| **CDVF-10** | Spatial Localisation Contract | PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | `SpatialLocalisation` preserves original image pixel coordinates without downsampling distortion | `PLANNED` | `CDVF-A0` |
-| **CDVF-11** | Temporal Localisation Contract| PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | `TemporalLocalisation` preserves start/end seconds, sample indices, and video PTS | `PLANNED` | `CDVF-A0` |
-| **CDVF-12** | OOD & Calibration Annotations | PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | Typed `OODStatus` and `CalibrationStatus` enums recorded on every generated finding | `PLANNED` | `CDVF-A0` |
-| **CDVF-13** | Activity ID & Limitation Logs | PRD §12.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | Finding retains source exhibit UUID, activity UUID, and immutable limitation list | `PLANNED` | `CDVF-A0` |
-| **CDVF-14** | Centralized Model Registry | PRD §12.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | `ModelRegistryEntry` database models persist model architectures and target tasks | `PLANNED` | `CDVF-A0` |
-| **CDVF-15** | Checkpoint SHA-256 Assertion | PRD §12.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Streaming weight verifier aborts execution on single-bit corrupted checkpoint | `PLANNED` | `CDVF-A0` |
-| **CDVF-16** | Model Card Documentation | PRD §12.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Model card schema stores training datasets, licenses, tensor shapes, and limitations | `PLANNED` | `CDVF-A0` |
-| **CDVF-17** | Unique Validation Identity | PRD §12.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Weight, architecture, or threshold modification generates new versioned UUID | `PLANNED` | `CDVF-A0` |
-| **CDVF-18** | 9-State Model Lifecycle | PRD §12.6 | TRD §11.B.3.1 | **CDVF-A1** | `CDVF-CP-01-01` | State machine enforces valid transitions from `REGISTERED` to `REVOKED` | `PLANNED` | `CDVF-A0` |
-| **CDVF-19** | Ed25519 Promotion Signatures | PRD §12.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Model promotion requires valid Ed25519 signature from Forensic Governance Officer | `PLANNED` | `CDVF-A0` |
-| **CDVF-20** | Scoped Operating Boundaries | PRD §12.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Out-of-scope deployment triggers `UNVALIDATED_OPERATIONAL_DOMAIN` warning | `PLANNED` | `CDVF-A0` |
-| **CDVF-21** | Structured Dataset Registry | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | `DatasetRecord` database models persist dataset versions, sources, and quality tiers | `PLANNED` | `CDVF-A1` |
-| **CDVF-22** | Comprehensive Dataset Cards | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Dataset card documents sample counts, original vs manipulated splits, and label formats | `PLANNED` | `CDVF-A1` |
-| **CDVF-23** | Dataset Manifest Cryptography | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Manifest SHA-256 verifier confirms dataset file integrity prior to benchmark run | `PLANNED` | `CDVF-A1` |
-| **CDVF-24** | Image Benchmark Support | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Ingests FaceForensics++, Celeb-DF, DFDC, DeeperForensics-1.0, and ForgeryNet | `PLANNED` | `CDVF-A1` |
-| **CDVF-25** | Audio Spoofing Benchmarks | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Ingests ASVspoof 2019/2021, MLAAD, WaveFake, and In-the-Wild audio deepfakes | `PLANNED` | `CDVF-A1` |
-| **CDVF-26** | Decoupled Splice Benchmarks | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Ingests purpose-built audio splice and edit localization corpora separately from spoofing | `PLANNED` | `CDVF-A1` |
-| **CDVF-27** | Audiovisual Benchmark Support | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Ingests multi-modal benchmarks containing verified aligned AV ground truth | `PLANNED` | `CDVF-A1` |
-| **CDVF-28** | License Compatibility Gate | PRD §12.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Automated license checker rejects corpora incompatible with forensic law enforcement | `PLANNED` | `CDVF-A1` |
-| **CDVF-29** | Group-Aware Data Splitting | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | `GroupKFold` split engine partitions media at speaker, actor, and video group levels | `PLANNED` | `CDVF-A1` |
-| **CDVF-30** | Speaker-Disjoint Audio Splits | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Speaker key partitioner guarantees zero speaker overlap ($\mathcal{S}_{\text{train}} \cap \mathcal{S}_{\text{test}} = \emptyset$) | `PLANNED` | `CDVF-A1` |
-| **CDVF-31** | Subject-Disjoint Face Splits | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Actor key partitioner guarantees zero subject overlap ($\mathcal{I}_{\text{train}} \cap \mathcal{I}_{\text{test}} = \emptyset$) | `PLANNED` | `CDVF-A1` |
-| **CDVF-32** | Video-Disjoint Splits | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Root video ID partitioner guarantees zero video overlap ($\mathcal{V}_{\text{train}} \cap \mathcal{V}_{\text{test}} = \emptyset$) | `PLANNED` | `CDVF-A1` |
-| **CDVF-33** | Mathematical Leakage Audit | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Intersection auditor terminates execution with `LEAKAGE_DETECTED` on shared keys | `PLANNED` | `CDVF-A1` |
-| **CDVF-34** | 4-Way Disjoint Partitions | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Split manager establishes completely isolated Train, Calib, Val, and Test partitions | `PLANNED` | `CDVF-A1` |
-| **CDVF-35** | Generator-Disjoint Splits | PRD §12.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Generator partitioner holds out entire synthesis algorithms (e.g. Diffusion vs GAN) | `PLANNED` | `CDVF-A1` |
-| **CDVF-36** | 10 Evaluation Tracks | PRD §12.6 | TRD §11.B.5.1 | **CDVF-A2** | `CDVF-CP-02-01` | Benchmark runner executes 10 tracks (In-Domain, Cross-Dataset, Cross-Codec, etc.) | `PLANNED` | `CDVF-A1` |
-| **CDVF-37** | Independent Subsystem Testing | PRD §12.6 | TRD §11.B.6 | **CDVF-A3** | `CDVF-CP-03-01` | Multi-modal runner evaluates each subsystem independently prior to cross-modal fusion | `PLANNED` | `CDVF-A2` |
-| **CDVF-38** | Decoupled Image Classification| PRD §12.6 | TRD §11.B.6 | **CDVF-A4** | `CDVF-CP-04-01` | Evaluates synthetic image and face-swap classification separately from localisation | `PLANNED` | `CDVF-A3` |
-| **CDVF-39** | Image Localisation Metrics | PRD §12.6 | TRD §11.B.6.1 | **CDVF-A4** | `CDVF-CP-04-01` | Reports pixel-level IoU, Dice coefficient, and Boundary F1 against ground truth | `PLANNED` | `CDVF-A3` |
-| **CDVF-40** | Comprehensive Image Metrics | PRD §12.6 | TRD §11.B.6.1 | **CDVF-A4** | `CDVF-CP-04-01` | Reports Precision, Recall, F1, Specificity, Balanced Accuracy, and ROC-AUC | `PLANNED` | `CDVF-A3` |
-| **CDVF-41** | Decoupled Audio Spoof/Splice | PRD §12.6 | TRD §11.B.6 | **CDVF-A5** | `CDVF-CP-05-01` | Evaluates ADDE voice cloning and ARE splice localisation as distinct tasks | `PLANNED` | `CDVF-A3` |
-| **CDVF-42** | Audio Spoofing Metrics | PRD §12.6 | TRD §11.B.6.1 | **CDVF-A5** | `CDVF-CP-05-01` | Reports Equal Error Rate (EER), minimum Detection Cost Function (minDCF), and AUC | `PLANNED` | `CDVF-A3` |
-| **CDVF-43** | Audio Edit Localisation Metrics| PRD §12.6 | TRD §11.B.6.1 | **CDVF-A5** | `CDVF-CP-05-01` | Reports temporal IoU, boundary start/end error (ms), and false alarms per hour | `PLANNED` | `CDVF-A3` |
-| **CDVF-44** | Decoupled Video/Frame Metrics | PRD §12.6 | TRD §11.B.6 | **CDVF-A6** | `CDVF-CP-06-01` | Reports video-level ROC-AUC and frame-level AUC as independent metrics | `PLANNED` | `CDVF-A3` |
-| **CDVF-45** | Correct Correlated Frame Bias | PRD §12.6 | TRD §11.B.6 | **CDVF-A6** | `CDVF-CP-06-01` | Cluster bootstrap aggregates temporally adjacent frames to prevent statistical inflation | `PLANNED` | `CDVF-A3` |
-| **CDVF-46** | Individual/Joint VISTA Heads | PRD §12.6 | TRD §11.B.6 | **CDVF-A6** | `CDVF-CP-06-01` | Evaluates spatial face manipulation and temporal continuity models individually & jointly | `PLANNED` | `CDVF-A3` |
-| **CDVF-47** | Video Spatio-Temporal Metrics | PRD §12.6 | TRD §11.B.6.1 | **CDVF-A6** | `CDVF-CP-06-01` | Reports face track spatial mask IoU and temporal segment tIoU with frame indices | `PLANNED` | `CDVF-A3` |
-| **CDVF-48** | Cross-Dataset Transfer Testing | PRD §12.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Mode B runner evaluates model on $\ge 2$ independent corpora not seen during training | `PLANNED` | `CDVF-A4..A6` |
-| **CDVF-49** | Quantify Transfer Degradation | PRD §12.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Calculates transfer performance drop $\Delta\operatorname{AUC}_{\text{transfer}} = \operatorname{AUC}_{\text{in}} - \operatorname{AUC}_{\text{cross}}$ | `PLANNED` | `CDVF-A7` |
-| **CDVF-50** | Scope Ceiling on Transfer Drop | PRD §12.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Transfer drop $> 15\%$ automatically restricts model operational scope | `PLANNED` | `CDVF-A7` |
-| **CDVF-51** | Held-Out Generator Testing | PRD §12.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Mode C runner tests detection against held-out synthesis foundation models | `PLANNED` | `CDVF-A7` |
-| **CDVF-52** | Composite UG-Score Metric | PRD §12.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Calculates harmonic mean Unseen-Generator Robustness Score ($\operatorname{UG-Score}$) | `PLANNED` | `CDVF-A7` |
-| **CDVF-53** | Unsupported Generator Tag | PRD §12.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Novel generator with balanced accuracy $< 50\%$ tagged `UNSUPPORTED_GENERATOR_FAMILY` | `PLANNED` | `CDVF-A7` |
-| **CDVF-54** | Image Perturbation Grids | PRD §12.6 | TRD §11.B.7, §11.B.12| **CDVF-A7** | `CDVF-CP-07-01` | Evaluates image models under JPEG compression, resizing, blur, and noise | `PLANNED` | `CDVF-A7` |
-| **CDVF-55** | Audio Acoustic Degradation | PRD §12.6 | TRD §11.B.7, §11.B.12| **CDVF-A7** | `CDVF-CP-07-01` | Evaluates audio models under MP3/AAC/Opus lossy codecs, resampling, and noise | `PLANNED` | `CDVF-A7` |
-| **CDVF-56** | Video Transcoding Grids | PRD §12.6 | TRD §11.B.7, §11.B.12| **CDVF-A7** | `CDVF-CP-07-01` | Evaluates video models under H.264/H.265 compression, VFR jitter, and downscaling | `PLANNED` | `CDVF-A7` |
-| **CDVF-57** | Cross-Modal Evidence Correlator| PRD §12.6 | TRD §11.B.8 | **CDVF-A8** | `CDVF-CP-08-01` | `CrossModalCorrelationEngine` correlates multi-modal findings across case exhibits | `PLANNED` | `CDVF-A7` |
-| **CDVF-58** | Correlation Prerequisites | PRD §12.6 | TRD §11.B.8 | **CDVF-A8** | `CDVF-CP-08-01` | Asserts same case, documented relationship, and valid temporal alignment before fusion | `PLANNED` | `CDVF-A7` |
-| **CDVF-59** | Prerequisite Fallback Policy | PRD §12.6 | TRD §11.B.8 | **CDVF-A8** | `CDVF-CP-08-01` | Emits `CORRELATION_NOT_ESTABLISHED` when prerequisites fail; preserves independent findings | `PLANNED` | `CDVF-A7` |
-| **CDVF-60** | Scenario A: Lip-Sync Correlation| PRD §12.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Correlates VISTA lip-sync metrics with AURAS speech VAD without assuming which was altered | `PLANNED` | `CDVF-A7` |
-| **CDVF-61** | Scenario B: Speaker Corroboration| PRD §12.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Correlates speaking faces with audio diarization; face does not imply speaker identity | `PLANNED` | `CDVF-A7` |
-| **CDVF-62** | Scenario C: Image-Video Matching| PRD §12.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Correlates still photo exhibits with video surveillance frames based on facial similarity | `PLANNED` | `CDVF-A7` |
-| **CDVF-63** | Scenario D: AV Event Matching | PRD §12.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Correlates acoustic transients (gunshots, impacts) with video luminance changes via CSTV | `PLANNED` | `CDVF-A7` |
-| **CDVF-64** | Scenario E: Compound Tampering | PRD §12.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Detects compound manipulation (e.g. face swap + cloned voice) as distinct findings | `PLANNED` | `CDVF-A7` |
-| **CDVF-65** | Anti-Averaging DAG Invariant | PRD §12.6 | TRD §11.B.8, §11.B.9 | **CDVF-A9** | `CDVF-CP-09-01` | Prohibits scalar averaging; preserves separate modality nodes in evidence DAG | `PLANNED` | `CDVF-A8` |
-| **CDVF-66** | Missing Modality Neutrality | PRD §12.6 | TRD §11.B.9 | **CDVF-A9** | `CDVF-CP-09-01` | Flags missing media tracks as `MODALITY_ABSENT` without negative detection bias | `PLANNED` | `CDVF-A8` |
-| **CDVF-67** | Mandatory Confidence Calibration| PRD §12.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Calibrates detector raw scores before presenting as probabilities in court dossiers | `PLANNED` | `CDVF-A7` |
-| **CDVF-68** | Isolated Calibration Fitting | PRD §12.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Fits Platt, temperature, and isotonic scaling strictly on isolated calibration split | `PLANNED` | `CDVF-A7` |
-| **CDVF-69** | Zero Test-Set Calibration Leak | PRD §12.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Automated audit confirms calibration parameters never fitted on final test set | `PLANNED` | `CDVF-A7` |
-| **CDVF-70** | Quantify ECE across 15 Bins | PRD §12.6 | TRD §11.B.10.1 | **CDVF-A8** | `CDVF-CP-08-01` | Computes Expected Calibration Error across 15 equal-width bins, Brier score, and NLL | `PLANNED` | `CDVF-A7` |
-| **CDVF-71** | ECE <= 0.05 Calibration Ceiling | PRD §12.6 | TRD §11.B.10.1 | **CDVF-A8** | `CDVF-CP-08-01` | Model must achieve $\operatorname{ECE} \le 0.05$ on calibration split to pass Gate 4 | `PLANNED` | `CDVF-A7` |
-| **CDVF-72** | Visual Reliability Diagrams | PRD §12.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Renders reliability diagram SVG/PNG plotting confidence vs empirical accuracy | `PLANNED` | `CDVF-A7` |
-| **CDVF-73** | Cross-Domain Calibration Drift | PRD §12.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Evaluates calibration stability under dataset shift; documents cross-domain miscalibration | `PLANNED` | `CDVF-A7` |
-| **CDVF-74** | Uncalibrated Score Watermark | PRD §12.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Uncalibrated models trigger mandatory watermark: `CAUTION: UNCALIBRATED DETECTOR` | `PLANNED` | `CDVF-A7` |
-| **CDVF-75** | Out-of-Distribution Gating | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | `OODGatingEngine` computes distance to certified training manifold on embeddings | `PLANNED` | `CDVF-A7` |
-| **CDVF-76** | Multi-Method OOD Scoring | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Implements Mahalanobis distance, free energy, and predictive Shannon entropy | `PLANNED` | `CDVF-A7` |
-| **CDVF-77** | Calibrated OOD Thresholds | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Calibrates $\tau_{\text{OOD}}$ threshold on in-distribution vs synthetic shift validation sets | `PLANNED` | `CDVF-A7` |
-| **CDVF-78** | Standardized 6 OOD States | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Emits `IN_DISTRIBUTION`, `OOD_SUSPECTED`, `OUTSIDE_VALIDATED_SCOPE`, etc. | `PLANNED` | `CDVF-A7` |
-| **CDVF-79** | OOD Non-Tampering Invariant | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Policy linter asserts OOD finding is never cited as affirmative tampering evidence | `PLANNED` | `CDVF-A7` |
-| **CDVF-80** | Mandatory OOD Abstention | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Input exceeding $\tau_{\text{OOD}}$ triggers mandatory abstention with `OUTSIDE_VALIDATED_SCOPE` | `PLANNED` | `CDVF-A7` |
-| **CDVF-81** | OOD AUROC >= 0.85 Performance | PRD §12.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | OOD evaluation must achieve AUROC $\ge 0.85$ on distribution shift evaluation sets | `PLANNED` | `CDVF-A7` |
-| **CDVF-82** | Breakdown Threshold Detection | PRD §12.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Identifies critical quality thresholds where detector accuracy collapses $< 70\%$ | `PLANNED` | `CDVF-A9` |
-| **CDVF-83** | Recompression Robustness Sweeps| PRD §12.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Quantifies image detector degradation under multi-generational lossy recompression | `PLANNED` | `CDVF-A9` |
-| **CDVF-84** | Telephony Codec Robustness | PRD §12.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Quantifies audio detector degradation under AMR-WB, G.711, and cellular transcoding | `PLANNED` | `CDVF-A9` |
-| **CDVF-85** | Video Transcoding Robustness | PRD §12.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Quantifies video detector degradation under frame-rate jitter and bit-rate drops | `PLANNED` | `CDVF-A9` |
-| **CDVF-86** | Adversarial Perturbation Tests | PRD §12.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Evaluates model vulnerability against realistic manipulation-aware perturbations | `PLANNED` | `CDVF-A9` |
-| **CDVF-87** | Quality Breakdown Abstention | PRD §12.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Media falling below certified quality floors automatically receives `INSUFFICIENT_EVIDENCE` | `PLANNED` | `CDVF-A9` |
-| **CDVF-88** | Selective Prediction Framework | PRD §12.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | `SelectivePredictionEngine` allows platform to abstain when evidence is ambiguous | `PLANNED` | `CDVF-A8` |
-| **CDVF-89** | 8 Formal Decision States | PRD §12.6 | TRD §11.B.12 | **CDVF-A9** | `CDVF-CP-09-01` | Enforces 8 mutually exclusive states (`SUSPICIOUS_FINDING` to `PROCESSING_INCOMPLETE`) | `PLANNED` | `CDVF-A8` |
-| **CDVF-90** | Coverage-Risk Trade-Off Curve | PRD §12.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | Evaluates coverage-risk curve; asserts selective risk decreases as coverage is restricted | `PLANNED` | `CDVF-A8` |
-| **CDVF-91** | Task-Specific Decision Floors | PRD §12.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | Rejects arbitrary universal 0.5 threshold; enforces model- and task-specific thresholds | `PLANNED` | `CDVF-A8` |
-| **CDVF-92** | Valid Inconclusive Outcomes | PRD §12.6 | TRD §11.B.12 | **CDVF-A9** | `CDVF-CP-09-01` | Inconclusive outcomes formatted as scientifically valid, neutral legal determinations | `PLANNED` | `CDVF-A8` |
-| **CDVF-93** | 100% Corruption Abstention | PRD §12.6 | TRD §11.B.12 | **CDVF-A9** | `CDVF-CP-09-01` | Abstains on 100% of inputs with extreme corruption, missing modalities, or deadlock | `PLANNED` | `CDVF-A8` |
-| **CDVF-94** | Spatial Localisation Metrics | PRD §12.6 | TRD §11.B.6.1, §11.B.14| **CDVF-A4** | `CDVF-CP-04-01` | Evaluates spatial masks using IoU, Dice coefficient, and mean boundary distance | `PLANNED` | `CDVF-A3` |
-| **CDVF-95** | Temporal Localisation Metrics | PRD §12.6 | TRD §11.B.6.1, §11.B.14| **CDVF-A5** | `CDVF-CP-05-01` | Evaluates temporal intervals using temporal IoU (tIoU) and boundary start/end errors | `PLANNED` | `CDVF-A3` |
-| **CDVF-96** | Inter-Detector Agreement Matrix| PRD §12.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | Computes Fleiss' kappa and Cohen's kappa across paired and multi-model predictions | `PLANNED` | `CDVF-A8` |
-| **CDVF-97** | 7 Conflict Taxonomy Codes | PRD §12.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | Assigns conflicts to `MODALITY_RESULT_CONFLICT`, `DETECTOR_RESULT_CONFLICT`, etc. | `PLANNED` | `CDVF-A8` |
-| **CDVF-98** | Automated Regression Runner | PRD §12.6 | TRD §11.B.14 | **CDVF-A11** | `CDVF-CP-11-01` | Continuous regression runner blocks promotion if $\Delta\operatorname{AUC} < -0.01$ or $\Delta\operatorname{ECE} > +0.01$ | `PLANNED` | `CDVF-A10` |
-| **CDVF-99** | RFC 8785 24-Item WORM Bundle | PRD §12.6 | TRD §11.B.15 | **CDVF-A11** | `CDVF-CP-11-01` | Serializes complete benchmark execution into 24-item canonical JSON bundle in WORM vault | `PLANNED` | `CDVF-A10` |
-| **CDVF-100**| Section 65B/63 BSA Dossier | PRD §12.6 | TRD §11.B.16 | **CDVF-A11** | `CDVF-CP-11-01` | Generates court-ready PDF dossier with reliability diagrams, ROC curves, and examiner sign-off | `PLANNED` | `CDVF-A10` |
+| **CDVF-01** | Shared Validation Architecture | PRD §13.6 | TRD §11.B.1 | **CDVF-A0** | `CDVF-CP-00-01` | Architecture boundary linting confirms single shared validation framework across engines | `PLANNED` | Phase 0 Gate |
+| **CDVF-02** | Preserve Detector Ownership | PRD §13.6 | TRD §11.B.1 | **CDVF-A0** | `CDVF-CP-00-01` | Subsystem routing interfaces enforce image in AIF, audio in AURAS, video in VISTA | `PLANNED` | `CDVF-A0` |
+| **CDVF-03** | CEIPL Custody Integration | PRD §13.6 | TRD §11.B.1, §11.B.15| **CDVF-A0** | `CDVF-CP-00-01` | CEIPL DAG manifest pointers assert pre-execution exhibit SHA-256 and lineage | `PLANNED` | Phase 0 Gate |
+| **CDVF-04** | CMMS Metadata Ingestion | PRD §13.6 | TRD §11.B.1 | **CDVF-A0** | `CDVF-CP-00-01` | Ingests `EvidenceMetadataSnapshot` for camera, codec, and structural context | `PLANNED` | `CMMS-A0` |
+| **CDVF-05** | CSTV Temporal Ingestion | PRD §13.6 | TRD §11.B.1 | **CDVF-A0** | `CDVF-CP-00-01` | Ingests `CrossSourceTimeline` and clock drift $\delta(t)$ for multi-source alignment | `PLANNED` | `CSTV-A0` |
+| **CDVF-06** | UFREDF Legal Reporting | PRD §13.6 | TRD §11.B.1, §11.B.16| **CDVF-A0** | `CDVF-CP-00-01` | Emits validated multi-modal findings into structured Section 63 BSA dossier | `PLANNED` | Phase 0 Gate |
+| **CDVF-07** | Standard Pydantic Contract | PRD §13.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | `DetectorResultContract` schema validates 100% of simulated multi-modal outputs | `PLANNED` | `CDVF-A0` |
+| **CDVF-08** | Explicit Score Semantics | PRD §13.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | Typed `ScoreSemantics` enum strictly distinguishes raw logits from calibrated probabilities | `PLANNED` | `CDVF-A0` |
+| **CDVF-09** | Cryptographic Model Provenance| PRD §13.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | `ModelProvenance` sub-record asserts checkpoint SHA-256 and preprocessing version | `PLANNED` | `CDVF-A0` |
+| **CDVF-10** | Spatial Localisation Contract | PRD §13.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | `SpatialLocalisation` preserves original image pixel coordinates without downsampling distortion | `PLANNED` | `CDVF-A0` |
+| **CDVF-11** | Temporal Localisation Contract| PRD §13.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | `TemporalLocalisation` preserves start/end seconds, sample indices, and video PTS | `PLANNED` | `CDVF-A0` |
+| **CDVF-12** | OOD & Calibration Annotations | PRD §13.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | Typed `OODStatus` and `CalibrationStatus` enums recorded on every generated finding | `PLANNED` | `CDVF-A0` |
+| **CDVF-13** | Activity ID & Limitation Logs | PRD §13.6 | TRD §11.B.2 | **CDVF-A1** | `CDVF-CP-01-01` | Finding retains source exhibit UUID, activity UUID, and immutable limitation list | `PLANNED` | `CDVF-A0` |
+| **CDVF-14** | Centralized Model Registry | PRD §13.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | `ModelRegistryEntry` database models persist model architectures and target tasks | `PLANNED` | `CDVF-A0` |
+| **CDVF-15** | Checkpoint SHA-256 Assertion | PRD §13.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Streaming weight verifier aborts execution on single-bit corrupted checkpoint | `PLANNED` | `CDVF-A0` |
+| **CDVF-16** | Model Card Documentation | PRD §13.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Model card schema stores training datasets, licenses, tensor shapes, and limitations | `PLANNED` | `CDVF-A0` |
+| **CDVF-17** | Unique Validation Identity | PRD §13.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Weight, architecture, or threshold modification generates new versioned UUID | `PLANNED` | `CDVF-A0` |
+| **CDVF-18** | 9-State Model Lifecycle | PRD §13.6 | TRD §11.B.3.1 | **CDVF-A1** | `CDVF-CP-01-01` | State machine enforces valid transitions from `REGISTERED` to `REVOKED` | `PLANNED` | `CDVF-A0` |
+| **CDVF-19** | Ed25519 Promotion Signatures | PRD §13.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Model promotion requires valid Ed25519 signature from Forensic Governance Officer | `PLANNED` | `CDVF-A0` |
+| **CDVF-20** | Scoped Operating Boundaries | PRD §13.6 | TRD §11.B.3 | **CDVF-A1** | `CDVF-CP-01-01` | Out-of-scope deployment triggers `UNVALIDATED_OPERATIONAL_DOMAIN` warning | `PLANNED` | `CDVF-A0` |
+| **CDVF-21** | Structured Dataset Registry | PRD §13.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | `DatasetRecord` database models persist dataset versions, sources, and quality tiers | `PLANNED` | `CDVF-A1` |
+| **CDVF-22** | Comprehensive Dataset Cards | PRD §13.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Dataset card documents sample counts, original vs manipulated splits, and label formats | `PLANNED` | `CDVF-A1` |
+| **CDVF-23** | Dataset Manifest Cryptography | PRD §13.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Manifest SHA-256 verifier confirms dataset file integrity prior to benchmark run | `PLANNED` | `CDVF-A1` |
+| **CDVF-24** | Image Benchmark Support | PRD §13.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Ingests FaceForensics++, Celeb-DF, DFDC, DeeperForensics-1.0, and ForgeryNet | `PLANNED` | `CDVF-A1` |
+| **CDVF-25** | Audio Spoofing Benchmarks | PRD §13.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Ingests ASVspoof 2019/2021, MLAAD, WaveFake, and In-the-Wild audio deepfakes | `PLANNED` | `CDVF-A1` |
+| **CDVF-26** | Decoupled Splice Benchmarks | PRD §13.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Ingests purpose-built audio splice and edit localization corpora separately from spoofing | `PLANNED` | `CDVF-A1` |
+| **CDVF-27** | Audiovisual Benchmark Support | PRD §13.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Ingests multi-modal benchmarks containing verified aligned AV ground truth | `PLANNED` | `CDVF-A1` |
+| **CDVF-28** | License Compatibility Gate | PRD §13.6 | TRD §11.B.4 | **CDVF-A2** | `CDVF-CP-02-01` | Automated license checker rejects corpora incompatible with forensic law enforcement | `PLANNED` | `CDVF-A1` |
+| **CDVF-29** | Group-Aware Data Splitting | PRD §13.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | `GroupKFold` split engine partitions media at speaker, actor, and video group levels | `PLANNED` | `CDVF-A1` |
+| **CDVF-30** | Speaker-Disjoint Audio Splits | PRD §13.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Speaker key partitioner guarantees zero speaker overlap ($\mathcal{S}_{\text{train}} \cap \mathcal{S}_{\text{test}} = \emptyset$) | `PLANNED` | `CDVF-A1` |
+| **CDVF-31** | Subject-Disjoint Face Splits | PRD §13.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Actor key partitioner guarantees zero subject overlap ($\mathcal{I}_{\text{train}} \cap \mathcal{I}_{\text{test}} = \emptyset$) | `PLANNED` | `CDVF-A1` |
+| **CDVF-32** | Video-Disjoint Splits | PRD §13.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Root video ID partitioner guarantees zero video overlap ($\mathcal{V}_{\text{train}} \cap \mathcal{V}_{\text{test}} = \emptyset$) | `PLANNED` | `CDVF-A1` |
+| **CDVF-33** | Mathematical Leakage Audit | PRD §13.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Intersection auditor terminates execution with `LEAKAGE_DETECTED` on shared keys | `PLANNED` | `CDVF-A1` |
+| **CDVF-34** | 4-Way Disjoint Partitions | PRD §13.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Split manager establishes completely isolated Train, Calib, Val, and Test partitions | `PLANNED` | `CDVF-A1` |
+| **CDVF-35** | Generator-Disjoint Splits | PRD §13.6 | TRD §11.B.5 | **CDVF-A2** | `CDVF-CP-02-01` | Generator partitioner holds out entire synthesis algorithms (e.g. Diffusion vs GAN) | `PLANNED` | `CDVF-A1` |
+| **CDVF-36** | 10 Evaluation Tracks | PRD §13.6 | TRD §11.B.5.1 | **CDVF-A2** | `CDVF-CP-02-01` | Benchmark runner executes 10 tracks (In-Domain, Cross-Dataset, Cross-Codec, etc.) | `PLANNED` | `CDVF-A1` |
+| **CDVF-37** | Independent Subsystem Testing | PRD §13.6 | TRD §11.B.6 | **CDVF-A3** | `CDVF-CP-03-01` | Multi-modal runner evaluates each subsystem independently prior to cross-modal fusion | `PLANNED` | `CDVF-A2` |
+| **CDVF-38** | Decoupled Image Classification| PRD §13.6 | TRD §11.B.6 | **CDVF-A4** | `CDVF-CP-04-01` | Evaluates synthetic image and face-swap classification separately from localisation | `PLANNED` | `CDVF-A3` |
+| **CDVF-39** | Image Localisation Metrics | PRD §13.6 | TRD §11.B.6.1 | **CDVF-A4** | `CDVF-CP-04-01` | Reports pixel-level IoU, Dice coefficient, and Boundary F1 against ground truth | `PLANNED` | `CDVF-A3` |
+| **CDVF-40** | Comprehensive Image Metrics | PRD §13.6 | TRD §11.B.6.1 | **CDVF-A4** | `CDVF-CP-04-01` | Reports Precision, Recall, F1, Specificity, Balanced Accuracy, and ROC-AUC | `PLANNED` | `CDVF-A3` |
+| **CDVF-41** | Decoupled Audio Spoof/Splice | PRD §13.6 | TRD §11.B.6 | **CDVF-A5** | `CDVF-CP-05-01` | Evaluates ADDE voice cloning and ARE splice localisation as distinct tasks | `PLANNED` | `CDVF-A3` |
+| **CDVF-42** | Audio Spoofing Metrics | PRD §13.6 | TRD §11.B.6.1 | **CDVF-A5** | `CDVF-CP-05-01` | Reports Equal Error Rate (EER), minimum Detection Cost Function (minDCF), and AUC | `PLANNED` | `CDVF-A3` |
+| **CDVF-43** | Audio Edit Localisation Metrics| PRD §13.6 | TRD §11.B.6.1 | **CDVF-A5** | `CDVF-CP-05-01` | Reports temporal IoU, boundary start/end error (ms), and false alarms per hour | `PLANNED` | `CDVF-A3` |
+| **CDVF-44** | Decoupled Video/Frame Metrics | PRD §13.6 | TRD §11.B.6 | **CDVF-A6** | `CDVF-CP-06-01` | Reports video-level ROC-AUC and frame-level AUC as independent metrics | `PLANNED` | `CDVF-A3` |
+| **CDVF-45** | Correct Correlated Frame Bias | PRD §13.6 | TRD §11.B.6 | **CDVF-A6** | `CDVF-CP-06-01` | Cluster bootstrap aggregates temporally adjacent frames to prevent statistical inflation | `PLANNED` | `CDVF-A3` |
+| **CDVF-46** | Individual/Joint VISTA Heads | PRD §13.6 | TRD §11.B.6 | **CDVF-A6** | `CDVF-CP-06-01` | Evaluates spatial face manipulation and temporal continuity models individually & jointly | `PLANNED` | `CDVF-A3` |
+| **CDVF-47** | Video Spatio-Temporal Metrics | PRD §13.6 | TRD §11.B.6.1 | **CDVF-A6** | `CDVF-CP-06-01` | Reports face track spatial mask IoU and temporal segment tIoU with frame indices | `PLANNED` | `CDVF-A3` |
+| **CDVF-48** | Cross-Dataset Transfer Testing | PRD §13.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Mode B runner evaluates model on $\ge 2$ independent corpora not seen during training | `PLANNED` | `CDVF-A4..A6` |
+| **CDVF-49** | Quantify Transfer Degradation | PRD §13.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Calculates transfer performance drop $\Delta\operatorname{AUC}_{\text{transfer}} = \operatorname{AUC}_{\text{in}} - \operatorname{AUC}_{\text{cross}}$ | `PLANNED` | `CDVF-A7` |
+| **CDVF-50** | Scope Ceiling on Transfer Drop | PRD §13.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Transfer drop $> 15\%$ automatically restricts model operational scope | `PLANNED` | `CDVF-A7` |
+| **CDVF-51** | Held-Out Generator Testing | PRD §13.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Mode C runner tests detection against held-out synthesis foundation models | `PLANNED` | `CDVF-A7` |
+| **CDVF-52** | Composite UG-Score Metric | PRD §13.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Calculates harmonic mean Unseen-Generator Robustness Score ($\operatorname{UG-Score}$) | `PLANNED` | `CDVF-A7` |
+| **CDVF-53** | Unsupported Generator Tag | PRD §13.6 | TRD §11.B.7 | **CDVF-A7** | `CDVF-CP-07-01` | Novel generator with balanced accuracy $< 50\%$ tagged `UNSUPPORTED_GENERATOR_FAMILY` | `PLANNED` | `CDVF-A7` |
+| **CDVF-54** | Image Perturbation Grids | PRD §13.6 | TRD §11.B.7, §11.B.12| **CDVF-A7** | `CDVF-CP-07-01` | Evaluates image models under JPEG compression, resizing, blur, and noise | `PLANNED` | `CDVF-A7` |
+| **CDVF-55** | Audio Acoustic Degradation | PRD §13.6 | TRD §11.B.7, §11.B.12| **CDVF-A7** | `CDVF-CP-07-01` | Evaluates audio models under MP3/AAC/Opus lossy codecs, resampling, and noise | `PLANNED` | `CDVF-A7` |
+| **CDVF-56** | Video Transcoding Grids | PRD §13.6 | TRD §11.B.7, §11.B.12| **CDVF-A7** | `CDVF-CP-07-01` | Evaluates video models under H.264/H.265 compression, VFR jitter, and downscaling | `PLANNED` | `CDVF-A7` |
+| **CDVF-57** | Cross-Modal Evidence Correlator| PRD §13.6 | TRD §11.B.8 | **CDVF-A8** | `CDVF-CP-08-01` | `CrossModalCorrelationEngine` correlates multi-modal findings across case exhibits | `PLANNED` | `CDVF-A7` |
+| **CDVF-58** | Correlation Prerequisites | PRD §13.6 | TRD §11.B.8 | **CDVF-A8** | `CDVF-CP-08-01` | Asserts same case, documented relationship, and valid temporal alignment before fusion | `PLANNED` | `CDVF-A7` |
+| **CDVF-59** | Prerequisite Fallback Policy | PRD §13.6 | TRD §11.B.8 | **CDVF-A8** | `CDVF-CP-08-01` | Emits `CORRELATION_NOT_ESTABLISHED` when prerequisites fail; preserves independent findings | `PLANNED` | `CDVF-A7` |
+| **CDVF-60** | Scenario A: Lip-Sync Correlation| PRD §13.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Correlates VISTA lip-sync metrics with AURAS speech VAD without assuming which was altered | `PLANNED` | `CDVF-A7` |
+| **CDVF-61** | Scenario B: Speaker Corroboration| PRD §13.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Correlates speaking faces with audio diarization; face does not imply speaker identity | `PLANNED` | `CDVF-A7` |
+| **CDVF-62** | Scenario C: Image-Video Matching| PRD §13.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Correlates still photo exhibits with video surveillance frames based on facial similarity | `PLANNED` | `CDVF-A7` |
+| **CDVF-63** | Scenario D: AV Event Matching | PRD §13.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Correlates acoustic transients (gunshots, impacts) with video luminance changes via CSTV | `PLANNED` | `CDVF-A7` |
+| **CDVF-64** | Scenario E: Compound Tampering | PRD §13.6 | TRD §11.B.8.1 | **CDVF-A8** | `CDVF-CP-08-01` | Detects compound manipulation (e.g. face swap + cloned voice) as distinct findings | `PLANNED` | `CDVF-A7` |
+| **CDVF-65** | Anti-Averaging DAG Invariant | PRD §13.6 | TRD §11.B.8, §11.B.9 | **CDVF-A9** | `CDVF-CP-09-01` | Prohibits scalar averaging; preserves separate modality nodes in evidence DAG | `PLANNED` | `CDVF-A8` |
+| **CDVF-66** | Missing Modality Neutrality | PRD §13.6 | TRD §11.B.9 | **CDVF-A9** | `CDVF-CP-09-01` | Flags missing media tracks as `MODALITY_ABSENT` without negative detection bias | `PLANNED` | `CDVF-A8` |
+| **CDVF-67** | Mandatory Confidence Calibration| PRD §13.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Calibrates detector raw scores before presenting as probabilities in court dossiers | `PLANNED` | `CDVF-A7` |
+| **CDVF-68** | Isolated Calibration Fitting | PRD §13.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Fits Platt, temperature, and isotonic scaling strictly on isolated calibration split | `PLANNED` | `CDVF-A7` |
+| **CDVF-69** | Zero Test-Set Calibration Leak | PRD §13.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Automated audit confirms calibration parameters never fitted on final test set | `PLANNED` | `CDVF-A7` |
+| **CDVF-70** | Quantify ECE across 15 Bins | PRD §13.6 | TRD §11.B.10.1 | **CDVF-A8** | `CDVF-CP-08-01` | Computes Expected Calibration Error across 15 equal-width bins, Brier score, and NLL | `PLANNED` | `CDVF-A7` |
+| **CDVF-71** | ECE <= 0.05 Calibration Ceiling | PRD §13.6 | TRD §11.B.10.1 | **CDVF-A8** | `CDVF-CP-08-01` | Model must achieve $\operatorname{ECE} \le 0.05$ on calibration split to pass Gate 4 | `PLANNED` | `CDVF-A7` |
+| **CDVF-72** | Visual Reliability Diagrams | PRD §13.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Renders reliability diagram SVG/PNG plotting confidence vs empirical accuracy | `PLANNED` | `CDVF-A7` |
+| **CDVF-73** | Cross-Domain Calibration Drift | PRD §13.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Evaluates calibration stability under dataset shift; documents cross-domain miscalibration | `PLANNED` | `CDVF-A7` |
+| **CDVF-74** | Uncalibrated Score Watermark | PRD §13.6 | TRD §11.B.10 | **CDVF-A8** | `CDVF-CP-08-01` | Uncalibrated models trigger mandatory watermark: `CAUTION: UNCALIBRATED DETECTOR` | `PLANNED` | `CDVF-A7` |
+| **CDVF-75** | Out-of-Distribution Gating | PRD §13.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | `OODGatingEngine` computes distance to certified training manifold on embeddings | `PLANNED` | `CDVF-A7` |
+| **CDVF-76** | Multi-Method OOD Scoring | PRD §13.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Implements Mahalanobis distance, free energy, and predictive Shannon entropy | `PLANNED` | `CDVF-A7` |
+| **CDVF-77** | Calibrated OOD Thresholds | PRD §13.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Calibrates $\tau_{\text{OOD}}$ threshold on in-distribution vs synthetic shift validation sets | `PLANNED` | `CDVF-A7` |
+| **CDVF-78** | Standardized 6 OOD States | PRD §13.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Emits `IN_DISTRIBUTION`, `OOD_SUSPECTED`, `OUTSIDE_VALIDATED_SCOPE`, etc. | `PLANNED` | `CDVF-A7` |
+| **CDVF-79** | OOD Non-Tampering Invariant | PRD §13.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Policy linter asserts OOD finding is never cited as affirmative tampering evidence | `PLANNED` | `CDVF-A7` |
+| **CDVF-80** | Mandatory OOD Abstention | PRD §13.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | Input exceeding $\tau_{\text{OOD}}$ triggers mandatory abstention with `OUTSIDE_VALIDATED_SCOPE` | `PLANNED` | `CDVF-A7` |
+| **CDVF-81** | OOD AUROC >= 0.85 Performance | PRD §13.6 | TRD §11.B.11 | **CDVF-A8** | `CDVF-CP-08-01` | OOD evaluation must achieve AUROC $\ge 0.85$ on distribution shift evaluation sets | `PLANNED` | `CDVF-A7` |
+| **CDVF-82** | Breakdown Threshold Detection | PRD §13.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Identifies critical quality thresholds where detector accuracy collapses $< 70\%$ | `PLANNED` | `CDVF-A9` |
+| **CDVF-83** | Recompression Robustness Sweeps| PRD §13.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Quantifies image detector degradation under multi-generational lossy recompression | `PLANNED` | `CDVF-A9` |
+| **CDVF-84** | Telephony Codec Robustness | PRD §13.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Quantifies audio detector degradation under AMR-WB, G.711, and cellular transcoding | `PLANNED` | `CDVF-A9` |
+| **CDVF-85** | Video Transcoding Robustness | PRD §13.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Quantifies video detector degradation under frame-rate jitter and bit-rate drops | `PLANNED` | `CDVF-A9` |
+| **CDVF-86** | Adversarial Perturbation Tests | PRD §13.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Evaluates model vulnerability against realistic manipulation-aware perturbations | `PLANNED` | `CDVF-A9` |
+| **CDVF-87** | Quality Breakdown Abstention | PRD §13.6 | TRD §11.B.12 | **CDVF-A10** | `CDVF-CP-10-01` | Media falling below certified quality floors automatically receives `INSUFFICIENT_EVIDENCE` | `PLANNED` | `CDVF-A9` |
+| **CDVF-88** | Selective Prediction Framework | PRD §13.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | `SelectivePredictionEngine` allows platform to abstain when evidence is ambiguous | `PLANNED` | `CDVF-A8` |
+| **CDVF-89** | 8 Formal Decision States | PRD §13.6 | TRD §11.B.12 | **CDVF-A9** | `CDVF-CP-09-01` | Enforces 8 mutually exclusive states (`SUSPICIOUS_FINDING` to `PROCESSING_INCOMPLETE`) | `PLANNED` | `CDVF-A8` |
+| **CDVF-90** | Coverage-Risk Trade-Off Curve | PRD §13.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | Evaluates coverage-risk curve; asserts selective risk decreases as coverage is restricted | `PLANNED` | `CDVF-A8` |
+| **CDVF-91** | Task-Specific Decision Floors | PRD §13.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | Rejects arbitrary universal 0.5 threshold; enforces model- and task-specific thresholds | `PLANNED` | `CDVF-A8` |
+| **CDVF-92** | Valid Inconclusive Outcomes | PRD §13.6 | TRD §11.B.12 | **CDVF-A9** | `CDVF-CP-09-01` | Inconclusive outcomes formatted as scientifically valid, neutral legal determinations | `PLANNED` | `CDVF-A8` |
+| **CDVF-93** | 100% Corruption Abstention | PRD §13.6 | TRD §11.B.12 | **CDVF-A9** | `CDVF-CP-09-01` | Abstains on 100% of inputs with extreme corruption, missing modalities, or deadlock | `PLANNED` | `CDVF-A8` |
+| **CDVF-94** | Spatial Localisation Metrics | PRD §13.6 | TRD §11.B.6.1, §11.B.14| **CDVF-A4** | `CDVF-CP-04-01` | Evaluates spatial masks using IoU, Dice coefficient, and mean boundary distance | `PLANNED` | `CDVF-A3` |
+| **CDVF-95** | Temporal Localisation Metrics | PRD §13.6 | TRD §11.B.6.1, §11.B.14| **CDVF-A5** | `CDVF-CP-05-01` | Evaluates temporal intervals using temporal IoU (tIoU) and boundary start/end errors | `PLANNED` | `CDVF-A3` |
+| **CDVF-96** | Inter-Detector Agreement Matrix| PRD §13.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | Computes Fleiss' kappa and Cohen's kappa across paired and multi-model predictions | `PLANNED` | `CDVF-A8` |
+| **CDVF-97** | 7 Conflict Taxonomy Codes | PRD §13.6 | TRD §11.B.13 | **CDVF-A9** | `CDVF-CP-09-01` | Assigns conflicts to `MODALITY_RESULT_CONFLICT`, `DETECTOR_RESULT_CONFLICT`, etc. | `PLANNED` | `CDVF-A8` |
+| **CDVF-98** | Automated Regression Runner | PRD §13.6 | TRD §11.B.14 | **CDVF-A11** | `CDVF-CP-11-01` | Continuous regression runner blocks promotion if $\Delta\operatorname{AUC} < -0.01$ or $\Delta\operatorname{ECE} > +0.01$ | `PLANNED` | `CDVF-A10` |
+| **CDVF-99** | RFC 8785 24-Item WORM Bundle | PRD §13.6 | TRD §11.B.15 | **CDVF-A11** | `CDVF-CP-11-01` | Serializes complete benchmark execution into 24-item canonical JSON bundle in WORM vault | `PLANNED` | `CDVF-A10` |
+| **CDVF-100**| Section 65B/63 BSA Dossier | PRD §13.6 | TRD §11.B.16 | **CDVF-A11** | `CDVF-CP-11-01` | Generates structured PDF dossier with reliability diagrams, ROC curves, and examiner sign-off | `PLANNED` | `CDVF-A10` |
 ## 12. IMLF Master Requirement Traceability Matrix (IML-01 through IML-22)
 
 The following master traceability matrix maps every canonical Image Manipulation Localisation Framework requirement (`IML-01` through `IML-22`) to its authoritative specification in `PRD.md`, its technical contract in `TRD.md`, its designated implementation phase in `PHASES.md`, its primary verification checkpoint, and the mandatory empirical evidence required for approval:
 
 | Requirement ID | Functional Requirement Summary | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Verification Evidence |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **IML-01** | Unified Localisation Architecture & Router | PRD §13.2, §13.13 | TRD §10.11.1, §10.11.15 | **AIF-IML-00** | `AIF-IML-CP-00-01` | Architecture baseline, engine routing contracts, zero memory leaks. |
-| **IML-02** | Copy-Move Forgery Localisation | PRD §13.3, §13.13 | TRD §10.11.4 | **AIF-IML-01** | `AIF-IML-CP-01-01` | SIFT/RANSAC homography, inlier count $\ge 12$, COVERAGE benchmark. |
-| **IML-03** | Image Splicing & Compositing Localisation | PRD §13.3, §13.13 | TRD §10.11.5 | **AIF-IML-02** | `AIF-IML-CP-02-01` | Noise residual variance map, boundary gradient seams, Columbia dataset. |
-| **IML-04** | Object Removal & Inpainting Localisation | PRD §13.3, §13.13 | TRD §10.11.6 | **AIF-IML-04** | `AIF-IML-CP-04-01` | Deep inpainting heads, spectral rolloff, DEFACTO inpainting test set. |
-| **IML-05** | AI-Generated Regional Manipulation Localisation | PRD §13.3, §13.13 | TRD §10.11.6 | **AIF-IML-04** | `AIF-IML-CP-04-02` | TruFor RGB+noiseprint, unlocalised manipulation fallback. |
-| **IML-06** | Face & Portrait Manipulation Localisation | PRD §13.3, §13.13 | TRD §10.11.7 | **AIF-IML-05** | `AIF-IML-CP-05-01` | RetinaFace 68 landmarks, facial perimeter seam ribbon analysis. |
-| **IML-07** | Compression & Resampling Inconsistency | PRD §13.3, §13.13 | TRD §10.11.5, §10.11.6 | **AIF-IML-02** | `AIF-IML-CP-02-02` | ELA error map, DCT $8\times 8$ grid shift, CAT-Net compression stream. |
-| **IML-08** | Sensor Noise & PRNU Inconsistency | PRD §13.3, §13.13 | TRD §10.11.5 | **AIF-IML-02** | `AIF-IML-CP-02-03` | Camera PRNU correlation, Peak-to-Correlation Energy $\text{PCE} < 15$. |
-| **IML-09** | Multi-Scale Tiling & Inverse Mapping | PRD §13.6, §13.13 | TRD §10.11.8 | **AIF-IML-06** | `AIF-IML-CP-06-01` | $1024\text{ px}$ tiles, 25% overlap, inverse affine matrix $H^{-1}$ mapping. |
-| **IML-10** | Unified Mask, Polygon & Region Contract | PRD §13.5, §13.13 | TRD §10.11.10, §12.4 | **AIF-IML-00** | `AIF-IML-CP-00-02` | Pydantic v2 schemas pass bidirectional JSON round-trip validation. |
-| **IML-11** | Canonical Coordinate Normalisation | PRD §13.6, §13.13 | TRD §10.11.9 | **AIF-IML-00** | `AIF-IML-CP-00-03` | Top-left $(0,0)$, half-open intervals, normalized floats $[0, 1]$. |
-| **IML-12** | Confidence, Reliability & Uncertainty | PRD §13.7, §13.13 | TRD §10.11.1, §10.11.10 | **AIF-IML-07** | `AIF-IML-CP-07-01` | Distinct probability $P$, anomaly $A$, and reliability $R$ maps. |
-| **IML-13** | Multi-Detector Evidence Fusion & Conflict Handling | PRD §13.8, §13.13 | TRD §10.11.11 | **AIF-IML-07** | `AIF-IML-CP-07-02` | Pairwise IoU clustering, anti-averaging invariant, conflict logs. |
-| **IML-14** | Forensic Examiner Review Workbench | PRD §13.12, §13.13 | TRD §10.11.1 | **AIF-IML-09** | `AIF-IML-CP-09-01` | Multi-layer canvas, threshold sliders, examiner disposition tags. |
-| **IML-15** | Ground-Truth Dataset Management & Provenance | PRD §13.10, §13.13 | TRD §10.11.13 | **AIF-IML-08** | `AIF-IML-CP-08-01` | Zero-leakage source-scene partitioning ($\mathcal{G} \cap \mathcal{G}' = \emptyset$). |
-| **IML-16** | Pixel-Level Localisation Evaluation | PRD §13.13 | TRD §10.11.12 | **AIF-IML-08** | `AIF-IML-CP-08-02` | Pixel IoU, Dice, MCC, boundary F1 with zero-denominator safety. |
-| **IML-17** | Independent Image-Level Detection Evaluation | PRD §13.2, §13.13 | TRD §10.11.13 | **AIF-IML-08** | `AIF-IML-CP-08-03` | Image ROC-AUC and CDR @ 0.01 FAR evaluated independently from IoU. |
-| **IML-18** | Cross-Dataset & Unseen-Manipulation Benchmarking | PRD §13.10, §13.13 | TRD §10.11.13 | **AIF-IML-08** | `AIF-IML-CP-08-04` | Cross-corpus transfer $\Delta\operatorname{IoU}$, unseen tool degradation. |
-| **IML-19** | Robustness Sweeps & Repeated-Texture Controls | PRD §13.11, §13.13 | TRD §10.11.4, §10.11.14 | **AIF-IML-01** | `AIF-IML-CP-01-02` | 14-condition degradation sweep; false alarms $\le 0.05$ on textures. |
-| **IML-20** | First-Class Abstention & Inconclusive Outcomes | PRD §13.9, §13.13 | TRD §10.11.1 | **AIF-IML-07** | `AIF-IML-CP-07-03` | Emits `INCONCLUSIVE_LOW_QUALITY` on SNR $< 6\text{ dB}$, size $< 256\text{ px}$. |
-| **IML-21** | Evidentiary Lineage & Section 65B/63 BSA Traceability | PRD §13.4, §13.13 | TRD §10.11.1, §10.11.10 | **AIF-IML-09** | `AIF-IML-CP-09-02` | Section 63 BSA certified PDF with SHA-256 and vector overlays. |
-| **IML-22** | Security Safeguards, Resource Ceilings & Reproducibility | PRD §13.14, §13.13 | TRD §10.11.15 | **AIF-IML-10** | `AIF-IML-CP-10-01` | 100 MP decompression bomb defense, 16 GB RAM ceiling, 300s timeout. |
+| **IML-01** | Unified Localisation Architecture & Router | PRD §14.2, §13.13 | TRD §10.11.1, §10.11.15 | **AIF-IML-00** | `AIF-IML-CP-00-01` | Architecture baseline, engine routing contracts, zero memory leaks. |
+| **IML-02** | Copy-Move Forgery Localisation | PRD §14.3, §13.13 | TRD §10.11.4 | **AIF-IML-01** | `AIF-IML-CP-01-01` | SIFT/RANSAC homography, inlier count $\ge 12$, COVERAGE benchmark. |
+| **IML-03** | Image Splicing & Compositing Localisation | PRD §14.3, §13.13 | TRD §10.11.5 | **AIF-IML-02** | `AIF-IML-CP-02-01` | Noise residual variance map, boundary gradient seams, Columbia dataset. |
+| **IML-04** | Object Removal & Inpainting Localisation | PRD §14.3, §13.13 | TRD §10.11.6 | **AIF-IML-04** | `AIF-IML-CP-04-01` | Deep inpainting heads, spectral rolloff, DEFACTO inpainting test set. |
+| **IML-05** | AI-Generated Regional Manipulation Localisation | PRD §14.3, §13.13 | TRD §10.11.6 | **AIF-IML-04** | `AIF-IML-CP-04-02` | TruFor RGB+noiseprint, unlocalised manipulation fallback. |
+| **IML-06** | Face & Portrait Manipulation Localisation | PRD §14.3, §13.13 | TRD §10.11.7 | **AIF-IML-05** | `AIF-IML-CP-05-01` | RetinaFace 68 landmarks, facial perimeter seam ribbon analysis. |
+| **IML-07** | Compression & Resampling Inconsistency | PRD §14.3, §13.13 | TRD §10.11.5, §10.11.6 | **AIF-IML-02** | `AIF-IML-CP-02-02` | ELA error map, DCT $8\times 8$ grid shift, CAT-Net compression stream. |
+| **IML-08** | Sensor Noise & PRNU Inconsistency | PRD §14.3, §13.13 | TRD §10.11.5 | **AIF-IML-02** | `AIF-IML-CP-02-03` | Camera PRNU correlation, Peak-to-Correlation Energy $\text{PCE} < 15$. |
+| **IML-09** | Multi-Scale Tiling & Inverse Mapping | PRD §14.6, §13.13 | TRD §10.11.8 | **AIF-IML-06** | `AIF-IML-CP-06-01` | $1024\text{ px}$ tiles, 25% overlap, inverse affine matrix $H^{-1}$ mapping. |
+| **IML-10** | Unified Mask, Polygon & Region Contract | PRD §14.5, §13.13 | TRD §10.11.10, §12.4 | **AIF-IML-00** | `AIF-IML-CP-00-02` | Pydantic v2 schemas pass bidirectional JSON round-trip validation. |
+| **IML-11** | Canonical Coordinate Normalisation | PRD §14.6, §13.13 | TRD §10.11.9 | **AIF-IML-00** | `AIF-IML-CP-00-03` | Top-left $(0,0)$, half-open intervals, normalized floats $[0, 1]$. |
+| **IML-12** | Confidence, Reliability & Uncertainty | PRD §14.7, §13.13 | TRD §10.11.1, §10.11.10 | **AIF-IML-07** | `AIF-IML-CP-07-01` | Distinct probability $P$, anomaly $A$, and reliability $R$ maps. |
+| **IML-13** | Multi-Detector Evidence Fusion & Conflict Handling | PRD §14.8, §13.13 | TRD §10.11.11 | **AIF-IML-07** | `AIF-IML-CP-07-02` | Pairwise IoU clustering, anti-averaging invariant, conflict logs. |
+| **IML-14** | Forensic Examiner Review Workbench | PRD §14.12, §13.13 | TRD §10.11.1 | **AIF-IML-09** | `AIF-IML-CP-09-01` | Multi-layer canvas, threshold sliders, examiner disposition tags. |
+| **IML-15** | Ground-Truth Dataset Management & Provenance | PRD §14.10, §13.13 | TRD §10.11.13 | **AIF-IML-08** | `AIF-IML-CP-08-01` | Zero-leakage source-scene partitioning ($\mathcal{G} \cap \mathcal{G}' = \emptyset$). |
+| **IML-16** | Pixel-Level Localisation Evaluation | PRD §14.13 | TRD §10.11.12 | **AIF-IML-08** | `AIF-IML-CP-08-02` | Pixel IoU, Dice, MCC, boundary F1 with zero-denominator safety. |
+| **IML-17** | Independent Image-Level Detection Evaluation | PRD §14.2, §13.13 | TRD §10.11.13 | **AIF-IML-08** | `AIF-IML-CP-08-03` | Image ROC-AUC and CDR @ 0.01 FAR evaluated independently from IoU. |
+| **IML-18** | Cross-Dataset & Unseen-Manipulation Benchmarking | PRD §14.10, §13.13 | TRD §10.11.13 | **AIF-IML-08** | `AIF-IML-CP-08-04` | Cross-corpus transfer $\Delta\operatorname{IoU}$, unseen tool degradation. |
+| **IML-19** | Robustness Sweeps & Repeated-Texture Controls | PRD §14.11, §13.13 | TRD §10.11.4, §10.11.14 | **AIF-IML-01** | `AIF-IML-CP-01-02` | 14-condition degradation sweep; false alarms $\le 0.05$ on textures. |
+| **IML-20** | First-Class Abstention & Inconclusive Outcomes | PRD §14.9, §13.13 | TRD §10.11.1 | **AIF-IML-07** | `AIF-IML-CP-07-03` | Emits `INCONCLUSIVE_LOW_QUALITY` on SNR $< 6\text{ dB}$, size $< 256\text{ px}$. |
+| **IML-21** | Evidentiary Lineage & Section 65B/63 BSA Traceability | PRD §14.4, §13.13 | TRD §10.11.1, §10.11.10 | **AIF-IML-09** | `AIF-IML-CP-09-02` | Section 63 BSA certified PDF with SHA-256 and vector overlays. |
+| **IML-22** | Security Safeguards, Resource Ceilings & Reproducibility | PRD §14.14, §13.13 | TRD §10.11.15 | **AIF-IML-10** | `AIF-IML-CP-10-01` | 100 MP decompression bomb defense, 16 GB RAM ceiling, 300s timeout. |
 
 ---
 
@@ -5794,28 +5794,28 @@ Every CCTV Frame Integrity and Temporal Sequence Forensics requirement (`CFI-01`
 
 | Req ID | Requirement Title | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Validation Evidence | Status | Dependencies / Blockers |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **CFI-01** | Frame & Packet Identity Tracking | PRD §14.3, §14.12 | TRD §11.12.2 | **VISTA-CFI-01** | `VISTA-CFI-CP-01-01` | Unit test verifies 5 independent coordinate indices across 1,000 frames | `PLANNED` | `VISTA-CFI-00` |
-| **CFI-02** | Timestamp & Timebase Inspection | PRD §14.3, §14.12 | TRD §11.12.4 | **VISTA-CFI-01** | `VISTA-CFI-CP-01-02` | Zero rounding error in rational timebase math ($t_i = PTS_i \imes TB$) | `PLANNED` | `VISTA-CFI-00` |
-| **CFI-03** | Variable-Frame-Rate Cadence Analysis | PRD §14.7, §14.12 | TRD §11.12.5 | **VISTA-CFI-02** | `VISTA-CFI-CP-02-04` | Suppresses false alarms on authentic VFR streams ($z_i \le 3.5\imes MAD$) | `PLANNED` | `VISTA-CFI-01` |
-| **CFI-04** | Missing-Frame Candidate Detection | PRD §14.4.1, §14.12 | TRD §11.12.6 | **VISTA-CFI-04** | `VISTA-CFI-CP-04-01` | Detects 1, 5, 30-frame deletions; differentiates Mode A–D evidence | `PLANNED` | `VISTA-CFI-02` |
-| **CFI-05** | Duplicate-Frame Detection | PRD §14.4.2, §14.12 | TRD §11.12.7 | **VISTA-CFI-03** | `VISTA-CFI-CP-03-01` | BLAKE3 exact hash and pHash Hamming distance detect cloned loops | `PLANNED` | `VISTA-CFI-02` |
-| **CFI-06** | Inserted-Frame Candidate Detection | PRD §14.4.3, §14.12 | TRD §11.12.8 | **VISTA-CFI-04** | `VISTA-CFI-CP-04-04` | Optical warping residual $R_i$ flags AI-interpolated and spliced frames | `PLANNED` | `VISTA-CFI-03` |
-| **CFI-07** | Frozen-Sequence Detection | PRD §14.4.4, §14.12 | TRD §11.12.9 | **VISTA-CFI-03** | `VISTA-CFI-CP-03-04` | Detects freeze $\ge 1.0\text{s}$; audits audio power and OSD clock advance | `PLANNED` | `VISTA-CFI-02` |
-| **CFI-08** | Reordered-Frame Candidate Detection | PRD §14.4.5, §14.12 | TRD §11.12.10 | **VISTA-CFI-05** | `VISTA-CFI-CP-05-01` | Presentation order PTS monotonicity and ByteTrack trajectory kinematics | `PLANNED` | `VISTA-CFI-04` |
-| **CFI-09** | Motion-Continuity Analysis | PRD §14.7, §14.12 | TRD §11.12.11 | **VISTA-CFI-05** | `VISTA-CFI-CP-05-02` | Dense optical flow warping residual and trajectory momentum continuity | `PLANNED` | `VISTA-CFI-04` |
-| **CFI-10** | Codec, GOP & Bitstream Correlation | PRD §14.8, §14.12 | TRD §11.12.12 | **VISTA-CFI-06** | `VISTA-CFI-CP-06-01` | Flags truncated GOP, non-cadence I-frames, and macroblock QP pulsing | `PLANNED` | `VISTA-CFI-05` |
-| **CFI-11** | CCTV Clock & OCR Timestamp Correlation | PRD §14.9, §14.12 | TRD §11.12.13 | **VISTA-CFI-06** | `VISTA-CFI-CP-06-03` | PaddleOCR drift regression $\delta(t)$ detects $\ge 1.0\text{s}$ OSD step jumps | `PLANNED` | `VISTA-CFI-05` |
-| **CFI-12** | Recorder & Export Evidence Integration | PRD §14.9, §14.12 | TRD §11.12.12 | **VISTA-CFI-06** | `VISTA-CFI-CP-06-04` | Parses companion DVR export XML/JSON logs without DVR login | `PLANNED` | `VISTA-CFI-05` |
-| **CFI-13** | Cross-Camera Timeline Comparison | PRD §14.9, §14.12 | TRD §11.12.14 | **VISTA-CFI-07** | `VISTA-CFI-CP-07-02` | Aligns multi-camera feeds onto UTC; flags 15s secondary coverage gap | `PLANNED` | `VISTA-CFI-06` |
-| **CFI-14** | Audio-Video Timeline Correlation | PRD §14.10, §14.12 | TRD §11.12.15 | **VISTA-CFI-07** | `VISTA-CFI-CP-07-03` | AFB audio power and AVSC SyncNet lip-sync verify freeze continuity | `PLANNED` | `VISTA-CFI-06` |
-| **CFI-15** | Frame-Range Localisation & Reporting | PRD §14.6, §14.12 | TRD §11.12.16 | **VISTA-CFI-08** | `VISTA-CFI-CP-08-01` | Serializes findings into Pydantic v2 `FrameIntegrityFinding` schemas | `PLANNED` | `VISTA-CFI-07` |
-| **CFI-16** | Examiner Visualisation & Review | PRD §14.11, §14.12 | TRD §11.12.18 | **VISTA-CFI-08** | `VISTA-CFI-CP-08-02` | Interactive dual timeline, cadence plot, and similarity heatmap canvas | `PLANNED` | `VISTA-CFI-07` |
-| **CFI-17** | Ground-Truth Corpus & Annotation | PRD §14.12 | TRD §11.12.19 | **VISTA-CFI-09** | `VISTA-CFI-CP-09-01` | Controlled 1,000-sample corpus with bit-exact manipulation maps | `PLANNED` | `VISTA-CFI-08` |
-| **CFI-18** | Event & Temporal Localisation Metrics | PRD §14.12 | TRD §11.12.20 | **VISTA-CFI-09** | `VISTA-CFI-CP-09-02` | Precision, Recall, F1 $\ge 0.90$ and $tIoU \ge 0.85$ across all categories | `PLANNED` | `VISTA-CFI-08` |
-| **CFI-19** | Robustness & False-Positive Evaluation | PRD §14.12 | TRD §11.12.20 | **VISTA-CFI-09** | `VISTA-CFI-CP-09-03` | False alarm rate $\le 0.05$/hour on VFR, PTZ, and static camera controls | `PLANNED` | `VISTA-CFI-08` |
-| **CFI-20** | Evidence Lineage & CEIPL Integration | PRD §14.13 | TRD §11.12.1 | **VISTA-CFI-00** | `VISTA-CFI-CP-00-04` | Pre-decode dual hash and RFC 8785 JSON manifest DAG binding | `PLANNED` | Phase 1 Gate |
-| **CFI-21** | Security Safeguards & Resource Ceilings | PRD §14.13 | TRD §11.12.17 | **VISTA-CFI-00** | `VISTA-CFI-CP-01-01` | Worker memory $\le 4\text{ GB}$, ring buffer $\le 64$ frames, 10s timeout | `PLANNED` | Phase 0 Gate |
-| **CFI-22** | Reproducibility & Release Validation | PRD §14.12 | TRD §11.12.20 | **VISTA-CFI-09** | `VISTA-CFI-CP-09-04` | 100% deterministic report hashes across 5 runs; air-gap verified | `PLANNED` | `VISTA-CFI-08` |
+| **CFI-01** | Frame & Packet Identity Tracking | PRD §15.3, §14.12 | TRD §11.12.2 | **VISTA-CFI-01** | `VISTA-CFI-CP-01-01` | Unit test verifies 5 independent coordinate indices across 1,000 frames | `PLANNED` | `VISTA-CFI-00` |
+| **CFI-02** | Timestamp & Timebase Inspection | PRD §15.3, §14.12 | TRD §11.12.4 | **VISTA-CFI-01** | `VISTA-CFI-CP-01-02` | Zero rounding error in rational timebase math ($t_i = PTS_i \imes TB$) | `PLANNED` | `VISTA-CFI-00` |
+| **CFI-03** | Variable-Frame-Rate Cadence Analysis | PRD §15.7, §14.12 | TRD §11.12.5 | **VISTA-CFI-02** | `VISTA-CFI-CP-02-04` | Suppresses false alarms on authentic VFR streams ($z_i \le 3.5\imes MAD$) | `PLANNED` | `VISTA-CFI-01` |
+| **CFI-04** | Missing-Frame Candidate Detection | PRD §15.4.1, §14.12 | TRD §11.12.6 | **VISTA-CFI-04** | `VISTA-CFI-CP-04-01` | Detects 1, 5, 30-frame deletions; differentiates Mode A–D evidence | `PLANNED` | `VISTA-CFI-02` |
+| **CFI-05** | Duplicate-Frame Detection | PRD §15.4.2, §14.12 | TRD §11.12.7 | **VISTA-CFI-03** | `VISTA-CFI-CP-03-01` | BLAKE3 exact hash and pHash Hamming distance detect cloned loops | `PLANNED` | `VISTA-CFI-02` |
+| **CFI-06** | Inserted-Frame Candidate Detection | PRD §15.4.3, §14.12 | TRD §11.12.8 | **VISTA-CFI-04** | `VISTA-CFI-CP-04-04` | Optical warping residual $R_i$ flags AI-interpolated and spliced frames | `PLANNED` | `VISTA-CFI-03` |
+| **CFI-07** | Frozen-Sequence Detection | PRD §15.4.4, §14.12 | TRD §11.12.9 | **VISTA-CFI-03** | `VISTA-CFI-CP-03-04` | Detects freeze $\ge 1.0\text{s}$; audits audio power and OSD clock advance | `PLANNED` | `VISTA-CFI-02` |
+| **CFI-08** | Reordered-Frame Candidate Detection | PRD §15.4.5, §14.12 | TRD §11.12.10 | **VISTA-CFI-05** | `VISTA-CFI-CP-05-01` | Presentation order PTS monotonicity and ByteTrack trajectory kinematics | `PLANNED` | `VISTA-CFI-04` |
+| **CFI-09** | Motion-Continuity Analysis | PRD §15.7, §14.12 | TRD §11.12.11 | **VISTA-CFI-05** | `VISTA-CFI-CP-05-02` | Dense optical flow warping residual and trajectory momentum continuity | `PLANNED` | `VISTA-CFI-04` |
+| **CFI-10** | Codec, GOP & Bitstream Correlation | PRD §15.8, §14.12 | TRD §11.12.12 | **VISTA-CFI-06** | `VISTA-CFI-CP-06-01` | Flags truncated GOP, non-cadence I-frames, and macroblock QP pulsing | `PLANNED` | `VISTA-CFI-05` |
+| **CFI-11** | CCTV Clock & OCR Timestamp Correlation | PRD §15.9, §14.12 | TRD §11.12.13 | **VISTA-CFI-06** | `VISTA-CFI-CP-06-03` | PaddleOCR drift regression $\delta(t)$ detects $\ge 1.0\text{s}$ OSD step jumps | `PLANNED` | `VISTA-CFI-05` |
+| **CFI-12** | Recorder & Export Evidence Integration | PRD §15.9, §14.12 | TRD §11.12.12 | **VISTA-CFI-06** | `VISTA-CFI-CP-06-04` | Parses companion DVR export XML/JSON logs without DVR login | `PLANNED` | `VISTA-CFI-05` |
+| **CFI-13** | Cross-Camera Timeline Comparison | PRD §15.9, §14.12 | TRD §11.12.14 | **VISTA-CFI-07** | `VISTA-CFI-CP-07-02` | Aligns multi-camera feeds onto UTC; flags 15s secondary coverage gap | `PLANNED` | `VISTA-CFI-06` |
+| **CFI-14** | Audio-Video Timeline Correlation | PRD §15.10, §14.12 | TRD §11.12.15 | **VISTA-CFI-07** | `VISTA-CFI-CP-07-03` | AFB audio power and AVSC SyncNet lip-sync verify freeze continuity | `PLANNED` | `VISTA-CFI-06` |
+| **CFI-15** | Frame-Range Localisation & Reporting | PRD §15.6, §14.12 | TRD §11.12.16 | **VISTA-CFI-08** | `VISTA-CFI-CP-08-01` | Serializes findings into Pydantic v2 `FrameIntegrityFinding` schemas | `PLANNED` | `VISTA-CFI-07` |
+| **CFI-16** | Examiner Visualisation & Review | PRD §15.11, §14.12 | TRD §11.12.18 | **VISTA-CFI-08** | `VISTA-CFI-CP-08-02` | Interactive dual timeline, cadence plot, and similarity heatmap canvas | `PLANNED` | `VISTA-CFI-07` |
+| **CFI-17** | Ground-Truth Corpus & Annotation | PRD §15.12 | TRD §11.12.19 | **VISTA-CFI-09** | `VISTA-CFI-CP-09-01` | Controlled 1,000-sample corpus with bit-exact manipulation maps | `PLANNED` | `VISTA-CFI-08` |
+| **CFI-18** | Event & Temporal Localisation Metrics | PRD §15.12 | TRD §11.12.20 | **VISTA-CFI-09** | `VISTA-CFI-CP-09-02` | Precision, Recall, F1 $\ge 0.90$ and $tIoU \ge 0.85$ across all categories | `PLANNED` | `VISTA-CFI-08` |
+| **CFI-19** | Robustness & False-Positive Evaluation | PRD §15.12 | TRD §11.12.20 | **VISTA-CFI-09** | `VISTA-CFI-CP-09-03` | False alarm rate $\le 0.05$/hour on VFR, PTZ, and static camera controls | `PLANNED` | `VISTA-CFI-08` |
+| **CFI-20** | Evidence Lineage & CEIPL Integration | PRD §15.13 | TRD §11.12.1 | **VISTA-CFI-00** | `VISTA-CFI-CP-00-04` | Pre-decode dual hash and RFC 8785 JSON manifest DAG binding | `PLANNED` | Phase 1 Gate |
+| **CFI-21** | Security Safeguards & Resource Ceilings | PRD §15.13 | TRD §11.12.17 | **VISTA-CFI-00** | `VISTA-CFI-CP-01-01` | Worker memory $\le 4\text{ GB}$, ring buffer $\le 64$ frames, 10s timeout | `PLANNED` | Phase 0 Gate |
+| **CFI-22** | Reproducibility & Release Validation | PRD §15.12 | TRD §11.12.20 | **VISTA-CFI-09** | `VISTA-CFI-CP-09-04` | 100% deterministic report hashes across 5 runs; air-gap verified | `PLANNED` | `VISTA-CFI-08` |
 
 
 ---
@@ -5826,84 +5826,84 @@ Every Cross-Media Metadata Service requirement (`CMMS-01` through `CMMS-78`) is 
 
 | Req ID | Requirement Title | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Validation Evidence | Status | Dependencies / Blockers |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **CMMS-01** | Shared Service Architecture | PRD §15.6 | TRD §16.1 | **CMMS-A0** | `CMMS-CP-00-01` | Architectural linting confirms single shared metadata pipeline across all engines | `PLANNED` | Phase 0 Gate |
-| **CMMS-02** | Pluggable Parser Adapters | PRD §15.6 | TRD §16.2 | **CMMS-A1** | `CMMS-CP-01-01` | Adapter registry unit test verifies dynamic parser registration and execution | `PLANNED` | `CMMS-A0` |
-| **CMMS-03** | Format & Magic Identification | PRD §15.6 | TRD §16.1, §16.13 | **CMMS-A1** | `CMMS-CP-01-01` | Magic byte sniffer correctly identifies 50 test files with mismatched extensions | `PLANNED` | `CMMS-A0` |
-| **CMMS-04** | Dual-Track Raw/Normalized Store | PRD §15.6 | TRD §16.4 | **CMMS-A1** | `CMMS-CP-01-01` | Serialization test asserts raw and normalized fields preserved simultaneously | `PLANNED` | `CMMS-A0` |
-| **CMMS-05** | Shared Subsystem Handoff | PRD §15.6 | TRD §16.1, §16.10 | **CMMS-A0** | `CMMS-CP-00-01` | Interface contract assertions for AIF, AURAS, VISTA, ONTF, and UFREDF | `PLANNED` | Phase 0 Gate |
-| **CMMS-06** | Broad Image Format Support | PRD §15.6 | TRD §16.2, §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Successful extraction across JPEG, PNG, TIFF, WebP, HEIC, RAW, DNG, AVIF | `PLANNED` | `CMMS-A1` |
-| **CMMS-07** | Comprehensive EXIF Extraction | PRD §15.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Complete IFD0, ExifIFD, SubIFD extraction across 100 test camera files | `PLANNED` | `CMMS-A1` |
-| **CMMS-08** | EXIF GPS Telemetry | PRD §15.6 | TRD §16.5.1, §16.5.6| **CMMS-A2** | `CMMS-CP-02-01` | Extracts Lat/Long/Alt, DOP, positioning error, and satellite timestamps | `PLANNED` | `CMMS-A1` |
-| **CMMS-09** | XMP Data & History Extraction | PRD §15.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Extracts DocumentID, InstanceID, History events, and editing software agents | `PLANNED` | `CMMS-A1` |
-| **CMMS-10** | IPTC Core & Extension Parsing | PRD §15.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Parses IPTC Application Records, captions, copyrights, and location tags | `PLANNED` | `CMMS-A1` |
-| **CMMS-11** | Image Structural Forensics | PRD §15.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Extracts JPEG DQT quantization tables, Huffman tables, and ICC color profiles | `PLANNED` | `CMMS-A1` |
-| **CMMS-12** | C2PA Manifest Discovery | PRD §15.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Detects C2PA JUMBF boxes and validates cryptographic manifest presence | `PLANNED` | `CMMS-A1` |
-| **CMMS-13** | Audio Format & Stream Support | PRD §15.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Extracts stream metadata across WAV, RF64, MP3, FLAC, AAC, OGG, Opus, AIFF | `PLANNED` | `CMMS-A1` |
-| **CMMS-14** | Technical Stream Descriptors | PRD §15.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Extracts sample rate, channels, bit depth, bitrate, and duration in float seconds | `PLANNED` | `CMMS-A1` |
-| **CMMS-15** | BWF `bext` & UMID Extraction | PRD §15.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Parses Broadcast Wave `bext` chunk, Originator, TimeReference, and UMID | `PLANNED` | `CMMS-A1` |
-| **CMMS-16** | Embedded iXML / ADM Parsing | PRD §15.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Extracts multi-track production recorder XML metadata chunks | `PLANNED` | `CMMS-A1` |
-| **CMMS-17** | Compressed Audio Tags | PRD §15.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Parses ID3v1/v2, Vorbis comments, and FLAC STREAMINFO metadata tags | `PLANNED` | `CMMS-A1` |
-| **CMMS-18** | Audio Provenance Neutrality | PRD §15.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Asserts encoder strings tagged `OPERATOR_REPORTED`; no AI inferences made | `PLANNED` | `CMMS-A1` |
-| **CMMS-19** | Video Container Parsing | PRD §15.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Parses MP4, MOV, MKV, AVI, WebM, TS containers, brands, and track layouts | `PLANNED` | `CMMS-A1` |
-| **CMMS-20** | Video Elementary Stream Metrics| PRD §15.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Extracts codec, profile, level, dimensions, pixel format, and color primaries | `PLANNED` | `CMMS-A1` |
-| **CMMS-21** | Rational Timebase Representation| PRD §15.6 | TRD §16.4.2, §16.5.3| **CMMS-A4** | `CMMS-CP-04-01` | Preserves exact integer PTS and rational timebase fractions without rounding | `PLANNED` | `CMMS-A1` |
-| **CMMS-22** | Demuxed Audio Track Lineage | PRD §15.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Registers demuxed audio track metadata linked via AFB bridge in CEIPL DAG | `PLANNED` | `CMMS-A1` |
-| **CMMS-23** | Variable Frame Rate Detection | PRD §15.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Measures packet cadence variance to classify stream as CFR or VFR | `PLANNED` | `CMMS-A1` |
-| **CMMS-24** | B-Frame Preservation Invariant | PRD §15.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Preserves PTS vs DTS separation; suppresses false alarms on decode reordering | `PLANNED` | `CMMS-A1` |
-| **CMMS-25** | CCTV Recorder Profile Parsing | PRD §15.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Extracts DVR manufacturer, model, serial, and channel labels from CCTV exports | `PLANNED` | `CMMS-A1` |
-| **CMMS-26** | CCTV Export Sidecar Binding | PRD §15.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Binds companion XML/JSON sidecar metadata to primary recording exhibit | `PLANNED` | `CMMS-A1` |
-| **CMMS-27** | Multi-Channel CCTV Mapping | PRD §15.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Maps multi-channel recorder streams to discrete camera exhibits | `PLANNED` | `CMMS-A1` |
-| **CMMS-28** | CCTV Timezone Configuration | PRD §15.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Extracts recorder timezone settings and evaluates against UTC stream time | `PLANNED` | `CMMS-A1` |
-| **CMMS-29** | Recorder Log Parsing | PRD §15.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Ingests companion DVR export logs and correlates system event timestamps | `PLANNED` | `CMMS-A1` |
-| **CMMS-30** | Operator Claim Separation | PRD §15.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Classifies operator notes and interview forms strictly as `OPERATOR_REPORTED` | `PLANNED` | `CMMS-A1` |
-| **CMMS-31** | Offline PCAP/PCAPNG Parsing | PRD §15.6 | TRD §16.5.5 | **CMMS-A5** | `CMMS-CP-05-01` | Parses offline PCAP/PCAPNG captures without requiring live network access | `PLANNED` | `CMMS-A1` |
-| **CMMS-32** | Capture-Level Metadata | PRD §15.6 | TRD §16.5.5 | **CMMS-A5** | `CMMS-CP-05-01` | Extracts link type, snap length, timestamp resolution, and interface records | `PLANNED` | `CMMS-A1` |
-| **CMMS-33** | Packet-Level Header Telemetry | PRD §15.6 | TRD §16.5.5 | **CMMS-A5** | `CMMS-CP-05-01` | Summarizes packet index, capture timestamps, frame lengths, and IP 5-tuples | `PLANNED` | `CMMS-A1` |
-| **CMMS-34** | Sensitive Payload Exclusion | PRD §15.6 | TRD §16.5.5 | **CMMS-A5** | `CMMS-CP-05-01` | Verifies application layer payload bytes are omitted from general metadata | `PLANNED` | `CMMS-A1` |
-| **CMMS-35** | Air-Gapped Network Invariant | PRD §15.6 | TRD §16.5.5, §16.9 | **CMMS-A5** | `CMMS-CP-05-01` | Network packet audit confirms zero outbound network sockets during execution | `PLANNED` | `CMMS-A1` |
-| **CMMS-36** | Geospatial Field Extraction | PRD §15.6 | TRD §16.5.6 | **CMMS-A2** | `CMMS-CP-02-01` | Extracts GPS coordinates, altitude, direction, speed, and DOP metrics | `PLANNED` | `CMMS-A1` |
-| **CMMS-37** | Lossless Coordinate Normalizer | PRD §15.6 | TRD §16.4.1, §16.5.6| **CMMS-A6** | `CMMS-CP-06-01` | Converts DMS to decimal degrees while preserving original hemisphere and text | `PLANNED` | `CMMS-A2` |
-| **CMMS-38** | Geodetic Datum Preservation | PRD §15.6 | TRD §16.5.6 | **CMMS-A6** | `CMMS-CP-06-01` | Preserves source map datum (WGS-84) and positioning error metrics | `PLANNED` | `CMMS-A2` |
-| **CMMS-39** | Geospatial Handoff to AIF-GEO | PRD §15.6 | TRD §16.5.6 | **CMMS-A6** | `CMMS-CP-06-01` | Validates structured geospatial metadata payload handoff to AIF-GEO engine | `PLANNED` | `CMMS-A6` |
-| **CMMS-40** | Common Versioned Metadata Model| PRD §15.6 | TRD §16.3 | **CMMS-A1** | `CMMS-CP-01-01` | Validates `EvidenceMetadataSnapshot` across all 5 evidence modalities | `PLANNED` | `CMMS-A0` |
-| **CMMS-41** | Field-Level Provenance Tracking| PRD §15.6 | TRD §16.3.1 | **CMMS-A1** | `CMMS-CP-01-01` | Asserts 100% of extracted fields possess complete `FieldProvenance` records | `PLANNED` | `CMMS-A0` |
-| **CMMS-42** | Strongly-Typed Value Contracts | PRD §15.6 | TRD §16.3.1 | **CMMS-A1** | `CMMS-CP-01-01` | Pydantic v2 type enforcement on numeric, rational, boolean, and string fields | `PLANNED` | `CMMS-A0` |
-| **CMMS-43** | Canonical Normalization Pipeline| PRD §15.6 | TRD §16.4 | **CMMS-A6** | `CMMS-CP-06-01` | Transforms raw metadata into canonical units without mutating raw fields | `PLANNED` | `CMMS-A2..A5` |
-| **CMMS-44** | Explicit Transformation Rules | PRD §15.6 | TRD §16.4.1 | **CMMS-A6** | `CMMS-CP-06-01` | Every normalized field links to a registered transformation function UUID | `PLANNED` | `CMMS-A6` |
-| **CMMS-45** | Missing/Conflict Status Enum | PRD §15.6 | TRD §16.3.1 | **CMMS-A1** | `CMMS-CP-01-01` | Implements `MISSING`, `CONFLICTING`, `UNVERIFIED`, `PARTIAL` status enums | `PLANNED` | `CMMS-A0` |
-| **CMMS-46** | RFC 8785 JSON Canonicalization | PRD §15.6 | TRD §16.8 | **CMMS-A1** | `CMMS-CP-01-01` | Deterministic SHA-256 snapshot hashing across independent runtime platforms | `PLANNED` | `CMMS-A0` |
-| **CMMS-47** | 14 Timestamp Semantics Contract | PRD §15.6 | TRD §16.4.2 | **CMMS-A6** | `CMMS-CP-06-01` | Strict classification of timestamps into 14 explicit semantic classes | `PLANNED` | `CMMS-A2..A5` |
-| **CMMS-48** | Zero Silent Timezone Conversion| PRD §15.6 | TRD §16.4.1 | **CMMS-A6** | `CMMS-CP-06-01` | Guard test verifies naive timestamps are preserved as `timezone: UNKNOWN` | `PLANNED` | `CMMS-A6` |
-| **CMMS-49** | Timestamp Chronology Checker | PRD §15.6 | TRD §16.6 | **CMMS-A7** | `CMMS-CP-07-01` | Detects inverted creation vs modification timestamps across evidence files | `PLANNED` | `CMMS-A6` |
-| **CMMS-50** | Device Consistency Checker | PRD §15.6 | TRD §16.6 | **CMMS-A7** | `CMMS-CP-07-01` | Flags contradictions between Make, Model, Lens, and MakerNote tags | `PLANNED` | `CMMS-A6` |
-| **CMMS-51** | Software & Processing History | PRD §15.6 | TRD §16.6 | **CMMS-A7** | `CMMS-CP-07-01` | Identifies editing software markers (Photoshop, Premiere, Audacity) | `PLANNED` | `CMMS-A6` |
-| **CMMS-52** | Structural Integrity Checker | PRD §15.6 | TRD §16.6 | **CMMS-A7** | `CMMS-CP-07-01` | Flags truncated IFDs, duplicate blocks, and container-stream mismatches | `PLANNED` | `CMMS-A6` |
-| **CMMS-53** | Cross-Evidence Correlation | PRD §15.6 | TRD §16.7 | **CMMS-A7** | `CMMS-CP-07-01` | Correlates common metadata fields across multiple exhibits in a case | `PLANNED` | `CMMS-A6` |
-| **CMMS-54** | Multi-Source Candidate Timeline| PRD §15.6 | TRD §16.7 | **CMMS-A7** | `CMMS-CP-07-01` | Reconstructs multi-source timelines without premature ground-truth selection | `PLANNED` | `CMMS-A6` |
-| **CMMS-55** | Time Window Containment Checker| PRD §15.6 | TRD §16.7 | **CMMS-A7** | `CMMS-CP-07-01` | Evaluates photo/audio timestamps against CCTV recording start/end windows | `PLANNED` | `CMMS-A6` |
-| **CMMS-56** | Cross-Evidence Conflict Finding| PRD §15.6 | TRD §16.6.1, §16.7 | **CMMS-A7** | `CMMS-CP-07-01` | Emits `META_CROSS_EVIDENCE_CONFLICT` on contradictory multi-exhibit claims | `PLANNED` | `CMMS-A6` |
-| **CMMS-57** | Non-Causality Correlation Policy| PRD §15.6 | TRD §16.7.1 | **CMMS-A7** | `CMMS-CP-07-01` | Disclaimers of non-causality verified in all generated correlation reports | `PLANNED` | `CMMS-A7` |
-| **CMMS-58** | CEIPL Exhibit Hash Binding | PRD §15.6 | TRD §16.8 | **CMMS-A8** | `CMMS-CP-08-01` | Pre-extraction exhibit SHA-256 bound to metadata snapshot manifest | `PLANNED` | `CMMS-A7` |
-| **CMMS-59** | Non-Destructive Raw Immutability| PRD §15.6 | TRD §16.4, §16.8 | **CMMS-A8** | `CMMS-CP-08-01` | Asserts POSIX `0400` read-only permissions on master evidence exhibits | `PLANNED` | `CMMS-A7` |
-| **CMMS-60** | Versioned Metadata Snapshots | PRD §15.6 | TRD §16.8.1 | **CMMS-A8** | `CMMS-CP-08-01` | Multiple snapshots for same exhibit stored without overwriting history | `PLANNED` | `CMMS-A7` |
-| **CMMS-61** | CEIPL DAG Provenance Node | PRD §15.6 | TRD §16.8 | **CMMS-A8** | `CMMS-CP-08-01` | Registers extraction activity and snapshot hash as child node in DAG | `PLANNED` | `CMMS-A7` |
-| **CMMS-62** | Merkle Audit Log Registration | PRD §15.6 | TRD §16.8 | **CMMS-A8** | `CMMS-CP-08-01` | Snapshot creation event recorded in append-only CEIPL Merkle tree | `PLANNED` | `CMMS-A7` |
-| **CMMS-63** | Unprivileged Parser Sandbox | PRD §15.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | External parsers run in isolated process namespaces with `cap_drop: ALL` | `PLANNED` | `CMMS-A7` |
-| **CMMS-64** | Cgroup RAM & CPU Ceilings | PRD §15.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | Enforces 512MB/1GB/2GB RAM limits and 15s/30s/60s CPU timeouts | `PLANNED` | `CMMS-A7` |
-| **CMMS-65** | Decompression Bomb Defense | PRD §15.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | Traps and terminates files declaring $> 100\text{ MP}$ or expansion $> 50:1$ | `PLANNED` | `CMMS-A7` |
-| **CMMS-66** | Shell Injection Immunity | PRD §15.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | Static code analysis verifies 100% discrete vector execution (`shell=False`) | `PLANNED` | `CMMS-A7` |
-| **CMMS-67** | Privacy Redaction for Reports | PRD §15.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | Authorizes redaction on exported report views without mutating master exhibits | `PLANNED` | `CMMS-A7` |
-| **CMMS-68** | Standard REST API Endpoints | PRD §15.6 | TRD §16.10 | **CMMS-A8** | `CMMS-CP-08-01` | 10 REST endpoints implemented conforming to OpenAPI specification | `PLANNED` | `CMMS-A7` |
-| **CMMS-69** | Celery Asynchronous Pipeline | PRD §15.6 | TRD §16.2, §16.10 | **CMMS-A8** | `CMMS-CP-08-01` | Long-running extraction tasks dispatched cleanly to Celery worker queues | `PLANNED` | `CMMS-A7` |
-| **CMMS-70** | Hybrid PostgreSQL/JSONB Storage| PRD §15.6 | TRD §16.11 | **CMMS-A8** | `CMMS-CP-08-01` | B-tree + GIN indexed schema with Row-Level Security policies active | `PLANNED` | `CMMS-A7` |
-| **CMMS-71** | UFREDF Section 65B/63 Dossier | PRD §15.6 | TRD §16.12 | **CMMS-A8** | `CMMS-CP-08-01` | Generates Section 65B IEA / Section 63 BSA PDF certificate annexures | `PLANNED` | `CMMS-A7` |
-| **CMMS-72** | Neutral Forensic Language Rule | PRD §15.6 | TRD §16.12 | **CMMS-A8** | `CMMS-CP-08-01` | Linter asserts reports contain zero absolute claims of "authenticity" | `PLANNED` | `CMMS-A7` |
-| **CMMS-73** | Multi-Modal Unit Test Suite | PRD §15.6 | TRD §16.13 | **CMMS-A9** | `CMMS-CP-09-01` | 100% test pass rate across unit test suite in `tests/cmms/unit/` | `PLANNED` | `CMMS-A8` |
-| **CMMS-74** | End-to-End Subsystem Pipelines | PRD §15.6 | TRD §16.13 | **CMMS-A9** | `CMMS-CP-09-01` | E2E integration tests passing for AIF, AURAS, VISTA, ONTF, and AIF-GEO | `PLANNED` | `CMMS-A8` |
-| **CMMS-75** | Adversarial & Corrupted Fixtures| PRD §15.6 | TRD §16.13 | **CMMS-A9** | `CMMS-CP-09-01` | Zero unhandled exceptions on 50 fuzzed and truncated metadata files | `PLANNED` | `CMMS-A8` |
-| **CMMS-76** | Performance Latency SLAs | PRD §15.6 | TRD §16.13.1 | **CMMS-A9** | `CMMS-CP-09-01` | Benchmarks confirm image $\le 80\text{ms}$, audio $\le 120\text{ms}$, video $\le 250\text{ms}$ | `PLANNED` | `CMMS-A8` |
-| **CMMS-77** | Batch Ingestion Throughput | PRD §15.6 | TRD §16.13.1 | **CMMS-A9** | `CMMS-CP-09-01` | Load test achieves $\ge 50\text{ exhibits/minute}$ batch throughput | `PLANNED` | `CMMS-A8` |
-| **CMMS-78** | Ground-Truth Fixture Corpus | PRD §15.6 | TRD §16.13 | **CMMS-A9** | `CMMS-CP-09-01` | 500-fixture multi-modal corpus verified with bit-exact metadata assertions | `PLANNED` | `CMMS-A8` |
+| **CMMS-01** | Shared Service Architecture | PRD §16.6 | TRD §16.1 | **CMMS-A0** | `CMMS-CP-00-01` | Architectural linting confirms single shared metadata pipeline across all engines | `PLANNED` | Phase 0 Gate |
+| **CMMS-02** | Pluggable Parser Adapters | PRD §16.6 | TRD §16.2 | **CMMS-A1** | `CMMS-CP-01-01` | Adapter registry unit test verifies dynamic parser registration and execution | `PLANNED` | `CMMS-A0` |
+| **CMMS-03** | Format & Magic Identification | PRD §16.6 | TRD §16.1, §16.13 | **CMMS-A1** | `CMMS-CP-01-01` | Magic byte sniffer correctly identifies 50 test files with mismatched extensions | `PLANNED` | `CMMS-A0` |
+| **CMMS-04** | Dual-Track Raw/Normalized Store | PRD §16.6 | TRD §16.4 | **CMMS-A1** | `CMMS-CP-01-01` | Serialization test asserts raw and normalized fields preserved simultaneously | `PLANNED` | `CMMS-A0` |
+| **CMMS-05** | Shared Subsystem Handoff | PRD §16.6 | TRD §16.1, §16.10 | **CMMS-A0** | `CMMS-CP-00-01` | Interface contract assertions for AIF, AURAS, VISTA, ONTF, and UFREDF | `PLANNED` | Phase 0 Gate |
+| **CMMS-06** | Broad Image Format Support | PRD §16.6 | TRD §16.2, §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Successful extraction across JPEG, PNG, TIFF, WebP, HEIC, RAW, DNG, AVIF | `PLANNED` | `CMMS-A1` |
+| **CMMS-07** | Comprehensive EXIF Extraction | PRD §16.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Complete IFD0, ExifIFD, SubIFD extraction across 100 test camera files | `PLANNED` | `CMMS-A1` |
+| **CMMS-08** | EXIF GPS Telemetry | PRD §16.6 | TRD §16.5.1, §16.5.6| **CMMS-A2** | `CMMS-CP-02-01` | Extracts Lat/Long/Alt, DOP, positioning error, and satellite timestamps | `PLANNED` | `CMMS-A1` |
+| **CMMS-09** | XMP Data & History Extraction | PRD §16.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Extracts DocumentID, InstanceID, History events, and editing software agents | `PLANNED` | `CMMS-A1` |
+| **CMMS-10** | IPTC Core & Extension Parsing | PRD §16.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Parses IPTC Application Records, captions, copyrights, and location tags | `PLANNED` | `CMMS-A1` |
+| **CMMS-11** | Image Structural Forensics | PRD §16.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Extracts JPEG DQT quantization tables, Huffman tables, and ICC color profiles | `PLANNED` | `CMMS-A1` |
+| **CMMS-12** | C2PA Manifest Discovery | PRD §16.6 | TRD §16.5.1 | **CMMS-A2** | `CMMS-CP-02-01` | Detects C2PA JUMBF boxes and validates cryptographic manifest presence | `PLANNED` | `CMMS-A1` |
+| **CMMS-13** | Audio Format & Stream Support | PRD §16.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Extracts stream metadata across WAV, RF64, MP3, FLAC, AAC, OGG, Opus, AIFF | `PLANNED` | `CMMS-A1` |
+| **CMMS-14** | Technical Stream Descriptors | PRD §16.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Extracts sample rate, channels, bit depth, bitrate, and duration in float seconds | `PLANNED` | `CMMS-A1` |
+| **CMMS-15** | BWF `bext` & UMID Extraction | PRD §16.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Parses Broadcast Wave `bext` chunk, Originator, TimeReference, and UMID | `PLANNED` | `CMMS-A1` |
+| **CMMS-16** | Embedded iXML / ADM Parsing | PRD §16.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Extracts multi-track production recorder XML metadata chunks | `PLANNED` | `CMMS-A1` |
+| **CMMS-17** | Compressed Audio Tags | PRD §16.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Parses ID3v1/v2, Vorbis comments, and FLAC STREAMINFO metadata tags | `PLANNED` | `CMMS-A1` |
+| **CMMS-18** | Audio Provenance Neutrality | PRD §16.6 | TRD §16.5.2 | **CMMS-A3** | `CMMS-CP-03-01` | Asserts encoder strings tagged `OPERATOR_REPORTED`; no AI inferences made | `PLANNED` | `CMMS-A1` |
+| **CMMS-19** | Video Container Parsing | PRD §16.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Parses MP4, MOV, MKV, AVI, WebM, TS containers, brands, and track layouts | `PLANNED` | `CMMS-A1` |
+| **CMMS-20** | Video Elementary Stream Metrics| PRD §16.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Extracts codec, profile, level, dimensions, pixel format, and color primaries | `PLANNED` | `CMMS-A1` |
+| **CMMS-21** | Rational Timebase Representation| PRD §16.6 | TRD §16.4.2, §16.5.3| **CMMS-A4** | `CMMS-CP-04-01` | Preserves exact integer PTS and rational timebase fractions without rounding | `PLANNED` | `CMMS-A1` |
+| **CMMS-22** | Demuxed Audio Track Lineage | PRD §16.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Registers demuxed audio track metadata linked via AFB bridge in CEIPL DAG | `PLANNED` | `CMMS-A1` |
+| **CMMS-23** | Variable Frame Rate Detection | PRD §16.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Measures packet cadence variance to classify stream as CFR or VFR | `PLANNED` | `CMMS-A1` |
+| **CMMS-24** | B-Frame Preservation Invariant | PRD §16.6 | TRD §16.5.3 | **CMMS-A4** | `CMMS-CP-04-01` | Preserves PTS vs DTS separation; suppresses false alarms on decode reordering | `PLANNED` | `CMMS-A1` |
+| **CMMS-25** | CCTV Recorder Profile Parsing | PRD §16.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Extracts DVR manufacturer, model, serial, and channel labels from CCTV exports | `PLANNED` | `CMMS-A1` |
+| **CMMS-26** | CCTV Export Sidecar Binding | PRD §16.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Binds companion XML/JSON sidecar metadata to primary recording exhibit | `PLANNED` | `CMMS-A1` |
+| **CMMS-27** | Multi-Channel CCTV Mapping | PRD §16.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Maps multi-channel recorder streams to discrete camera exhibits | `PLANNED` | `CMMS-A1` |
+| **CMMS-28** | CCTV Timezone Configuration | PRD §16.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Extracts recorder timezone settings and evaluates against UTC stream time | `PLANNED` | `CMMS-A1` |
+| **CMMS-29** | Recorder Log Parsing | PRD §16.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Ingests companion DVR export logs and correlates system event timestamps | `PLANNED` | `CMMS-A1` |
+| **CMMS-30** | Operator Claim Separation | PRD §16.6 | TRD §16.5.4 | **CMMS-A4** | `CMMS-CP-04-01` | Classifies operator notes and interview forms strictly as `OPERATOR_REPORTED` | `PLANNED` | `CMMS-A1` |
+| **CMMS-31** | Offline PCAP/PCAPNG Parsing | PRD §16.6 | TRD §16.5.5 | **CMMS-A5** | `CMMS-CP-05-01` | Parses offline PCAP/PCAPNG captures without requiring live network access | `PLANNED` | `CMMS-A1` |
+| **CMMS-32** | Capture-Level Metadata | PRD §16.6 | TRD §16.5.5 | **CMMS-A5** | `CMMS-CP-05-01` | Extracts link type, snap length, timestamp resolution, and interface records | `PLANNED` | `CMMS-A1` |
+| **CMMS-33** | Packet-Level Header Telemetry | PRD §16.6 | TRD §16.5.5 | **CMMS-A5** | `CMMS-CP-05-01` | Summarizes packet index, capture timestamps, frame lengths, and IP 5-tuples | `PLANNED` | `CMMS-A1` |
+| **CMMS-34** | Sensitive Payload Exclusion | PRD §16.6 | TRD §16.5.5 | **CMMS-A5** | `CMMS-CP-05-01` | Verifies application layer payload bytes are omitted from general metadata | `PLANNED` | `CMMS-A1` |
+| **CMMS-35** | Air-Gapped Network Invariant | PRD §16.6 | TRD §16.5.5, §16.9 | **CMMS-A5** | `CMMS-CP-05-01` | Network packet audit confirms zero outbound network sockets during execution | `PLANNED` | `CMMS-A1` |
+| **CMMS-36** | Geospatial Field Extraction | PRD §16.6 | TRD §16.5.6 | **CMMS-A2** | `CMMS-CP-02-01` | Extracts GPS coordinates, altitude, direction, speed, and DOP metrics | `PLANNED` | `CMMS-A1` |
+| **CMMS-37** | Lossless Coordinate Normalizer | PRD §16.6 | TRD §16.4.1, §16.5.6| **CMMS-A6** | `CMMS-CP-06-01` | Converts DMS to decimal degrees while preserving original hemisphere and text | `PLANNED` | `CMMS-A2` |
+| **CMMS-38** | Geodetic Datum Preservation | PRD §16.6 | TRD §16.5.6 | **CMMS-A6** | `CMMS-CP-06-01` | Preserves source map datum (WGS-84) and positioning error metrics | `PLANNED` | `CMMS-A2` |
+| **CMMS-39** | Geospatial Handoff to AIF-GEO | PRD §16.6 | TRD §16.5.6 | **CMMS-A6** | `CMMS-CP-06-01` | Validates structured geospatial metadata payload handoff to AIF-GEO engine | `PLANNED` | `CMMS-A6` |
+| **CMMS-40** | Common Versioned Metadata Model| PRD §16.6 | TRD §16.3 | **CMMS-A1** | `CMMS-CP-01-01` | Validates `EvidenceMetadataSnapshot` across all 5 evidence modalities | `PLANNED` | `CMMS-A0` |
+| **CMMS-41** | Field-Level Provenance Tracking| PRD §16.6 | TRD §16.3.1 | **CMMS-A1** | `CMMS-CP-01-01` | Asserts 100% of extracted fields possess complete `FieldProvenance` records | `PLANNED` | `CMMS-A0` |
+| **CMMS-42** | Strongly-Typed Value Contracts | PRD §16.6 | TRD §16.3.1 | **CMMS-A1** | `CMMS-CP-01-01` | Pydantic v2 type enforcement on numeric, rational, boolean, and string fields | `PLANNED` | `CMMS-A0` |
+| **CMMS-43** | Canonical Normalization Pipeline| PRD §16.6 | TRD §16.4 | **CMMS-A6** | `CMMS-CP-06-01` | Transforms raw metadata into canonical units without mutating raw fields | `PLANNED` | `CMMS-A2..A5` |
+| **CMMS-44** | Explicit Transformation Rules | PRD §16.6 | TRD §16.4.1 | **CMMS-A6** | `CMMS-CP-06-01` | Every normalized field links to a registered transformation function UUID | `PLANNED` | `CMMS-A6` |
+| **CMMS-45** | Missing/Conflict Status Enum | PRD §16.6 | TRD §16.3.1 | **CMMS-A1** | `CMMS-CP-01-01` | Implements `MISSING`, `CONFLICTING`, `UNVERIFIED`, `PARTIAL` status enums | `PLANNED` | `CMMS-A0` |
+| **CMMS-46** | RFC 8785 JSON Canonicalization | PRD §16.6 | TRD §16.8 | **CMMS-A1** | `CMMS-CP-01-01` | Deterministic SHA-256 snapshot hashing across independent runtime platforms | `PLANNED` | `CMMS-A0` |
+| **CMMS-47** | 14 Timestamp Semantics Contract | PRD §16.6 | TRD §16.4.2 | **CMMS-A6** | `CMMS-CP-06-01` | Strict classification of timestamps into 14 explicit semantic classes | `PLANNED` | `CMMS-A2..A5` |
+| **CMMS-48** | Zero Silent Timezone Conversion| PRD §16.6 | TRD §16.4.1 | **CMMS-A6** | `CMMS-CP-06-01` | Guard test verifies naive timestamps are preserved as `timezone: UNKNOWN` | `PLANNED` | `CMMS-A6` |
+| **CMMS-49** | Timestamp Chronology Checker | PRD §16.6 | TRD §16.6 | **CMMS-A7** | `CMMS-CP-07-01` | Detects inverted creation vs modification timestamps across evidence files | `PLANNED` | `CMMS-A6` |
+| **CMMS-50** | Device Consistency Checker | PRD §16.6 | TRD §16.6 | **CMMS-A7** | `CMMS-CP-07-01` | Flags contradictions between Make, Model, Lens, and MakerNote tags | `PLANNED` | `CMMS-A6` |
+| **CMMS-51** | Software & Processing History | PRD §16.6 | TRD §16.6 | **CMMS-A7** | `CMMS-CP-07-01` | Identifies editing software markers (Photoshop, Premiere, Audacity) | `PLANNED` | `CMMS-A6` |
+| **CMMS-52** | Structural Integrity Checker | PRD §16.6 | TRD §16.6 | **CMMS-A7** | `CMMS-CP-07-01` | Flags truncated IFDs, duplicate blocks, and container-stream mismatches | `PLANNED` | `CMMS-A6` |
+| **CMMS-53** | Cross-Evidence Correlation | PRD §16.6 | TRD §16.7 | **CMMS-A7** | `CMMS-CP-07-01` | Correlates common metadata fields across multiple exhibits in a case | `PLANNED` | `CMMS-A6` |
+| **CMMS-54** | Multi-Source Candidate Timeline| PRD §16.6 | TRD §16.7 | **CMMS-A7** | `CMMS-CP-07-01` | Reconstructs multi-source timelines without premature ground-truth selection | `PLANNED` | `CMMS-A6` |
+| **CMMS-55** | Time Window Containment Checker| PRD §16.6 | TRD §16.7 | **CMMS-A7** | `CMMS-CP-07-01` | Evaluates photo/audio timestamps against CCTV recording start/end windows | `PLANNED` | `CMMS-A6` |
+| **CMMS-56** | Cross-Evidence Conflict Finding| PRD §16.6 | TRD §16.6.1, §16.7 | **CMMS-A7** | `CMMS-CP-07-01` | Emits `META_CROSS_EVIDENCE_CONFLICT` on contradictory multi-exhibit claims | `PLANNED` | `CMMS-A6` |
+| **CMMS-57** | Non-Causality Correlation Policy| PRD §16.6 | TRD §16.7.1 | **CMMS-A7** | `CMMS-CP-07-01` | Disclaimers of non-causality verified in all generated correlation reports | `PLANNED` | `CMMS-A7` |
+| **CMMS-58** | CEIPL Exhibit Hash Binding | PRD §16.6 | TRD §16.8 | **CMMS-A8** | `CMMS-CP-08-01` | Pre-extraction exhibit SHA-256 bound to metadata snapshot manifest | `PLANNED` | `CMMS-A7` |
+| **CMMS-59** | Non-Destructive Raw Immutability| PRD §16.6 | TRD §16.4, §16.8 | **CMMS-A8** | `CMMS-CP-08-01` | Asserts POSIX `0400` read-only permissions on master evidence exhibits | `PLANNED` | `CMMS-A7` |
+| **CMMS-60** | Versioned Metadata Snapshots | PRD §16.6 | TRD §16.8.1 | **CMMS-A8** | `CMMS-CP-08-01` | Multiple snapshots for same exhibit stored without overwriting history | `PLANNED` | `CMMS-A7` |
+| **CMMS-61** | CEIPL DAG Provenance Node | PRD §16.6 | TRD §16.8 | **CMMS-A8** | `CMMS-CP-08-01` | Registers extraction activity and snapshot hash as child node in DAG | `PLANNED` | `CMMS-A7` |
+| **CMMS-62** | Merkle Audit Log Registration | PRD §16.6 | TRD §16.8 | **CMMS-A8** | `CMMS-CP-08-01` | Snapshot creation event recorded in append-only CEIPL Merkle tree | `PLANNED` | `CMMS-A7` |
+| **CMMS-63** | Unprivileged Parser Sandbox | PRD §16.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | External parsers run in isolated process namespaces with `cap_drop: ALL` | `PLANNED` | `CMMS-A7` |
+| **CMMS-64** | Cgroup RAM & CPU Ceilings | PRD §16.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | Enforces 512MB/1GB/2GB RAM limits and 15s/30s/60s CPU timeouts | `PLANNED` | `CMMS-A7` |
+| **CMMS-65** | Decompression Bomb Defense | PRD §16.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | Traps and terminates files declaring $> 100\text{ MP}$ or expansion $> 50:1$ | `PLANNED` | `CMMS-A7` |
+| **CMMS-66** | Shell Injection Immunity | PRD §16.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | Static code analysis verifies 100% discrete vector execution (`shell=False`) | `PLANNED` | `CMMS-A7` |
+| **CMMS-67** | Privacy Redaction for Reports | PRD §16.6 | TRD §16.9 | **CMMS-A8** | `CMMS-CP-08-01` | Authorizes redaction on exported report views without mutating master exhibits | `PLANNED` | `CMMS-A7` |
+| **CMMS-68** | Standard REST API Endpoints | PRD §16.6 | TRD §16.10 | **CMMS-A8** | `CMMS-CP-08-01` | 10 REST endpoints implemented conforming to OpenAPI specification | `PLANNED` | `CMMS-A7` |
+| **CMMS-69** | Celery Asynchronous Pipeline | PRD §16.6 | TRD §16.2, §16.10 | **CMMS-A8** | `CMMS-CP-08-01` | Long-running extraction tasks dispatched cleanly to Celery worker queues | `PLANNED` | `CMMS-A7` |
+| **CMMS-70** | Hybrid PostgreSQL/JSONB Storage| PRD §16.6 | TRD §16.11 | **CMMS-A8** | `CMMS-CP-08-01` | B-tree + GIN indexed schema with Row-Level Security policies active | `PLANNED` | `CMMS-A7` |
+| **CMMS-71** | UFREDF Section 65B/63 Dossier | PRD §16.6 | TRD §16.12 | **CMMS-A8** | `CMMS-CP-08-01` | Generates Section 65B IEA / Section 63 BSA PDF certificate annexures | `PLANNED` | `CMMS-A7` |
+| **CMMS-72** | Neutral Forensic Language Rule | PRD §16.6 | TRD §16.12 | **CMMS-A8** | `CMMS-CP-08-01` | Linter asserts reports contain zero absolute claims of "authenticity" | `PLANNED` | `CMMS-A7` |
+| **CMMS-73** | Multi-Modal Unit Test Suite | PRD §16.6 | TRD §16.13 | **CMMS-A9** | `CMMS-CP-09-01` | 100% test pass rate across unit test suite in `tests/cmms/unit/` | `PLANNED` | `CMMS-A8` |
+| **CMMS-74** | End-to-End Subsystem Pipelines | PRD §16.6 | TRD §16.13 | **CMMS-A9** | `CMMS-CP-09-01` | E2E integration tests passing for AIF, AURAS, VISTA, ONTF, and AIF-GEO | `PLANNED` | `CMMS-A8` |
+| **CMMS-75** | Adversarial & Corrupted Fixtures| PRD §16.6 | TRD §16.13 | **CMMS-A9** | `CMMS-CP-09-01` | Zero unhandled exceptions on 50 fuzzed and truncated metadata files | `PLANNED` | `CMMS-A8` |
+| **CMMS-76** | Performance Latency SLAs | PRD §16.6 | TRD §16.13.1 | **CMMS-A9** | `CMMS-CP-09-01` | Benchmarks confirm image $\le 80\text{ms}$, audio $\le 120\text{ms}$, video $\le 250\text{ms}$ | `PLANNED` | `CMMS-A8` |
+| **CMMS-77** | Batch Ingestion Throughput | PRD §16.6 | TRD §16.13.1 | **CMMS-A9** | `CMMS-CP-09-01` | Load test achieves $\ge 50\text{ exhibits/minute}$ batch throughput | `PLANNED` | `CMMS-A8` |
+| **CMMS-78** | Ground-Truth Fixture Corpus | PRD §16.6 | TRD §16.13 | **CMMS-A9** | `CMMS-CP-09-01` | 500-fixture multi-modal corpus verified with bit-exact metadata assertions | `PLANNED` | `CMMS-A8` |
 
 ---
 
@@ -6035,7 +6035,7 @@ flowchart TD
 - **8. Verifiable Checkpoints:**
   - `CSTV-CP-03-01`: Interval arithmetic handles subsecond uncertainty bounds correctly.
   - `CSTV-CP-03-02`: Allen's 13 interval relations pass formal mathematical logic suite.
-  - `CSTV-CP-03-03`: Timeline serialization produces court-admissible JSON payloads with source references.
+  - `CSTV-CP-03-03`: Timeline serialization produces structured JSON payloads with source references and uncertainty bounds.
   - `CSTV-CP-03-04`: Visual discrimination contract correctly distinguishes raw from corrected and inferred times.
 - **9. Acceptance Criteria:** Master timeline API returns fully populated multi-tiered JSON within latency target.
 - **10. Exit Criteria:** Timeline endpoints ready for frontend canvas consumption.
@@ -6211,7 +6211,7 @@ flowchart TD
 - **5. Unit & Integration Test Specifications:**
   - `test_ceipl_merkle_dag_registration()`: Verifies parent-child hash linkage in DAG.
   - `test_worm_vault_snapshot_locking()`: Asserts POSIX 0400 permissions on exported timeline files.
-  - `test_ufredf_section65b_pdf_generation()`: Validates court-certified PDF export containing hash manifests.
+  - `test_ufredf_section65b_pdf_generation()`: Validates structured PDF export containing hash manifests, clock models, and examiner sign-off.
   - `test_examiner_override_audit_trail()`: Asserts append-only audit record on examiner parameter modification.
 - **6. Performance & Benchmark Targets:** PDF dossier compilation in $< 3.0\text{ s}$ for 50-page evidence annexure.
 - **7. Expected Deliverables & Artifacts:** `src/cstv/ceipl_bridge.py`, `src/ufredf/templates/temporal_dossier.html`.
@@ -6266,90 +6266,90 @@ Every Cross-Source Timestamp Verification requirement (`CSTV-01` through `CSTV-8
 
 | Req ID | Requirement Title | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Validation Evidence | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **CSTV-01** | Platform-Wide Shared Architecture Integration | PRD §16.5 | TRD §17.1 | **CSTV-A0** | `CSTV-CP-00-01` | Architecture audit confirms shared service design | `PLANNED` |
-| **CSTV-02** | Non-Destructive Temporal Analysis Invariant | PRD §16.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A0** | `CSTV-CP-00-03` | Bitstream hash invariance check passes | `PLANNED` |
-| **CSTV-03** | Modality Specialist Timing Delegation | PRD §16.5 | TRD §17.1 | **CSTV-A0** | `CSTV-CP-00-04` | Zero duplicate signal/video decoder logic | `PLANNED` |
-| **CSTV-04** | Cryptographic Lineage & DAG Provenance Binding | PRD §16.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A0** | `CSTV-CP-00-03` | Merkle DAG node parent hash assertion test | `PLANNED` |
-| **CSTV-05** | Air-Gapped Operation & External Time Safeguards | PRD §16.5, §16.9 | TRD §15.6, §17.7 | **CSTV-A0** | `CSTV-CP-00-02` | Zero external network calls in sandbox audit | `PLANNED` |
-| **CSTV-06** | Seventeen-Category Temporal Source Registry | PRD §16.4.1, §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-01` | Registry contract validation across 17 sources | `PLANNED` |
-| **CSTV-07** | Eighteen-Field Timestamp Observation Schema | PRD §16.4.1, §16.5 | TRD §12.8, §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Pydantic v2 `TemporalObservation` test suite | `PLANNED` |
-| **CSTV-08** | Canonical Timestamp Data Representation | PRD §16.5 | TRD §12.8, §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | JSON schema validation against canonical format | `PLANNED` |
-| **CSTV-09** | Exact Integer & Rational Precision Preservation | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Numerical benchmark: zero float rounding drift | `PLANNED` |
-| **CSTV-10** | Multi-Evidence Case Scoping & Exhibit Isolation | PRD §16.5 | TRD §17.10 | **CSTV-A1** | `CSTV-CP-01-04` | PostgreSQL multi-tenant isolation unit test | `PLANNED` |
-| **CSTV-11** | Physical Clock Identity Disambiguation | PRD §16.5 | TRD §17.2, §17.10 | **CSTV-A1** | `CSTV-CP-01-01` | Disambiguates recorder RTC vs camera clock | `PLANNED` |
-| **CSTV-12** | Source Trust & Provenance Classification | PRD §16.5 | TRD §17.2, §17.7 | **CSTV-A1** | `CSTV-CP-01-01` | Classifies HARDWARE vs EXIF vs USER trust | `PLANNED` |
-| **CSTV-13** | 27-State Timestamp Semantics Taxonomy | PRD §16.4.2, §16.5 | TRD §12.8, §17.2 | **CSTV-A1** | `CSTV-CP-01-03` | `TimestampSemanticsEnum` completeness tests | `PLANNED` |
-| **CSTV-14** | Semantic Contradiction & Anomaly Detection | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-03` | Flags modification date preceding creation | `PLANNED` |
-| **CSTV-15** | Container vs Stream Presentation Time Disambiguation | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-03` | Differentiates MP4 `mvhd` date from PTS start | `PLANNED` |
-| **CSTV-16** | CCTV OSD Overlay vs System Clock Disambiguation | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-03` | Differentiates OCR clock text from DVR log | `PLANNED` |
-| **CSTV-17** | Audio Sample-Index Continuous Time Mapping | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Sample math verification ($t = t_0 + n/f_s$) | `PLANNED` |
-| **CSTV-18** | Video Frame PTS Rational Timebase Conversion | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Rational tick conversion ($t = \text{PTS} \times TB$) | `PLANNED` |
-| **CSTV-19** | Offline PCAP Packet Timestamp Ingestion | PRD §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Nanosecond precision packet capture test | `PLANNED` |
-| **CSTV-20** | Timezone Offset Normalization & IANA Tracking | PRD §16.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-01` | Validates $t_{\text{UTC}} = t_{\text{local}} - \Delta_{\text{UTC}}$ | `PLANNED` |
-| **CSTV-21** | Prohibition of Silent Local Machine Timezone Inference | PRD §16.5, §16.10 | TRD §15.6, §17.3 | **CSTV-A2** | `CSTV-CP-02-02` | Asserts UNKNOWN flag on naive timestamps | `PLANNED` |
-| **CSTV-22** | Daylight Saving Time (DST) Transition Disambiguation | PRD §16.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-03` | Dual candidate intervals on fall-back transition | `PLANNED` |
-| **CSTV-23** | Multi-Hypothesis Timezone Ambiguity Representation | PRD §16.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-03` | Serializes candidate UTC interval branches | `PLANNED` |
-| **CSTV-24** | GPS Time to UTC Leap-Second Conversion | PRD §16.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-04` | 18-second leap-second offset conversion test | `PLANNED` |
-| **CSTV-25** | Leap-Second Lineage & Provenance Tracking | PRD §16.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-04` | Logs IERS Bulletin C version in observation | `PLANNED` |
-| **CSTV-26** | Pairwise Relative Clock Offset Estimation | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A4** | `CSTV-CP-04-01` | Calculates $O_{ij}(t) = C_i(t) - C_j(t)$ | `PLANNED` |
-| **CSTV-27** | Reference Clock Selection & Hierarchy Governance | PRD §16.5 | TRD §17.4 | **CSTV-A4** | `CSTV-CP-04-02` | Enforces GPS > NTP > Recorder trust priority | `PLANNED` |
-| **CSTV-28** | Linear Clock Drift Modeling ($t_i = a + b T + \epsilon$) | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-02` | Accurately recovers slope and drift in ppm | `PLANNED` |
-| **CSTV-29** | Ordinary Least Squares (OLS) Linear Regression | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | SciPy regression benchmark on clean anchors | `PLANNED` |
-| **CSTV-30** | Weighted Least Squares (WLS) Anchor Variance Weighting | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | Weights regression by inverse anchor variance | `PLANNED` |
-| **CSTV-31** | Huber Loss Robust Regression Engine | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | Downweights moderate anchor residual outliers | `PLANNED` |
-| **CSTV-32** | RANSAC Outlier Rejection Regression | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | Rejects gross anchor mismatches ($\ge 2\text{s}$) | `PLANNED` |
-| **CSTV-33** | Theil-Sen Median-Based Non-Parametric Slope | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | 29.3% breakdown point on noisy anchor sets | `PLANNED` |
-| **CSTV-34** | Minimum Anchor Threshold Enforcement ($N \ge 3$) | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-02` | Blocks unvalidated drift estimation on $N < 3$ | `PLANNED` |
-| **CSTV-35** | Anti-Extrapolation Boundary Gating | PRD §16.5, §16.6 | TRD §15.6, §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Restricts model validity to $[T_{\min}, T_{\max}]$ | `PLANNED` |
-| **CSTV-36** | Clock Reset & Discontinuity Step Detection | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-03` | Flags sudden clock step jumps ($|\Delta O| > \tau$) | `PLANNED` |
-| **CSTV-37** | Non-Linear & Thermal Clock Drift Modeling | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-03` | Evaluates non-linear residual trends | `PLANNED` |
-| **CSTV-38** | Piecewise Linear Clock Segmentation Engine | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Fits separate pre-reset/post-reset models | `PLANNED` |
-| **CSTV-39** | Change-Point Detection via PELT Algorithm | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-03` | Optimal change-point segmentation in $O(N)$ | `PLANNED` |
-| **CSTV-40** | Segment-Specific Validity Bounds Enforcement | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Clamps segment evaluation to $[t_{\text{start}}, t_{\text{end}}]$ | `PLANNED` |
-| **CSTV-41** | Prohibition of Global Model Spanning Resets | PRD §16.5, §16.6 | TRD §15.6, §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Invariant check blocks single continuous model | `PLANNED` |
-| **CSTV-42** | Derived Segmented Time Mapping Engine | PRD §16.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Computes $\hat{T}$ across segmented timelines | `PLANNED` |
-| **CSTV-43** | Multi-Source Case Timeline Aggregation | PRD §16.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-03` | Aggregates 11 evidence categories into one view | `PLANNED` |
-| **CSTV-44** | Image and Audio Cross-Modal Correlation | PRD §16.3.2, §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-01` | Aligns EXIF capture instant with audio timeline | `PLANNED` |
-| **CSTV-45** | Audio and Video Cross-Stream Synchronization | PRD §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-01` | Aligns audio sample time with video PTS | `PLANNED` |
-| **CSTV-46** | CCTV Multi-Camera Spatial-Temporal Alignment | PRD §16.3.2, §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-02` | Synchronizes shop DVR with municipal camera | `PLANNED` |
-| **CSTV-47** | Offline PCAP & CCTV Video Timeline Correlation | PRD §16.3.2, §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-03` | Aligns network traffic burst with CCTV screen | `PLANNED` |
-| **CSTV-48** | GPS Track & Media Capture Temporal Interpolation | PRD §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-04` | Geodesic coordinate interpolation at photo time | `PLANNED` |
-| **CSTV-49** | Device & Recorder Event Log Alignment | PRD §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-01` | Aligns power-cycle syslog with video reboot | `PLANNED` |
-| **CSTV-50** | Cross-Evidence Non-Causality Evidentiary Safeguard | PRD §16.5, §16.10 | TRD §15.6, §17.5 | **CSTV-A7** | `CSTV-CP-07-04` | Non-causality statement in all finding texts | `PLANNED` |
-| **CSTV-51** | Standardized Event Anchor Data Contract | PRD §16.5, §16.7 | TRD §12.8, §17.5 | **CSTV-A6** | `CSTV-CP-06-01` | `EventAnchor` Pydantic v2 schema test suite | `PLANNED` |
-| **CSTV-52** | Acoustic Impulse Cross-Correlation Alignment | PRD §16.5, §16.7 | TRD §17.5 | **CSTV-A6** | `CSTV-CP-06-02` | Cross-correlation aligns gunshot transients | `PLANNED` |
-| **CSTV-53** | Audio-Visual Flash & Acoustic Onset Alignment | PRD §16.5, §16.7 | TRD §17.5 | **CSTV-A6** | `CSTV-CP-06-03` | Luminance derivative aligns with audio peak | `PLANNED` |
-| **CSTV-54** | Visual Common-Event Tracking & Feature Matching | PRD §16.5, §16.7 | TRD §17.5 | **CSTV-A6** | `CSTV-CP-06-03` | Matches pedestrian step landmark across feeds | `PLANNED` |
-| **CSTV-55** | Anti-Circular Calibration Invariant Enforcement | PRD §16.5, §16.7 | TRD §15.6, §17.5 | **CSTV-A6** | `CSTV-CP-06-04` | Disjoint sets: zero calibration/validation overlap | `PLANNED` |
-| **CSTV-56** | Multi-Factor Anchor Reliability Scoring | PRD §16.5, §16.7 | TRD §17.5 | **CSTV-A6** | `CSTV-CP-06-04` | Computes confidence $\in [0.0, 1.0]$ with SNR | `PLANNED` |
-| **CSTV-57** | Interval-Based Temporal Representation ($I = [t_{\min}, t_{\max}]$) | PRD §16.5, §16.8 | TRD §17.6 | **CSTV-A3** | `CSTV-CP-03-01` | Interval arithmetic accommodates measurement $\sigma$ | `PLANNED` |
-| **CSTV-58** | Allen's Thirteen Interval Relations Implementation | PRD §16.5, §16.8 | TRD §17.6 | **CSTV-A3** | `CSTV-CP-03-02` | Logic suite tests all 13 qualitative relations | `PLANNED` |
-| **CSTV-59** | Temporal Ordering & Monotonicity Verification | PRD §16.5, §16.8 | TRD §17.6 | **CSTV-A3** | `CSTV-CP-03-02` | Flags causal inversions and non-monotonic steps | `PLANNED` |
-| **CSTV-60** | Sequence Conflict Graph Construction | PRD §16.5, §16.8 | TRD §17.6 | **CSTV-A8** | `CSTV-CP-08-01` | Builds directed evidence graph with typed edges | `PLANNED` |
-| **CSTV-61** | Conflict Graph Cycle Detection (Tarjan's SCC) | PRD §16.5, §16.8 | TRD §17.6 | **CSTV-A8** | `CSTV-CP-08-01` | Tarjan's algorithm flags impossible causal loops | `PLANNED` |
-| **CSTV-62** | Explainable Temporal Conflict Generation | PRD §16.5 | TRD §17.6 | **CSTV-A8** | `CSTV-CP-08-01` | Generates drift/timezone conflict hypotheses | `PLANNED` |
-| **CSTV-63** | Measurement Uncertainty Propagation Engine | PRD §16.5, §16.10 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-02` | Calculates $\sigma_{\text{diff}} = \sqrt{\sigma_1^2 + \sigma_2^2}$ | `PLANNED` |
-| **CSTV-64** | Clock Model Parameter Covariance & Confidence Bands | PRD §16.5 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-02` | Computes $CI_{95\%}(\hat{T})$ using $(X^T X)^{-1}$ | `PLANNED` |
-| **CSTV-65** | Decoupled Multi-Dimensional Forensic Verdicts | PRD §16.5, §16.10 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-03` | Separates consistency, trust, and authenticity | `PLANNED` |
-| **CSTV-66** | Fourteen Canonical Decision States Taxonomy | PRD §16.5, §16.10 | TRD §12.8, §17.8 | **CSTV-A8** | `CSTV-CP-08-03` | Maps findings to 14 canonical states | `PLANNED` |
-| **CSTV-67** | First-Class Inconclusive Outcome Policy | PRD §16.5, §16.10 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-03` | Abstention permitted on high uncertainty | `PLANNED` |
-| **CSTV-68** | Twenty-Two Machine-Readable Finding Codes (`TIME_*`) | PRD §16.5 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-04` | Serializes 22 typed finding records with details | `PLANNED` |
-| **CSTV-69** | Case-Wide Interactive Master Evidence Timeline | PRD §16.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-03` | Serializes complete case chronological payload | `PLANNED` |
-| **CSTV-70** | Multi-Tiered Timeline Visual Discrimination | PRD §16.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-04` | Visually discriminates Raw vs Corrected vs Inferred | `PLANNED` |
-| **CSTV-71** | Timeline Multi-Attribute Filtering & Faceting | PRD §16.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-03` | Filters by evidence ID, clock, and modality | `PLANNED` |
-| **CSTV-72** | Interactive Dual-Timeline Comparison Canvas | PRD §16.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-04` | Parallel canvas rendering reference vs observed | `PLANNED` |
-| **CSTV-73** | CEIPL Cryptographic Evidence Lineage Integration | PRD §16.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A9** | `CSTV-CP-09-01` | Merkle DAG registers all models and findings | `PLANNED` |
-| **CSTV-74** | Derived WORM Artifact Registration | PRD §16.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A9** | `CSTV-CP-09-02` | Vault POSIX 0400 write-protection verified | `PLANNED` |
-| **CSTV-75** | Immutable Original Timestamp Preservation | PRD §16.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A9** | `CSTV-CP-09-01` | Asserts original metadata remains unaltered | `PLANNED` |
-| **CSTV-76** | Section 65B IEA / Section 63 BSA Legal Dossier Export | PRD §16.5, §16.11 | TRD §15.6, §17.9 | **CSTV-A9** | `CSTV-CP-09-03` | Generates court-certified PDF report with hashes | `PLANNED` |
-| **CSTV-77** | Multi-Tenant Case Scoping & RBAC Access Control | PRD §16.5, §16.11 | TRD §17.10 | **CSTV-A9** | `CSTV-CP-09-04` | RBAC test verifies zero inter-case data leaks | `PLANNED` |
-| **CSTV-78** | Tamper-Evident Audit Logging for Examiner Overrides | PRD §16.5, §16.11 | TRD §15.6, §17.10 | **CSTV-A9** | `CSTV-CP-09-04` | Immutable log records examiner manual edits | `PLANNED` |
-| **CSTV-79** | High-Throughput Normalization & Latency Performance | PRD §16.5, §16.9 | TRD §17.3, §17.9 | **CSTV-A10** | `CSTV-CP-10-02` | $\ge 5,000$ timestamps/sec; timeline $< 1.5\text{s}$ | `PLANNED` |
-| **CSTV-80** | Scalable Relational Database Persistence (PostgreSQL) | PRD §16.5 | TRD §17.10 | **CSTV-A1** | `CSTV-CP-01-04` | Index performance verified on 100k rows | `PLANNED` |
-| **CSTV-81** | Asynchronous Celery Worker Task Orchestration | PRD §16.5 | TRD §17.11 | **CSTV-A1** | `CSTV-CP-01-04` | Async task execution and cgroup limits pass | `PLANNED` |
-| **CSTV-82** | Controlled Synthetic & Ground-Truth Test Benchmarks | PRD §16.5 | TRD §17.13 | **CSTV-A10** | `CSTV-CP-10-01` | 500-fixture validation suite executes cleanly | `PLANNED` |
-| **CSTV-83** | False-Positive Suppression on Legitimate Media | PRD §16.5, §16.10 | TRD §17.13 | **CSTV-A10** | `CSTV-CP-10-03` | Zero false tampering findings on authentic controls | `PLANNED` |
-| **CSTV-84** | Deterministic Repeatability & Release Validation | PRD §16.5 | TRD §17.13 | **CSTV-A10** | `CSTV-CP-10-04` | 5-run bit-exact parameter hash consistency | `PLANNED` |
+| **CSTV-01** | Platform-Wide Shared Architecture Integration | PRD §17.5 | TRD §17.1 | **CSTV-A0** | `CSTV-CP-00-01` | Architecture audit confirms shared service design | `PLANNED` |
+| **CSTV-02** | Non-Destructive Temporal Analysis Invariant | PRD §17.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A0** | `CSTV-CP-00-03` | Bitstream hash invariance check passes | `PLANNED` |
+| **CSTV-03** | Modality Specialist Timing Delegation | PRD §17.5 | TRD §17.1 | **CSTV-A0** | `CSTV-CP-00-04` | Zero duplicate signal/video decoder logic | `PLANNED` |
+| **CSTV-04** | Cryptographic Lineage & DAG Provenance Binding | PRD §17.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A0** | `CSTV-CP-00-03` | Merkle DAG node parent hash assertion test | `PLANNED` |
+| **CSTV-05** | Air-Gapped Operation & External Time Safeguards | PRD §17.5, §16.9 | TRD §15.6, §17.7 | **CSTV-A0** | `CSTV-CP-00-02` | Zero external network calls in sandbox audit | `PLANNED` |
+| **CSTV-06** | Seventeen-Category Temporal Source Registry | PRD §17.4.1, §16.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-01` | Registry contract validation across 17 sources | `PLANNED` |
+| **CSTV-07** | Eighteen-Field Timestamp Observation Schema | PRD §17.4.1, §16.5 | TRD §12.8, §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Pydantic v2 `TemporalObservation` test suite | `PLANNED` |
+| **CSTV-08** | Canonical Timestamp Data Representation | PRD §17.5 | TRD §12.8, §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | JSON schema validation against canonical format | `PLANNED` |
+| **CSTV-09** | Exact Integer & Rational Precision Preservation | PRD §17.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Numerical benchmark: zero float rounding drift | `PLANNED` |
+| **CSTV-10** | Multi-Evidence Case Scoping & Exhibit Isolation | PRD §17.5 | TRD §17.10 | **CSTV-A1** | `CSTV-CP-01-04` | PostgreSQL multi-tenant isolation unit test | `PLANNED` |
+| **CSTV-11** | Physical Clock Identity Disambiguation | PRD §17.5 | TRD §17.2, §17.10 | **CSTV-A1** | `CSTV-CP-01-01` | Disambiguates recorder RTC vs camera clock | `PLANNED` |
+| **CSTV-12** | Source Trust & Provenance Classification | PRD §17.5 | TRD §17.2, §17.7 | **CSTV-A1** | `CSTV-CP-01-01` | Classifies HARDWARE vs EXIF vs USER trust | `PLANNED` |
+| **CSTV-13** | 27-State Timestamp Semantics Taxonomy | PRD §17.4.2, §16.5 | TRD §12.8, §17.2 | **CSTV-A1** | `CSTV-CP-01-03` | `TimestampSemanticsEnum` completeness tests | `PLANNED` |
+| **CSTV-14** | Semantic Contradiction & Anomaly Detection | PRD §17.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-03` | Flags modification date preceding creation | `PLANNED` |
+| **CSTV-15** | Container vs Stream Presentation Time Disambiguation | PRD §17.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-03` | Differentiates MP4 `mvhd` date from PTS start | `PLANNED` |
+| **CSTV-16** | CCTV OSD Overlay vs System Clock Disambiguation | PRD §17.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-03` | Differentiates OCR clock text from DVR log | `PLANNED` |
+| **CSTV-17** | Audio Sample-Index Continuous Time Mapping | PRD §17.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Sample math verification ($t = t_0 + n/f_s$) | `PLANNED` |
+| **CSTV-18** | Video Frame PTS Rational Timebase Conversion | PRD §17.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Rational tick conversion ($t = \text{PTS} \times TB$) | `PLANNED` |
+| **CSTV-19** | Offline PCAP Packet Timestamp Ingestion | PRD §17.5 | TRD §17.2 | **CSTV-A1** | `CSTV-CP-01-02` | Nanosecond precision packet capture test | `PLANNED` |
+| **CSTV-20** | Timezone Offset Normalization & IANA Tracking | PRD §17.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-01` | Validates $t_{\text{UTC}} = t_{\text{local}} - \Delta_{\text{UTC}}$ | `PLANNED` |
+| **CSTV-21** | Prohibition of Silent Local Machine Timezone Inference | PRD §17.5, §16.10 | TRD §15.6, §17.3 | **CSTV-A2** | `CSTV-CP-02-02` | Asserts UNKNOWN flag on naive timestamps | `PLANNED` |
+| **CSTV-22** | Daylight Saving Time (DST) Transition Disambiguation | PRD §17.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-03` | Dual candidate intervals on fall-back transition | `PLANNED` |
+| **CSTV-23** | Multi-Hypothesis Timezone Ambiguity Representation | PRD §17.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-03` | Serializes candidate UTC interval branches | `PLANNED` |
+| **CSTV-24** | GPS Time to UTC Leap-Second Conversion | PRD §17.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-04` | 18-second leap-second offset conversion test | `PLANNED` |
+| **CSTV-25** | Leap-Second Lineage & Provenance Tracking | PRD §17.5 | TRD §17.3 | **CSTV-A2** | `CSTV-CP-02-04` | Logs IERS Bulletin C version in observation | `PLANNED` |
+| **CSTV-26** | Pairwise Relative Clock Offset Estimation | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A4** | `CSTV-CP-04-01` | Calculates $O_{ij}(t) = C_i(t) - C_j(t)$ | `PLANNED` |
+| **CSTV-27** | Reference Clock Selection & Hierarchy Governance | PRD §17.5 | TRD §17.4 | **CSTV-A4** | `CSTV-CP-04-02` | Enforces GPS > NTP > Recorder trust priority | `PLANNED` |
+| **CSTV-28** | Linear Clock Drift Modeling ($t_i = a + b T + \epsilon$) | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-02` | Accurately recovers slope and drift in ppm | `PLANNED` |
+| **CSTV-29** | Ordinary Least Squares (OLS) Linear Regression | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | SciPy regression benchmark on clean anchors | `PLANNED` |
+| **CSTV-30** | Weighted Least Squares (WLS) Anchor Variance Weighting | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | Weights regression by inverse anchor variance | `PLANNED` |
+| **CSTV-31** | Huber Loss Robust Regression Engine | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | Downweights moderate anchor residual outliers | `PLANNED` |
+| **CSTV-32** | RANSAC Outlier Rejection Regression | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | Rejects gross anchor mismatches ($\ge 2\text{s}$) | `PLANNED` |
+| **CSTV-33** | Theil-Sen Median-Based Non-Parametric Slope | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-01` | 29.3% breakdown point on noisy anchor sets | `PLANNED` |
+| **CSTV-34** | Minimum Anchor Threshold Enforcement ($N \ge 3$) | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-02` | Blocks unvalidated drift estimation on $N < 3$ | `PLANNED` |
+| **CSTV-35** | Anti-Extrapolation Boundary Gating | PRD §17.5, §16.6 | TRD §15.6, §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Restricts model validity to $[T_{\min}, T_{\max}]$ | `PLANNED` |
+| **CSTV-36** | Clock Reset & Discontinuity Step Detection | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-03` | Flags sudden clock step jumps ($|\Delta O| > \tau$) | `PLANNED` |
+| **CSTV-37** | Non-Linear & Thermal Clock Drift Modeling | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-03` | Evaluates non-linear residual trends | `PLANNED` |
+| **CSTV-38** | Piecewise Linear Clock Segmentation Engine | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Fits separate pre-reset/post-reset models | `PLANNED` |
+| **CSTV-39** | Change-Point Detection via PELT Algorithm | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-03` | Optimal change-point segmentation in $O(N)$ | `PLANNED` |
+| **CSTV-40** | Segment-Specific Validity Bounds Enforcement | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Clamps segment evaluation to $[t_{\text{start}}, t_{\text{end}}]$ | `PLANNED` |
+| **CSTV-41** | Prohibition of Global Model Spanning Resets | PRD §17.5, §16.6 | TRD §15.6, §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Invariant check blocks single continuous model | `PLANNED` |
+| **CSTV-42** | Derived Segmented Time Mapping Engine | PRD §17.5, §16.6 | TRD §17.4 | **CSTV-A5** | `CSTV-CP-05-04` | Computes $\hat{T}$ across segmented timelines | `PLANNED` |
+| **CSTV-43** | Multi-Source Case Timeline Aggregation | PRD §17.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-03` | Aggregates 11 evidence categories into one view | `PLANNED` |
+| **CSTV-44** | Image and Audio Cross-Modal Correlation | PRD §17.3.2, §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-01` | Aligns EXIF capture instant with audio timeline | `PLANNED` |
+| **CSTV-45** | Audio and Video Cross-Stream Synchronization | PRD §17.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-01` | Aligns audio sample time with video PTS | `PLANNED` |
+| **CSTV-46** | CCTV Multi-Camera Spatial-Temporal Alignment | PRD §17.3.2, §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-02` | Synchronizes shop DVR with municipal camera | `PLANNED` |
+| **CSTV-47** | Offline PCAP & CCTV Video Timeline Correlation | PRD §17.3.2, §16.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-03` | Aligns network traffic burst with CCTV screen | `PLANNED` |
+| **CSTV-48** | GPS Track & Media Capture Temporal Interpolation | PRD §17.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-04` | Geodesic coordinate interpolation at photo time | `PLANNED` |
+| **CSTV-49** | Device & Recorder Event Log Alignment | PRD §17.5 | TRD §17.5 | **CSTV-A7** | `CSTV-CP-07-01` | Aligns power-cycle syslog with video reboot | `PLANNED` |
+| **CSTV-50** | Cross-Evidence Non-Causality Evidentiary Safeguard | PRD §17.5, §16.10 | TRD §15.6, §17.5 | **CSTV-A7** | `CSTV-CP-07-04` | Non-causality statement in all finding texts | `PLANNED` |
+| **CSTV-51** | Standardized Event Anchor Data Contract | PRD §17.5, §16.7 | TRD §12.8, §17.5 | **CSTV-A6** | `CSTV-CP-06-01` | `EventAnchor` Pydantic v2 schema test suite | `PLANNED` |
+| **CSTV-52** | Acoustic Impulse Cross-Correlation Alignment | PRD §17.5, §16.7 | TRD §17.5 | **CSTV-A6** | `CSTV-CP-06-02` | Cross-correlation aligns gunshot transients | `PLANNED` |
+| **CSTV-53** | Audio-Visual Flash & Acoustic Onset Alignment | PRD §17.5, §16.7 | TRD §17.5 | **CSTV-A6** | `CSTV-CP-06-03` | Luminance derivative aligns with audio peak | `PLANNED` |
+| **CSTV-54** | Visual Common-Event Tracking & Feature Matching | PRD §17.5, §16.7 | TRD §17.5 | **CSTV-A6** | `CSTV-CP-06-03` | Matches pedestrian step landmark across feeds | `PLANNED` |
+| **CSTV-55** | Anti-Circular Calibration Invariant Enforcement | PRD §17.5, §16.7 | TRD §15.6, §17.5 | **CSTV-A6** | `CSTV-CP-06-04` | Disjoint sets: zero calibration/validation overlap | `PLANNED` |
+| **CSTV-56** | Multi-Factor Anchor Reliability Scoring | PRD §17.5, §16.7 | TRD §17.5 | **CSTV-A6** | `CSTV-CP-06-04` | Computes confidence $\in [0.0, 1.0]$ with SNR | `PLANNED` |
+| **CSTV-57** | Interval-Based Temporal Representation ($I = [t_{\min}, t_{\max}]$) | PRD §17.5, §16.8 | TRD §17.6 | **CSTV-A3** | `CSTV-CP-03-01` | Interval arithmetic accommodates measurement $\sigma$ | `PLANNED` |
+| **CSTV-58** | Allen's Thirteen Interval Relations Implementation | PRD §17.5, §16.8 | TRD §17.6 | **CSTV-A3** | `CSTV-CP-03-02` | Logic suite tests all 13 qualitative relations | `PLANNED` |
+| **CSTV-59** | Temporal Ordering & Monotonicity Verification | PRD §17.5, §16.8 | TRD §17.6 | **CSTV-A3** | `CSTV-CP-03-02` | Flags causal inversions and non-monotonic steps | `PLANNED` |
+| **CSTV-60** | Sequence Conflict Graph Construction | PRD §17.5, §16.8 | TRD §17.6 | **CSTV-A8** | `CSTV-CP-08-01` | Builds directed evidence graph with typed edges | `PLANNED` |
+| **CSTV-61** | Conflict Graph Cycle Detection (Tarjan's SCC) | PRD §17.5, §16.8 | TRD §17.6 | **CSTV-A8** | `CSTV-CP-08-01` | Tarjan's algorithm flags impossible causal loops | `PLANNED` |
+| **CSTV-62** | Explainable Temporal Conflict Generation | PRD §17.5 | TRD §17.6 | **CSTV-A8** | `CSTV-CP-08-01` | Generates drift/timezone conflict hypotheses | `PLANNED` |
+| **CSTV-63** | Measurement Uncertainty Propagation Engine | PRD §17.5, §16.10 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-02` | Calculates $\sigma_{\text{diff}} = \sqrt{\sigma_1^2 + \sigma_2^2}$ | `PLANNED` |
+| **CSTV-64** | Clock Model Parameter Covariance & Confidence Bands | PRD §17.5 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-02` | Computes $CI_{95\%}(\hat{T})$ using $(X^T X)^{-1}$ | `PLANNED` |
+| **CSTV-65** | Decoupled Multi-Dimensional Forensic Verdicts | PRD §17.5, §16.10 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-03` | Separates consistency, trust, and authenticity | `PLANNED` |
+| **CSTV-66** | Fourteen Canonical Decision States Taxonomy | PRD §17.5, §16.10 | TRD §12.8, §17.8 | **CSTV-A8** | `CSTV-CP-08-03` | Maps findings to 14 canonical states | `PLANNED` |
+| **CSTV-67** | First-Class Inconclusive Outcome Policy | PRD §17.5, §16.10 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-03` | Abstention permitted on high uncertainty | `PLANNED` |
+| **CSTV-68** | Twenty-Two Machine-Readable Finding Codes (`TIME_*`) | PRD §17.5 | TRD §17.8 | **CSTV-A8** | `CSTV-CP-08-04` | Serializes 22 typed finding records with details | `PLANNED` |
+| **CSTV-69** | Case-Wide Interactive Master Evidence Timeline | PRD §17.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-03` | Serializes complete case chronological payload | `PLANNED` |
+| **CSTV-70** | Multi-Tiered Timeline Visual Discrimination | PRD §17.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-04` | Visually discriminates Raw vs Corrected vs Inferred | `PLANNED` |
+| **CSTV-71** | Timeline Multi-Attribute Filtering & Faceting | PRD §17.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-03` | Filters by evidence ID, clock, and modality | `PLANNED` |
+| **CSTV-72** | Interactive Dual-Timeline Comparison Canvas | PRD §17.5 | TRD §17.9 | **CSTV-A3** | `CSTV-CP-03-04` | Parallel canvas rendering reference vs observed | `PLANNED` |
+| **CSTV-73** | CEIPL Cryptographic Evidence Lineage Integration | PRD §17.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A9** | `CSTV-CP-09-01` | Merkle DAG registers all models and findings | `PLANNED` |
+| **CSTV-74** | Derived WORM Artifact Registration | PRD §17.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A9** | `CSTV-CP-09-02` | Vault POSIX 0400 write-protection verified | `PLANNED` |
+| **CSTV-75** | Immutable Original Timestamp Preservation | PRD §17.5, §16.11 | TRD §15.6, §17.1 | **CSTV-A9** | `CSTV-CP-09-01` | Asserts original metadata remains unaltered | `PLANNED` |
+| **CSTV-76** | Section 63 BSA Legal Dossier Export | PRD §17.5, §17.11 | TRD §15.6, §17.9 | **CSTV-A9** | `CSTV-CP-09-03` | Generates structured PDF report with hashes | `PLANNED` |
+| **CSTV-77** | Multi-Tenant Case Scoping & RBAC Access Control | PRD §17.5, §16.11 | TRD §17.10 | **CSTV-A9** | `CSTV-CP-09-04` | RBAC test verifies zero inter-case data leaks | `PLANNED` |
+| **CSTV-78** | Tamper-Evident Audit Logging for Examiner Overrides | PRD §17.5, §16.11 | TRD §15.6, §17.10 | **CSTV-A9** | `CSTV-CP-09-04` | Immutable log records examiner manual edits | `PLANNED` |
+| **CSTV-79** | High-Throughput Normalization & Latency Performance | PRD §17.5, §16.9 | TRD §17.3, §17.9 | **CSTV-A10** | `CSTV-CP-10-02` | $\ge 5,000$ timestamps/sec; timeline $< 1.5\text{s}$ | `PLANNED` |
+| **CSTV-80** | Scalable Relational Database Persistence (PostgreSQL) | PRD §17.5 | TRD §17.10 | **CSTV-A1** | `CSTV-CP-01-04` | Index performance verified on 100k rows | `PLANNED` |
+| **CSTV-81** | Asynchronous Celery Worker Task Orchestration | PRD §17.5 | TRD §17.11 | **CSTV-A1** | `CSTV-CP-01-04` | Async task execution and cgroup limits pass | `PLANNED` |
+| **CSTV-82** | Controlled Synthetic & Ground-Truth Test Benchmarks | PRD §17.5 | TRD §17.13 | **CSTV-A10** | `CSTV-CP-10-01` | 500-fixture validation suite executes cleanly | `PLANNED` |
+| **CSTV-83** | False-Positive Suppression on Legitimate Media | PRD §17.5, §16.10 | TRD §17.13 | **CSTV-A10** | `CSTV-CP-10-03` | Zero false tampering findings on authentic controls | `PLANNED` |
+| **CSTV-84** | Deterministic Repeatability & Release Validation | PRD §17.5 | TRD §17.13 | **CSTV-A10** | `CSTV-CP-10-04` | 5-run bit-exact parameter hash consistency | `PLANNED` |
 
 ---
 
@@ -6655,7 +6655,7 @@ flowchart TD
 - **5. Unit & Integration Test Specifications:**
   - `test_mvsi_speaker_binding()`: Binds Speaker 1 ID to candidate splice region without causal blame.
   - `test_ceipl_merkle_dag_lineage()`: Asserts parent exhibit SHA-256 link in finding DAG node.
-  - `test_ufredf_section65b_pdf_generation()`: Exports court-admissible PDF dossier with figures.
+  - `test_ufredf_section65b_pdf_generation()`: Exports structured PDF dossier with figures and sample-index tables.
   - `test_examiner_override_audit_trail()`: Asserts append-only audit record on examiner confirmation.
 - **6. Performance & Benchmark Targets:** PDF dossier generation $< 2.5\text{ s}$; UI scrub latency $< 16\text{ ms}$ (60 fps).
 - **7. Expected Deliverables & Artifacts:** `src/auras/are/aesl/integration/mvsi_bridge.py`, `src/ufredf/templates/aesl_dossier.html`.
@@ -6710,96 +6710,96 @@ Every Audio Edit and Splice Localisation requirement (`AESL-01` through `AESL-90
 
 | Req ID | Requirement Title | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Validation Evidence | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **AESL-01** | ARE Embedded Architectural Boundary | PRD §17.1, §17.6 | TRD §18.1 | **AURAS-AESL-00** | `AESL-CP-00-01` | Architecture audit confirms ARE ownership | `PLANNED` |
-| **AESL-02** | Three-Engine Subsystem Preservation | PRD §17.2.2, §17.6 | TRD §18.1 | **AURAS-AESL-00** | `AESL-CP-00-03` | Verifies AURAS retains exactly 3 engines | `PLANNED` |
-| **AESL-03** | Modality Specialist Delegation (MVSI & ADDE) | PRD §17.2.2, §17.6 | TRD §18.1 | **AURAS-AESL-00** | `AESL-CP-00-04` | Reuses MVSI diarization and ADDE voice flags | `PLANNED` |
-| **AESL-04** | Air-Gapped Offline Execution Safeguard | PRD §17.2.2, §17.6 | TRD §15.7, §18.1 | **AURAS-AESL-00** | `AESL-CP-00-02` | Zero external network calls in sandbox audit | `PLANNED` |
-| **AESL-05** | Shared Infrastructure Reuse (CEIPL, CMMS, UFREDF)| PRD §17.6 | TRD §18.1 | **AURAS-AESL-00** | `AESL-CP-00-04` | Shared service interface client test | `PLANNED` |
-| **AESL-06** | Original Evidence Bitstream Immutability | PRD §17.6, §17.12 | TRD §15.7, §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Exhibit SHA-256 assert pre/post execution | `PLANNED` |
-| **AESL-07** | Non-Destructive Working Copy Factory | PRD §17.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Artifact A and B manifest validation | `PLANNED` |
-| **AESL-08** | Multi-Format Defensive Decoding | PRD §17.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | 50-file corrupted audio format suite | `PLANNED` |
-| **AESL-09** | Technical Audio Metadata Preservation | PRD §17.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | CMMS metadata schema validation | `PLANNED` |
-| **AESL-10** | Native Channel Preservation Invariant | PRD §17.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Preserves multi-channel layout in Artifact A | `PLANNED` |
-| **AESL-11** | Derived 16 kHz Mono Normalization Contract | PRD §17.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Sinc resampled Artifact B with mapping | `PLANNED` |
-| **AESL-12** | Decompression Bomb & Resource Ceilings | PRD §17.6 | TRD §15.7, §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Cgroup memory kill test at 4 GB ceiling | `PLANNED` |
-| **AESL-13** | Exact Integer Sample-Index Tracking ($t = n/f_s$) | PRD §17.6, §17.7 | TRD §15.7, §18.3 | **AURAS-AESL-01** | `AESL-CP-01-03` | Precision benchmark ($< 1\mu\text{s}$ float error)| `PLANNED` |
-| **AESL-14** | Multi-Resolution Segmentation Engine | PRD §17.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | 4-scale windowing grid unit test | `PLANNED` |
-| **AESL-15** | Short-Window Boundary Analysis (10-20ms) | PRD §17.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Captures hard waveform cuts | `PLANNED` |
-| **AESL-16** | Medium-Window Spectral Analysis (20-50ms) | PRD §17.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Analyzes STFT flux and LFCC/MFCC | `PLANNED` |
-| **AESL-17** | Long-Window Acoustic Environment (50-200ms) | PRD §17.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Tracks noise floor stationarity | `PLANNED` |
-| **AESL-18** | Macro-Window Contextual Analysis (200-1000ms+) | PRD §17.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Evaluates RT60 and room ambience | `PLANNED` |
-| **AESL-19** | Dynamic Adaptive Windowing on Low SNR | PRD §17.6 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Adaptive window expansion benchmark | `PLANNED` |
-| **AESL-20** | Waveform Amplitude Discontinuity Inspection | PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Flags step jump with $\Delta E > 12\text{ dB}$ | `PLANNED` |
-| **AESL-21** | Root Mean Square (RMS) & Energy Contours | PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Short-time energy calculation test | `PLANNED` |
-| **AESL-22** | Crest Factor & Local Variance Analysis | PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Dynamic range peak-to-RMS variance test | `PLANNED` |
-| **AESL-23** | Zero-Crossing Rate & Phase Discontinuity | PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Flags phase inversion zero-crossing | `PLANNED` |
-| **AESL-24** | First-Order Waveform Derivative Analysis | PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Slope peak $|d[n]|$ discontinuity test | `PLANNED` |
-| **AESL-25** | Local DC Offset Shift Detection | PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Flags localized DC bias step | `PLANNED` |
-| **AESL-26** | Boundary-Specific Sample-Neighborhood Inspection| PRD §17.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Narrow-window sample delta assert | `PLANNED` |
-| **AESL-27** | Natural Speech Plosive False-Positive Guard | PRD §17.6, §17.10 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Natural plosive rejection test suite | `PLANNED` |
-| **AESL-28** | Multi-Band Noise-Floor Energy Tracking | PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-01` | Spectral noise-floor energy test | `PLANNED` |
-| **AESL-29** | Minimum Statistics Noise Estimation | PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-01` | Minimum tracking noise benchmark | `PLANNED` |
-| **AESL-30** | Spectral Flatness & Spectral Entropy Profiling | PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-01` | Tonality transition detection test | `PLANNED` |
-| **AESL-31** | Room Impulse Response (RIR) Characteristic Modeling| PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-02` | Blind RIR parameter estimation test | `PLANNED` |
-| **AESL-32** | Reverberation Decay Time (RT60) Discontinuity | PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-02` | Flags RT60 step jump $> 0.2\text{s}$ | `PLANNED` |
-| **AESL-33** | Direct-to-Reverberant Ratio (DRR) Tracking | PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-02` | DRR distance transition test | `PLANNED` |
-| **AESL-34** | Ambient Background Signature Distance ($D_{\text{env}}$)| PRD §17.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-03` | Validates $D_{\text{env}} > 0.65$ on splices | `PLANNED` |
-| **AESL-35** | Microphone Handling & Distance Shift Safeguard | PRD §17.6, §17.10 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-04` | Suppresses handling noise false alarms | `PLANNED` |
-| **AESL-36** | High-Resolution Short-Time Fourier Transform (STFT)| PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Hann-windowed STFT unit test | `PLANNED` |
-| **AESL-37** | Spectral Centroid & Bandwidth Tracking | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Centroid step discontinuity test | `PLANNED` |
-| **AESL-38** | Spectral Flux & Onset Strength Modeling | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Half-wave rectified flux peak test | `PLANNED` |
-| **AESL-39** | Spectral Rolloff Frequency Transition Detection | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Low-pass filter rolloff drop test | `PLANNED` |
-| **AESL-40** | Linear Frequency Cepstral Coefficients (LFCC) | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | LFCC feature extraction test | `PLANNED` |
-| **AESL-41** | Mel-Frequency Cepstral Coefficients (MFCC) | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | MFCC distance matrix calculation test | `PLANNED` |
-| **AESL-42** | Evidence-Linked Forensic Spectrogram Generation | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Exact coordinate visual render test | `PLANNED` |
-| **AESL-43** | Multi-Channel Independent Signal Extraction | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Multi-channel array extraction test | `PLANNED` |
-| **AESL-44** | Inter-Channel Cross-Correlation ($R_{xy}(\tau)$) | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Normalized peak coherence $\rho_{\max}$ | `PLANNED` |
-| **AESL-45** | Inter-Channel Time Difference (ITD) Tracking | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | ITD spatial angle consistency test | `PLANNED` |
-| **AESL-46** | Stereo-Image & Phase Discontinuity Detection | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Flags stereo image collapse/inversion | `PLANNED` |
-| **AESL-47** | Channel Energy Distribution Discrepancy | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Localized channel energy step test | `PLANNED` |
-| **AESL-48** | Unilateral Channel Edit Localisation | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Isolates splice on single channel | `PLANNED` |
-| **AESL-49** | MP3/AAC Frame Allocation & Header Continuity | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-01` | Frame header sequence audit test | `PLANNED` |
-| **AESL-50** | MDCT Quantization Scalefactor Band Inconsistency| PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-01` | Quantization step discrepancy test | `PLANNED` |
-| **AESL-51** | Bitrate & High-Frequency Cutoff Transition | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-02` | Flags $16\text{ kHz} \to 11\text{ kHz}$ cutoff drop | `PLANNED` |
-| **AESL-52** | Double-Compression & Transcoding Trace Detection| PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-03` | MDCT histogram ghost peak test | `PLANNED` |
-| **AESL-53** | Resampling & Sample-Rate Conversion Traces | PRD §17.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-04` | Anti-aliasing filter ripple test | `PLANNED` |
-| **AESL-54** | Codec Artifact Forensic Limitation Disclaimers | PRD §17.6, §17.11 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-04` | Report disclaimer inclusion audit | `PLANNED` |
-| **AESL-55** | Self-Similarity Matrix Acoustic Fingerprinting | PRD §17.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-01` | 64-bit sub-band energy hash test | `PLANNED` |
-| **AESL-56** | Normalized Cross-Correlation Template Matching | PRD §17.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-02` | Identifies duplicate with $R_{xy} \ge 0.99$ | `PLANNED` |
-| **AESL-57** | Dynamic Time Warping (DTW) Syllable Alignment | PRD §17.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-03` | Matches warped cloned segment | `PLANNED` |
-| **AESL-58** | Minimum Duration Threshold for Duplication | PRD §17.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-04` | Gated on $\Delta t \ge 100\text{ ms}$ duration | `PLANNED` |
-| **AESL-59** | Natural Speech Repetition False-Positive Guard | PRD §17.6, §17.10 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-04` | Pitch micro-jitter check passes | `PLANNED` |
-| **AESL-60** | Ambient Background Loop Duplication Detection | PRD §17.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-02` | Flags cloned ambient traffic loop | `PLANNED` |
-| **AESL-61** | Statistical Change-Point Detection (CUSUM) | PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-06** | `AESL-CP-06-03` | Cumulative sum shift test | `PLANNED` |
-| **AESL-62** | Pruned Exact Linear Time (PELT) Change Detection | PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-06** | `AESL-CP-06-02` | PELT $O(N)$ segmentation benchmark | `PLANNED` |
-| **AESL-63** | Kernel-Based Non-Parametric Change-Point Detection| PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-06** | `AESL-CP-06-04` | Kernel MMD segmentation test | `PLANNED` |
-| **AESL-64** | Multi-Branch Feature Stacking for Segmentation | PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-06** | `AESL-CP-06-01` | Normalized composite matrix test | `PLANNED` |
-| **AESL-65** | Learned Temporal Localisation Model (TCN/CRNN) | PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-07** | `AESL-CP-07-01` | Frame-level suspicion inference test | `PLANNED` |
-| **AESL-66** | ASLNet Research Architecture Evaluation | PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-07** | `AESL-CP-07-03` | ASLNet benchmark evaluation harness | `PLANNED` |
-| **AESL-67** | Time-Indexed Suspicion Curve Output | PRD §17.6, §17.8 | TRD §18.8 | **AURAS-AESL-07** | `AESL-CP-07-01` | Frame-to-second score array test | `PLANNED` |
-| **AESL-68** | Candidate Boundary Generation at Native Resolution| PRD §17.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-01` | Candidate interval constructor test | `PLANNED` |
-| **AESL-69** | Dual-Threshold Hysteresis Region Aggregation | PRD §17.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-01` | $\tau_{\text{high}}=0.70, \tau_{\text{low}}=0.40$ | `PLANNED` |
-| **AESL-70** | Micro-Interval Preservation Safeguard ($\ge 10\text{ms}$)| PRD §17.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-01` | Preserves brief word deletion intervals | `PLANNED` |
-| **AESL-71** | Sample-Level Narrow-Window Boundary Refinement | PRD §17.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-02` | Refines boundary to exact zero-crossing | `PLANNED` |
-| **AESL-72** | Boundary Uncertainty Interval Quantification | PRD §17.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-03` | Computes $\pm \sigma_{\text{ms}}$ confidence bands | `PLANNED` |
-| **AESL-73** | Multi-Branch Late Fusion & Disagreement Retention| PRD §17.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-04` | Preserves inter-branch disagreement | `PLANNED` |
-| **AESL-74** | MVSI Speaker Diarization Timeline Ingestion | PRD §17.6, §17.10 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Binds speaker IDs to edit regions | `PLANNED` |
-| **AESL-75** | Voice Activity Detection (VAD) Speech Alignment | PRD §17.6, §17.10 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Differentiates speech vs pause edits | `PLANNED` |
-| **AESL-76** | Multilingual & Code-Switching Invariant Guard | PRD §17.6, §17.10 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Rejects language change false alarm | `PLANNED` |
-| **AESL-77** | Speaker Turn-Taking Discontinuity Disambiguation | PRD §17.6, §17.10 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Natural turn-taking check passes | `PLANNED` |
-| **AESL-78** | Non-Speech Environmental Recording Analysis | PRD §17.6 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Non-speech audio benchmark passes | `PLANNED` |
-| **AESL-79** | Twenty Machine-Readable Finding Taxonomy (`AUDIO_EDIT_*`)| PRD §17.6 | TRD §12.9, §18.12| **AURAS-AESL-08** | `AESL-CP-08-04` | Serializes 20 typed finding records | `PLANNED` |
-| **AESL-80** | Fourteen Canonical Temporal Decision States | PRD §17.6 | TRD §12.9, §18.12| **AURAS-AESL-08** | `AESL-CP-08-04` | Maps findings to 14 canonical states | `PLANNED` |
-| **AESL-81** | First-Class Inconclusive Outcome Policy | PRD §17.6 | TRD §15.7, §18.12| **AURAS-AESL-08** | `AESL-CP-08-04` | Abstains on severe low-quality audio | `PLANNED` |
-| **AESL-82** | Synchronized Dual-Waveform Examiner Review UI | PRD §17.6 | TRD §18.11 | **AURAS-AESL-09** | `AESL-CP-09-04` | Interactive sample-accurate review UI | `PLANNED` |
-| **AESL-83** | Quality Control & 18 Benign Alternative Explanations| PRD §17.6, §17.10 | TRD §15.7, §18.11| **AURAS-AESL-09** | `AESL-CP-09-04` | Checklist audit in all findings | `PLANNED` |
-| **AESL-84** | CEIPL Cryptographic Evidence Lineage Integration | PRD §17.6, §17.12 | TRD §15.7, §18.10| **AURAS-AESL-09** | `AESL-CP-09-02` | Merkle DAG registers all findings | `PLANNED` |
-| **AESL-85** | Derived Analysis Representation WORM Vault Locking| PRD §17.6, §17.12 | TRD §15.7, §18.10| **AURAS-AESL-09** | `AESL-CP-09-02` | POSIX 0400 read-only mode verified | `PLANNED` |
-| **AESL-86** | Tamper-Evident Examiner Override Audit Logging | PRD §17.6, §17.12 | TRD §15.7, §18.11| **AURAS-AESL-09** | `AESL-CP-09-04` | Immutable log records examiner edits | `PLANNED` |
-| **AESL-87** | Worker Timeout & Memory Cgroup Limits (4 GB) | PRD §17.6 | TRD §15.7, §18.13| **AURAS-AESL-01** | `AESL-CP-01-02` | Cgroup memory kill test at 4 GB | `PLANNED` |
-| **AESL-88** | Section 65B IEA / Section 63 BSA Certified PDF Dossier| PRD §17.6, §17.12 | TRD §15.7, §18.11| **AURAS-AESL-09** | `AESL-CP-09-03` | Generates court-certified PDF report | `PLANNED` |
-| **AESL-89** | Controlled 500-Fixture Evaluation Dataset | PRD §17.6 | TRD §18.15 | **AURAS-AESL-10** | `AESL-CP-10-01` | 500 ground-truth fixtures evaluated | `PLANNED` |
-| **AESL-90** | Region-Level IoU & Boundary MAE Metrics | PRD §17.6 | TRD §18.15 | **AURAS-AESL-10** | `AESL-CP-10-02` | $\text{tIoU} \ge 0.75$, $\text{MAE} \le 15\text{ms}$ | `PLANNED` |
+| **AESL-01** | ARE Embedded Architectural Boundary | PRD §18.1, §17.6 | TRD §18.1 | **AURAS-AESL-00** | `AESL-CP-00-01` | Architecture audit confirms ARE ownership | `PLANNED` |
+| **AESL-02** | Three-Engine Subsystem Preservation | PRD §18.2.2, §17.6 | TRD §18.1 | **AURAS-AESL-00** | `AESL-CP-00-03` | Verifies AURAS retains exactly 3 engines | `PLANNED` |
+| **AESL-03** | Modality Specialist Delegation (MVSI & ADDE) | PRD §18.2.2, §17.6 | TRD §18.1 | **AURAS-AESL-00** | `AESL-CP-00-04` | Reuses MVSI diarization and ADDE voice flags | `PLANNED` |
+| **AESL-04** | Air-Gapped Offline Execution Safeguard | PRD §18.2.2, §17.6 | TRD §15.7, §18.1 | **AURAS-AESL-00** | `AESL-CP-00-02` | Zero external network calls in sandbox audit | `PLANNED` |
+| **AESL-05** | Shared Infrastructure Reuse (CEIPL, CMMS, UFREDF)| PRD §18.6 | TRD §18.1 | **AURAS-AESL-00** | `AESL-CP-00-04` | Shared service interface client test | `PLANNED` |
+| **AESL-06** | Original Evidence Bitstream Immutability | PRD §18.6, §17.12 | TRD §15.7, §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Exhibit SHA-256 assert pre/post execution | `PLANNED` |
+| **AESL-07** | Non-Destructive Working Copy Factory | PRD §18.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Artifact A and B manifest validation | `PLANNED` |
+| **AESL-08** | Multi-Format Defensive Decoding | PRD §18.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | 50-file corrupted audio format suite | `PLANNED` |
+| **AESL-09** | Technical Audio Metadata Preservation | PRD §18.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | CMMS metadata schema validation | `PLANNED` |
+| **AESL-10** | Native Channel Preservation Invariant | PRD §18.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Preserves multi-channel layout in Artifact A | `PLANNED` |
+| **AESL-11** | Derived 16 kHz Mono Normalization Contract | PRD §18.5, §17.6 | TRD §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Sinc resampled Artifact B with mapping | `PLANNED` |
+| **AESL-12** | Decompression Bomb & Resource Ceilings | PRD §18.6 | TRD §15.7, §18.2 | **AURAS-AESL-01** | `AESL-CP-01-02` | Cgroup memory kill test at 4 GB ceiling | `PLANNED` |
+| **AESL-13** | Exact Integer Sample-Index Tracking ($t = n/f_s$) | PRD §18.6, §17.7 | TRD §15.7, §18.3 | **AURAS-AESL-01** | `AESL-CP-01-03` | Precision benchmark ($< 1\mu\text{s}$ float error)| `PLANNED` |
+| **AESL-14** | Multi-Resolution Segmentation Engine | PRD §18.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | 4-scale windowing grid unit test | `PLANNED` |
+| **AESL-15** | Short-Window Boundary Analysis (10-20ms) | PRD §18.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Captures hard waveform cuts | `PLANNED` |
+| **AESL-16** | Medium-Window Spectral Analysis (20-50ms) | PRD §18.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Analyzes STFT flux and LFCC/MFCC | `PLANNED` |
+| **AESL-17** | Long-Window Acoustic Environment (50-200ms) | PRD §18.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Tracks noise floor stationarity | `PLANNED` |
+| **AESL-18** | Macro-Window Contextual Analysis (200-1000ms+) | PRD §18.6, §17.7 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Evaluates RT60 and room ambience | `PLANNED` |
+| **AESL-19** | Dynamic Adaptive Windowing on Low SNR | PRD §18.6 | TRD §18.3 | **AURAS-AESL-02** | `AESL-CP-02-01` | Adaptive window expansion benchmark | `PLANNED` |
+| **AESL-20** | Waveform Amplitude Discontinuity Inspection | PRD §18.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Flags step jump with $\Delta E > 12\text{ dB}$ | `PLANNED` |
+| **AESL-21** | Root Mean Square (RMS) & Energy Contours | PRD §18.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Short-time energy calculation test | `PLANNED` |
+| **AESL-22** | Crest Factor & Local Variance Analysis | PRD §18.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Dynamic range peak-to-RMS variance test | `PLANNED` |
+| **AESL-23** | Zero-Crossing Rate & Phase Discontinuity | PRD §18.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Flags phase inversion zero-crossing | `PLANNED` |
+| **AESL-24** | First-Order Waveform Derivative Analysis | PRD §18.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Slope peak $|d[n]|$ discontinuity test | `PLANNED` |
+| **AESL-25** | Local DC Offset Shift Detection | PRD §18.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Flags localized DC bias step | `PLANNED` |
+| **AESL-26** | Boundary-Specific Sample-Neighborhood Inspection| PRD §18.6, §17.8 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Narrow-window sample delta assert | `PLANNED` |
+| **AESL-27** | Natural Speech Plosive False-Positive Guard | PRD §18.6, §17.10 | TRD §18.4 | **AURAS-AESL-02** | `AESL-CP-02-02` | Natural plosive rejection test suite | `PLANNED` |
+| **AESL-28** | Multi-Band Noise-Floor Energy Tracking | PRD §18.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-01` | Spectral noise-floor energy test | `PLANNED` |
+| **AESL-29** | Minimum Statistics Noise Estimation | PRD §18.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-01` | Minimum tracking noise benchmark | `PLANNED` |
+| **AESL-30** | Spectral Flatness & Spectral Entropy Profiling | PRD §18.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-01` | Tonality transition detection test | `PLANNED` |
+| **AESL-31** | Room Impulse Response (RIR) Characteristic Modeling| PRD §18.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-02` | Blind RIR parameter estimation test | `PLANNED` |
+| **AESL-32** | Reverberation Decay Time (RT60) Discontinuity | PRD §18.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-02` | Flags RT60 step jump $> 0.2\text{s}$ | `PLANNED` |
+| **AESL-33** | Direct-to-Reverberant Ratio (DRR) Tracking | PRD §18.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-02` | DRR distance transition test | `PLANNED` |
+| **AESL-34** | Ambient Background Signature Distance ($D_{\text{env}}$)| PRD §18.6, §17.8 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-03` | Validates $D_{\text{env}} > 0.65$ on splices | `PLANNED` |
+| **AESL-35** | Microphone Handling & Distance Shift Safeguard | PRD §18.6, §17.10 | TRD §18.5 | **AURAS-AESL-03** | `AESL-CP-03-04` | Suppresses handling noise false alarms | `PLANNED` |
+| **AESL-36** | High-Resolution Short-Time Fourier Transform (STFT)| PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Hann-windowed STFT unit test | `PLANNED` |
+| **AESL-37** | Spectral Centroid & Bandwidth Tracking | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Centroid step discontinuity test | `PLANNED` |
+| **AESL-38** | Spectral Flux & Onset Strength Modeling | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Half-wave rectified flux peak test | `PLANNED` |
+| **AESL-39** | Spectral Rolloff Frequency Transition Detection | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Low-pass filter rolloff drop test | `PLANNED` |
+| **AESL-40** | Linear Frequency Cepstral Coefficients (LFCC) | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | LFCC feature extraction test | `PLANNED` |
+| **AESL-41** | Mel-Frequency Cepstral Coefficients (MFCC) | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | MFCC distance matrix calculation test | `PLANNED` |
+| **AESL-42** | Evidence-Linked Forensic Spectrogram Generation | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-03` | Exact coordinate visual render test | `PLANNED` |
+| **AESL-43** | Multi-Channel Independent Signal Extraction | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Multi-channel array extraction test | `PLANNED` |
+| **AESL-44** | Inter-Channel Cross-Correlation ($R_{xy}(\tau)$) | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Normalized peak coherence $\rho_{\max}$ | `PLANNED` |
+| **AESL-45** | Inter-Channel Time Difference (ITD) Tracking | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | ITD spatial angle consistency test | `PLANNED` |
+| **AESL-46** | Stereo-Image & Phase Discontinuity Detection | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Flags stereo image collapse/inversion | `PLANNED` |
+| **AESL-47** | Channel Energy Distribution Discrepancy | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Localized channel energy step test | `PLANNED` |
+| **AESL-48** | Unilateral Channel Edit Localisation | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-02** | `AESL-CP-02-04` | Isolates splice on single channel | `PLANNED` |
+| **AESL-49** | MP3/AAC Frame Allocation & Header Continuity | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-01` | Frame header sequence audit test | `PLANNED` |
+| **AESL-50** | MDCT Quantization Scalefactor Band Inconsistency| PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-01` | Quantization step discrepancy test | `PLANNED` |
+| **AESL-51** | Bitrate & High-Frequency Cutoff Transition | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-02` | Flags $16\text{ kHz} \to 11\text{ kHz}$ cutoff drop | `PLANNED` |
+| **AESL-52** | Double-Compression & Transcoding Trace Detection| PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-03` | MDCT histogram ghost peak test | `PLANNED` |
+| **AESL-53** | Resampling & Sample-Rate Conversion Traces | PRD §18.6, §17.8 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-04` | Anti-aliasing filter ripple test | `PLANNED` |
+| **AESL-54** | Codec Artifact Forensic Limitation Disclaimers | PRD §18.6, §17.11 | TRD §18.6 | **AURAS-AESL-04** | `AESL-CP-04-04` | Report disclaimer inclusion audit | `PLANNED` |
+| **AESL-55** | Self-Similarity Matrix Acoustic Fingerprinting | PRD §18.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-01` | 64-bit sub-band energy hash test | `PLANNED` |
+| **AESL-56** | Normalized Cross-Correlation Template Matching | PRD §18.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-02` | Identifies duplicate with $R_{xy} \ge 0.99$ | `PLANNED` |
+| **AESL-57** | Dynamic Time Warping (DTW) Syllable Alignment | PRD §18.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-03` | Matches warped cloned segment | `PLANNED` |
+| **AESL-58** | Minimum Duration Threshold for Duplication | PRD §18.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-04` | Gated on $\Delta t \ge 100\text{ ms}$ duration | `PLANNED` |
+| **AESL-59** | Natural Speech Repetition False-Positive Guard | PRD §18.6, §17.10 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-04` | Pitch micro-jitter check passes | `PLANNED` |
+| **AESL-60** | Ambient Background Loop Duplication Detection | PRD §18.6, §17.8 | TRD §18.7 | **AURAS-AESL-05** | `AESL-CP-05-02` | Flags cloned ambient traffic loop | `PLANNED` |
+| **AESL-61** | Statistical Change-Point Detection (CUSUM) | PRD §18.6, §17.8 | TRD §18.8 | **AURAS-AESL-06** | `AESL-CP-06-03` | Cumulative sum shift test | `PLANNED` |
+| **AESL-62** | Pruned Exact Linear Time (PELT) Change Detection | PRD §18.6, §17.8 | TRD §18.8 | **AURAS-AESL-06** | `AESL-CP-06-02` | PELT $O(N)$ segmentation benchmark | `PLANNED` |
+| **AESL-63** | Kernel-Based Non-Parametric Change-Point Detection| PRD §18.6, §17.8 | TRD §18.8 | **AURAS-AESL-06** | `AESL-CP-06-04` | Kernel MMD segmentation test | `PLANNED` |
+| **AESL-64** | Multi-Branch Feature Stacking for Segmentation | PRD §18.6, §17.8 | TRD §18.8 | **AURAS-AESL-06** | `AESL-CP-06-01` | Normalized composite matrix test | `PLANNED` |
+| **AESL-65** | Learned Temporal Localisation Model (TCN/CRNN) | PRD §18.6, §17.8 | TRD §18.8 | **AURAS-AESL-07** | `AESL-CP-07-01` | Frame-level suspicion inference test | `PLANNED` |
+| **AESL-66** | ASLNet Research Architecture Evaluation | PRD §18.6, §17.8 | TRD §18.8 | **AURAS-AESL-07** | `AESL-CP-07-03` | ASLNet benchmark evaluation harness | `PLANNED` |
+| **AESL-67** | Time-Indexed Suspicion Curve Output | PRD §18.6, §17.8 | TRD §18.8 | **AURAS-AESL-07** | `AESL-CP-07-01` | Frame-to-second score array test | `PLANNED` |
+| **AESL-68** | Candidate Boundary Generation at Native Resolution| PRD §18.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-01` | Candidate interval constructor test | `PLANNED` |
+| **AESL-69** | Dual-Threshold Hysteresis Region Aggregation | PRD §18.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-01` | $\tau_{\text{high}}=0.70, \tau_{\text{low}}=0.40$ | `PLANNED` |
+| **AESL-70** | Micro-Interval Preservation Safeguard ($\ge 10\text{ms}$)| PRD §18.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-01` | Preserves brief word deletion intervals | `PLANNED` |
+| **AESL-71** | Sample-Level Narrow-Window Boundary Refinement | PRD §18.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-02` | Refines boundary to exact zero-crossing | `PLANNED` |
+| **AESL-72** | Boundary Uncertainty Interval Quantification | PRD §18.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-03` | Computes $\pm \sigma_{\text{ms}}$ confidence bands | `PLANNED` |
+| **AESL-73** | Multi-Branch Late Fusion & Disagreement Retention| PRD §18.6, §17.9 | TRD §18.9 | **AURAS-AESL-08** | `AESL-CP-08-04` | Preserves inter-branch disagreement | `PLANNED` |
+| **AESL-74** | MVSI Speaker Diarization Timeline Ingestion | PRD §18.6, §17.10 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Binds speaker IDs to edit regions | `PLANNED` |
+| **AESL-75** | Voice Activity Detection (VAD) Speech Alignment | PRD §18.6, §17.10 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Differentiates speech vs pause edits | `PLANNED` |
+| **AESL-76** | Multilingual & Code-Switching Invariant Guard | PRD §18.6, §17.10 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Rejects language change false alarm | `PLANNED` |
+| **AESL-77** | Speaker Turn-Taking Discontinuity Disambiguation | PRD §18.6, §17.10 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Natural turn-taking check passes | `PLANNED` |
+| **AESL-78** | Non-Speech Environmental Recording Analysis | PRD §18.6 | TRD §18.1 | **AURAS-AESL-09** | `AESL-CP-09-01` | Non-speech audio benchmark passes | `PLANNED` |
+| **AESL-79** | Twenty Machine-Readable Finding Taxonomy (`AUDIO_EDIT_*`)| PRD §18.6 | TRD §12.9, §18.12| **AURAS-AESL-08** | `AESL-CP-08-04` | Serializes 20 typed finding records | `PLANNED` |
+| **AESL-80** | Fourteen Canonical Temporal Decision States | PRD §18.6 | TRD §12.9, §18.12| **AURAS-AESL-08** | `AESL-CP-08-04` | Maps findings to 14 canonical states | `PLANNED` |
+| **AESL-81** | First-Class Inconclusive Outcome Policy | PRD §18.6 | TRD §15.7, §18.12| **AURAS-AESL-08** | `AESL-CP-08-04` | Abstains on severe low-quality audio | `PLANNED` |
+| **AESL-82** | Synchronized Dual-Waveform Examiner Review UI | PRD §18.6 | TRD §18.11 | **AURAS-AESL-09** | `AESL-CP-09-04` | Interactive sample-accurate review UI | `PLANNED` |
+| **AESL-83** | Quality Control & 18 Benign Alternative Explanations| PRD §18.6, §17.10 | TRD §15.7, §18.11| **AURAS-AESL-09** | `AESL-CP-09-04` | Checklist audit in all findings | `PLANNED` |
+| **AESL-84** | CEIPL Cryptographic Evidence Lineage Integration | PRD §18.6, §17.12 | TRD §15.7, §18.10| **AURAS-AESL-09** | `AESL-CP-09-02` | Merkle DAG registers all findings | `PLANNED` |
+| **AESL-85** | Derived Analysis Representation WORM Vault Locking| PRD §18.6, §17.12 | TRD §15.7, §18.10| **AURAS-AESL-09** | `AESL-CP-09-02` | POSIX 0400 read-only mode verified | `PLANNED` |
+| **AESL-86** | Tamper-Evident Examiner Override Audit Logging | PRD §18.6, §17.12 | TRD §15.7, §18.11| **AURAS-AESL-09** | `AESL-CP-09-04` | Immutable log records examiner edits | `PLANNED` |
+| **AESL-87** | Worker Timeout & Memory Cgroup Limits (4 GB) | PRD §18.6 | TRD §15.7, §18.13| **AURAS-AESL-01** | `AESL-CP-01-02` | Cgroup memory kill test at 4 GB | `PLANNED` |
+| **AESL-88** | Section 63 BSA Certified PDF Dossier| PRD §18.6, §18.12 | TRD §15.7, §18.11| **AURAS-AESL-09** | `AESL-CP-09-03` | Generates structured PDF report | `PLANNED` |
+| **AESL-89** | Controlled 500-Fixture Evaluation Dataset | PRD §18.6 | TRD §18.15 | **AURAS-AESL-10** | `AESL-CP-10-01` | 500 ground-truth fixtures evaluated | `PLANNED` |
+| **AESL-90** | Region-Level IoU & Boundary MAE Metrics | PRD §18.6 | TRD §18.15 | **AURAS-AESL-10** | `AESL-CP-10-02` | $\text{tIoU} \ge 0.75$, $\text{MAE} \le 15\text{ms}$ | `PLANNED` |
 
 ## 19. Dedicated Evidence Integrity Verification Engineering Playbook (CEIPL-EIV-00 through CEIPL-EIV-10)
 
@@ -6876,12 +6876,12 @@ flowchart TD
 ---
 
 ### Phase CEIPL-EIV-02: Pre-Decode Dual-Hashing Pipeline
-- **Objective:** Construct the streaming dual-hashing pipeline (SHA-256 + SHA-512 / SHA3-256) with bounded memory buffers and chunk Merkle tree construction.
+- **Objective:** Construct the streaming dual-hashing pipeline (SHA-256 + SHA3-512) with bounded memory buffers and chunk Merkle tree construction.
 - **Prerequisites:** Phase `CEIPL-EIV-01` contracts.
 - **Scope:** Core cryptographic hashing, bounded memory streaming buffer ($\le 64 \text{ MB}$), chunk partitioning (4 MB), and binary Merkle tree generator.
 - **Detailed Tasks:**
   1. Implement `StreamingDualHasher` consuming chunked byte streams via 64 KB buffers with NIST FIPS 180-4 algorithms.
-  2. Implement secondary algorithm agility supporting NIST FIPS 202 SHA3-256 Keccak sponge.
+  2. Implement secondary algorithm supporting NIST FIPS 202 SHA3-512 Keccak sponge.
   3. Implement stream interruption handling with clean temporary file purge and failure logging.
   4. Implement `ChunkMerkleTreeBuilder` generating RFC 6962 compliant Merkle trees and $O(\log N)$ inclusion proofs.
 - **Dependencies:** OpenSSL, Python `hashlib` / `cryptography`.
@@ -7076,7 +7076,7 @@ flowchart TD
 ---
 
 ### Phase CEIPL-EIV-09: Cross-Subsystem and UFREDF Integration
-- **Objective:** Integrate EIV across all forensic engines (AIF, AURAS, VISTA, ONTF, CMMS, CSTV) and bind verification records into court-admissible UFREDF reports.
+- **Objective:** Integrate EIV across all forensic engines (AIF, AURAS, VISTA, ONTF, CMMS, CSTV) and bind verification records into structured UFREDF reports.
 - **Prerequisites:** Phase `CEIPL-EIV-08` APIs and verifier.
 - **Scope:** Engine intake wrappers, metadata binding, and automated assembly of Section 63 BSA / 65B IEA certified technical dossiers.
 - **Detailed Tasks:**
@@ -7096,7 +7096,7 @@ flowchart TD
   | `EIV-CP-09-02` | Section 63 BSA Schedule| PDF evidence schedule contains full hash tables and keys | Legal dossier rejected | `PLANNED` |
   | `EIV-CP-09-03` | Report Gate Validation | Mismatched derivative halts report compilation | Flag integrity exception in UI | `PLANNED` |
   | `EIV-CP-09-04` | QR Code Offline Linkage| Scanning QR code launches verification of export package| Regenerate QR code payload | `PLANNED` |
-- **Acceptance Criteria:** All forensic engines integrated; court-certified Section 63 BSA dossiers generated with cryptographic audit annexures.
+- **Acceptance Criteria:** All forensic engines integrated; structured Section 63 BSA dossiers generated with cryptographic audit annexures.
 - **Exit Criteria:** System ready for release security hardening and performance benchmarking.
 - **Risks & Mitigations:** Large PDF dossier size due to extensive hash tables. *Mitigation:* Compact tabular formatting and vector annexures.
 - **Current Status:** `NOT_STARTED`
@@ -7133,106 +7133,106 @@ flowchart TD
 
 | Req ID | Requirement Summary | PRD Reference | TRD Reference | Implementation Phase | Checkpoint ID | Verification Method | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **EIV-01** | CEIPL Platform Ownership: Primary ownership in CEIPL shared platform layer | PRD §18.7 | TRD §19.1 | **CEIPL-EIV-00** | `EIV-CP-00-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-02** | Non-Destructive Raw Bitstream Preservation: Zero alteration upon intake | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-03** | Engine-Independent Execution: Runs without media decoder dependencies | PRD §18.7 | TRD §19.1 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-04** | Separation of Integrity from Authenticity: Distinct semantic output states | PRD §18.7 | TRD §18.9, §19.8 | **CEIPL-EIV-00** | `EIV-CP-00-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-05** | Zero Silent Repair: Rejection of automatic rehashing or silent overwriting | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-04** | `EIV-CP-05-05` | Automated Test / Audit | `PLANNED` |
-| **EIV-06** | Universal Modality Support: Uniform intake of image, video, audio, PCAP | PRD §18.7 | TRD §19.1 | **CEIPL-EIV-01** | `EIV-CP-01-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-07** | Permanent UUIDv7 Evidence Identification: Time-sortable unique Evidence ID | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-08** | Name & Path Independence: Identity invariant to filename or folder changes | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-09** | Storage Key Decoupling: Identity decoupled from physical storage URN | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-10** | Algorithm-Independent Identity: Identity unaffected by algorithm upgrades | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-11** | Ten-Entity Entity Separation: Distinct IDs across Case, Evidence, File, etc. | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-12** | Duplicate Evidence Provenance Preservation: Separate custody for duplicate files | PRD §18.7 | TRD §18.5, §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-13** | Storage-Level Deduplication Isolation: Shared blocks without merging metadata | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-04** | `EIV-CP-04-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-14** | Case Scoping & Tenant Isolation: Evidence strictly scoped to authorized Case ID | PRD §18.7 | TRD §19.14 | **CEIPL-EIV-01** | `EIV-CP-01-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-15** | Pre-Decode Streaming Hashing: Stream bytes to hasher before decoding | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-16** | Mandatory Dual-Hashing Pipeline: Concurrent SHA-256 and SHA-512 calculation | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-17** | Secondary Algorithm Agility (SHA3-256): Configurable Keccak sponge digest | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-18** | Legacy Hash Segregation: MD5/SHA-1 barred as primary integrity references | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-19** | Bounded Memory Streaming Buffer: Memory consumption bounded to <= 64 MB | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-20** | Byte-Count Verification: Exact byte length verified against content-length | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-21** | Stream Interruption & Abort Cleanup: Safe cleanup on aborted network streams | PRD §18.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-22** | Hash Computation Performance SLA: Sustained throughput >= 150 MB/s | PRD §18.7 | TRD §19.17 | **CEIPL-EIV-02** | `EIV-CP-02-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-23** | Strongly Typed Hash Result Contract: Pydantic v2 HashRecord serialization | PRD §18.7 | TRD §12.10, §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-24** | Configurable Chunking Engine: Fixed-size 4MB or 16MB chunk slicing | PRD §18.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-25** | Deterministic Chunk Hashing: SHA-256 computed for each indexed chunk | PRD §18.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-26** | Merkle Tree Construction: Balanced binary tree with RFC 6962 prefixes | PRD §18.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-27** | Merkle Inclusion Proof Generation: Verifiable O(log N) inclusion proofs | PRD §18.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-28** | Partial File & Segment Verification: Verify specific byte ranges of CCTV/PCAP | PRD §18.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-29** | Whole-File Primacy Rule: Merkle trees supplement, never replace whole-file digest | PRD §18.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-30** | Versioned Evidence Manifest Schema: Comprehensive JSON manifest model | PRD §18.7 | TRD §12.10, §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-31** | RFC 8785 Canonical JSON Representation: JCS deterministic serialization | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-32** | Deterministic Key Ordering & UTF-8 Encoding: Standardized code-point sorting | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-33** | IEEE 754 Number Representation: Cross-platform floating point consistency | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-34** | Sensitive Data Exclusion Invariant: Zero private keys or passwords in manifests | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-35** | Manifest Versioning & Evolution: Backward-compatible schema evolution | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-36** | Manifest Immutability Post-Sealing: Sealed manifests permanently locked | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-37** | Manifest Fingerprint Computation: SHA-256 over canonical JCS bytes | PRD §18.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-38** | Detached Manifest Digital Signing: 64-byte Ed25519 signature over manifest | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-39** | Standards-Compliant Signature Algorithms: RFC 8032 Ed25519 support | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-40** | Secure Private Key Storage: OS Keystore (DPAPI/Keyring) or HSM integration | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-41** | Cryptographic Key Lifecycle Records: Immutable key registry and rotation logs | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-42** | Historical Signature Verification: Verification preserved across rotated keys | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-43** | Signer Authorization Verification: Key mapping to authorized officer roles | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-44** | Public Key & Certificate Embedding: Inclusion of public keys in export packages | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-08** | `EIV-CP-08-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-45** | Separation of Document vs Manifest Signatures: PAdES PDF vs Ed25519 distinct | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-46** | Key Revocation Enforcement: Immediate CRL check and signature invalidation | PRD §18.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-47** | RFC 3161 Timestamp Protocol Support: TSA client requesting TimeStampResp | PRD §18.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-48** | Message Imprint Verification: Assertion that token matches manifest digest | PRD §18.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-49** | TSA Certificate Chain & Policy Validation: Trust anchor and OID validation | PRD §18.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-50** | Seven-Tier Timestamp Disambiguation: Strict semantic separation of timestamps | PRD §18.7 | TRD §18.6, §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-51** | Air-Gapped Offline Timestamp Mode: Local hardware clock labeled untrusted | PRD §18.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-52** | Deferred Timestamp Attestation: Queued TSA stamping upon station docking | PRD §18.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-53** | True WORM Storage Enforcement: Storage-enforced Write-Once vaults | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-54** | POSIX Local Filesystem WORM: 0400 read-only mode and chattr +i attribute | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-55** | S3 Object Lock Compliance Mode: Retention locked against deletion | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-56** | S3 Object Lock Governance Mode: Privileged bypass with audit logging | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-57** | Legal Hold Support: Indefinite retention locking for active litigation | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-58** | Seven Logical Storage Zones: Rigorous folder/bucket tier segregation | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-59** | Storage Administrator Misuse Mitigation: Audited storage command execution | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-60** | At-Rest Storage Encryption: AES-256-GCM encryption for stored exhibits | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-61** | Storage Immutability Verification Suite: Automated penetration test suite | PRD §18.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-62** | Twelve Lifecycle Verification Checkpoints: Mandatory hash checks across stages | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-63** | Post-Write Readback Gate: Mandatory readback before unblocking downstream | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-64** | Retrieval Verification Gate: In-memory hash check before passing to engines | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-65** | Continuous Fixity Scheduling: Automated Celery rolling 30-day fixity audit | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-66** | Fixity Job Throughput SLA: Background fixity auditing >= 200 MB/s | PRD §18.7 | TRD §19.17 | **CEIPL-EIV-05** | `EIV-CP-05-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-67** | Typed Verification Result Record: Pydantic v2 VerificationRunResult logging | PRD §18.7 | TRD §12.10, §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-68** | Export Manifest Verification: Full package hash recalculation prior to export | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-08** | `EIV-CP-08-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-69** | Final Report Linkage Verification: Validate hashes in UFREDF certificates | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-09** | `EIV-CP-09-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-70** | Asynchronous Non-Blocking Fixity: Audits execute without UI degradation | PRD §18.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-71** | Automated Quarantine State Transition: Instant quarantine on hash mismatch | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-05** | `EIV-CP-05-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-72** | Fail-Closed Downstream Blocking: HTTP 423 Locked for quarantined items | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-05** | `EIV-CP-05-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-73** | Conflicting Version In-Place Preservation: Corrupted file kept as .corrupt | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-05** | `EIV-CP-05-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-74** | Automated Integrity Incident Logging: Structured IntegrityIncident records | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-05** | `EIV-CP-05-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-75** | Independent Backup Replica Verification: Validate replica against baseline | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-08** | `EIV-CP-08-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-76** | Verified Recovery Copy Deployment: Restored replica committed with audit log | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-08** | `EIV-CP-08-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-77** | Unrecoverable Corruption Escalation: Formal loss declaration if backups fail | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-08** | `EIV-CP-08-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-78** | Prohibition of Digest Inversion: Database constraints forbid overwriting hash | PRD §18.7 | TRD §19.9 | **CEIPL-EIV-04** | `EIV-CP-05-05` | Automated Test / Audit | `PLANNED` |
-| **EIV-79** | Twenty-One Mandatory Custody Events: Full lifecycle event tracking | PRD §18.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-80** | Strongly Typed Custody Event Schema: Pydantic v2 CustodyEventRecord | PRD §18.7 | TRD §12.10, §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-81** | Hash-Chained Event History: Cryptographic link E_i = H(Ev_i || E_i-1) | PRD §18.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-82** | Strictly Monotonic Sequence Numbers: Gaps prohibited under concurrency | PRD §18.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-83** | Tamper-Evident Ledger Auditing: Instant detection of edited historical rows | PRD §18.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-84** | User Description vs Machine Data Separation: Examiner notes isolated from telemetry | PRD §18.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-85** | Periodic Merkle Root Anchoring: Signed daily custody anchor blocks | PRD §18.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-86** | Distinct Derivative Artifact Identity: Unique UUIDv7 and hash per output | PRD §18.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-87** | Cryptographic Parent Binding: Strict parent exhibit ID and SHA-256 link | PRD §18.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-88** | Complete Transformation Audit Metadata: Tool name, version, CLI args logged | PRD §18.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-89** | Multi-Generational Lineage DAG: Recursive traversal back to original exhibit | PRD §18.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-90** | Package-Level Integrity Verification: Merkle root computed over multi-file export | PRD §18.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-91** | Path Traversal & Symlink Defense: Canonical relative paths, safe unzipping | PRD §18.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-92** | Standalone Portable Offline Verifier: Zero-PyPI Python verification script | PRD §18.7 | TRD §19.12 | **CEIPL-EIV-08** | `EIV-CP-08-01` | Automated Test / Audit | `PLANNED` |
-| **EIV-93** | Fourteen Offline Verification Checks: Comprehensive 14-point audit in CLI | PRD §18.7 | TRD §19.12 | **CEIPL-EIV-08** | `EIV-CP-08-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-94** | Fifteen Dedicated REST API Endpoints: Versioned FastAPI routes with RBAC | PRD §18.7 | TRD §19.15 | **CEIPL-EIV-08** | `EIV-CP-08-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-95** | Asynchronous Celery Worker Integration: Dedicated background worker queue | PRD §18.7 | TRD §19.15 | **CEIPL-EIV-05** | `EIV-CP-05-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-96** | OpenAPI 3.1 & TypeScript Contract Sync: Synchronized Pydantic models & TS types | PRD §18.7 | TRD §12.10, §19.15 | **CEIPL-EIV-08** | `EIV-CP-08-04` | Automated Test / Audit | `PLANNED` |
-| **EIV-97** | Seven-Tier Role-Based Access Control: Strict separation of Operator, Custodian | PRD §18.7 | TRD §19.14 | **CEIPL-EIV-10** | `EIV-CP-10-03` | Automated Test / Audit | `PLANNED` |
-| **EIV-98** | Section 63 BSA / 65B IEA Dossier Assembly: Statutory evidence schedule PDF | PRD §18.7 | TRD §19.13 | **CEIPL-EIV-09** | `EIV-CP-09-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-99** | Five-Hundred-Fixture Verification Benchmark: 100% detection on 500 test fixtures | PRD §18.7 | TRD §19.17 | **CEIPL-EIV-10** | `EIV-CP-10-02` | Automated Test / Audit | `PLANNED` |
-| **EIV-100** | Air-Gapped Packaging & Security Hardening: Docker deployment with zero egress | PRD §18.7 | TRD §19.17 | **CEIPL-EIV-10** | `EIV-CP-10-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-01** | CEIPL Platform Ownership: Primary ownership in CEIPL shared platform layer | PRD §19.7 | TRD §19.1 | **CEIPL-EIV-00** | `EIV-CP-00-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-02** | Non-Destructive Raw Bitstream Preservation: Zero alteration upon intake | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-03** | Engine-Independent Execution: Runs without media decoder dependencies | PRD §19.7 | TRD §19.1 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-04** | Separation of Integrity from Authenticity: Distinct semantic output states | PRD §19.7 | TRD §18.9, §19.8 | **CEIPL-EIV-00** | `EIV-CP-00-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-05** | Zero Silent Repair: Rejection of automatic rehashing or silent overwriting | PRD §19.7 | TRD §19.9 | **CEIPL-EIV-04** | `EIV-CP-05-05` | Automated Test / Audit | `PLANNED` |
+| **EIV-06** | Universal Modality Support: Uniform intake of image, video, audio, PCAP | PRD §19.7 | TRD §19.1 | **CEIPL-EIV-01** | `EIV-CP-01-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-07** | Permanent UUIDv7 Evidence Identification: Time-sortable unique Evidence ID | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-08** | Name & Path Independence: Identity invariant to filename or folder changes | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-09** | Storage Key Decoupling: Identity decoupled from physical storage URN | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-10** | Algorithm-Independent Identity: Identity unaffected by algorithm upgrades | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-11** | Ten-Entity Entity Separation: Distinct IDs across Case, Evidence, File, etc. | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-12** | Duplicate Evidence Provenance Preservation: Separate custody for duplicate files | PRD §19.7 | TRD §18.5, §19.2 | **CEIPL-EIV-01** | `EIV-CP-01-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-13** | Storage-Level Deduplication Isolation: Shared blocks without merging metadata | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-04** | `EIV-CP-04-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-14** | Case Scoping & Tenant Isolation: Evidence strictly scoped to authorized Case ID | PRD §19.7 | TRD §19.14 | **CEIPL-EIV-01** | `EIV-CP-01-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-15** | Pre-Decode Streaming Hashing: Stream bytes to hasher before decoding | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-16** | Mandatory Dual-Hashing Pipeline: Concurrent SHA-256 and SHA3-512 calculation | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-17** | Secondary Algorithm Independence (SHA3-512): NIST FIPS 202 Keccak sponge digest | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-18** | Legacy Hash Segregation: MD5/SHA-1 barred as primary integrity references | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-19** | Bounded Memory Streaming Buffer: Memory consumption bounded to <= 64 MB | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-20** | Byte-Count Verification: Exact byte length verified against content-length | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-21** | Stream Interruption & Abort Cleanup: Safe cleanup on aborted network streams | PRD §19.7 | TRD §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-22** | Hash Computation Performance SLA: Sustained throughput >= 150 MB/s | PRD §19.7 | TRD §19.17 | **CEIPL-EIV-02** | `EIV-CP-02-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-23** | Strongly Typed Hash Result Contract: Pydantic v2 HashRecord serialization | PRD §19.7 | TRD §12.10, §19.2 | **CEIPL-EIV-02** | `EIV-CP-02-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-24** | Configurable Chunking Engine: Fixed-size 4MB or 16MB chunk slicing | PRD §19.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-25** | Deterministic Chunk Hashing: SHA-256 computed for each indexed chunk | PRD §19.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-26** | Merkle Tree Construction: Balanced binary tree with RFC 6962 prefixes | PRD §19.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-27** | Merkle Inclusion Proof Generation: Verifiable O(log N) inclusion proofs | PRD §19.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-28** | Partial File & Segment Verification: Verify specific byte ranges of CCTV/PCAP | PRD §19.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-29** | Whole-File Primacy Rule: Merkle trees supplement, never replace whole-file digest | PRD §19.7 | TRD §19.3 | **CEIPL-EIV-02** | `EIV-CP-02-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-30** | Versioned Evidence Manifest Schema: Comprehensive JSON manifest model | PRD §19.7 | TRD §12.10, §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-31** | RFC 8785 Canonical JSON Representation: JCS deterministic serialization | PRD §19.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-32** | Deterministic Key Ordering & UTF-8 Encoding: Standardized code-point sorting | PRD §19.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-33** | IEEE 754 Number Representation: Cross-platform floating point consistency | PRD §19.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-34** | Sensitive Data Exclusion Invariant: Zero private keys or passwords in manifests | PRD §19.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-35** | Manifest Versioning & Evolution: Backward-compatible schema evolution | PRD §19.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-36** | Manifest Immutability Post-Sealing: Sealed manifests permanently locked | PRD §19.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-37** | Manifest Fingerprint Computation: SHA-256 over canonical JCS bytes | PRD §19.7 | TRD §19.4 | **CEIPL-EIV-03** | `EIV-CP-03-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-38** | Detached Manifest Digital Signing: 64-byte Ed25519 signature over manifest | PRD §19.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-39** | Standards-Compliant Signature Algorithms: RFC 8032 Ed25519 support | PRD §19.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-40** | Secure Private Key Storage: OS Keystore (DPAPI/Keyring) or HSM integration | PRD §19.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-41** | Cryptographic Key Lifecycle Records: Immutable key registry and rotation logs | PRD §19.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-42** | Historical Signature Verification: Verification preserved across rotated keys | PRD §19.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-43** | Signer Authorization Verification: Key mapping to authorized officer roles | PRD §19.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-44** | Public Key & Certificate Embedding: Inclusion of public keys in export packages | PRD §19.7 | TRD §19.5 | **CEIPL-EIV-08** | `EIV-CP-08-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-45** | Separation of Document vs Manifest Signatures: PAdES PDF vs Ed25519 distinct | PRD §19.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-46** | Key Revocation Enforcement: Immediate CRL check and signature invalidation | PRD §19.7 | TRD §19.5 | **CEIPL-EIV-03** | `EIV-CP-03-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-47** | RFC 3161 Timestamp Protocol Support: TSA client requesting TimeStampResp | PRD §19.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-48** | Message Imprint Verification: Assertion that token matches manifest digest | PRD §19.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-49** | TSA Certificate Chain & Policy Validation: Trust anchor and OID validation | PRD §19.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-50** | Seven-Tier Timestamp Disambiguation: Strict semantic separation of timestamps | PRD §19.7 | TRD §18.6, §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-51** | Air-Gapped Offline Timestamp Mode: Local hardware clock labeled untrusted | PRD §19.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-52** | Deferred Timestamp Attestation: Queued TSA stamping upon station docking | PRD §19.7 | TRD §19.6 | **CEIPL-EIV-03** | `EIV-CP-03-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-53** | True WORM Storage Enforcement: Storage-enforced Write-Once vaults | PRD §19.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-54** | POSIX Local Filesystem WORM: 0400 read-only mode and chattr +i attribute | PRD §19.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-55** | S3 Object Lock Compliance Mode: Retention locked against deletion | PRD §19.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-56** | S3 Object Lock Governance Mode: Privileged bypass with audit logging | PRD §19.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-57** | Legal Hold Support: Indefinite retention locking for active litigation | PRD §19.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-58** | Seven Logical Storage Zones: Rigorous folder/bucket tier segregation | PRD §19.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-59** | Storage Administrator Misuse Mitigation: Audited storage command execution | PRD §19.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-60** | At-Rest Storage Encryption: AES-256-GCM encryption for stored exhibits | PRD §19.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-61** | Storage Immutability Verification Suite: Automated penetration test suite | PRD §19.7 | TRD §19.7 | **CEIPL-EIV-04** | `EIV-CP-04-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-62** | Twelve Lifecycle Verification Checkpoints: Mandatory hash checks across stages | PRD §19.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-63** | Post-Write Readback Gate: Mandatory readback before unblocking downstream | PRD §19.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-64** | Retrieval Verification Gate: In-memory hash check before passing to engines | PRD §19.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-65** | Continuous Fixity Scheduling: Automated Celery rolling 30-day fixity audit | PRD §19.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-66** | Fixity Job Throughput SLA: Background fixity auditing >= 200 MB/s | PRD §19.7 | TRD §19.17 | **CEIPL-EIV-05** | `EIV-CP-05-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-67** | Typed Verification Result Record: Pydantic v2 VerificationRunResult logging | PRD §19.7 | TRD §12.10, §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-68** | Export Manifest Verification: Full package hash recalculation prior to export | PRD §19.7 | TRD §19.8 | **CEIPL-EIV-08** | `EIV-CP-08-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-69** | Final Report Linkage Verification: Validate hashes in UFREDF certificates | PRD §19.7 | TRD §19.8 | **CEIPL-EIV-09** | `EIV-CP-09-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-70** | Asynchronous Non-Blocking Fixity: Audits execute without UI degradation | PRD §19.7 | TRD §19.8 | **CEIPL-EIV-05** | `EIV-CP-05-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-71** | Automated Quarantine State Transition: Instant quarantine on hash mismatch | PRD §19.7 | TRD §19.9 | **CEIPL-EIV-05** | `EIV-CP-05-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-72** | Fail-Closed Downstream Blocking: HTTP 423 Locked for quarantined items | PRD §19.7 | TRD §19.9 | **CEIPL-EIV-05** | `EIV-CP-05-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-73** | Conflicting Version In-Place Preservation: Corrupted file kept as .corrupt | PRD §19.7 | TRD §19.9 | **CEIPL-EIV-05** | `EIV-CP-05-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-74** | Automated Integrity Incident Logging: Structured IntegrityIncident records | PRD §19.7 | TRD §19.9 | **CEIPL-EIV-05** | `EIV-CP-05-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-75** | Independent Backup Replica Verification: Validate replica against baseline | PRD §19.7 | TRD §19.9 | **CEIPL-EIV-08** | `EIV-CP-08-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-76** | Verified Recovery Copy Deployment: Restored replica committed with audit log | PRD §19.7 | TRD §19.9 | **CEIPL-EIV-08** | `EIV-CP-08-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-77** | Unrecoverable Corruption Escalation: Formal loss declaration if backups fail | PRD §19.7 | TRD §19.9 | **CEIPL-EIV-08** | `EIV-CP-08-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-78** | Prohibition of Digest Inversion: Database constraints forbid overwriting hash | PRD §19.7 | TRD §19.9 | **CEIPL-EIV-04** | `EIV-CP-05-05` | Automated Test / Audit | `PLANNED` |
+| **EIV-79** | Twenty-One Mandatory Custody Events: Full lifecycle event tracking | PRD §19.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-80** | Strongly Typed Custody Event Schema: Pydantic v2 CustodyEventRecord | PRD §19.7 | TRD §12.10, §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-81** | Hash-Chained Event History: Cryptographic link E_i = H(Ev_i || E_i-1) | PRD §19.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-82** | Strictly Monotonic Sequence Numbers: Gaps prohibited under concurrency | PRD §19.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-83** | Tamper-Evident Ledger Auditing: Instant detection of edited historical rows | PRD §19.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-84** | User Description vs Machine Data Separation: Examiner notes isolated from telemetry | PRD §19.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-85** | Periodic Merkle Root Anchoring: Signed daily custody anchor blocks | PRD §19.7 | TRD §19.10 | **CEIPL-EIV-06** | `EIV-CP-06-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-86** | Distinct Derivative Artifact Identity: Unique UUIDv7 and hash per output | PRD §19.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-87** | Cryptographic Parent Binding: Strict parent exhibit ID and SHA-256 link | PRD §19.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-88** | Complete Transformation Audit Metadata: Tool name, version, CLI args logged | PRD §19.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-89** | Multi-Generational Lineage DAG: Recursive traversal back to original exhibit | PRD §19.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-90** | Package-Level Integrity Verification: Merkle root computed over multi-file export | PRD §19.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-91** | Path Traversal & Symlink Defense: Canonical relative paths, safe unzipping | PRD §19.7 | TRD §19.11 | **CEIPL-EIV-07** | `EIV-CP-07-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-92** | Standalone Portable Offline Verifier: Zero-PyPI Python verification script | PRD §19.7 | TRD §19.12 | **CEIPL-EIV-08** | `EIV-CP-08-01` | Automated Test / Audit | `PLANNED` |
+| **EIV-93** | Fourteen Offline Verification Checks: Comprehensive 14-point audit in CLI | PRD §19.7 | TRD §19.12 | **CEIPL-EIV-08** | `EIV-CP-08-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-94** | Fifteen Dedicated REST API Endpoints: Versioned FastAPI routes with RBAC | PRD §19.7 | TRD §19.15 | **CEIPL-EIV-08** | `EIV-CP-08-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-95** | Asynchronous Celery Worker Integration: Dedicated background worker queue | PRD §19.7 | TRD §19.15 | **CEIPL-EIV-05** | `EIV-CP-05-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-96** | OpenAPI 3.1 & TypeScript Contract Sync: Synchronized Pydantic models & TS types | PRD §19.7 | TRD §12.10, §19.15 | **CEIPL-EIV-08** | `EIV-CP-08-04` | Automated Test / Audit | `PLANNED` |
+| **EIV-97** | Seven-Tier Role-Based Access Control: Strict separation of Operator, Custodian | PRD §19.7 | TRD §19.14 | **CEIPL-EIV-10** | `EIV-CP-10-03` | Automated Test / Audit | `PLANNED` |
+| **EIV-98** | Section 63 BSA / 65B IEA Dossier Assembly: Statutory evidence schedule PDF | PRD §19.7 | TRD §19.13 | **CEIPL-EIV-09** | `EIV-CP-09-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-99** | Five-Hundred-Fixture Verification Benchmark: 100% detection on 500 test fixtures | PRD §19.7 | TRD §19.17 | **CEIPL-EIV-10** | `EIV-CP-10-02` | Automated Test / Audit | `PLANNED` |
+| **EIV-100** | Air-Gapped Packaging & Security Hardening: Docker deployment with zero egress | PRD §19.7 | TRD §19.17 | **CEIPL-EIV-10** | `EIV-CP-10-04` | Automated Test / Audit | `PLANNED` |
 ---
 
 ## 21. Dedicated Unified Forensic Evidence Dashboard Engineering Playbook (UFD-A0 through UFD-A11)
@@ -7505,7 +7505,7 @@ flowchart LR
   3. Build the Technical Review approval panel allowing `ROLE-TECHREV` to verify methodology, bounds, and limitations.
   4. Implement the dual-control statutory issuance workflow requiring independent Ed25519 signatures from `ROLE-EXAMINER` and `ROLE-REPREV`.
   5. Guarantee zero client-side report assembly: PDF rendering, hashing, and digital signing remain strictly executed by UFREDF.
-- **Dependencies:** Phase UFD-A7, CEIPL-EIV-09.
+- **Dependencies:** Phase UFD-A7, UFREDF-A5, CEIPL-EIV-09.
 - **Deliverables:** Report Workspace Viewport, Dossier Preview Engine, Dual-Signoff Issuance Modal.
 - **Unit Tests:** `test_report_lifecycle_state_transitions()`, `test_dual_control_issuance_validation()`.
 - **Integration Tests:** `test_report_draft_to_issued_pipeline()`, `test_pdf_preview_snapshot_fetch()`.
@@ -7517,7 +7517,7 @@ flowchart LR
   | :--- | :--- | :---: |
   | `UFD-CP-08-01` | Statutory dossier issuance strictly requires dual sign-off from Examiner and Reviewer | `PLANNED` |
   | `UFD-CP-08-02` | Dossier PDFs are compiled exclusively by the UFREDF backend service | `PLANNED` |
-- **Acceptance Criteria:** Reports cannot be issued unilaterally; PDF preview matches court-admissible standards.
+- **Acceptance Criteria:** Reports cannot be issued unilaterally; PDF preview matches formal archival standards.
 - **Exit Criteria:** End-to-end report issuance lifecycle executed successfully with two distinct test keys.
 - **Risks & Mitigations:** Dossier compilation timeouts mitigated by asynchronous Celery generation with progress polling.
 - **Current Status:** `PLANNED`
@@ -7620,106 +7620,106 @@ flowchart LR
 
 | Req ID | Requirement Focus | PRD Ref | TRD Ref | Planned Phase | Checkpoint ID | Verification Method | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :---: |
-| **UFD-01** | Shared Presentation & Workflow Layer Boundary | PRD §19.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Architecture Audit | `PLANNED` |
-| **UFD-02** | Zero Duplicate Forensic Detection Algorithms | PRD §19.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Code Inspection | `PLANNED` |
-| **UFD-03** | CEIPL Authoritative Master Evidence Storage | PRD §19.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Storage Contract Test | `PLANNED` |
-| **UFD-04** | Subsystem Sovereignty for Technical Findings | PRD §19.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Schema Validation | `PLANNED` |
-| **UFD-05** | Finding Traceability to Exhibit & Activity UUID| PRD §19.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Lineage Graph Audit | `PLANNED` |
-| **UFD-06** | Honest Representation of Data Freshness & Gaps | PRD §19.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | UI State Test | `PLANNED` |
-| **UFD-07** | Nine Formal Forensic Practitioner Roles | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-01` | RBAC Matrix Test | `PLANNED` |
-| **UFD-08** | Case-Level Security & PostgreSQL RLS Scoping | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-01` | Database Security Test | `PLANNED` |
-| **UFD-09** | Separation of Evidence and Admin Access | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-01` | Privilege Escalation Test | `PLANNED` |
-| **UFD-10** | Dual-Control Custody & Quarantine Overrides | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-02` | Multi-Sig Workflow Test | `PLANNED` |
-| **UFD-11** | Dual-Control Courtroom Report Issuance | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-02` | Cryptographic Sign Test | `PLANNED` |
-| **UFD-12** | Backend Enforcement of All Role Permissions | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-01` | REST API Penetration Test | `PLANNED` |
-| **UFD-13** | Immutable Audit Trail of Privileged Actions | PRD §19.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-02` | Audit Log Integrity Test | `PLANNED` |
-| **UFD-14** | Live Backend-Calculated Dashboard Metrics | PRD §19.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | Database Query Audit | `PLANNED` |
-| **UFD-15** | Zero Hardcoded Metrics or Mock Numbers | PRD §19.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | Static Code Analysis | `PLANNED` |
-| **UFD-16** | Filtered Navigation from Dashboard Metric Cards| PRD §19.6 | TRD §20.2 | `UFD-A1` | `UFD-CP-01-01` | UI Navigation Test | `PLANNED` |
-| **UFD-17** | Real-Time Platform Workload & Job Monitoring | PRD §19.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | Celery Queue Monitor | `PLANNED` |
-| **UFD-18** | Distinct Processing, Integrity & Review States| PRD §19.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | UI State Mapping Test | `PLANNED` |
-| **UFD-19** | Case-Scoped Recent Activity Chronology | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Activity Feed Audit | `PLANNED` |
-| **UFD-20** | Redaction of Sensitive Preview Data in Feed | PRD §19.6 | TRD §20.16 | `UFD-A2` | `UFD-CP-02-01` | Privacy Leakage Audit | `PLANNED` |
-| **UFD-21** | Case Creation Workflow & Reference Validation | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Input Validation Test | `PLANNED` |
-| **UFD-22** | Prevention of Duplicate Legal Case Identifiers| PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Database Constraint Test | `PLANNED` |
-| **UFD-23** | Minimal Collection of PII in Case Metadata | PRD §19.6 | TRD §20.16 | `UFD-A2` | `UFD-CP-02-01` | Data Minimization Audit | `PLANNED` |
-| **UFD-24** | Case Overview Identity & Jurisdictional Scope | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Contract Verification | `PLANNED` |
-| **UFD-25** | Comprehensive Case Evidence Inventory Summary | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Aggregation Query Test | `PLANNED` |
-| **UFD-26** | Multi-Engine Investigation Status Summary | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Subsystem Status Test | `PLANNED` |
-| **UFD-27** | Section 63 BSA Report Dossier Status Summary | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Report Status Query | `PLANNED` |
-| **UFD-28** | Read-Only View of CEIPL Chain-of-Custody | PRD §19.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Custody Ledger Audit | `PLANNED` |
-| **UFD-29** | Support for 10 Multi-Modal Evidence Categories | PRD §19.6 | TRD §20.5 | `UFD-A3` | `UFD-CP-03-01` | Multi-Format Ingest Test | `PLANNED` |
-| **UFD-30** | Configurable Evidence Inventory Column Table | PRD §19.6 | TRD §20.4 | `UFD-A3` | `UFD-CP-03-01` | UI Component Test | `PLANNED` |
-| **UFD-31** | Separation of Acquisition and File System Time| PRD §19.6 | TRD §20.4 | `UFD-A3` | `UFD-CP-03-01` | Timestamp Semantic Test | `PLANNED` |
-| **UFD-32** | Multi-Dimensional Evidence Filter & Search | PRD §19.6 | TRD §20.14 | `UFD-A3` | `UFD-CP-03-01` | Query Filter Benchmark | `PLANNED` |
-| **UFD-33** | Server-Side Pagination for Evidence Records | PRD §19.6 | TRD §20.14 | `UFD-A3` | `UFD-CP-03-01` | Scalability Benchmark | `PLANNED` |
-| **UFD-34** | Evidence Detail Dedicated Investigation Page | PRD §19.6 | TRD §20.4 | `UFD-A3` | `UFD-CP-03-01` | Page Layout Test | `PLANNED` |
-| **UFD-35** | Visual Differentiation of Originals vs Derived | PRD §19.6 | TRD §20.4 | `UFD-A3` | `UFD-CP-03-02` | Lineage Rendering Test | `PLANNED` |
-| **UFD-36** | Permission-Controlled Evidence Export Actions | PRD §19.6 | TRD §20.16 | `UFD-A3` | `UFD-CP-03-01` | Export Permission Test | `PLANNED` |
-| **UFD-37** | AIF Synchronized Dual-Canvas Image Viewer | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Canvas Synchronization | `PLANNED` |
-| **UFD-38** | Image Metadata, EXIF, XMP & DQT Inspection | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Header Extraction Test | `PLANNED` |
-| **UFD-39** | IMLF Manipulation Heatmaps & Bounding Masks | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | IoU Overlay Test | `PLANNED` |
-| **UFD-40** | Original Pixel Coordinate Space Invariant | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Geometric Integrity Test | `PLANNED` |
-| **UFD-41** | AURAS Interactive Mel-Spectrogram & Waveform | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | WebAudio Rendering Test | `PLANNED` |
-| **UFD-42** | Silero VAD Speech & ECAPA Diarization Tracks | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Interval Alignment Test | `PLANNED` |
-| **UFD-43** | AESL Splice Markers with Sample-Index Bounds | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Splice Index Precision | `PLANNED` |
-| **UFD-44** | Strict Audio Autoplay Prevention & Decibel Clamp| PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Acoustic Safety Test | `PLANNED` |
-| **UFD-45** | VISTA Frame-Accurate Scrubber & PTS Timeline | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-02` | Frame Stepping Latency | `PLANNED` |
-| **UFD-46** | Handling B-Frame Reordering & Compression | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-02` | Codec Invariant Test | `PLANNED` |
-| **UFD-47** | CCTV Burned-In Overlay vs Sidecar Verification| PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-02` | Optical Header Audit | `PLANNED` |
-| **UFD-48** | ONTF Offline PCAP Flow Table & Redaction | PRD §19.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Offline Zeek Flow Test | `PLANNED` |
-| **UFD-49** | Unified Multi-Subsystem Findings Inventory | PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-01` | Aggregation Test | `PLANNED` |
-| **UFD-50** | Strict Separation of Score, Calib & Conclusion| PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-01` | Score Contract Test | `PLANNED` |
-| **UFD-51** | Finding Detail View with Model Checkpoint Hash | PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-01` | Checkpoint Traceability | `PLANNED` |
-| **UFD-52** | Ten-State Finding Review Lifecycle Machine | PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-02` | State Machine Unit Test | `PLANNED` |
-| **UFD-53** | Examiner Annotations with Cryptographic Signing | PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-02` | Digital Signature Test | `PLANNED` |
-| **UFD-54** | Zero Silent Overwriting of Examiner Notes | PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-02` | Immutability Verification| `PLANNED` |
-| **UFD-55** | Watermarking of Uncalibrated Model Outputs | PRD §19.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-01` | UI Watermark Audit | `PLANNED` |
-| **UFD-56** | CSTV Multi-Source Timeline Integration | PRD §19.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | CSTV Scrubber Test | `PLANNED` |
-| **UFD-57** | Dual Timestamp Display (Raw vs CSTV Corrected) | PRD §19.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | Dual Display Audit | `PLANNED` |
-| **UFD-58** | Visual Highlighting of Temporal Anomalies | PRD §19.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | Anomaly Highlighting | `PLANNED` |
-| **UFD-59** | Interactive Event Scrubbing to Media Playback | PRD §19.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | Playhead Sync Test | `PLANNED` |
-| **UFD-60** | Non-Causality Safeguard Disclaimer on Timeline| PRD §19.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | Legal Guardrail Audit | `PLANNED` |
-| **UFD-61** | AIF-GEO Offline Leaflet Map Canvas | PRD §19.6 | TRD §20.5 | `UFD-A6` | `UFD-CP-06-02` | Offline Tile Render | `PLANNED` |
-| **UFD-62** | GPS Dilution of Precision Bounding Ellipses | PRD §19.6 | TRD §20.5 | `UFD-A6` | `UFD-CP-06-02` | Geometry Bounding Test | `PLANNED` |
-| **UFD-63** | CDVF Cross-Modal Multi-Modal Workspace | PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Cross-Modal Matrix Test | `PLANNED` |
-| **UFD-64** | Anti-Averaging Invariant (Zero Score Averaging)| PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | DAG Integrity Test | `PLANNED` |
-| **UFD-65** | Seven-Code Conflict Taxonomy Presentation | PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Taxonomy Mapping Test | `PLANNED` |
-| **UFD-66** | Prominent Audio vs Video Disagreement Banners | PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Conflict Banner Test | `PLANNED` |
-| **UFD-67** | Non-Suppression of Minority Detector Alarms | PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Detector Coverage Test | `PLANNED` |
-| **UFD-68** | First-Class Inconclusive & OOD Explanation Card| PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | OOD Breakdown Audit | `PLANNED` |
-| **UFD-69** | Independent Cross-Modal Signal Corroboration | PRD §19.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Corroboration Matrix | `PLANNED` |
-| **UFD-70** | CEIPL Pre/Post-Write SHA-256 Fixity Audit | PRD §19.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Fixity Ledger Audit | `PLANNED` |
-| **UFD-71** | Real-Time Fixity Status Indicators & Digests | PRD §19.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Digest Match Test | `PLANNED` |
-| **UFD-72** | Un-Dismissible Quarantine Lockout on Failure | PRD §19.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Quarantine Injection | `PLANNED` |
-| **UFD-73** | Dual-Control Quarantine Exception Workflow | PRD §19.6 | TRD §20.3 | `UFD-A7` | `UFD-CP-07-01` | Dual-Sig Override Test | `PLANNED` |
-| **UFD-74** | Read-Only Presentation of CEIPL Custody Ledger | PRD §19.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Immutable History Audit| `PLANNED` |
-| **UFD-75** | Merkle DAG Audit Proof Visualizer | PRD §19.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Merkle Path Validation | `PLANNED` |
-| **UFD-76** | Zero Direct UI Mutation of Custody Chains | PRD §19.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Security Policy Audit | `PLANNED` |
-| **UFD-77** | UFREDF Section 65B/63 BSA Report Workspace | PRD §19.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-01` | Report Workspace Test | `PLANNED` |
-| **UFD-78** | In-Browser PDF/A-1b Dossier Snapshot Preview | PRD §19.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-02` | PDF.js Preview Test | `PLANNED` |
-| **UFD-79** | Zero Client-Side PDF Compilation (BFF Only) | PRD §19.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-02` | Architecture Audit | `PLANNED` |
-| **UFD-80** | Independent Technical Review Approval Gate | PRD §19.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-01` | Peer Review Test | `PLANNED` |
-| **UFD-81** | Dual-Signature Courtroom Dossier Issuance | PRD §19.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-01` | Multi-Sig PDF Sign Test| `PLANNED` |
-| **UFD-82** | Prevention of Unilateral Report Status Changes| PRD §19.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-01` | RBAC Enforcement Test | `PLANNED` |
-| **UFD-83** | Case-Scoped Full-Text Search Engine | PRD §19.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-01` | Full-Text Search Query | `PLANNED` |
-| **UFD-84** | Zero Cross-Case Data Leakage in Autocomplete | PRD §19.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-01` | Autocomplete Leak Audit| `PLANNED` |
-| **UFD-85** | Verification Event Notifications & WebSocket | PRD §19.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-02` | WebSocket Alert Test | `PLANNED` |
-| **UFD-86** | Prioritized Examiner Review & Task Queue | PRD §19.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-02` | Task Queue Dispatch | `PLANNED` |
-| **UFD-87** | Task Assignment & Reassignment Audit Trails | PRD §19.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-02` | Reassignment Log Test | `PLANNED` |
-| **UFD-88** | Complete Keyboard Operability (Zero Mouse) | PRD §19.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | Manual Keyboard Audit | `PLANNED` |
-| **UFD-89** | High-Contrast Visible Focus Rings (>= 3:1) | PRD §19.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | CSS Focus Style Audit | `PLANNED` |
-| **UFD-90** | Screen-Reader Semantic Headings & ARIA Live | PRD §19.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | NVDA Screen Reader Test| `PLANNED` |
-| **UFD-91** | Non-Colour Status Encoding (Shapes + Text) | PRD §19.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | Visual Accessibility | `PLANNED` |
-| **UFD-92** | Tabular HTML Alternatives for Media Visuals | PRD §19.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | Table Alternative Test | `PLANNED` |
-| **UFD-93** | Text Scaling up to 200% Without Layout Loss | PRD §19.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | 200% Zoom Reflow Audit | `PLANNED` |
-| **UFD-94** | OWASP ASVS v4.0.3 Level 2 Security Compliance | PRD §19.7 | TRD §20.16 | `UFD-A10` | `UFD-CP-10-01` | ASVS L2 Penetration Test|`PLANNED` |
-| **UFD-95** | Strict Content Security Policy (Zero Unsafe) | PRD §19.7 | TRD §20.16 | `UFD-A10` | `UFD-CP-10-01` | CSP Header Validation | `PLANNED` |
-| **UFD-96** | DOMPurify Sanitization of Metadata & Notes | PRD §19.7 | TRD §20.16 | `UFD-A10` | `UFD-CP-10-01` | XSS Attack Suite | `PLANNED` |
-| **UFD-97** | 100% Offline Air-Gapped Zero-Egress Guarantee | PRD §19.7 | TRD §20.16 | `UFD-A10` | `UFD-CP-10-01` | Network Sniffer Audit | `PLANNED` |
-| **UFD-98** | System Latency Budgets & SLA Compliance | PRD §19.7 | TRD §20.17 | `UFD-A11` | `UFD-CP-11-01` | Benchmark Test Suite | `PLANNED` |
-| **UFD-99** | Seven End-to-End Investigation Scenarios | PRD §19.8 | TRD §20.11 | `UFD-A11` | `UFD-CP-11-01` | 7 E2E Scenario Suite | `PLANNED` |
-| **UFD-100**| Release Readiness & Examiner Acceptance Sign-Off| PRD §19.8| TRD §20.18 | `UFD-A11` | `UFD-CP-11-02` | Acceptance Dossier Review|`PLANNED` |
+| **UFD-01** | Shared Presentation & Workflow Layer Boundary | PRD §20.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Architecture Audit | `PLANNED` |
+| **UFD-02** | Zero Duplicate Forensic Detection Algorithms | PRD §20.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Code Inspection | `PLANNED` |
+| **UFD-03** | CEIPL Authoritative Master Evidence Storage | PRD §20.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Storage Contract Test | `PLANNED` |
+| **UFD-04** | Subsystem Sovereignty for Technical Findings | PRD §20.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Schema Validation | `PLANNED` |
+| **UFD-05** | Finding Traceability to Exhibit & Activity UUID| PRD §20.6 | TRD §20.1 | `UFD-A0` | `UFD-CP-00-01` | Lineage Graph Audit | `PLANNED` |
+| **UFD-06** | Honest Representation of Data Freshness & Gaps | PRD §20.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | UI State Test | `PLANNED` |
+| **UFD-07** | Nine Formal Forensic Practitioner Roles | PRD §20.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-01` | RBAC Matrix Test | `PLANNED` |
+| **UFD-08** | Case-Level Security & PostgreSQL RLS Scoping | PRD §20.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-01` | Database Security Test | `PLANNED` |
+| **UFD-09** | Separation of Evidence and Admin Access | PRD §20.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-01` | Privilege Escalation Test | `PLANNED` |
+| **UFD-10** | Dual-Control Custody & Quarantine Overrides | PRD §20.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-02` | Multi-Sig Workflow Test | `PLANNED` |
+| **UFD-11** | Dual-Control Courtroom Report Issuance | PRD §20.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-02` | Cryptographic Sign Test | `PLANNED` |
+| **UFD-12** | Backend Enforcement of All Role Permissions | PRD §20.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-01` | REST API Penetration Test | `PLANNED` |
+| **UFD-13** | Immutable Audit Trail of Privileged Actions | PRD §20.6 | TRD §20.3 | `UFD-A2` | `UFD-CP-02-02` | Audit Log Integrity Test | `PLANNED` |
+| **UFD-14** | Live Backend-Calculated Dashboard Metrics | PRD §20.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | Database Query Audit | `PLANNED` |
+| **UFD-15** | Zero Hardcoded Metrics or Mock Numbers | PRD §20.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | Static Code Analysis | `PLANNED` |
+| **UFD-16** | Filtered Navigation from Dashboard Metric Cards| PRD §20.6 | TRD §20.2 | `UFD-A1` | `UFD-CP-01-01` | UI Navigation Test | `PLANNED` |
+| **UFD-17** | Real-Time Platform Workload & Job Monitoring | PRD §20.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | Celery Queue Monitor | `PLANNED` |
+| **UFD-18** | Distinct Processing, Integrity & Review States| PRD §20.6 | TRD §20.11 | `UFD-A1` | `UFD-CP-01-01` | UI State Mapping Test | `PLANNED` |
+| **UFD-19** | Case-Scoped Recent Activity Chronology | PRD §20.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Activity Feed Audit | `PLANNED` |
+| **UFD-20** | Redaction of Sensitive Preview Data in Feed | PRD §20.6 | TRD §20.16 | `UFD-A2` | `UFD-CP-02-01` | Privacy Leakage Audit | `PLANNED` |
+| **UFD-21** | Case Creation Workflow & Reference Validation | PRD §20.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Input Validation Test | `PLANNED` |
+| **UFD-22** | Prevention of Duplicate Legal Case Identifiers| PRD §20.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Database Constraint Test | `PLANNED` |
+| **UFD-23** | Minimal Collection of PII in Case Metadata | PRD §20.6 | TRD §20.16 | `UFD-A2` | `UFD-CP-02-01` | Data Minimization Audit | `PLANNED` |
+| **UFD-24** | Case Overview Identity & Jurisdictional Scope | PRD §20.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Contract Verification | `PLANNED` |
+| **UFD-25** | Comprehensive Case Evidence Inventory Summary | PRD §20.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Aggregation Query Test | `PLANNED` |
+| **UFD-26** | Multi-Engine Investigation Status Summary | PRD §20.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Subsystem Status Test | `PLANNED` |
+| **UFD-27** | Section 63 BSA Report Dossier Status Summary | PRD §20.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Report Status Query | `PLANNED` |
+| **UFD-28** | Read-Only View of CEIPL Chain-of-Custody | PRD §20.6 | TRD §20.4 | `UFD-A2` | `UFD-CP-02-01` | Custody Ledger Audit | `PLANNED` |
+| **UFD-29** | Support for 10 Multi-Modal Evidence Categories | PRD §20.6 | TRD §20.5 | `UFD-A3` | `UFD-CP-03-01` | Multi-Format Ingest Test | `PLANNED` |
+| **UFD-30** | Configurable Evidence Inventory Column Table | PRD §20.6 | TRD §20.4 | `UFD-A3` | `UFD-CP-03-01` | UI Component Test | `PLANNED` |
+| **UFD-31** | Separation of Acquisition and File System Time| PRD §20.6 | TRD §20.4 | `UFD-A3` | `UFD-CP-03-01` | Timestamp Semantic Test | `PLANNED` |
+| **UFD-32** | Multi-Dimensional Evidence Filter & Search | PRD §20.6 | TRD §20.14 | `UFD-A3` | `UFD-CP-03-01` | Query Filter Benchmark | `PLANNED` |
+| **UFD-33** | Server-Side Pagination for Evidence Records | PRD §20.6 | TRD §20.14 | `UFD-A3` | `UFD-CP-03-01` | Scalability Benchmark | `PLANNED` |
+| **UFD-34** | Evidence Detail Dedicated Investigation Page | PRD §20.6 | TRD §20.4 | `UFD-A3` | `UFD-CP-03-01` | Page Layout Test | `PLANNED` |
+| **UFD-35** | Visual Differentiation of Originals vs Derived | PRD §20.6 | TRD §20.4 | `UFD-A3` | `UFD-CP-03-02` | Lineage Rendering Test | `PLANNED` |
+| **UFD-36** | Permission-Controlled Evidence Export Actions | PRD §20.6 | TRD §20.16 | `UFD-A3` | `UFD-CP-03-01` | Export Permission Test | `PLANNED` |
+| **UFD-37** | AIF Synchronized Dual-Canvas Image Viewer | PRD §20.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Canvas Synchronization | `PLANNED` |
+| **UFD-38** | Image Metadata, EXIF, XMP & DQT Inspection | PRD §20.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Header Extraction Test | `PLANNED` |
+| **UFD-39** | IMLF Manipulation Heatmaps & Bounding Masks | PRD §20.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | IoU Overlay Test | `PLANNED` |
+| **UFD-40** | Original Pixel Coordinate Space Invariant | PRD §20.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Geometric Integrity Test | `PLANNED` |
+| **UFD-41** | AURAS Interactive Mel-Spectrogram & Waveform | PRD §20.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | WebAudio Rendering Test | `PLANNED` |
+| **UFD-42** | Silero VAD Speech & ECAPA Diarization Tracks | PRD §20.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Interval Alignment Test | `PLANNED` |
+| **UFD-43** | AESL Splice Markers with Sample-Index Bounds | PRD §20.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Splice Index Precision | `PLANNED` |
+| **UFD-44** | Strict Audio Autoplay Prevention & Decibel Clamp| PRD §20.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Acoustic Safety Test | `PLANNED` |
+| **UFD-45** | VISTA Frame-Accurate Scrubber & PTS Timeline | PRD §20.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-02` | Frame Stepping Latency | `PLANNED` |
+| **UFD-46** | Handling B-Frame Reordering & Compression | PRD §20.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-02` | Codec Invariant Test | `PLANNED` |
+| **UFD-47** | CCTV Burned-In Overlay vs Sidecar Verification| PRD §20.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-02` | Optical Header Audit | `PLANNED` |
+| **UFD-48** | ONTF Offline PCAP Flow Table & Redaction | PRD §20.6 | TRD §20.5 | `UFD-A4` | `UFD-CP-04-01` | Offline Zeek Flow Test | `PLANNED` |
+| **UFD-49** | Unified Multi-Subsystem Findings Inventory | PRD §20.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-01` | Aggregation Test | `PLANNED` |
+| **UFD-50** | Strict Separation of Score, Calib & Conclusion| PRD §20.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-01` | Score Contract Test | `PLANNED` |
+| **UFD-51** | Finding Detail View with Model Checkpoint Hash | PRD §20.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-01` | Checkpoint Traceability | `PLANNED` |
+| **UFD-52** | Ten-State Finding Review Lifecycle Machine | PRD §20.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-02` | State Machine Unit Test | `PLANNED` |
+| **UFD-53** | Examiner Annotations with Cryptographic Signing | PRD §20.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-02` | Digital Signature Test | `PLANNED` |
+| **UFD-54** | Zero Silent Overwriting of Examiner Notes | PRD §20.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-02` | Immutability Verification| `PLANNED` |
+| **UFD-55** | Watermarking of Uncalibrated Model Outputs | PRD §20.6 | TRD §20.6 | `UFD-A5` | `UFD-CP-05-01` | UI Watermark Audit | `PLANNED` |
+| **UFD-56** | CSTV Multi-Source Timeline Integration | PRD §20.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | CSTV Scrubber Test | `PLANNED` |
+| **UFD-57** | Dual Timestamp Display (Raw vs CSTV Corrected) | PRD §20.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | Dual Display Audit | `PLANNED` |
+| **UFD-58** | Visual Highlighting of Temporal Anomalies | PRD §20.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | Anomaly Highlighting | `PLANNED` |
+| **UFD-59** | Interactive Event Scrubbing to Media Playback | PRD §20.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | Playhead Sync Test | `PLANNED` |
+| **UFD-60** | Non-Causality Safeguard Disclaimer on Timeline| PRD §20.6 | TRD §20.7 | `UFD-A6` | `UFD-CP-06-01` | Legal Guardrail Audit | `PLANNED` |
+| **UFD-61** | AIF-GEO Offline Leaflet Map Canvas | PRD §20.6 | TRD §20.5 | `UFD-A6` | `UFD-CP-06-02` | Offline Tile Render | `PLANNED` |
+| **UFD-62** | GPS Dilution of Precision Bounding Ellipses | PRD §20.6 | TRD §20.5 | `UFD-A6` | `UFD-CP-06-02` | Geometry Bounding Test | `PLANNED` |
+| **UFD-63** | CDVF Cross-Modal Multi-Modal Workspace | PRD §20.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Cross-Modal Matrix Test | `PLANNED` |
+| **UFD-64** | Anti-Averaging Invariant (Zero Score Averaging)| PRD §20.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | DAG Integrity Test | `PLANNED` |
+| **UFD-65** | Seven-Code Conflict Taxonomy Presentation | PRD §20.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Taxonomy Mapping Test | `PLANNED` |
+| **UFD-66** | Prominent Audio vs Video Disagreement Banners | PRD §20.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Conflict Banner Test | `PLANNED` |
+| **UFD-67** | Non-Suppression of Minority Detector Alarms | PRD §20.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Detector Coverage Test | `PLANNED` |
+| **UFD-68** | First-Class Inconclusive & OOD Explanation Card| PRD §20.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | OOD Breakdown Audit | `PLANNED` |
+| **UFD-69** | Independent Cross-Modal Signal Corroboration | PRD §20.6 | TRD §20.8 | `UFD-A7` | `UFD-CP-07-02` | Corroboration Matrix | `PLANNED` |
+| **UFD-70** | CEIPL Pre/Post-Write SHA-256 Fixity Audit | PRD §20.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Fixity Ledger Audit | `PLANNED` |
+| **UFD-71** | Real-Time Fixity Status Indicators & Digests | PRD §20.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Digest Match Test | `PLANNED` |
+| **UFD-72** | Un-Dismissible Quarantine Lockout on Failure | PRD §20.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Quarantine Injection | `PLANNED` |
+| **UFD-73** | Dual-Control Quarantine Exception Workflow | PRD §20.6 | TRD §20.3 | `UFD-A7` | `UFD-CP-07-01` | Dual-Sig Override Test | `PLANNED` |
+| **UFD-74** | Read-Only Presentation of CEIPL Custody Ledger | PRD §20.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Immutable History Audit| `PLANNED` |
+| **UFD-75** | Merkle DAG Audit Proof Visualizer | PRD §20.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Merkle Path Validation | `PLANNED` |
+| **UFD-76** | Zero Direct UI Mutation of Custody Chains | PRD §20.6 | TRD §20.9 | `UFD-A7` | `UFD-CP-07-01` | Security Policy Audit | `PLANNED` |
+| **UFD-77** | UFREDF Section 65B/63 BSA Report Workspace | PRD §20.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-01` | Report Workspace Test | `PLANNED` |
+| **UFD-78** | In-Browser PDF/A-1b Dossier Snapshot Preview | PRD §20.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-02` | PDF.js Preview Test | `PLANNED` |
+| **UFD-79** | Zero Client-Side PDF Compilation (BFF Only) | PRD §20.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-02` | Architecture Audit | `PLANNED` |
+| **UFD-80** | Independent Technical Review Approval Gate | PRD §20.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-01` | Peer Review Test | `PLANNED` |
+| **UFD-81** | Dual-Signature Courtroom Dossier Issuance | PRD §20.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-01` | Multi-Sig PDF Sign Test| `PLANNED` |
+| **UFD-82** | Prevention of Unilateral Report Status Changes| PRD §20.6 | TRD §20.10 | `UFD-A8` | `UFD-CP-08-01` | RBAC Enforcement Test | `PLANNED` |
+| **UFD-83** | Case-Scoped Full-Text Search Engine | PRD §20.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-01` | Full-Text Search Query | `PLANNED` |
+| **UFD-84** | Zero Cross-Case Data Leakage in Autocomplete | PRD §20.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-01` | Autocomplete Leak Audit| `PLANNED` |
+| **UFD-85** | Verification Event Notifications & WebSocket | PRD §20.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-02` | WebSocket Alert Test | `PLANNED` |
+| **UFD-86** | Prioritized Examiner Review & Task Queue | PRD §20.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-02` | Task Queue Dispatch | `PLANNED` |
+| **UFD-87** | Task Assignment & Reassignment Audit Trails | PRD §20.6 | TRD §20.13 | `UFD-A9` | `UFD-CP-09-02` | Reassignment Log Test | `PLANNED` |
+| **UFD-88** | Complete Keyboard Operability (Zero Mouse) | PRD §20.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | Manual Keyboard Audit | `PLANNED` |
+| **UFD-89** | High-Contrast Visible Focus Rings (>= 3:1) | PRD §20.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | CSS Focus Style Audit | `PLANNED` |
+| **UFD-90** | Screen-Reader Semantic Headings & ARIA Live | PRD §20.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | NVDA Screen Reader Test| `PLANNED` |
+| **UFD-91** | Non-Colour Status Encoding (Shapes + Text) | PRD §20.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | Visual Accessibility | `PLANNED` |
+| **UFD-92** | Tabular HTML Alternatives for Media Visuals | PRD §20.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | Table Alternative Test | `PLANNED` |
+| **UFD-93** | Text Scaling up to 200% Without Layout Loss | PRD §20.7 | TRD §20.15 | `UFD-A10` | `UFD-CP-10-02` | 200% Zoom Reflow Audit | `PLANNED` |
+| **UFD-94** | OWASP ASVS v4.0.3 Level 2 Security Compliance | PRD §20.7 | TRD §20.16 | `UFD-A10` | `UFD-CP-10-01` | ASVS L2 Penetration Test|`PLANNED` |
+| **UFD-95** | Strict Content Security Policy (Zero Unsafe) | PRD §20.7 | TRD §20.16 | `UFD-A10` | `UFD-CP-10-01` | CSP Header Validation | `PLANNED` |
+| **UFD-96** | DOMPurify Sanitization of Metadata & Notes | PRD §20.7 | TRD §20.16 | `UFD-A10` | `UFD-CP-10-01` | XSS Attack Suite | `PLANNED` |
+| **UFD-97** | 100% Offline Air-Gapped Zero-Egress Guarantee | PRD §20.7 | TRD §20.16 | `UFD-A10` | `UFD-CP-10-01` | Network Sniffer Audit | `PLANNED` |
+| **UFD-98** | System Latency Budgets & SLA Compliance | PRD §20.7 | TRD §20.17 | `UFD-A11` | `UFD-CP-11-01` | Benchmark Test Suite | `PLANNED` |
+| **UFD-99** | Seven End-to-End Investigation Scenarios | PRD §20.8 | TRD §20.11 | `UFD-A11` | `UFD-CP-11-01` | 7 E2E Scenario Suite | `PLANNED` |
+| **UFD-100**| Release Readiness & Examiner Acceptance Sign-Off| PRD §20.8| TRD §20.18 | `UFD-A11` | `UFD-CP-11-02` | Acceptance Dossier Review|`PLANNED` |
 ---
 
 ## 23. Dedicated Unified Forensic Reporting & Evidence Dossier Framework Engineering Playbook (UFREDF-A0 through UFREDF-A10)
@@ -7807,7 +7807,7 @@ flowchart LR
 - **Scope:** Evidence schedule compilation, hash integrity schedules, and Merkle custody ledger summarization.
 - **Detailed Tasks:**
   1. Build the evidence schedule compiler collecting all seized exhibits, filenames, file sizes, and MIME types.
-  2. Embed pre-decode dual-hashes (`SHA-256` + `SHA3-512` or hardware-accelerated `SHA-512`) for every referenced exhibit.
+  2. Embed pre-decode dual-hashes (`SHA-256` + `SHA3-512`) for every referenced exhibit.
   3. Extract CEIPL immutable custody events, rendering a tamper-evident audit timeline with Merkle root hashes.
   4. Implement quarantine checks: prevent compilation of official reports referencing exhibits with active fixity failures.
 - **Dependencies:** Phase UFREDF-A1, CEIPL-EIV-06, CMMS-A9.
@@ -7869,7 +7869,7 @@ flowchart LR
   3. Enforce the Anti-Averaging Invariant: multi-modal probabilities are presented as separate DAG nodes, never as a composite average.
   4. Render first-class disclosures for out-of-distribution (OOD) alerts, degraded signals, and inconclusive outcomes.
   5. Embed the CSTV aligned timeline and clock drift regression table $\delta(t)$ as a structured technical annexure.
-- **Dependencies:** Phase UFREDF-A3, CSTV-A10, CDVF-A11, UFD-A5.
+- **Dependencies:** Phase UFREDF-A3, CSTV-A10, CDVF-A11.
 - **Deliverables:** Multi-Modal Findings Aggregator, Cross-Modal Matrix Formatter, CSTV Timeline Annexure.
 - **Unit Tests:** `test_multi_modal_findings_formatting()`, `test_anti_averaging_enforcement()`.
 - **Integration Tests:** `test_subsystem_findings_to_report_pipeline()`, `test_cstv_timeline_annexure_binding()`.
@@ -7899,7 +7899,7 @@ flowchart LR
   3. Build the examiner annotation editor recording free-text observations bound cryptographically to the report snapshot.
   4. Implement detached RFC 8032 Ed25519 digital signing of the compiled report SHA-256 digest.
   5. Implement the dual-control courtroom issuance challenge requiring two distinct authorized signatures (`ROLE-EXAMINER` + `ROLE-REPREV`).
-- **Dependencies:** Phase UFREDF-A4, UFD-A2, UFD-A8.
+- **Dependencies:** Phase UFREDF-A4, UFD-A2 (RBAC contracts).
 - **Deliverables:** Report Review Workflow Engine, Examiner Annotation Ledger, Dual-Signer Cryptographic Module.
 - **Unit Tests:** `test_report_lifecycle_transitions()`, `test_ed25519_detached_signature_verification()`.
 - **Integration Tests:** `test_dual_control_issuance_two_actor_workflow()`, `test_technical_review_gate_enforcement()`.
