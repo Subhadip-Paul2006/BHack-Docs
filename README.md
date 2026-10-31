@@ -20,7 +20,7 @@ Manual forensic examination is time-consuming, requires scarce specialized exper
 
 1. **Cryptographic Chain of Custody (CEIPL):** Write-Once-Read-Many (WORM) storage, instant raw-byte dual-hashing (SHA-256 and SHA3-512), RFC 8785 canonical manifests, Ed25519 signatures, RFC 3161 timestamps, and an append-only Merkle tree audit log.
 2. **AIF Advanced Image Forensics Subsystem:** High-resolution image understanding (IVE), physics/frequency reverse engineering (IRE), AI generation/steganography detection (AIM), and judicial biometric comparison (FPA).
-3. **AURAS Audio Forensics Subsystem:** Deep electroacoustic signal analysis (ARE), multilingual voice and overlap-aware diarization (MVSI), and calibrated multi-branch audio deepfake detection (ADDE).
+3. **AURAS Audio Forensics Subsystem:** Deep electroacoustic signal analysis and Audio Edit & Splice Localisation (ARE/AESL), multilingual voice and overlap-aware diarization (MVSI), and calibrated multi-branch audio deepfake detection (ADDE).
 4. **VISTA Video & CCTV Forensics Subsystem:** Modular five-engine video forensics architecture:
    - **VRE (Video Reverse Engineering Engine):** Bitstream container, codec, PTS/DTS cadence, variable frame rates, scene cuts, and compression history.
    - **AFB (Audio Forensic Bridge):** Cryptographically bound audio extraction routing directly into AURAS without algorithm duplication.
@@ -34,7 +34,7 @@ Manual forensic examination is time-consuming, requires scarce specialized exper
 8. **Image Manipulation Localisation Framework (IMLF):** Shared spatial reasoning capability within AIF that localises, segments, and corroborates copy-move, splicing, inpainting, AI-generated patch, and facial manipulations into calibrated pixel masks and vector polygons with multi-scale tiling and an examiner review workbench.
 9. **Cross-Media Metadata Service (CMMS):** A shared, evidence-aware metadata extraction, normalisation, validation, consistency-analysis and correlation layer supporting digital images, audio recordings, video files, CCTV exports, offline PCAP/PCAPNG captures, and geospatial evidence. CMMS preserves raw metadata values, produces canonically normalised representations, identifies anomalies and inconsistencies across fields and evidence items, and exposes structured metadata records to AIF, AURAS, VISTA, AIF-GEO, ONTF, CEIPL, and UFREDF without duplicating modality-specific forensic analysis inside each engine.
 10. **Cross-Source Timestamp Verification (CSTV):** A platform-wide temporal verification and correlation capability that analyzes, compares, and cross-validates timestamps across 17 distinct evidence source categories (EXIF, audio samples, video PTS/DTS, CCTV OSD overlays, offline PCAPs, GPS tracks, device/recorder logs). CSTV estimates clock offsets and linear/piecewise drift rates in parts per million (ppm), detects clock resets, aligns multimodal event anchors, evaluates Allen's interval algebra and sequence conflict graphs, and reconstructs unified multi-tiered case timelines without overwriting source metadata.
-11. 10. **Court-Admissible Legal Certification:** Automated generation of tamper-evident electronic evidence certificates under **Section 65B of the Indian Evidence Act (IEA)** and **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** with Archify JSON Intermediate Representation (IR).
+11. **Court-Admissible Legal Certification:** Automated generation of tamper-evident electronic evidence certificates under **Section 65B of the Indian Evidence Act (IEA)** and **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** with Archify JSON Intermediate Representation (IR).
 
 ---
 
@@ -1316,6 +1316,139 @@ CSTV registers and analyzes temporal records across 17 distinct categories:
 
 Source code implementation is **explicitly out of scope** for this documentation release.
 See `PRD.md Section 16`, `TRD.md Section 17`, and `PHASES.md Section 14` for full specifications.
+
+
+## 4.29 Audio Edit and Splice Localisation (AESL)
+
+> **Localized Audio Temporal Integrity Engine — Embedded Inside ARE (Audio Reverse Engineering Engine)**
+
+The Audio Edit and Splice Localisation (AESL) capability is a specialized temporal-integrity sub-engine embedded directly within the **Audio Reverse Engineering Engine (ARE)** of the AURAS subsystem.
+
+AESL is **not** a fourth AURAS engine. It does not replace or duplicate voice cloning classification (ADDE) or speaker diarization (MVSI). Its specific mission is to detect, isolate, and localise suspicious audio edit regions, candidate splice boundaries, and cloned sequences with exact native sample coordinates ($t = n/f_s$) and quantified millisecond uncertainty intervals.
+
+```mermaid
+flowchart TD
+    subgraph INTAKE["1. Intake & Custody"]
+        SEIZED_AUD["Original Audio Exhibit (WAV, MP3, AAC, M4A)"]
+        CEIPL_WORM["CEIPL WORM Vault (POSIX 0400 Read-Only, Dual Hash)"]
+        SEIZED_AUD --> CEIPL_WORM
+    end
+
+    subgraph WORK_FACTORY["2. Working Copy Factory"]
+        ART_A["Artifact A: Native Working WAV (Channels & Rate Preserved)"]
+        ART_B["Artifact B: Derived 16 kHz Mono WAV (Neural Branch Normalization)"]
+        CEIPL_WORM --> ART_A --> ART_B
+    end
+
+    subgraph ARE_AESL["3. ARE / AESL Multi-Branch Localisation Pipeline"]
+        MULTI_RES["Multi-Resolution Windowing (10ms, 20ms, 50ms, 200ms)"]
+        ART_A --> MULTI_RES
+        
+        BRANCH_TIME["Branch A: Time-Domain Continuity\n(Short-Time RMS, Zero-Crossing, Slope |d[n]|)"]
+        BRANCH_SPEC["Branch B: STFT Spectral Forensics\n(Hann STFT, Spectral Flux SF[m], Centroid)"]
+        BRANCH_NOISE["Branch C: Acoustic Environment & Noise\n(Minimum Statistics P_N, RIR, RT60, DRR)"]
+        BRANCH_CHAN["Branch D: Multi-Channel Coherence\n(Cross-Correlation R_xy(tau), ITD, Phase Inversion)"]
+        BRANCH_MODEL["Branch E: Learned Temporal Localiser\n(TCN / CRNN Suspicion Curves, ASLNet Evaluation)"]
+        
+        MULTI_RES --> BRANCH_TIME & BRANCH_SPEC & BRANCH_NOISE & BRANCH_CHAN
+        ART_B --> BRANCH_MODEL
+        
+        CHANGE_PT["Change-Point Engine (PELT & CUSUM Segmentation)"]
+        BRANCH_TIME & BRANCH_SPEC & BRANCH_NOISE & BRANCH_CHAN & BRANCH_MODEL --> CHANGE_PT
+        
+        REFINE["Sample-Accurate Boundary Refinement\n(Narrow-Window Zero-Crossing Snap +/- 500 Samples)"]
+        CHANGE_PT --> REFINE
+    end
+
+    subgraph FUSION_QC["4. Anti-Black-Box Fusion & Quality Control"]
+        HYSTERESIS["Dual-Threshold Hysteresis Bounding (tau_high = 0.70, tau_low = 0.40)"]
+        QC_CHECK["18 Benign Alternative Explanations Evaluator (Speaker Movement, AGC, Codec)"]
+        REFINE --> HYSTERESIS --> QC_CHECK
+    end
+
+    subgraph DELIVERABLES["5. Court-Certified Deliverables"]
+        CANVAS["Examiner Review Workbench (Sample-Accurate Scrub Canvas)"]
+        UFREDF_DOC["UFREDF Section 65B/63 BSA Dossier (Court-Certified PDF)"]
+        QC_CHECK --> CANVAS --> UFREDF_DOC
+    end
+```
+
+### 4.29.1 Why Audio Splice Localisation Matters
+In digital criminal trials, a bare binary verdict such as "78% Fake" is legally vulnerable under judicial cross-examination. A court requires concrete physical and acoustic answers:
+- *Where in the audio was the edit made?*
+- *Exactly which sample indices and timestamps bound the altered phrase?*
+- *Which audio channel was spliced?*
+- *Did the background room reverberation (RT60) or ambient noise floor change discontinuously?*
+- *Can the acoustic discontinuity be explained by natural speaker movement, automatic gain control (AGC), or legitimate mobile transcoding?*
+
+AESL answers these questions by producing evidence-linked suspicious-region candidates with sample coordinates ($t = n/f_s$) and quantified uncertainty intervals ($\pm \sigma_{\text{ms}}$).
+
+### 4.29.2 Six Supported Manipulation Topologies
+1. **Audio Splicing:** Audio from an external recording inserted into a carrier recording, flagged via background-noise jumps and acoustic room mismatch.
+2. **Segment Deletion:** An interval excised to alter meaning, flagged via severed reverberation tails and non-cadence zero-crossing discontinuities.
+3. **Segment Insertion:** Foreign speech or sound introduced into a recording pause, flagged via twin splice boundaries and double-compression traces.
+4. **Audio Replacement:** A legitimate word replaced with an alternative word or synthesized sound, flagged via phase and room-impulse response (RIR) discontinuities.
+5. **Copy-Move Manipulation:** Content duplicated from within the same recording, flagged via acoustic fingerprint collision and dynamic time warping (DTW).
+6. **Concealed Edits:** Manipulations smoothed via crossfades ($\ge 20\text{ ms}$), noise-bed mixing, or lossy recompression (e.g. WhatsApp Opus at 16 kbps), flagged via multi-scale spectral flux and MDCT quantization anomalies.
+
+### 4.29.3 Core Mathematical Formulations
+1. **Sample Coordinate Preservation:**
+   $$t = \frac{n}{f_s}, \quad t_{\text{start}} = \frac{n_{\text{start}}}{f_s}, \quad t_{\text{end}} = \frac{n_{\text{end}}}{f_s}$$
+2. **STFT Spectral Flux Discontinuity:**
+   $$SF[m] = \sum_{k=0}^{K-1} H(|X(m,k)| - |X(m-1,k)|)^2$$
+3. **Reverberation Decay ($RT60$) Step:** Energy decay curve evaluated via Schroeder backward integration:
+   $$EDC(t) = \int_t^\infty h^2(\tau) d\tau$$
+4. **Inter-Channel Cross-Correlation (Stereo):**
+   $$R_{xy}(\tau) = \sum_{n=0}^{N-1} x[n] y[n + \tau], \quad \rho_{\max} = \frac{\max_\tau R_{xy}(\tau)}{\sqrt{\sum x^2[n] \sum y^2[n]}}$$
+5. **PELT Change-Point Segmentation:**
+   $$\min_{\tau} \sum_{i=1}^{M+1} \left[ \mathcal{C}(y_{(\tau_{i-1}+1):\tau_i}) + \beta \right]$$
+
+### 4.29.4 Relationship with MVSI and ADDE
+- **ARE/AESL:** Owns temporal integrity, edit localisation, splice boundaries, copy-move detection, and physical signal continuity.
+- **MVSI (Voice & Speaker Intel):** Supplies speaker diarization intervals, VAD speech boundaries, and Indian language identification context.
+- **ADDE (Audio Deepfake Detection):** Supplies independent AI-generated and cloned-voice suspicion scores.
+- *Evidentiary Invariant:* Splicing findings and AI-voice findings remain strictly decoupled. A splice can occur in authentic human speech, between two genuine speakers, or inside an unvoiced environmental recording.
+
+### 4.29.5 Explicit Forensic Limitations
+1. An acoustic discontinuity does not independently prove fraudulent tampering.
+2. A continuous, smooth waveform does not prove that an audio recording is unedited.
+3. Background noise changes occur naturally in mobile and outdoor recording environments.
+4. Speaker head rotation alters room reverberation and high-frequency spectral rolloff.
+5. Microphone handling produces low-frequency thumps mimicking edit boundaries.
+6. Legitimate lossy compression introduces frame-boundary blocking and high-frequency cutoff artifacts.
+7. Professional crossfading ($\ge 50\text{ ms}$) and noise-bed smoothing can conceal splice boundaries.
+8. Copy-move detection can flag naturally repeated speech words, refrains, or machine cycles.
+9. Neural network suspicion scores are uncalibrated heuristics, not mathematical probabilities of guilt.
+10. Reconstructed boundary intervals have finite temporal precision bounded by the sampling theorem.
+11. Content deletions cannot be recovered or proven without an independent authentic reference recording.
+12. A single forensic detector must never form the sole basis of an affirmative tampering verdict.
+13. Model generalisation degrades on unseen mobile codecs, low-quality microphones, or rare dialects.
+14. All forensic findings must document tested alternative explanations and unresolved hypotheses.
+15. Splicing indicators must be reported independently from AI-generated voice cloning indicators.
+16. Speaker diarization identifies vocal characteristics, not who performed an audio edit.
+17. Original evidence bitstreams must remain strictly immutable; enhancements are derived artifacts.
+18. Resampled or denoised audio files represent derived working copies, not original evidence.
+19. Inconclusive outcomes are legally and scientifically valid forensic determinations.
+20. Final courtroom interpretations require evaluation by a certified forensic human examiner.
+
+### 4.29.6 Implementation Status
+
+| Capability | Phase | Status |
+| :--- | :--- | :--- |
+| ARE architecture baseline & three-engine preservation (AESL-01..05) | AURAS-AESL-00 | `PLANNED` |
+| Evidence intake, Artifact A/B factory, and sample-index tracking (AESL-06..13) | AURAS-AESL-01 | `PLANNED` |
+| Multi-resolution segmentation, time/spectral/channel analysis (AESL-14..27, 36..48) | AURAS-AESL-02 | `PLANNED` |
+| Noise floor tracking, RIR modeling, and acoustic environment distance (AESL-28..35) | AURAS-AESL-03 | `PLANNED` |
+| Codec bitstream inspection, MP3/AAC quantization, and re-encoding traces (AESL-49..54) | AURAS-AESL-04 | `PLANNED` |
+| Copy-move acoustic fingerprinting and DTW syllable alignment (AESL-55..60) | AURAS-AESL-05 | `PLANNED` |
+| Statistical change-point detection (PELT, CUSUM, Kernel MMD) (AESL-61..64) | AURAS-AESL-06 | `PLANNED` |
+| Learned temporal localisation models (TCN/CRNN) & ASLNet evaluation (AESL-65..67) | AURAS-AESL-07 | `PLANNED` |
+| Dual-threshold hysteresis, sample-level refinement, and 20 findings (AESL-68..73, 79..81) | AURAS-AESL-08 | `PLANNED` |
+| CEIPL WORM vault, MVSI context binding, and Section 65B/63 BSA dossier (AESL-74..78, 82..88) | AURAS-AESL-09 | `PLANNED` |
+| 500-fixture benchmark corpus, tIoU $\ge 0.75$, boundary MAE $\le 15\text{ms}$ (AESL-89..90) | AURAS-AESL-10 | `PLANNED` |
+
+Source code implementation is **explicitly out of scope** for this documentation release.
+See `PRD.md Section 17`, `TRD.md Section 18`, and `PHASES.md Section 16` for full specifications.
 
 
 ## 5. Implementation Status
