@@ -1,11 +1,11 @@
 # Implementation Roadmap & Phases (PHASES.md)
 
 ## Project: Digital Evidence Authenticity & Integrity Verification Platform (PS-05)
-**Hackathon:** Bihar Government Cyber Hackathon 2026 (C-DAC Patna, CCSU, Bihar Police)  
-**Track:** Digital Forensics  
-**Problem Statement:** PS-05 — Digital Evidence Authenticity and Integrity Verification Platform  
-**Document Version:** 1.1.0  
-**Status:** Canonical Implementation Roadmap & Engineering Playbook  
+**Hackathon:** Bihar Government Cyber Hackathon 2026 (C-DAC Patna, CCSU, Bihar Police)
+**Track:** Digital Forensics
+**Problem Statement:** PS-05 — Digital Evidence Authenticity and Integrity Verification Platform
+**Document Version:** 1.1.0
+**Status:** Canonical Implementation Roadmap & Engineering Playbook
 
 ---
 
@@ -17,6 +17,7 @@ The PS-05 development lifecycle is structured into eleven platform-level phases 
 - **AIF Image Forensics Subsystem:** Retained as Phase 4 with its multi-branch visual examination modules (**AIF-A0 through AIF-A15**).
 - **AIF-GEO Geospatial Forensics Subsystem:** Eleven engineering phases (**AIF-GEO-00 through AIF-GEO-10**).
 - **ONTF Network Traffic Forensics Subsystem:** Fourteen engineering phases (**ONTF-A0 through ONTF-A13**).
+- **Cross-Modal Deepfake Validation Framework (CDVF):** Twelve engineering phases (**CDVF-A0 through CDVF-A11**), providing a shared scientific benchmarking, empirical calibration, OOD gating, and model-governance backbone governing AIF, AURAS, and VISTA detection engines.
 - **Shared Platform Layer:** Common pre-decode dual-hashing, WORM vault persistence, Celery worker orchestration, and Section 65B/63 BSA legal reporting infrastructure.
 
 ```mermaid
@@ -29,15 +30,15 @@ flowchart TD
         direction TB
         A0["AURAS-A0: Audio Evidence Contracts & Preprocessing"] --> A1["AURAS-A1: ARE Baseline (Signal & Spectral Profiling)"]
         A1 --> A2["AURAS-A2: ARE Advanced (Splice, Noise, FAISS, ENF)"]
-        
+
         A0 --> A3["AURAS-A3: MVSI Foundation (Silero VAD & Segmentation)"]
         A3 --> A4["AURAS-A4: MVSI Advanced (Overlap-Aware Diarization)"]
         A4 --> A5["AURAS-A5: MVSI Multilingual (Indian LID & Code-Switching)"]
-        
+
         A0 --> A6["AURAS-A6: ADDE Foundation (RawNet2 & AASIST Framework)"]
         A6 --> A7["AURAS-A7: ADDE Advanced (WavLM SSL, Partial Splice, Robustness)"]
         A7 --> A8["AURAS-A8: ADDE Ensemble, Calibration & OOD Uncertainty"]
-        
+
         A2 & A5 & A8 --> A9["AURAS-A9: Audio Orchestration & Reviewer Workflow"]
         A9 --> A10["AURAS-A10: End-to-End Audio Validation & Benchmark"]
     end
@@ -47,17 +48,17 @@ flowchart TD
         VA0["VISTA-A0: Video Architecture & Standards Baseline"] --> VA1["VISTA-A1: Video Evidence Contracts & CEIPL Foundation"]
         VA1 --> VA2["VISTA-A2: Demuxing, Container & PTS Cadence (VRE)"]
         VA2 --> VA3["VISTA-A3: Advanced VRE (Macroblock QP, ExifTool, RIFE)"]
-        
+
         VA1 --> VA4["VISTA-A4: AFB Stream-Copy & AURAS Subsystem Bridge"]
         VA3 & VA4 --> VA5["VISTA-A5: AVSC Lip-Sync & Sound-Visual Correspondence"]
-        
+
         VA2 --> VA6["VISTA-A6: VCI Source Taxonomy, Tracking & Unique Counting"]
         VA2 & VA6 --> VA7["VISTA-A7: CCTV Automated Triage & Adaptive Questionnaire"]
         VA7 --> VA8["VISTA-A8: CCTV Clock Drift Regression & ONVIF Seals"]
-        
+
         VA5 --> VA9["VISTA-A9: VDF Frame Deepfake & Spatial Manipulation Heads"]
         VA9 --> VA10["VISTA-A10: VDF Temporal Models, 3D FFT & OOD Calibration"]
-        
+
         VA3 & VA5 & VA6 & VA8 & VA10 --> VA11["VISTA-A11: Cross-Engine Video Evidence Fusion"]
         VA11 --> VA12["VISTA-A12: Video Legal Reporting & Sec 65B/63 BSA Dossier"]
         VA12 --> VA13["VISTA-A13: End-to-End Video Validation & Benchmark Corpus"]
@@ -69,17 +70,17 @@ flowchart TD
         IA1 --> IA2["AIF-A2: Secure Image Intake & Safe Decoding"]
         IA2 --> IA3["AIF-A3: Hierarchical Taxonomy & Multi-label Classifier"]
         IA3 --> IA4["AIF-A4: Object Detection, Segmentation & People Count"]
-        
+
         IA2 --> IA5["AIF-A5: FPA Face, Portrait & Biometric Landmarks"]
         IA2 --> IA6["AIF-A6: Document Layout, Quad Warp & OCR Engine"]
         IA2 --> IA7["AIF-A7: Metadata Audit & Signal Profiling (IRE)"]
         IA7 --> IA8["AIF-A8: Classical CV & Geometric Forensics"]
         IA8 --> IA9["AIF-A9: CMFD Splicing & PRNU Sensor Noise"]
-        
+
         IA3 & IA7 --> IA10["AIF-A10: Multi-Branch AI-Gen & TruFor Inpainting"]
         IA5 --> IA11["AIF-A11: Face Swap, Morphing & Synthesis Forensics"]
         IA2 --> IA12["AIF-A12: Steganalysis & Malformed File Defense"]
-        
+
         IA1 & IA9 & IA10 & IA11 & IA12 --> IA13["AIF-A13: CEIPL Provenance & Custody Hardening"]
         IA13 --> IA14["AIF-A14: Evidence Fusion & Examiner Reporting"]
         IA14 --> IA15["AIF-A15: End-to-End Image Validation & Release"]
@@ -116,8 +117,25 @@ flowchart TD
         NA12 --> NA13["ONTF-A13: End-to-End Network Validation & Benchmark Corpus"]
     end
 
+    subgraph CDVF_WORKSTREAM["🔬 CDVF Cross-Modal Validation Playbook"]
+        direction TB
+        CA0["CDVF-A0: Repo Audit & Cross-Modal Contracts"] --> CA1["CDVF-A1: Model Registry & Checkpoint Provenance"]
+        CA0 --> CA2["CDVF-A2: Dataset Governance & Leakage Prevention"]
+        CA1 & CA2 --> CA3["CDVF-A3: Unified 19-Parameter Benchmark Runner"]
+
+        CA3 --> CA4["CDVF-A4: Image Detection & Localisation (AIF)"]
+        CA3 --> CA5["CDVF-A5: Audio Detection & Localisation (AURAS)"]
+        CA3 --> CA6["CDVF-A6: Video & CCTV Detection (VISTA)"]
+
+        CA4 & CA5 & CA6 --> CA7["CDVF-A7: Cross-Dataset & Unseen-Generators (Modes A-G)"]
+        CA7 --> CA8["CDVF-A8: Confidence Calibration (ECE <= 0.05) & OOD Gating"]
+        CA8 --> CA9["CDVF-A9: Abstention Policy & Cross-Modal DAG Fusion"]
+        CA9 --> CA10["CDVF-A10: Subgroup Fairness, Robustness & 12-Gate Scoped Approval"]
+        CA10 --> CA11["CDVF-A11: Continuous Regression, 24-Item Bundle & Release Readiness"]
+    end
+
     subgraph PLATFORM_DELIVERY["🚀 Platform Delivery & Legal Certification"]
-        A10 & VA13 & IA15 & NA13 & GA10 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
+        A10 & VA13 & IA15 & NA13 & GA10 & CA11 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
         P7 --> P8["Phase 8: Web Dashboard & Examiner Workbench"]
         P8 --> P9["Phase 9: Security Hardening & Air-Gapped Packaging"]
         P9 --> P10["Phase 10: Final Hackathon Demonstration & Release"]
@@ -197,7 +215,19 @@ flowchart TD
 | **ONTF-A11**| Forensic Investigation Workbench & Graph UI | UI / Presentation | `PLANNED` | ONTF-A4, A6, A10 | Timeline scrubber, force-directed graph UI, target card, flow inspection table |
 | **ONTF-A12**| Section 65B/63 BSA Legal Dossier | Reporting / ONTF | `PLANNED` | ONTF-A10, A11 Gates| 11-part court-admissible PDF dossier, Ed25519 signature, TSA timestamp |
 | **ONTF-A13**| End-to-End Network Validation & Benchmark | Validation / Release | `PLANNED` | ONTF-A12 Gate | Regression suite, immutability check, 5-run determinism, air-gap audit |
-| **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15, NA13 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
+| **CDVF-A0** | Repository Audit, Model Reconciliation & Validation Baseline | Shared CDVF | `IMPLEMENTED_AND_VERIFIED` | Phase 0 Gate | Complete gap audit, model reconciliation matrix, baseline specs |
+| **CDVF-A1** | Model Registry, Cryptographic Provenance & Licensing | CDVF Registry | `PLANNED` | CDVF-A0 Gate | `ModelRegistryEntry`, SHA-256 verifier, 12 revalidation triggers, WORM |
+| **CDVF-A2** | Dataset Governance, Quality Tiers & Leakage Prevention | CDVF Datasets | `PLANNED` | CDVF-A0 Gate | `DatasetCard`, 4 quality tiers, GroupKFold split engine, disjoint assertions |
+| **CDVF-A3** | Unified 19-Parameter Benchmark Runner & Statistical Harness | CDVF Benchmarks | `PLANNED` | CDVF-A1, A2 Gates | 19-parameter runner, grouped bootstrap (1,000 iterations), 95% CIs |
+| **CDVF-A4** | AIF Image Deepfake & Localisation Validation Suite | CDVF AIF Suite | `PLANNED` | CDVF-A3 Gate | Task IMG-1..4, spatial mask IoU, 10 perturbation stress-grids |
+| **CDVF-A5** | AURAS Audio Deepfake & Speech Validation Suite | CDVF AURAS Suite | `PLANNED` | CDVF-A3 Gate | Task AUD-1..4, EER, minDCF, temporal tIoU, 8 transmission grids |
+| **CDVF-A6** | VISTA Video & CCTV Deepfake Validation Suite | CDVF VISTA Suite | `PLANNED` | CDVF-A3 Gate | Task VID-1..5, temporal aggregation, CCTV low-quality surveillance suite |
+| **CDVF-A7** | Cross-Dataset (Modes A-G) & Unseen-Generator Protocols | CDVF Protocols | `PLANNED` | CDVF-A4..A6 Gates | Transfer gap delta-AUC, unseen generator vulnerability (UG-Score) |
+| **CDVF-A8** | Confidence Calibration Engine & OOD Domain Shift Gating | CDVF Calibration | `PLANNED` | CDVF-A7 Gate | Platt/Temp/Isotonic scaling, 15-bin ECE <= 0.05, Mahalanobis OOD gating |
+| **CDVF-A9** | First-Class Abstention Policy & Cross-Modal Fusion DAG | CDVF Abstention | `PLANNED` | CDVF-A8 Gate | 7 canonical states, risk vs coverage, DAG anti-averaging fusion |
+| **CDVF-A10** | Subgroup Fairness, Robustness & 12-Gate Scoped Approval | CDVF Governance | `PLANNED` | CDVF-A9 Gate | Subgroup disparity audit, 12-gate release review, Ed25519 approval record |
+| **CDVF-A11** | Continuous Regression, 24-Item WORM Bundle & Release Readiness| CDVF Release | `PLANNED` | CDVF-A10 Gate | Automated regression test, 24-item WORM bundle, Sec 65B/63 BSA dossier |
+| **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15, NA13, GA10, CDVF-A11 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
 | **Phase 8** | Web Dashboard & Examiner Workbench | UI / Presentation | `PLANNED` | Phase 7 Gate | Next.js interactive UI, multi-modal waveform viewer |
 | **Phase 9** | Security Hardening & Air-Gapped Packaging | DevOps / Security | `PLANNED` | Phase 8 Gate | Offline Docker containers, POSIX 0400 WORM scripts |
 | **Phase 10** | Final Hackathon Demonstration & Release | Quality & Release | `PLANNED` | Phase 9 Gate | Verified demonstration scripts & curated case pack |
@@ -210,14 +240,14 @@ flowchart TD
 
 **Status:** `PLANNED`
 
-**Objective:**  
+**Objective:**
 Establish the secure, cryptographically verifiable evidentiary foundation for audio processing. Implement bitstream dual-hashing, immutable WORM storage access controls, channel-preserving audio decoding, standardized derived artifact generation, and schema-validated engine contracts without altering original exhibit bytes.
 
 **Scope:**
 - *Included:* File ingestion, SHA-256 and SHA3-512 dual hashing, POSIX 0400 WORM write-blocking, FFprobe container audit, Kaiser sinc-resampling (16 kHz), channel downmixing, 2.0s sliding window generation, and transformation lineage manifests.
 - *Explicit Exclusions:* Signal anomaly detection (deferred to A1/A2), speech intelligence (deferred to A3/A4/A5), deepfake inference (deferred to A6/A7/A8).
 
-**Prerequisites:**  
+**Prerequisites:**
 Phase 0 architectural baseline completed; `pyproject.toml` and `.env.example` configured.
 
 **Topics & Subtopics:**
@@ -245,13 +275,13 @@ flowchart TD
     SLICE_C --> MANIFEST["Register Hashes & Lineage Manifests in DB"]
 ```
 
-**Validation Strategy:**  
+**Validation Strategy:**
 Upload genuine and corrupt audio samples; verify bitstream checksums before and after processing; assert that attempting to modify Artifact files throws `PermissionError`; verify Pydantic schema validation.
 
-**Definition of Done:**  
+**Definition of Done:**
 All ingestion and transformation modules implemented in `src/ps05/core/` and `src/ps05/engines/audio/common/`; unit tests in `tests/unit/test_audio_ingest.py` pass with exit code 0.
 
-**Dependencies & Risks:**  
+**Dependencies & Risks:**
 *Risk:* System FFmpeg version incompatibility. *Mitigation:* Pin FFmpeg $\ge 6.0$ and verify binary presence on application startup.
 
 **Checkpoint Table:**
@@ -269,14 +299,14 @@ All ingestion and transformation modules implemented in `src/ps05/core/` and `sr
 
 **Status:** `PLANNED`
 
-**Objective:**  
+**Objective:**
 Implement baseline electroacoustic and physical signal analysis for audio exhibits. Quantify dynamic range, detect clipping and DC offset bias, compute Short-Time Fourier Transform (STFT) spectrograms, and extract container metadata tags.
 
 **Scope:**
 - *Included:* ARE-01 (Integrity), ARE-02 (Metadata & DAW audit), ARE-03 (Signal profiling), ARE-04 (Spectral analysis & Welch PSD), high-frequency cutoff detection.
 - *Explicit Exclusions:* Splice localization (deferred to A2), diarization (deferred to A3–A5), deepfake inference (deferred to A6–A8).
 
-**Prerequisites:**  
+**Prerequisites:**
 Phase AURAS-A0 Gate passed; working Artifact A (native multi-channel) and Artifact B (16 kHz mono) available.
 
 **Topics & Subtopics:**
@@ -304,13 +334,13 @@ flowchart TD
     TAGS & SIG & SPEC --> SERIALIZE["Serialize to Pydantic Finding Objects & Store in DB"]
 ```
 
-**Validation Strategy:**  
+**Validation Strategy:**
 Execute unit tests on synthetic audio fixtures with injected DC offset ($+0.05$), 100 clipped samples, and a 1 kHz sine wave; verify that measured parameters match ground-truth values within 1% tolerance.
 
-**Definition of Done:**  
+**Definition of Done:**
 Modules `src/ps05/engines/audio/are/signal.py` and `spectral.py` implemented; `tests/unit/test_are_signal.py` passes 100%.
 
-**Dependencies & Risks:**  
+**Dependencies & Risks:**
 *Risk:* Memory exhaustion on long 2-hour recordings during STFT. *Mitigation:* Chunk STFT computation in 5-minute blocks.
 
 **Checkpoint Table:**
@@ -328,14 +358,14 @@ Modules `src/ps05/engines/audio/are/signal.py` and `spectral.py` implemented; `t
 
 **Status:** `PLANNED`
 
-**Objective:**  
+**Objective:**
 Implement advanced signal-level tampering detection: localizing candidate edit/splice points via change-point algorithms, tracking ambient noise-floor stationarity, detecting duplicated/cloned phrases via FAISS acoustic self-similarity, and extracting 50 Hz Electric Network Frequency (ENF).
 
 **Scope:**
 - *Included:* ARE-05 (Splice detection via PELT), ARE-06 (Noise consistency), ARE-07 (FAISS repetition), ARE-08 (Codec re-encoding), ARE-09 (ENF forensics), ARE-10 (Acoustic manifests).
 - *Explicit Exclusions:* Speaker identification (deferred to MVSI), deepfake neural classification (deferred to ADDE).
 
-**Prerequisites:**  
+**Prerequisites:**
 Phase AURAS-A1 Gate passed; spectral flux and STFT spectrograms operational.
 
 **Topics & Subtopics:**
@@ -361,22 +391,22 @@ flowchart TD
     AUDIO["Native Audio Stream"] --> NOISE["ARE-06: Noise Floor Minimum Statistics"]
     AUDIO --> MFCC["ARE-07: MFCC Extraction & FAISS Search"]
     AUDIO --> ENF["ARE-09: 50 Hz Bandpass & Hilbert Transform"]
-    
+
     PELT --> CANDIDATES["Candidate Splice Timecodes"]
     NOISE --> NOISE_ANOMALIES["Noise Floor Shift Flags"]
     MFCC --> REPEAT_PAIRS["Cloned Acoustic Phrase Pairs"]
     ENF --> ENF_CURVE["Instantaneous ENF Frequency Curve"]
-    
+
     CANDIDATES & NOISE_ANOMALIES & REPEAT_PAIRS & ENF_CURVE --> MANIFEST["ARE-10: Compile Signed Acoustic Manifest"]
 ```
 
-**Validation Strategy:**  
+**Validation Strategy:**
 Inject a 500ms tone or spliced spoken phrase into 10 test audio tracks at known millisecond timestamps; verify that ARE-05 detects the splice boundary within $\pm 50\text{ ms}$; verify that untampered controls produce 0 false-positive splice alarms above threshold.
 
-**Definition of Done:**  
+**Definition of Done:**
 Modules `src/ps05/engines/audio/are/edit_detect.py`, `noise.py`, `repetition.py`, and `enf.py` implemented; unit tests in `tests/unit/test_are_splice.py` pass.
 
-**Dependencies & Risks:**  
+**Dependencies & Risks:**
 *Risk:* Heavy lossy compression obscuring ENF signal. *Mitigation:* Explicitly mark ENF as `INCONCLUSIVE_NO_USABLE_ENF` when SNR $< 6\text{ dB}$.
 
 **Checkpoint Table:**
@@ -394,14 +424,14 @@ Modules `src/ps05/engines/audio/are/edit_detect.py`, `noise.py`, `repetition.py`
 
 **Status:** `PLANNED`
 
-**Objective:**  
+**Objective:**
 Implement voice activity detection (VAD), acoustic quality gating, and neural speech segmentation to isolate genuine speech intervals from non-speech background, silence, and environmental static.
 
 **Scope:**
 - *Included:* MVSI-01 (Audio quality assessment), MVSI-02 (Silero VAD / WebRTC VAD), MVSI-03 (Neural speech segmentation), temporal smoothing hysteresis.
 - *Explicit Exclusions:* Speaker clustering and diarization (deferred to A4), language ID (deferred to A5).
 
-**Prerequisites:**  
+**Prerequisites:**
 Phase AURAS-A0 Gate passed; working Artifact B (16 kHz mono normalized WAV) available.
 
 **Topics & Subtopics:**
@@ -427,13 +457,13 @@ flowchart TD
     CHUNKER --> INTERVALS["Typed SpeechInterval Objects Stored in DB"]
 ```
 
-**Validation Strategy:**  
+**Validation Strategy:**
 Run VAD test suite against 10 clean conversational clips and 5 noisy background controls; assert false alarm rate $< 5\%$ and speech boundary timing accuracy within $\pm 30\text{ ms}$.
 
-**Definition of Done:**  
+**Definition of Done:**
 Modules `src/ps05/engines/audio/mvsi/vad.py` and `segmentation.py` implemented; `tests/unit/test_mvsi_vad.py` passes 100%.
 
-**Dependencies & Risks:**  
+**Dependencies & Risks:**
 *Risk:* High background noise causing speech fragmentation. *Mitigation:* Dynamic threshold adaptation based on estimated background noise floor.
 
 **Checkpoint Table:**
@@ -451,14 +481,14 @@ Modules `src/ps05/engines/audio/mvsi/vad.py` and `segmentation.py` implemented; 
 
 **Status:** `PLANNED`
 
-**Objective:**  
+**Objective:**
 Implement end-to-end speaker diarization supporting simultaneous overlapping speech. Extract high-dimensional speaker embeddings, cluster speaker turns, and produce multi-label "who spoke when" timelines allowing concurrent speaker activity.
 
 **Scope:**
 - *Included:* MVSI-04 (Overlapped Speech Detection), MVSI-05 (ECAPA-TDNN embeddings), MVSI-06 (Agglomerative clustering), MVSI-07/08 (Overlap-aware diarization timeline).
 - *Explicit Exclusions:* Language identification (deferred to A5), speech-to-text transcription (optional in A5).
 
-**Prerequisites:**  
+**Prerequisites:**
 Phase AURAS-A3 Gate passed; speech segments and intervals operational.
 
 **Topics & Subtopics:**
@@ -488,13 +518,13 @@ flowchart TD
     MERGE --> TIMELINE["Multi-Speaker Timeline Table in Database"]
 ```
 
-**Validation Strategy:**  
+**Validation Strategy:**
 Run diarization on 5 multi-speaker conversations containing known overlapping turns; verify that overlapping intervals contain at least 2 active speaker labels; assert overall DER $< 18\%$.
 
-**Definition of Done:**  
+**Definition of Done:**
 Modules `src/ps05/engines/audio/mvsi/embeddings.py`, `osd.py`, and `diarization.py` implemented; `tests/unit/test_mvsi_diarization.py` passes 100%.
 
-**Dependencies & Risks:**  
+**Dependencies & Risks:**
 *Risk:* Speaker clustering fragmentation when speakers whisper or shout. *Mitigation:* Use PLDA scoring and length-normalized ECAPA-TDNN embeddings.
 
 **Checkpoint Table:**
@@ -512,14 +542,14 @@ Modules `src/ps05/engines/audio/mvsi/embeddings.py`, `osd.py`, and `diarization.
 
 **Status:** `PLANNED`
 
-**Objective:**  
+**Objective:**
 Implement multilingual spoken language identification (LID), intra-utterance code-switching detection, and aggregated speaker-language analytics across Scheduled Indian Languages and regional Hindi dialects.
 
 **Scope:**
 - *Included:* MVSI-09 (Multilingual LID), MVSI-10 (Code-switch boundary detector), MVSI-11 (Optional forensic ASR), MVSI-12 (Speaker-language analytics matrix), Indian language database registry.
 - *Explicit Exclusions:* Deepfake classification (deferred to A6–A8).
 
-**Prerequisites:**  
+**Prerequisites:**
 Phase AURAS-A4 Gate passed; speaker segments and diarization timeline available.
 
 **Topics & Subtopics:**
@@ -541,18 +571,18 @@ flowchart TD
     TURNS["Speaker Segments from MVSI-08"] --> LID["MVSI-09: Whisper / MMS Language ID"]
     LID --> SLIDING["MVSI-10: Sliding Window Code-Switch Tracker"]
     SLIDING --> BOUNDARIES["Refine Code-Switch Timestamps"]
-    
+
     TURNS & BOUNDARIES --> ANALYTICS["MVSI-12: Speaker-Language Analytics Merger"]
     ANALYTICS --> SUMMARY["Per-Speaker Language Breakdown (e.g., Hindi 70%, English 30%)"]
 ```
 
-**Validation Strategy:**  
+**Validation Strategy:**
 Test against bilingual audio clips (Hinglish, Bhojpuri-Hindi); verify that code-switching boundaries are detected within $\pm 200\text{ ms}$; verify that speaker cluster count remains 1 for a single speaker code-switching.
 
-**Definition of Done:**  
+**Definition of Done:**
 Modules `src/ps05/engines/audio/mvsi/language_id.py`, `code_switch.py`, and `registry.py` implemented; `tests/unit/test_mvsi_multilingual.py` passes.
 
-**Dependencies & Risks:**  
+**Dependencies & Risks:**
 *Risk:* Low-resource dialects (Magahi, Maithili) misclassified as standard Hindi. *Mitigation:* Explicitly record regional variant tags and output confidence ranges.
 
 **Checkpoint Table:**
@@ -570,14 +600,14 @@ Modules `src/ps05/engines/audio/mvsi/language_id.py`, `code_switch.py`, and `reg
 
 **Status:** `PLANNED`
 
-**Objective:**  
+**Objective:**
 Establish the dedicated, decoupled package boundary and model execution framework for the Audio Deepfake Detection Engine (ADDE). Implement standardized sliding-window preprocessing, integrate baseline neural detectors (RawNet2 and AASIST), and enforce pinned model manifests.
 
 **Scope:**
 - *Included:* ADDE-01 (Preprocessing & sliding windows), ADDE-02 (RawNet2), ADDE-03 (AASIST), model registry, checkpoint verification, and failure isolation.
 - *Explicit Exclusions:* Advanced foundation SSL models (deferred to A7), calibration and late-fusion ensemble (deferred to A8).
 
-**Prerequisites:**  
+**Prerequisites:**
 Phase AURAS-A0 Gate passed; working Artifact C (standardized 2.0s sliding slices at 16 kHz) available.
 
 **Topics & Subtopics:**
@@ -607,13 +637,13 @@ flowchart TD
     OUT_RAW & OUT_AASIST --> DB["Store Raw Detector Runs in Database"]
 ```
 
-**Validation Strategy:**  
+**Validation Strategy:**
 Execute unit tests loading RawNet2 and AASIST architectures with mock weights; assert output logit tensor shapes match $(B, 2)$ where $B$ is batch size; verify that missing checkpoint raises explicit `ModelCheckpointNotFoundError`.
 
-**Definition of Done:**  
+**Definition of Done:**
 Modules `src/ps05/engines/audio/adde/preprocess.py`, `rawnet2.py`, and `aasist.py` implemented; `tests/unit/test_adde_foundation.py` passes 100%.
 
-**Dependencies & Risks:**  
+**Dependencies & Risks:**
 *Risk:* PyTorch CUDA version mismatch on target police server. *Mitigation:* Pin PyTorch 2.2+ CPU/CUDA compatibility and test on both environments.
 
 **Checkpoint Table:**
@@ -631,14 +661,14 @@ Modules `src/ps05/engines/audio/adde/preprocess.py`, `rawnet2.py`, and `aasist.p
 
 **Status:** `PLANNED`
 
-**Objective:**  
+**Objective:**
 Integrate self-supervised speech foundation models (WavLM Base+), spectral vocoder classifiers (LFCC/CQCC + Light-CNN), sliding-window partial manipulation localization, and lossy codec robustness testing (CodecFake).
 
 **Scope:**
 - *Included:* ADDE-04 (WavLM foundation SSL), ADDE-05 (Spectral vocoder classifier), ADDE-06 (Codec robustness), ADDE-07 (Partial manipulation localization).
 - *Explicit Exclusions:* Late-fusion ensembling and calibration (deferred to A8).
 
-**Prerequisites:**  
+**Prerequisites:**
 Phase AURAS-A6 Gate passed; baseline detector framework operational.
 
 **Topics & Subtopics:**
@@ -659,21 +689,21 @@ Phase AURAS-A6 Gate passed; baseline detector framework operational.
 flowchart TD
     SLICES["Sliding Window Slices (2.0s / 0.5s stride)"] --> WAVLM["ADDE-04: WavLM Base+ Foundation Model"]
     SLICES --> SPECTRAL["ADDE-05: LFCC / CQCC + Light-CNN"]
-    
+
     WAVLM --> LOGITS_WAVLM["WavLM Logits per Window"]
     SPECTRAL --> LOGITS_SPEC["Spectral Logits per Window"]
-    
+
     LOGITS_WAVLM & LOGITS_SPEC --> LOCALIZE["ADDE-07: Sliding-Window Alignment & Smoothing"]
     LOCALIZE --> SUSPICION_INTERVALS["Flagged Partial Synthetic Timecodes [(start, end)]"]
 ```
 
-**Validation Strategy:**  
+**Validation Strategy:**
 Create test audio with a 1.5-second ElevenLabs synthetic voice clone inserted inside a 30-second genuine recording; verify that ADDE-07 localizes the synthetic interval within $\pm 250\text{ ms}$ boundary precision; assert individual detector EER $< 7.0\%$.
 
-**Definition of Done:**  
+**Definition of Done:**
 Modules `src/ps05/engines/audio/adde/ssl_wavlm.py`, `spectral.py`, and `codec_robust.py` implemented; unit tests in `tests/unit/test_adde_advanced.py` pass.
 
-**Dependencies & Risks:**  
+**Dependencies & Risks:**
 *Risk:* WavLM VRAM usage on low-spec hardware. *Mitigation:* Apply dynamic batching ($B=1$) and half-precision (FP16) inference.
 
 **Checkpoint Table:**
@@ -691,14 +721,14 @@ Modules `src/ps05/engines/audio/adde/ssl_wavlm.py`, `spectral.py`, and `codec_ro
 
 **Status:** `PLANNED`
 
-**Objective:**  
+**Objective:**
 Implement score calibration (Platt scaling / temperature scaling), quality-weighted late fusion ensembling, Mahalanobis distance out-of-distribution (OOD) uncertainty estimation, and standalone 1:1 speaker verification.
 
 **Scope:**
 - *Included:* ADDE-08 (1:1 speaker verification), ADDE-09 (Calibration), ADDE-10 (Late fusion ensemble), ADDE-11 (OOD uncertainty), ADDE-12 (Suspicion heatmaps & report visuals).
 - *Explicit Exclusions:* Unified reporting integration (deferred to A9).
 
-**Prerequisites:**  
+**Prerequisites:**
 Phase AURAS-A7 Gate passed; all four detector branches (RawNet2, AASIST, WavLM, Spectral) operational.
 
 **Topics & Subtopics:**
@@ -722,22 +752,22 @@ flowchart TD
     PROBS --> DISAGREE{"Discrepancy $> 0.50$?"}
     DISAGREE -->|Yes| FLAG_DIS["Record Detector Disagreement Alert"]
     DISAGREE -->|No| FUSION["ADDE-10: Quality-Weighted Late Fusion"]
-    
+
     WAVLM_EMB["WavLM 768-d Embedding"] --> OOD["ADDE-11: Mahalanobis Distance Check"]
     OOD --> UNCERTAIN{"$D_M(x) > \text{Threshold}$?"}
     UNCERTAIN -->|Yes| OOD_FLAG["Emit High Uncertainty / Warning"]
     UNCERTAIN -->|No| FUSION
-    
+
     FUSION & FLAG_DIS & OOD_FLAG --> REPORT["ADDE-12: Composite Suspicion Curve & Findings"]
 ```
 
-**Validation Strategy:**  
+**Validation Strategy:**
 Evaluate calibrated ensemble on 100 genuine and 100 spoofed test samples; verify that Brier score $< 0.08$ and ECE $< 0.05$; assert that extreme white noise input triggers OOD uncertainty rather than a false deepfake detection.
 
-**Definition of Done:**  
+**Definition of Done:**
 Modules `src/ps05/engines/audio/adde/calibration.py`, `ensemble.py`, `ood.py`, and `verification.py` implemented; `tests/benchmarks/test_adde_metrics.py` passes.
 
-**Dependencies & Risks:**  
+**Dependencies & Risks:**
 *Risk:* Overfitting calibration parameters to training vocoders. *Mitigation:* Fit calibration strictly on held-out validation sets featuring unseen vocoders.
 
 **Checkpoint Table:**
@@ -755,14 +785,14 @@ Modules `src/ps05/engines/audio/adde/calibration.py`, `ensemble.py`, `ood.py`, a
 
 **Status:** `PLANNED`
 
-**Objective:**  
+**Objective:**
 Unify independent findings from ARE, MVSI, and ADDE into a consolidated forensic timeline; implement Celery task dispatching, partial-failure recovery, reviewer annotation capabilities, Archify JSON IR formatting, and court-admissible electronic evidence reporting (Section 65B IEA / Section 63 BSA).
 
 **Scope:**
 - *Included:* Audio job orchestrator, cross-engine timeline alignment, finding merger, reviewer verdict overrides, Archify JSON IR generation, WeasyPrint PDF compilation.
 - *Explicit Exclusions:* Image and video findings (handled in Phase 7).
 
-**Prerequisites:**  
+**Prerequisites:**
 Phases AURAS-A2, AURAS-A5, and AURAS-A8 Gates passed; all three audio engines operational.
 
 **Topics & Subtopics:**
@@ -791,13 +821,13 @@ flowchart TD
     EXPORT_PDF --> SEAL["Digital Signature & Merkle Audit Seal"]
 ```
 
-**Validation Strategy:**  
+**Validation Strategy:**
 Execute end-to-end integration test dispatching a job on an audio file; verify that findings from all 3 engines merge cleanly into the result JSON; verify that generated PDF compiles with valid layout and correct hashes.
 
-**Definition of Done:**  
+**Definition of Done:**
 Modules `src/ps05/core/orchestrator.py` and `src/ps05/reporting/compiler.py` implemented; integration tests in `tests/integration/test_audio_orchestrator.py` pass.
 
-**Dependencies & Risks:**  
+**Dependencies & Risks:**
 *Risk:* Long-running audio jobs timing out on CPU. *Mitigation:* Implement incremental progress heartbeats over Redis every 5 seconds.
 
 **Checkpoint Table:**
@@ -815,14 +845,14 @@ Modules `src/ps05/core/orchestrator.py` and `src/ps05/reporting/compiler.py` imp
 
 **Status:** `PLANNED`
 
-**Objective:**  
+**Objective:**
 Execute comprehensive regression testing, benchmark the complete audio subsystem against curated test corpora, audit dependency licensing and air-gap integrity, and establish release readiness for the hackathon demonstration.
 
 **Scope:**
 - *Included:* Regression test suite, reproducibility audit, performance benchmarking, air-gap validation, documentation consistency audit.
 - *Explicit Exclusions:* None (covers full audio subsystem).
 
-**Prerequisites:**  
+**Prerequisites:**
 Phase AURAS-A9 Gate passed; full audio pipeline operational end-to-end.
 
 **Topics & Subtopics:**
@@ -845,17 +875,17 @@ flowchart TD
     RUN_SUITE --> REPRO["Audit Reproducibility (5 Runs per File)"]
     RUN_SUITE --> AIRGAP["Verify Air-Gap Network Isolation"]
     RUN_SUITE --> PERF["Profile Latency & VRAM Consumption"]
-    
+
     REPRO & AIRGAP & PERF --> REPORT["Generate Forensic Benchmark Dossier & Sign-Off"]
 ```
 
-**Validation Strategy:**  
+**Validation Strategy:**
 Execute `pytest tests/` covering all unit, integration, and benchmark tests; assert 100% green pass rate (exit code 0); verify zero outbound network packets via packet capture.
 
-**Definition of Done:**  
+**Definition of Done:**
 Full test suite passes with zero failures; benchmark dossier compiled; all phase checkpoints verified.
 
-**Dependencies & Risks:**  
+**Dependencies & Risks:**
 *Risk:* Hardware differences between development and hackathon jury laptops. *Mitigation:* Pre-configure both CPU and GPU execution modes.
 
 **Checkpoint Table:**
@@ -877,9 +907,9 @@ The Video Integrity, Synchronization & Tampering Analysis (VISTA) engineering ro
 
 ### Phase VISTA-A0: Video Evidence Architecture Baseline & Standards Integration
 
-**1. Phase ID & Title:** `VISTA-A0: Video Evidence Architecture Baseline & Standards Integration`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Establish the structural, algorithmic, defensive, and legal foundation for the VISTA subsystem. Initialize package hierarchies under `src/ps05/engines/vista/`, configure typing contracts, establish defensive PyAV/FFprobe execution harnesses, enforce memory allocation boundaries, trap malformed media bombs, and link VISTA into the shared platform discovery registry.  
+**1. Phase ID & Title:** `VISTA-A0: Video Evidence Architecture Baseline & Standards Integration`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Establish the structural, algorithmic, defensive, and legal foundation for the VISTA subsystem. Initialize package hierarchies under `src/ps05/engines/vista/`, configure typing contracts, establish defensive PyAV/FFprobe execution harnesses, enforce memory allocation boundaries, trap malformed media bombs, and link VISTA into the shared platform discovery registry.
 **4. Topics & Subtopics:**
 - Directory & Module Scaffold: Sub-packages (`common`, `vre`, `afb`, `avsc`, `vdf`, `vci`, `cctv`).
 - Defensive Demuxing Wrapper: `safe_demux.py` wrapping PyAV with strict 10-second I/O timeouts.
@@ -929,9 +959,9 @@ Scaffold committed, unit test suite passing with 100% exit code 0, typing verifi
 
 ### Phase VISTA-A1: Video Evidence Contracts, Ingestion & Cryptographic Foundation (CEIPL)
 
-**1. Phase ID & Title:** `VISTA-A1: Video Evidence Contracts, Ingestion & Cryptographic Foundation (CEIPL)`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement pre-decode dual-hashing, immutable WORM storage ingestion, RFC 8785 canonical manifests, Ed25519 digital signatures, RFC 3161 TSA timestamps, and Merkle audit logging for video exhibits, guaranteeing uncompromised judicial chain of custody under Section 65B/63 BSA.  
+**1. Phase ID & Title:** `VISTA-A1: Video Evidence Contracts, Ingestion & Cryptographic Foundation (CEIPL)`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement pre-decode dual-hashing, immutable WORM storage ingestion, RFC 8785 canonical manifests, Ed25519 digital signatures, RFC 3161 TSA timestamps, and Merkle audit logging for video exhibits, guaranteeing uncompromised judicial chain of custody under Section 65B/63 BSA.
 **4. Topics & Subtopics:**
 - Pre-Decode Dual Hashing: Streaming SHA-256 and SHA3-512 calculation prior to parsing.
 - WORM Vault Persistence: POSIX `0400` read-only filesystem permissions and S3 Object Lock.
@@ -980,9 +1010,9 @@ Ingestion endpoints operational, dual hashing verified against test vectors, Mer
 
 ### Phase VISTA-A2: Video Intake, Container Metadata & Safe Parsing (VRE Baseline)
 
-**1. Phase ID & Title:** `VISTA-A2: Video Intake, Container Metadata & Safe Parsing (VRE Baseline)`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Build the baseline Video Reverse Engineering (VRE) capabilities: container atom inspection (MP4/MKV/AVI/TS/DAV), `moov` atom placement audit, Presentation Timestamp (PTS/DTS) continuity regression, instantaneous FPS jitter calculation, and duplicate/frozen frame span detection.  
+**1. Phase ID & Title:** `VISTA-A2: Video Intake, Container Metadata & Safe Parsing (VRE Baseline)`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Build the baseline Video Reverse Engineering (VRE) capabilities: container atom inspection (MP4/MKV/AVI/TS/DAV), `moov` atom placement audit, Presentation Timestamp (PTS/DTS) continuity regression, instantaneous FPS jitter calculation, and duplicate/frozen frame span detection.
 **4. Topics & Subtopics:**
 - Container & Codec Introspection: Stream descriptors, codecs (H.264, H.265, AV1, VP9), profiles, pixel formats.
 - ISO Base Media Box Inspection: Relative position of `moov` vs `mdat` (`moov` at end vs `faststart`).
@@ -1030,9 +1060,9 @@ Bitstream and cadence modules implemented, test vectors passing, VRE baseline re
 
 ### Phase VISTA-A3: Timestamp-Aware Video Reverse Engineering (VRE Advanced)
 
-**1. Phase ID & Title:** `VISTA-A3: Timestamp-Aware Video Reverse Engineering (VRE Advanced)`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement advanced VRE capabilities: content-aware adaptive scene transition detection, macroblock quantization parameter (QP) distribution auditing, double-compression ghost artifact detection, ExifTool metadata auditing, and optical-flow temporal continuity analysis.  
+**1. Phase ID & Title:** `VISTA-A3: Timestamp-Aware Video Reverse Engineering (VRE Advanced)`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement advanced VRE capabilities: content-aware adaptive scene transition detection, macroblock quantization parameter (QP) distribution auditing, double-compression ghost artifact detection, ExifTool metadata auditing, and optical-flow temporal continuity analysis.
 **4. Topics & Subtopics:**
 - Adaptive Scene Boundary Detection: PySceneDetect adaptive thresholding isolating cuts vs splices.
 - Macroblock QP Distribution Parsing: Extracting macroblock-level quantization matrices from H.264/H.265 bitstreams.
@@ -1080,9 +1110,9 @@ Advanced VRE modules operational, unit tests passing with synthetic re-encoded f
 
 ### Phase VISTA-A4: Audio Extraction, DAG Lineage & AURAS Subsystem Bridge (AFB)
 
-**1. Phase ID & Title:** `VISTA-A4: Audio Extraction, DAG Lineage & AURAS Subsystem Bridge (AFB)`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement the Audio Forensic Bridge (AFB): extract audio streams losslessly using stream-copy (`-c:a copy`), normalize a standardized 16kHz mono Float32 analysis derivative, register cryptographic DAG parent-child lineage, dispatch asynchronous analysis to AURAS (ARE, MVSI, ADDE), and handle multi-speaker speech separation.  
+**1. Phase ID & Title:** `VISTA-A4: Audio Extraction, DAG Lineage & AURAS Subsystem Bridge (AFB)`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the Audio Forensic Bridge (AFB): extract audio streams losslessly using stream-copy (`-c:a copy`), normalize a standardized 16kHz mono Float32 analysis derivative, register cryptographic DAG parent-child lineage, dispatch asynchronous analysis to AURAS (ARE, MVSI, ADDE), and handle multi-speaker speech separation.
 **4. Topics & Subtopics:**
 - Lossless Audio Stream-Copy: Demuxing raw audio bitstreams without re-encoding.
 - Standardized Audio Normalization: Resampling to 16 kHz Mono Float32 normalized to -23 LUFS.
@@ -1132,9 +1162,9 @@ AFB extraction pipeline complete, AURAS bridge operational, end-to-end integrati
 
 ### Phase VISTA-A5: Audio-Visual Synchronization & Multi-Face Lip-Sync (AVSC)
 
-**1. Phase ID & Title:** `VISTA-A5: Audio-Visual Synchronization & Multi-Face Lip-Sync (AVSC)`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Build the Audio-Visual Synchronization & Correspondence Engine (AVSC): measure container AV global offset, perform surveillance-grade face detection (RetinaFace/SCRFD), maintain inter-frame face trajectories (ByteTrack), extract normalized mouth crops, execute SyncNet lip-sync cross-correlation, disambiguate multi-face speakers, and correlate acoustic events with visual phenomena.  
+**1. Phase ID & Title:** `VISTA-A5: Audio-Visual Synchronization & Multi-Face Lip-Sync (AVSC)`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Build the Audio-Visual Synchronization & Correspondence Engine (AVSC): measure container AV global offset, perform surveillance-grade face detection (RetinaFace/SCRFD), maintain inter-frame face trajectories (ByteTrack), extract normalized mouth crops, execute SyncNet lip-sync cross-correlation, disambiguate multi-face speakers, and correlate acoustic events with visual phenomena.
 **4. Topics & Subtopics:**
 - Container AV Alignment: Extracting stream start offsets and duration differences.
 - Surveillance Face Detection: RetinaFace / SCRFD high-recall face localization.
@@ -1188,9 +1218,9 @@ AVSC pipeline fully operational, SyncNet benchmarks passing, multi-face disambig
 
 ### Phase VISTA-A6: Video Content Intelligence, Detection & Tracking (VCI)
 
-**1. Phase ID & Title:** `VISTA-A6: Video Content Intelligence, Detection & Tracking (VCI)`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Build the Video Content Intelligence Engine (VCI): classify video recordings into a hierarchical 15-category source taxonomy, perform real-time object detection (YOLOv8/v10), promptable video object segmentation (SAM 2), unique person counting via trajectory tracking (ByteTrack), spatio-temporal action understanding (VideoMAE), and OSD timestamp/channel OCR extraction (PaddleOCR / Tesseract).  
+**1. Phase ID & Title:** `VISTA-A6: Video Content Intelligence, Detection & Tracking (VCI)`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Build the Video Content Intelligence Engine (VCI): classify video recordings into a hierarchical 15-category source taxonomy, perform real-time object detection (YOLOv8/v10), promptable video object segmentation (SAM 2), unique person counting via trajectory tracking (ByteTrack), spatio-temporal action understanding (VideoMAE), and OSD timestamp/channel OCR extraction (PaddleOCR / Tesseract).
 **4. Topics & Subtopics:**
 - 15-Category Video Source Taxonomy: CCTV, dashcam, bodycam, drone, mobile, broadcast, screen-record, etc.
 - Surveillance Object Detection: YOLOv8x / YOLOv10 detecting persons, vehicles, firearms, and backpacks.
@@ -1242,9 +1272,9 @@ VCI engine modules implemented, taxonomy classifier validated, OCR timestamp ext
 
 ### Phase VISTA-A7: CCTV Source Discovery, Auto-Metadata & Adaptive Questionnaire (CCTV Baseline)
 
-**1. Phase ID & Title:** `VISTA-A7: CCTV Source Discovery, Auto-Metadata & Adaptive Questionnaire (CCTV Baseline)`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement the Dedicated CCTV Forensic Profile baseline: execute multi-signal automated triage scoring, perform pre-questioning metadata extraction, populate the versioned `CCTVContext` record, formulate targeted adaptive questions (Questions A–E), enforce the non-blocking continuation invariant under missing context, and tag user claims strictly as `USER_REPORTED`.  
+**1. Phase ID & Title:** `VISTA-A7: CCTV Source Discovery, Auto-Metadata & Adaptive Questionnaire (CCTV Baseline)`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the Dedicated CCTV Forensic Profile baseline: execute multi-signal automated triage scoring, perform pre-questioning metadata extraction, populate the versioned `CCTVContext` record, formulate targeted adaptive questions (Questions A–E), enforce the non-blocking continuation invariant under missing context, and tag user claims strictly as `USER_REPORTED`.
 **4. Topics & Subtopics:**
 - Multi-Signal CCTV Triage Scoring: Evaluating OSD clock, fixed angle, IR transitions, low framerate, container tags.
 - Pre-Questioning Metadata Extraction: Automatically discovering camera channels, DVR make/model, and timebase.
@@ -1294,9 +1324,9 @@ CCTV triage operational, context schema implemented, adaptive questionnaire test
 
 ### Phase VISTA-A8: CCTV Timeline Integrity, Clock Drift & Native Export Verification (CCTV Advanced)
 
-**1. Phase ID & Title:** `VISTA-A8: CCTV Timeline Integrity, Clock Drift & Native Export Verification (CCTV Advanced)`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement advanced CCTV forensics: model OSD clock continuity and drift regression $\delta(t)$, detect temporal frame excisions and clock freezes, verify native DVR/NVR proprietary exports (`.dav`, `.sec`), validate ONVIF Export File Format and Media Signing digital seals, and corroborate multi-camera multi-channel timelines.  
+**1. Phase ID & Title:** `VISTA-A8: CCTV Timeline Integrity, Clock Drift & Native Export Verification (CCTV Advanced)`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement advanced CCTV forensics: model OSD clock continuity and drift regression $\delta(t)$, detect temporal frame excisions and clock freezes, verify native DVR/NVR proprietary exports (`.dav`, `.sec`), validate ONVIF Export File Format and Media Signing digital seals, and corroborate multi-camera multi-channel timelines.
 **4. Topics & Subtopics:**
 - OSD Clock Continuity Regression: Regressing OCR timestamp against presentation timestamp $\delta(t) = t_{	ext{ocr}} - t_{	ext{pts}}$.
 - Clock Jumps & Non-Monotonic Reversals: Trapping time jumps indicating deleted surveillance footage.
@@ -1345,9 +1375,9 @@ Clock drift regression verified on synthetic fixtures, ONVIF verifier passing, m
 
 ### Phase VISTA-A9: Video Deepfake Baselines & Spatial Manipulation Heads (VDF Baseline)
 
-**1. Phase ID & Title:** `VISTA-A9: Video Deepfake Baselines & Spatial Manipulation Heads (VDF Baseline)`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement baseline capabilities of the Video Deepfake & AI-Generation Detection Engine (VDF): construct the frame-level deepfake detector registry, deploy dual-domain spatial classifiers (EfficientNet-B4 / Xception), implement specialized heads for face swapping, facial reenactment, and local inpainting, and evaluate baseline performance on FaceForensics++ (FF++).  
+**1. Phase ID & Title:** `VISTA-A9: Video Deepfake Baselines & Spatial Manipulation Heads (VDF Baseline)`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement baseline capabilities of the Video Deepfake & AI-Generation Detection Engine (VDF): construct the frame-level deepfake detector registry, deploy dual-domain spatial classifiers (EfficientNet-B4 / Xception), implement specialized heads for face swapping, facial reenactment, and local inpainting, and evaluate baseline performance on FaceForensics++ (FF++).
 **4. Topics & Subtopics:**
 - Frame-Level Detector Registry: Standardized model loading and version tracking.
 - Dual-Domain Spatial Detection: Analyzing spatial RGB blending seams and DCT frequency residuals.
@@ -1396,9 +1426,9 @@ Spatial deepfake models integrated, calibration verified, benchmark test suite e
 
 ### Phase VISTA-A10: Temporal Deepfake, 3D FFT Generative & Model Robustness (VDF Advanced)
 
-**1. Phase ID & Title:** `VISTA-A10: Temporal Deepfake, 3D FFT Generative & Model Robustness (VDF Advanced)`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement advanced VDF capabilities: deploy temporal sequence models (FTCN / VideoMAE), analyze inter-frame landmark trajectory jitter and facial flickering, develop 3D FFT spatio-temporal power spectrum detectors for text-to-video generative synthesis (Sora, Runway, Pika), implement Mahalanobis out-of-distribution (OOD) distance estimation, and evaluate cross-dataset generalization.  
+**1. Phase ID & Title:** `VISTA-A10: Temporal Deepfake, 3D FFT Generative & Model Robustness (VDF Advanced)`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement advanced VDF capabilities: deploy temporal sequence models (FTCN / VideoMAE), analyze inter-frame landmark trajectory jitter and facial flickering, develop 3D FFT spatio-temporal power spectrum detectors for text-to-video generative synthesis (Sora, Runway, Pika), implement Mahalanobis out-of-distribution (OOD) distance estimation, and evaluate cross-dataset generalization.
 **4. Topics & Subtopics:**
 - Temporal Coherence Modeling: Fully Temporal ConvNet (FTCN) isolating temporal flicker without spatial bias.
 - Self-Supervised Spatio-Temporal Representations: VideoMAE ViT-B with forensic fine-tuned classification head.
@@ -1446,9 +1476,9 @@ Temporal models and 3D FFT detector operational, OOD metric validated, cross-dat
 
 ### Phase VISTA-A11: Cross-Engine Video Evidence Fusion & Conflict Resolution
 
-**1. Phase ID & Title:** `VISTA-A11: Cross-Engine Video Evidence Fusion & Conflict Resolution`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement the VISTA cross-engine evidence fusion layer: aggregate findings across VRE, AFB/AURAS, AVSC, VDF, VCI, and the CCTV Profile onto a unified multi-modal timeline, execute deterministic forensic conflict resolution rules (distinguishing dubbing from deepfakes, and hardware drops from splicing), preserve raw engine outputs without lossy averaging, and assign dimension-specific verdicts.  
+**1. Phase ID & Title:** `VISTA-A11: Cross-Engine Video Evidence Fusion & Conflict Resolution`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the VISTA cross-engine evidence fusion layer: aggregate findings across VRE, AFB/AURAS, AVSC, VDF, VCI, and the CCTV Profile onto a unified multi-modal timeline, execute deterministic forensic conflict resolution rules (distinguishing dubbing from deepfakes, and hardware drops from splicing), preserve raw engine outputs without lossy averaging, and assign dimension-specific verdicts.
 **4. Topics & Subtopics:**
 - Multi-Modal Timeline Synchronization: Aligning video frames, audio samples, OSD timestamps, and findings on unified UTC axis.
 - Forensic Conflict Resolution Matrix: Explicit rules resolving cross-modal discrepancies.
@@ -1496,9 +1526,9 @@ Fusion engine operational, conflict matrix verified on synthetic multi-modal tes
 
 ### Phase VISTA-A12: Video Legal Reporting, Examiner Review & Sec 65B/63 BSA Dossier
 
-**1. Phase ID & Title:** `VISTA-A12: Video Legal Reporting, Examiner Review & Sec 65B/63 BSA Dossier`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement the judicial reporting and examiner review architecture: generate the complete 11-part court-admissible forensic dossier in machine-readable RFC 8785 canonical JSON and human-readable PDF formats, embed mandatory Section 65B IEA and Section 63 BSA legal certificates, provide an interactive examiner workbench review flow, seal reports with Ed25519 digital signatures, and attach RFC 3161 TSA tokens.  
+**1. Phase ID & Title:** `VISTA-A12: Video Legal Reporting, Examiner Review & Sec 65B/63 BSA Dossier`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the judicial reporting and examiner review architecture: generate the complete 11-part court-admissible forensic dossier in machine-readable RFC 8785 canonical JSON and human-readable PDF formats, embed mandatory Section 65B IEA and Section 63 BSA legal certificates, provide an interactive examiner workbench review flow, seal reports with Ed25519 digital signatures, and attach RFC 3161 TSA tokens.
 **4. Topics & Subtopics:**
 - 11-Part Legal Dossier Structure: Compiling technical, visual, acoustic, sync, CCTV, and cryptographic sections.
 - Section 65B IEA / Section 63 BSA Certification: Generating statutory legal certificate with hardware environment hashes.
@@ -1547,9 +1577,9 @@ Reporting pipeline complete, PDF generation verified, digital signature and TSA 
 
 ### Phase VISTA-A13: End-to-End Video Validation, Security Audit & Release Readiness
 
-**1. Phase ID & Title:** `VISTA-A13: End-to-End Video Validation, Security Audit & Release Readiness`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Execute the final end-to-end forensic validation, security hardening, and release readiness audit for the VISTA subsystem: evaluate pipeline on a comprehensive evaluation corpus (FF++, Celeb-DF, DFDC, CCTV synthetic vectors, ONVIF exports), perform 5-run deterministic reproducibility audits, verify 100% air-gapped offline operation, audit dependency licenses, and enforce strict release criteria.  
+**1. Phase ID & Title:** `VISTA-A13: End-to-End Video Validation, Security Audit & Release Readiness`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Execute the final end-to-end forensic validation, security hardening, and release readiness audit for the VISTA subsystem: evaluate pipeline on a comprehensive evaluation corpus (FF++, Celeb-DF, DFDC, CCTV synthetic vectors, ONVIF exports), perform 5-run deterministic reproducibility audits, verify 100% air-gapped offline operation, audit dependency licenses, and enforce strict release criteria.
 **4. Topics & Subtopics:**
 - Standardized Forensic Evaluation Corpus: Ingesting 100+ multi-modal video exhibits across all supported formats.
 - 5-Run Deterministic Reproducibility Audit: Verifying bit-identical findings across repeated runs on identical media.
@@ -1601,47 +1631,47 @@ The Advanced Image Forensics (AIF) engineering roadmap defines sixteen sequentia
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Establish an empirical, research-backed architecture baseline for the Advanced Image Forensics (AIF) subsystem, verify existing codebase assets, enforce legal evidentiary standards (Section 65B IEA / Section 63 BSA), and establish strict module boundaries.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 Repository inspection, Archify integration status audit, file validation threat model, legal compliance boundaries, AIF engine directory scaffold, dependency license review.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 AIF Core, IVE, IRE, AIM, FPA, CEIPL Shared Cryptographic Layer.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Perform comprehensive audit of repository tree, verifying that existing AURAS audio engines (ARE, MVSI, ADDE) and VISTA video engines remain completely untouched.
 2. Audit Archify integration status; document that Archify CLI is not in system PATH and operates via static JSON IR schema in archify.config.json.
 3. Establish module boundary contracts between IVE (Visual Evidence), IRE (Reverse Engineering), AIM (Manipulation & Steganography), and FPA (Biometric Face Module).
 4. Formulate the AIF Threat Model addressing decompression bombs, malformed header exploits, adversarial generative perturbations, and privacy-violating biometric queries.
 5. Design Python packaging structure under `src/ps05/engines/image/` and `src/ps05/core/crypto/` with clean interface abstractions.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Execute automated file checks -> Audit Archify config -> Create directory package scaffold -> Draft interface contracts -> Validate threat model -> Formulate baseline checkpoints.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 Python 3.12, git, archify.config.json, pytest, Pydantic v2.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 Phase 0 Platform Architecture baseline completed; existing AURAS and VISTA documentation intact.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/engines/image/__init__.py`, `src/ps05/engines/image/common/schemas.py`, `tests/unit/test_aif_baseline.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Verify directory trees, ensure clean imports without cyclic dependencies, and confirm that all existing test suites pass without regression.
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 Accidental coupling between image decoders and shared core; mitigated by strict Pydantic contract layer.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Enforce zero-trust parser execution; untrusted file bytes must never be ingested by system-level decoders without sandbox isolation.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 Clean package hierarchy established; interface schemas defined; Archify integration status truthfully documented.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 Directory tree scaffolded, Pydantic schemas compiled, threat model reviewed, all 4 checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -1661,47 +1691,47 @@ Directory tree scaffolded, Pydantic schemas compiled, threat model reviewed, all
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Implement the shared Cryptographic Evidence Integrity & Provenance Layer (CEIPL) direct pre-decode dual-hasher, RFC 8785 canonical JSON serializer, WORM storage vault, and append-only custody event structure.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 Direct byte-stream hashing, FIPS 180-4 SHA-256, FIPS 202 SHA3-512, POSIX 0400 WORM write-blocking, RFC 8785 Canonical JSON Serialization (JCS), custody event schema.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.core.crypto.direct_hasher`, `ps05.core.crypto.canonical_json`, `ps05.core.storage`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement chunked (64KB block) streaming dual-hasher calculating SHA-256 and SHA3-512 directly from raw seized socket stream before disk write or decoding.
 2. Implement POSIX 0400 read-only file permission locking and S3 Object Lock compliance layer to guarantee immutable WORM vault storage.
 3. Implement deterministic RFC 8785 Canonical JSON Serialization (JCS) library for exhibit manifests.
 4. Define relational schema and SQLAlchemy models for `custody_events` enforcing append-only hash-chained event links.
 5. Build comprehensive test vector suite validating hash calculation against known NIST CAVP vectors.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Stream bytes -> Accumulate SHA-256/SHA3-512 -> Write raw vault -> Lock POSIX 0400 -> Build RFC 8785 manifest -> Commit custody event -> Verify bitstream equality.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 Python `hashlib`, `canonicaljson`, `cryptography`, PostgreSQL 15, S3 Object Lock.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A0 baseline approved; database migrations initialized.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/core/crypto/direct_hasher.py`, `src/ps05/core/crypto/canonical_json.py`, `tests/unit/test_ceipl_hasher.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Feed 100 test vectors with known SHA-256 digests; assert zero discrepancy; verify POSIX 0400 file permissions prevent modification (`chmod -w`).
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 File system caching concealing modification; mitigated by explicit flush and direct sync I/O.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Enforce strict separation between raw seized exhibit bytes and all derived analysis representations.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 Dual-hasher computes matching digests; WORM vault write-blocks correctly; canonical JSON produces identical bytes across platforms.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 All hasher and canonicalization tests pass with 100% code coverage; custody event table indexed; checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -1721,47 +1751,47 @@ All hasher and canonicalization tests pass with 100% code coverage; custody even
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Provide safe, sandboxed ingestion and structural profiling of seized digital image exhibits, enforcing strict decompression bomb quotas and rejecting polyglot binaries.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 Magic byte detection (`python-magic`), Pillow safety limits (`Image.MAX_IMAGE_PIXELS = 128_000_000`), subprocess memory cgroups (2GB RAM, 30s timeout), universal container profiling, colour space detection.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.engines.image.common.safe_decode`, `ps05.engines.image.common.profiling`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement `python-magic` signature validator to identify real image formats (JPEG, PNG, TIFF, WebP, HEIC, BMP, camera RAW) regardless of filename extension.
 2. Configure Pillow decompression bomb protection: enforce hard ceiling at 128 Megapixels; raise `DECOMPRESSION_BOMB_PREVENTED` on violations.
 3. Build isolated decoding subprocess harness with POSIX cgroups capping memory to 2GB and execution time to 30 seconds.
 4. Extract universal profile: dimensions, pixel count, aspect ratio, bit depth, colour mode, colour space, orientation tag, alpha channel, and frame count.
 5. Build malformed image test suite containing corrupt markers, truncated streams, and extreme dimension headers.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Receive seized bytes -> Check magic bytes -> Spawn isolated subprocess -> Enforce 128MP limit -> Parse metadata profile -> Write `image_exhibits` DB record.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 `python-magic`, Pillow 10.3.0, OpenCV (headless), resource limits (`resource` module / cgroups).
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A1 shared cryptographic foundation completed.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/engines/image/common/safe_decode.py`, `src/ps05/engines/image/common/profiling.py`, `tests/unit/test_ive_safe_decode.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Ingest 50 malformed and bomb image fixtures; assert 100% catch rate without crashing host worker; assert memory stays under 2GB.
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 Zero-day vulnerabilities in underlying C libraries (libjpeg, libpng); mitigated by sandboxed worker processes.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Never execute embedded scripts or metadata payloads; isolate decoders in unprivileged sub-processes.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 Real format correctly extracted; decompression bombs prevented; comprehensive profile stored in PostgreSQL.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 Safe decoding harness operational; malformed test suite passing; all 4 checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -1781,47 +1811,47 @@ Safe decoding harness operational; malformed test suite passing; all 4 checkpoin
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Implement a versioned, 150-category hierarchical taxonomy covering forensic and evidentiary domains, coupled with a multi-label classification pipeline for scene triage and priority flagging.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 15 parent forensic domains, 150 leaf classes, multi-label classification, SigLIP (ViT-SO400M) / CLIP embeddings, temperature calibration, triage alert indicators.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.engines.image.ive.taxonomy`, `ps05.engines.image.ive.classifier`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement relational database schema and registry for the 15-parent, 150-leaf category taxonomy (`image_taxonomy_categories`).
 2. Establish formal inclusion/exclusion criteria, model compatibility flags, and validation states per taxonomy label.
 3. Implement multi-label zero-shot and fine-tuned visual classification pipeline using SigLIP (ViT-SO400M) visual backbone.
 4. Implement temperature scaling and Platt calibration to produce calibrated category probabilities $p_c \in [0, 1]$.
 5. Build triage alert router identifying urgent investigative categories (e.g. violent incidents, weapons, forensic trauma) as prioritization flags.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Load image exhibit -> Resample to $336	imes 336$ normalized tensor -> Forward pass SigLIP -> Calibrate logits -> Filter by threshold -> Store taxonomy annotations.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 PyTorch 2.3, Hugging Face `transformers` (SigLIP / CLIP), scikit-learn (calibration).
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A2 safe intake operational; taxonomy relational tables created.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/engines/image/ive/taxonomy.py`, `src/ps05/engines/image/ive/classifier.py`, `tests/benchmarks/test_ive_taxonomy.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Evaluate classifier across test splits for all 15 domains; assert Macro-F1 $\ge 0.82$; verify calibration curve linearity.
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 Conflating visual triage flags with automated legal conclusions; mitigated by mandatory disclaimer strings.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Sanitize taxonomy query inputs; prevent prompt injection in visual-language reasoning descriptions.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 150 categories indexed; multi-label probabilities calibrated; triage alerts flag urgent evidence categories.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 Taxonomy loaded, classifier inference operational, calibration verified, checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -1841,47 +1871,47 @@ Taxonomy loaded, classifier inference operational, calibration verified, checkpo
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Deploy high-resolution object detection, zero-shot instance segmentation (SAM 2), and occlusion-aware people counting with high-resolution tiling and coordinate transform tracking.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 YOLOv8x / YOLOv10x detectors, SAM 2 instance masks, $1024	imes 1024$ overlapping tiling, NMS boundary suppression, dual-head people counting, crowd density estimation.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.engines.image.ive.detector`, `ps05.engines.image.ive.segmentor`, `ps05.engines.image.ive.people_count`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement YOLOv8x/v10x object detection pipeline mapped to forensic taxonomy categories.
 2. Implement SAM 2 (Segment Anything 2) promptable instance segmentation to generate precise polygon masks.
 3. Implement high-resolution tiling dispatcher: partition images $> 2048	imes 2048$ into $1024	imes 1024$ tiles with 128px overlap; merge boxes via NMS.
 4. Record linear affine coordinate mappings in Derived Artifact DAG to guarantee pixel-accurate projection back to original exhibit.
 5. Implement occlusion-aware people counter combining head-box and full-body detectors; resolve overlaps via Hungarian matching.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Tile high-res image -> Parallel YOLO & SAM 2 inference -> NMS cross-tile suppression -> Map coordinates to parent -> Execute people counter -> Store findings.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 `ultralytics` (YOLOv8/v10), `segment-anything-2`, OpenCV, NumPy.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A2 safe intake operational; GPU worker nodes configured.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/engines/image/ive/detector.py`, `src/ps05/engines/image/ive/segmentor.py`, `src/ps05/engines/image/ive/people_count.py`, `tests/benchmarks/test_ive_detection.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Evaluate on COCO and CrowdHuman benchmark splits; assert mAP@50 $\ge 0.65$; assert people count MAE $\le 1.8$ on crowds under 30 persons.
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 False positive detections on mannequins and posters; mitigated by 2D frequency texture depth check.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Enforce worker memory quotas ($\le 8	ext{GB}$ VRAM); prevent GPU Out-Of-Memory errors during high-res tiling.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 Bounding boxes and masks correctly mapped to parent image; people count separated from face count.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 Detection, segmentation, and people counting operational with full test suite passing; checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -1901,47 +1931,47 @@ Detection, segmentation, and people counting operational with full test suite pa
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Implement the shared Face, Portrait & Biometric Evidence Analysis (FPA) module, supporting multi-scale face detection, 468 3D facial landmarks, face quality gating, and authorized 1:1 ArcFace reference comparison.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 RetinaFace / SCRFD face detection, MediaPipe 468-point 3D facial mesh, head pose estimation (solvePnP yaw/pitch/roll), blur and occlusion metrics, 1:1 ArcFace / MagFace feature extraction, judicial case token gating.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.engines.image.fpa.detector`, `ps05.engines.image.fpa.landmarks`, `ps05.engines.image.fpa.quality`, `ps05.engines.image.fpa.matcher`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement RetinaFace / SCRFD detector extracting face bounding boxes across micro-faces ($\ge 20	ext{px}$) and high-res portraits.
 2. Implement MediaPipe Face Landmarker extracting 468 3D landmark coordinates.
 3. Implement face quality scoring evaluating Laplacian blur variance, illumination symmetry, and head pose angles.
 4. Enforce strict biometric privacy gating: automated 1:N searching prohibited; 1:1 feature extraction enabled ONLY when authorized `case_token` is present.
 5. Implement ArcFace (IResNet-100) / MagFace 512-dimensional embedding extraction and cosine similarity comparison with suspect reference mugshot.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Detect faces -> Gate by quality -> Extract 468 landmarks -> Check case authorization token -> (If authorized) Extract 512-d embedding -> Compute cosine distance -> Store encrypted blob.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 RetinaFace, `mediapipe`, `insightface` (ArcFace), OpenCV solvePnP, AES-256-GCM.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A2 safe intake operational; biometric privacy access control layer configured.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/engines/image/fpa/detector.py`, `src/ps05/engines/image/fpa/landmarks.py`, `src/ps05/engines/image/fpa/matcher.py`, `tests/unit/test_fpa_biometrics.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Evaluate face detection recall on WIDER FACE (Hard split $\ge 88\%$); verify 1:1 ArcFace cosine similarity on LFW dataset (Accuracy $\ge 99.2\%$).
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 Unconstitutional biometric mass surveillance; mitigated by cryptographic case authorization token requirement.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Raw biometric embeddings encrypted with AES-256-GCM; never exported in unencrypted reports.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 Faces detected, landmarks extracted, quality gated, and 1:1 comparison executed strictly under valid case token.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 FPA module fully integrated; biometric privacy tests passing; checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -1961,47 +1991,47 @@ FPA module fully integrated; biometric privacy tests passing; checkpoints record
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Provide specialized forensics for questioned documents, official seals, and signatures, including convex hull quadrilateral rectification and multilingual OCR across Indian scripts.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 Canny edge detection, convex hull polygon approximation, $3	imes 3$ perspective transformation matrix, PaddleOCR Indian script models (Hindi, Bhojpuri, Maithili, Bengali, English), seal and stamp region detection.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.engines.image.ive.ocr_engine`, `ps05.engines.image.common.transforms`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement document boundary localization using Canny edge filtering and convex hull 4-corner polygon approximation.
 2. Compute perspective homography matrix $H_{	ext{persp}} \in \mathbb{R}^{3	imes 3}$ and warp document to normalized rectangular plane.
 3. Integrate PaddleOCR text recognition supporting Devanagari (Hindi, Maithili, Bhojpuri), Bengali, and English scripts.
 4. Implement official seal, rubber stamp, and handwritten signature region localization.
 5. Register rectified document as child artifact in Derived Artifact DAG with complete affine transform parameters.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Detect document corners -> Compute perspective warp -> Rectify image -> Execute PaddleOCR -> Localize seals/signatures -> Store extracted text and coordinates.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 OpenCV (`findContours`, `getPerspectiveTransform`), PaddleOCR 2.7.3, Tesseract 5.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A2 safe intake operational; PaddleOCR language models downloaded.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/engines/image/ive/ocr_engine.py`, `tests/benchmarks/test_ive_ocr.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Evaluate OCR accuracy on scanned legal contracts and FIRs; assert Character Error Rate (CER) $\le 4.5\%$ on clean scans.
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 Perspective rectification distortion on non-planar (folded/curved) documents; report distortion warning when non-linear.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Sanitize OCR recognized text strings to prevent SQL/XSS injection during report compilation.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 Document rectified to flat plane; Indian script text extracted; seals and signatures localized.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 Document rectification and multilingual OCR operational; benchmarks verified; checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -2021,47 +2051,47 @@ Document rectification and multilingual OCR operational; benchmarks verified; ch
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Perform deep container, EXIF, XMP, IPTC, and ICC metadata inspection, combined with 2D Fast Fourier Transform (FFT) and Discrete Cosine Transform (DCT) signal analysis to detect processing traces.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 ExifTool parser wrapper, DQT Quantization Tables, 2D FFT magnitude spectrum, periodic resampling peaks, DCT block coefficient variance, timestamp discrepancy checks.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.engines.image.ire.exif_deep`, `ps05.engines.image.ire.signal_2d`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement sandboxed ExifTool wrapper extracting full tag dictionary across EXIF, MakerNotes, IPTC, and XMP blocks.
 2. Extract JPEG Quantization Tables (Luminance and Chrominance) and compare against catalog of 20,000 camera and editor profiles.
 3. Implement 2D Fast Fourier Transform on grayscale luminance; compute centered log-magnitude spectrum to detect periodic resampling spikes.
 4. Analyze $8	imes 8$ block DCT coefficient histograms for truncation and double-quantization periodicity.
 5. Execute internal timestamp cross-validation: `DateTimeOriginal` vs `DateTimeDigitized` vs `FileModifyDate`.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Run ExifTool -> Parse DQT markers -> Compute 2D FFT spectrum -> Analyze DCT histograms -> Check timestamp consistency -> Store findings.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 ExifTool 12.84, NumPy, SciPy (2D FFT), Pillow.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A2 safe intake operational; ExifTool binary vendored.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/engines/image/ire/exif_deep.py`, `src/ps05/engines/image/ire/signal_2d.py`, `tests/unit/test_ire_metadata.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Verify extraction against 100 reference images from 20 camera models; assert 100% EXIF tag parity with official ExifTool CLI.
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 Over-interpreting editing software tags as proof of malicious manipulation; mitigated by strict evidentiary disclaimer.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Sanitize all ExifTool command-line arguments to prevent shell command injection (`-` flag escaping).
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 EXIF/XMP tags parsed; DQT tables cataloged; 2D FFT spectrum generated; timestamp anomalies flagged.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 Metadata and signal analysis modules operational; unit tests passing; checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -2081,47 +2111,47 @@ Metadata and signal analysis modules operational; unit tests passing; checkpoint
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Deploy classical computer vision algorithms for edge detection, structural contour analysis, Hough line/circle alignment, and SIFT/ORB keypoint matching with RANSAC homography estimation.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 Canny edge detection with Otsu thresholding, Sobel/Scharr gradients, Laplacian focus measures, Hough transforms, SIFT/ORB feature matching, RANSAC homography estimation, residual difference maps.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.engines.image.ire.geom_cv`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement Canny edge detection with automated Otsu dual-thresholding and Sobel/Scharr gradient directionality.
 2. Implement Hough Line and Circle transforms for architectural structure, ballistic trajectory, and tire-track alignment.
 3. Implement SIFT and ORB multi-scale feature detection with $k$-NN descriptor matching ($d_1 / d_2 < 0.70$).
 4. Implement RANSAC homography estimation to align questioned exhibits with authorized physical reference photographs.
 5. Compute pixel-level absolute residual maps $\Delta = |I_Q - \mathcal{W}(I_R, H)|$ and local SSIM correlation.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Extract edges/gradients -> Detect SIFT/ORB features -> Estimate RANSAC homography -> Warp reference -> Compute residual map -> Store alignment artifact.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 OpenCV (headless) 4.9.0, NumPy, SciPy.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A7 signal analysis operational.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/engines/image/ire/geom_cv.py`, `tests/unit/test_ire_geom_cv.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Evaluate RANSAC homography on synthetic rotated/scaled image pairs; assert reprojection RMSE $\le 1.2	ext{px}$.
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 Treating Canny edges or SIFT matches as proof of tampering; mitigated by framing outputs strictly as geometric properties.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Enforce bounded RANSAC iterations ($\le 5000$) to prevent thread hanging on degenerate point clouds.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 Edges localized; homography estimated; reference aligned; residual difference map generated.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 Classical CV module operational; geometric alignment verified; checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -2141,48 +2171,48 @@ Classical CV module operational; geometric alignment verified; checkpoints recor
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Localize duplicated copy-move image regions via keypoint and block-based matching, and implement Photo-Response Non-Uniformity (PRNU) sensor noise extraction to associate images with camera sensors.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 SIFT keypoint DBSCAN clustering, DCT block matching, affine transformation consistency, Mihcak wavelet denoising, PRNU sensor noise fingerprinting, normalized cross-correlation (NCC).
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.engines.image.ire.cmfd`, `ps05.engines.image.ire.prnu_sensor`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement dual-branch Copy-Move Forgery Detection (CMFD): keypoint-based SIFT matching with DBSCAN spatial clustering and block-based DCT matching.
 2. Generate source and destination polygon bounding boxes enclosing cloned and pasted image regions.
 3. Implement Mihcak wavelet denoising filter to extract sensor noise residual $W = I - F(I)$.
 4. Implement Normalized Cross-Correlation (NCC) against camera reference fingerprint $K_{	ext{ref}}$ from 25 flat-field images.
 5. Explicitly document PRNU degradation under social media compression (WhatsApp, Facebook) and state verification limitations.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Extract SIFT keypoints -> Match $k$-NN -> Cluster DBSCAN -> Verify affine consistency -> Extract wavelet noise -> Correlate PRNU -> Store polygon masks.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 OpenCV, `PyWavelets` 1.6.0, scikit-learn (DBSCAN), FAISS.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A8 classical vision operational; reference flat photos available for PRNU.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/engines/image/ire/cmfd.py`, `src/ps05/engines/image/ire/prnu_sensor.py`, `tests/benchmarks/test_ire_cmfd.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Evaluate CMFD on CoMoFoD benchmark; assert detection recall $\ge 90\%$; test PRNU correlation on native camera stills ($
 ho > 0.15$).
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 PRNU false matches on images with shared ISP scene processing; mitigated by high significance threshold ($p < 0.001$).
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Enforce spatial distance thresholds ($r > 30	ext{px}$) to eliminate self-matching keypoint trivial loops.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 Cloned polygons localized; PRNU correlation calculated with legal limitations noted.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 CMFD and PRNU modules operational; benchmark evaluations recorded; checkpoints completed.
 
 **14. Explicit Status:** `PLANNED`
@@ -2202,47 +2232,47 @@ CMFD and PRNU modules operational; benchmark evaluations recorded; checkpoints c
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Deploy an independent, multi-branch architecture to detect fully synthetic AI-generated images, and implement dense pixel-level inpainting localization using TruFor and CAT-Net.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 Multi-branch classifier (ResNet50 spatial head, 2D FFT Fourier head, SigLIP foundation head), Platt scaling calibration, detector disagreement warning, TruFor RGB+noise inpainting localization, CAT-Net DCT stream.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.engines.image.aim.ai_detect`, `ps05.engines.image.aim.inpaint_loc`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement multi-branch AI image classifier combining spatial convolutional features, 2D FFT spectral falloff, and SigLIP embeddings.
 2. Calibrate model logits using Platt scaling fitted on diverse generative engines (Stable Diffusion, Midjourney, DALL-E 3, Flux, StyleGAN).
 3. Implement detector disagreement metric: flag `DETECTOR_DISAGREEMENT_WARNING` if branch predictions diverge by $> 0.50$.
 4. Integrate TruFor (Transformer-based RGB and noise residual fusion architecture) for dense inpainting anomaly localization.
 5. Generate pixel-level floating-point anomaly heatmaps $M(x, y) \in [0, 1]$ and vector polygon contours enclosing edited regions.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Input exhibit -> Parallel inference (Spatial + Fourier + SigLIP) -> Calibrate $P(	ext{AI})$ -> Execute TruFor localization -> Binarize mask -> Store heatmap & polygons.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 PyTorch 2.3, TruFor (`grip-unina/TruFor`), Hugging Face `transformers`, NumPy.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A2 safe intake operational; GPU inference nodes allocated.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/engines/image/aim/ai_detect.py`, `src/ps05/engines/image/aim/inpaint_loc.py`, `tests/benchmarks/test_aim_trufor.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Evaluate AI detector across 10,000 real and synthetic images; assert ROC-AUC $\ge 0.94$; evaluate TruFor pixel-level IoU $\ge 0.72$ on inpainting splits.
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 Domain shift on newly released diffusion/flow-matching generators; mitigated by Mahalanobis OOD uncertainty flag.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Enforce model checkpoint SHA-256 verification before loading weights into GPU memory.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 Calibrated $P(	ext{AI})$ score produced; inpainting heatmaps generated; disagreement warnings logged.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 AI detection and inpainting localization operational; benchmark metrics verified; checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -2262,47 +2292,47 @@ AI detection and inpainting localization operational; benchmark metrics verified
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Deploy specialized face tampering forensics to detect face swaps (DeepFakes, SimSwap, Roop), face morphs, and generative portrait modifications, separating manipulation from biometric recognition.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 Face X-Ray boundary inconsistency, facial landmark geometric asymmetry, corneal specularity reflection consistency, deepfake face swap classifier, beauty filter discrimination.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.engines.image.aim.face_tamper`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement Face X-Ray blend boundary detection network to expose blending edges between inserted face patch and original head/neck.
 2. Implement facial landmark geometric asymmetry analysis to detect unnatural morphing distortions.
 3. Implement corneal specularity reflection consistency checker: verify lighting direction across left and right pupils.
 4. Build beauty filter and retouching discriminator to prevent ordinary mobile skin-smoothing from triggering deepfake false positives.
 5. Package findings into structured `FaceManipulationResult` with localization heatmaps.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Receive FPA face crops -> Extract Face X-Ray boundary -> Analyze landmark asymmetry -> Check corneal specularity -> Score retouching -> Output face swap probability.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 PyTorch 2.3, OpenCV (pupil corneal segmentation), MediaPipe Face Mesh.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A5 FPA face landmark module completed.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/engines/image/aim/face_tamper.py`, `tests/benchmarks/test_aim_face_tamper.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Evaluate on FaceForensics++ (FaceSwap and DeepFakes c23 splits); assert AUC-ROC $\ge 0.92$; verify beauty filter false positive rate $\le 3\%$.
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 Low-light camera sensor noise mimicking blend boundary artifacts; mitigated by quality gating.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Enforce biometric privacy invariants: zero biometric vector comparison inside manipulation detector.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 Face swaps detected; blend boundaries localized; beauty filters correctly discriminated.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 Face tampering module operational; benchmark evaluations passing; checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -2322,47 +2352,47 @@ Face tampering module operational; benchmark evaluations passing; checkpoints re
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Implement statistical and structural steganalysis to detect hidden payloads, trailing data, and malformed container structures, enforcing zero-payload execution.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 Least Significant Bit (LSB) plane randomness, Sample Pair Analysis (SPA), Chi-square ($\chi^2$) statistical tests, Regular-Singular (RS) steganalysis, trailing byte detection, polyglot binary quarantine.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.engines.image.aim.steganalysis`, `ps05.engines.image.aim.file_defense`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement LSB plane visual extraction and bit-distribution entropy calculation.
 2. Implement Sample Pair Analysis (SPA) and Chi-square ($\chi^2$) statistical tests to estimate spatial embedding rates.
 3. Implement Regular-Singular (RS) steganalysis calculating flipping group proportions across $2	imes 2$ pixel blocks.
 4. Implement container structural inspection detecting unexpected trailing bytes past standard End-Of-Image markers (JPEG `FF D9`, PNG `IEND`).
 5. Enforce zero-execution policy: quarantined trailing bytes and steganographic payloads are never executed.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Scan bitstream -> Check trailing bytes -> Extract LSB planes -> Compute RS & Chi-square -> Flag stego anomalies -> Quarantine non-image payloads.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 Python standard library, NumPy, SciPy (stats), Pillow.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A2 safe intake operational.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/engines/image/aim/steganalysis.py`, `src/ps05/engines/image/aim/file_defense.py`, `tests/unit/test_aim_steganography.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Evaluate on BOSSbase test set with known Steghide and LSB injected payloads; assert detection rate $\ge 85\%$ for embedding rates $> 0.1	ext{ bpp}$.
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 Statistical anomalies in high-noise raw photos misinterpreted as steganography; label findings as statistical indicators.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Quarantined payloads written to isolated vault partition with zero execution permissions (`0600`).
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 LSB and RS steganalysis functional; trailing bytes quarantined; zero execution verified.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 Steganalysis and defensive modules operational; unit tests passing; checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -2382,47 +2412,47 @@ Steganalysis and defensive modules operational; unit tests passing; checkpoints 
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Harden CEIPL with RFC 8032 Ed25519 digital signatures, RFC 3161 Trusted Timestamp Authority (TSA) integration, RFC 6962 binary Merkle trees with inclusion proofs, and C2PA Content Credentials parsing.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 Ed25519 digital signatures, RFC 3161 TSA tokens, X.509 PKI certificate chain validation, append-only custody logs, RFC 6962 Merkle tree batch checkpoints, C2PA Content Credentials JUMBF parser.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.core.crypto.ed25519_signer`, `ps05.core.crypto.tsa_client`, `ps05.core.crypto.merkle_tree`, `ps05.core.crypto.c2pa_adapter`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement Ed25519 digital signature signing and verification for all canonical manifests and reports.
 2. Integrate RFC 3161 Trusted Timestamp Authority (TSA) client, validating ASN.1 timestamp tokens and X.509 certificate chains.
 3. Implement RFC 6962 binary Merkle trees aggregating batch exhibits and generating compact $O(\log N)$ inclusion proofs.
 4. Integrate C2PA Content Credentials parser extracting JUMBF claim boxes and verifying claim signatures and content bindings.
 5. Build cryptographic failure test suite verifying explicit typed error returns (`HASH_MISMATCH`, `SIGNATURE_INVALID`, `CUSTODY_CHAIN_BROKEN`).
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Build canonical manifest -> Sign with Ed25519 -> Request RFC 3161 TSA token -> Commit to Merkle tree -> Parse C2PA credentials -> Verify proof.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 `cryptography` 42.0.7, `rfc3161ng`, `c2pa-python`, PostgreSQL 15.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A1 shared cryptographic core completed; PKI certificates configured.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/core/crypto/ed25519_signer.py`, `src/ps05/core/crypto/tsa_client.py`, `src/ps05/core/crypto/merkle_tree.py`, `src/ps05/core/crypto/c2pa_adapter.py`, `tests/integration/test_ceipl_cryptography.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Execute 500 signature and Merkle verification cycles; assert 100% mathematical validity; assert tamper detection on single bit flip.
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 External TSA network timeout; handle gracefully by recording `TSA_UNREACHABLE` without invalidating local Ed25519 signature.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Private signing keys protected in HSM / KMS; never logged or exposed in client bundles.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 Ed25519 signatures verified; TSA tokens validated; Merkle inclusion proofs generate and verify; C2PA claims parsed.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 Complete cryptographic hardening suite operational; integration tests passing; checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -2442,47 +2472,47 @@ Complete cryptographic hardening suite operational; integration tests passing; c
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Implement the cross-engine finding aggregator, Archify JSON IR visual compiler, and Section 65B IEA / Section 63 BSA court-admissible PDF certificate generator with digital signature sealing.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 Cross-engine finding fusion (IVE + IRE + AIM + FPA + CEIPL), uncertainty calibration, detector conflict resolution, Archify JSON IR schema, Section 65B/63 BSA PDF compilation via WeasyPrint.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 `ps05.reporting.compiler`, `ps05.reporting.cert_65b`, `ps05.reporting.archify_adapter`.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Implement finding aggregation engine correlating visual taxonomy, metadata anomalies, CMFD cloned patches, and inpainting heatmaps.
 2. Implement conflict resolution matrix: handle cases where metadata suggests camera capture but AIM detects generative inpainting.
 3. Implement Archify JSON IR compiler formatting image provenance flow, localization heatmaps, and finding graphs into `archify.report.json`.
 4. Implement court-admissible PDF generator compiling Section 65B IEA / Section 63 BSA electronic evidence certificates with device custody declarations.
 5. Apply cryptographic sealing: embed Ed25519 signature, SHA-256 exhibit checksums, and RFC 3161 timestamp token into the exported PDF.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Aggregate findings -> Correlate anomalies -> Compile Archify JSON IR -> Render HTML template -> Generate WeasyPrint PDF -> Seal digital signature.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 Jinja2, WeasyPrint 61.2, Archify JSON IR, `ps05.core.crypto`.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A3 through AIF-A13 engine milestones completed.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `src/ps05/reporting/compiler.py`, `src/ps05/reporting/cert_65b.py`, `src/ps05/reporting/archify_adapter.py`, `tests/integration/test_image_reporting.py`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Generate 20 court certificates; assert presence of all mandatory Section 65B / 63 BSA custody clauses, valid SHA-256 hashes, and valid Ed25519 signatures.
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 Overstating statistical detection as judicial proof; mitigated by standardized legal disclaimer templates.
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Enforce strict PDF generation sandboxing; block SSRF by disabling external network resource fetching in WeasyPrint.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 Findings aggregated; Archify IR generated; certified PDF produced with digital signature seal.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 Reporting pipeline operational; sample certificates reviewed and verified; checkpoints recorded.
 
 **14. Explicit Status:** `PLANNED`
@@ -2502,47 +2532,47 @@ Reporting pipeline operational; sample certificates reviewed and verified; check
 
 **Status:** `PLANNED`
 
-**1. Purpose:**  
+**1. Purpose:**
 Execute comprehensive end-to-end platform validation across curated forensic image benchmarks, verify 5-run deterministic reproducibility, enforce air-gap network isolation, and conduct open-source license audits.
 
-**2. Topics & Subtopics:**  
+**2. Topics & Subtopics:**
 Curated image forensic corpus, CoMoFoD, TruFor benchmarks, 5-run deterministic reproducibility, air-gap network isolation test, license compliance audit, documentation parity check.
 
-**3. Modules Covered:**  
+**3. Modules Covered:**
 All AIF engines, tests/benchmarks, documentation.
 
-**4. Exact Tasks:**  
+**4. Exact Tasks:**
 1. Assemble curated evaluation corpus: authentic camera photos, smartphone captures, CoMoFoD copy-move images, TruFor inpainting splits, AI-generated images, and C2PA signed exhibits.
 2. Execute 5-run reproducibility audit: re-run full pipeline on identical exhibits 5 times; assert bit-for-bit identical JSON manifests and scores.
 3. Verify air-gap network isolation: execute complete test suite on network-isolated runner; assert zero outbound HTTP requests.
 4. Conduct open-source dependency license audit: verify all libraries (Pillow, OpenCV, PyTorch, SAM 2, PaddleOCR, WeasyPrint) comply with permissive/hackathon licenses.
 5. Verify documentation parity across README.md, PRD.md, TRD.md, PHASES.md, and AI_INSTRUCTIONS.md.
 
-**5. Execution Workflow:**  
+**5. Execution Workflow:**
 Run test corpus -> Verify 5-run determinism -> Disable network adapters -> Audit licenses -> Validate documentation -> Issue release tag.
 
-**6. Tools & Technologies:**  
+**6. Tools & Technologies:**
 `pytest`, `pip-licenses`, packet monitor, Python 3.12.
 
-**7. Prerequisites & Dependencies:**  
+**7. Prerequisites & Dependencies:**
 AIF-A0 through AIF-A14 completed and verified.
 
-**8. Expected Artifacts:**  
+**8. Expected Artifacts:**
 `tests/benchmarks/test_image_benchmarks.py`, `scripts/run_image_demo.py`, `RELEASE_NOTES_AIF.md`.
 
-**9. Validation Plan:**  
+**9. Validation Plan:**
 Execute full test suite; assert 100% green pass rate (exit code 0); assert zero non-deterministic score variance; assert zero network packets emitted.
 
-**10. Failure Cases & Risks:**  
+**10. Failure Cases & Risks:**
 Floating-point non-determinism across GPU architectures; mitigated by deterministic PyTorch CUDA flags (`torch.use_deterministic_algorithms(True)`).
 
-**11. Security Considerations:**  
+**11. Security Considerations:**
 Enforce complete air-gapped execution capability for classified forensic deployments.
 
-**12. Acceptance Criteria:**  
+**12. Acceptance Criteria:**
 100% test pass; deterministic reproducibility verified; air-gap validated; documentation consistent.
 
-**13. Definition of Done:**  
+**13. Definition of Done:**
 All 16 AIF phases validated; benchmark report compiled; all 64 checkpoints initialized and accounted for.
 
 **14. Explicit Status:** `PLANNED`
@@ -2974,9 +3004,9 @@ The Offline Network Traffic Forensics (ONTF) engineering roadmap defines fourtee
 
 ### Phase ONTF-A0: Network Architecture Baseline & Sandbox Execution Harness
 
-**1. Phase ID & Title:** `ONTF-A0: Network Architecture Baseline & Sandbox Execution Harness`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Establish the structural, algorithmic, defensive, and legal foundation for the ONTF subsystem. Initialize package hierarchies under `src/ps05/engines/ontf/`, configure typing contracts, establish defensive subprocess sandbox execution harnesses (`safe_exec.py`) for external CLI tools (TShark, Scapy, Zeek), enforce memory allocation ceilings ($\le 4	ext{ GB}$ RAM) and execution timeouts (300s), trap malformed packet bombs, and link ONTF into the shared platform service locator.  
+**1. Phase ID & Title:** `ONTF-A0: Network Architecture Baseline & Sandbox Execution Harness`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Establish the structural, algorithmic, defensive, and legal foundation for the ONTF subsystem. Initialize package hierarchies under `src/ps05/engines/ontf/`, configure typing contracts, establish defensive subprocess sandbox execution harnesses (`safe_exec.py`) for external CLI tools (TShark, Scapy, Zeek), enforce memory allocation ceilings ($\le 4	ext{ GB}$ RAM) and execution timeouts (300s), trap malformed packet bombs, and link ONTF into the shared platform service locator.
 **4. Topics & Subtopics:**
 - Directory & Module Scaffold: Sub-packages (`common`, `ingest`, `parsers`, `schema`, `features`, `attribution`, `threats`, `ml`, `graph`, `correlation`, `ui`, `reporting`).
 - Defensive Subprocess Sandbox: `safe_exec.py` wrapping external binaries with strict 300-second timeouts, resource quotas, and non-root user execution (`uid 10002`).
@@ -3026,9 +3056,9 @@ Scaffold committed, unit test suite passing with 100% exit code 0, typing verifi
 
 ### Phase ONTF-A1: Capture Evidence Ingestion, Dual Hashing & WORM Vault Locking
 
-**1. Phase ID & Title:** `ONTF-A1: Capture Evidence Ingestion, Dual Hashing & WORM Vault Locking`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement secure intake and tamper-evident preservation of seized `.pcap` and `.pcapng` network capture files. Compute streaming dual cryptographic hashes (SHA-256 and SHA3-512) prior to parsing, store untouched raw bitstreams in the WORM vault under POSIX `0400` read-only mode, record comprehensive intake metadata, strictly distinguish self-calculated hashes from reference hashes, and emit an RFC 8785 canonical JSON intake receipt signed with Ed25519.  
+**1. Phase ID & Title:** `ONTF-A1: Capture Evidence Ingestion, Dual Hashing & WORM Vault Locking`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement secure intake and tamper-evident preservation of seized `.pcap` and `.pcapng` network capture files. Compute streaming dual cryptographic hashes (SHA-256 and SHA3-512) prior to parsing, store untouched raw bitstreams in the WORM vault under POSIX `0400` read-only mode, record comprehensive intake metadata, strictly distinguish self-calculated hashes from reference hashes, and emit an RFC 8785 canonical JSON intake receipt signed with Ed25519.
 **4. Topics & Subtopics:**
 - Streaming Dual-Hasher: Chunked 64 KB read loop computing SHA-256 and SHA3-512 in a single streaming pass.
 - WORM Vault Persistence: Storage in isolated vault with POSIX `0400` read-only flags and S3 Object Lock compliance.
@@ -3077,9 +3107,9 @@ Ingestion service committed, verified by `test_ontf_ingest.py` with 100% pass ra
 
 ### Phase ONTF-A2: Defensive Packet Parsing & Multi-Tool Dissection (TShark & Scapy)
 
-**1. Phase ID & Title:** `ONTF-A2: Defensive Packet Parsing & Multi-Tool Dissection (TShark & Scapy)`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Validate container structure, detect capture anomalies, and dissect packet headers using isolated TShark and Scapy workers. Verify magic bytes for standard PCAP (`0xa1b2c3d4`), nanosecond PCAP (`0xa1b23c4d`), and PCAPNG Section Header Block (`0x0a0d0d0a`); validate link-layer header types (Ethernet, Linux Cooked SLL, Raw IP, 802.11); detect snaplen limits, truncated frames, and interface drop counters; export structured packet JSON and perform selective deep dissection.  
+**1. Phase ID & Title:** `ONTF-A2: Defensive Packet Parsing & Multi-Tool Dissection (TShark & Scapy)`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Validate container structure, detect capture anomalies, and dissect packet headers using isolated TShark and Scapy workers. Verify magic bytes for standard PCAP (`0xa1b2c3d4`), nanosecond PCAP (`0xa1b23c4d`), and PCAPNG Section Header Block (`0x0a0d0d0a`); validate link-layer header types (Ethernet, Linux Cooked SLL, Raw IP, 802.11); detect snaplen limits, truncated frames, and interface drop counters; export structured packet JSON and perform selective deep dissection.
 **4. Topics & Subtopics:**
 - Magic Byte & Container Header Inspection: Distinguishing PCAP (microsecond vs nanosecond) and PCAPNG.
 - Link-Layer Type Parsing: Handling DLT_EN10MB (Ethernet), DLT_LINUX_SLL (Linux Cooked), and DLT_RAW.
@@ -3129,9 +3159,9 @@ Parsers implemented and passing test suite against crafted malformed and standar
 
 ### Phase ONTF-A3: Offline Zeek Batch Processing Engine
 
-**1. Phase ID & Title:** `ONTF-A3: Offline Zeek Batch Processing Engine`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Execute Zeek in offline batch mode (`zeek -r capture.pcap local`) to generate structured forensic connection, protocol, and notice logs without running continuous live network daemons. Ingest and parse Zeek TSV/JSON logs (`conn.log`, `dns.log`, `ssl.log`, `http.log`, `ssh.log`, `notice.log`), decode connection state codes (`SF`, `S0`, `REJ`, `RSTO`, etc.), extract TLS handshake ciphersuites, SNI domain names, and certificate hashes, and handle missing protocol logs gracefully.  
+**1. Phase ID & Title:** `ONTF-A3: Offline Zeek Batch Processing Engine`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Execute Zeek in offline batch mode (`zeek -r capture.pcap local`) to generate structured forensic connection, protocol, and notice logs without running continuous live network daemons. Ingest and parse Zeek TSV/JSON logs (`conn.log`, `dns.log`, `ssl.log`, `http.log`, `ssh.log`, `notice.log`), decode connection state codes (`SF`, `S0`, `REJ`, `RSTO`, etc.), extract TLS handshake ciphersuites, SNI domain names, and certificate hashes, and handle missing protocol logs gracefully.
 **4. Topics & Subtopics:**
 - Offline Batch Invocation: Running `zeek -r <pcap_path>` in isolated temporary directories with local forensic scripts.
 - Log Parsing & Model Mapping: Ingesting Zeek TSV/JSON logs into structured Pydantic record models.
@@ -3181,9 +3211,9 @@ Zeek batch runner committed and passing all integration tests with verified log 
 
 ### Phase ONTF-A4: Common Network Telemetry Schema & Normalisation Layer
 
-**1. Phase ID & Title:** `ONTF-A4: Common Network Telemetry Schema & Normalisation Layer`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Build the normalisation layer mapping heterogeneous outputs from TShark, Scapy, and Zeek into a unified, extensible schema. Enforce microsecond UTC timestamp precision, compute deterministic 5-tuple flow keys (`flow_id`), provide full IPv4 and IPv6 dual-stack compatibility, safely handle missing fields with explicit `None` or typed sentinels without inventing zeros, deduplicate overlapping records, and implement privacy-preserving data minimisation (masking HTTP auth headers, cookies, and scrubbing packet payloads).  
+**1. Phase ID & Title:** `ONTF-A4: Common Network Telemetry Schema & Normalisation Layer`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Build the normalisation layer mapping heterogeneous outputs from TShark, Scapy, and Zeek into a unified, extensible schema. Enforce microsecond UTC timestamp precision, compute deterministic 5-tuple flow keys (`flow_id`), provide full IPv4 and IPv6 dual-stack compatibility, safely handle missing fields with explicit `None` or typed sentinels without inventing zeros, deduplicate overlapping records, and implement privacy-preserving data minimisation (masking HTTP auth headers, cookies, and scrubbing packet payloads).
 **4. Topics & Subtopics:**
 - Unified Flow & Event Schemas: Pydantic models `NetworkFlowRecord` and `NetworkProtocolEvent`.
 - Deterministic 5-Tuple Hashing: SHA-256 canonical hash of sorted IP/port pairs and protocol.
@@ -3233,9 +3263,9 @@ Schema models and normalisation pipeline committed and validated by `test_ontf_s
 
 ### Phase ONTF-A5: Statistical Flow & Inter-Arrival Feature Engineering
 
-**1. Phase ID & Title:** `ONTF-A5: Statistical Flow & Inter-Arrival Feature Engineering`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement a reproducible, zero-data-leakage feature-engineering pipeline extracting 80+ bidirectional and unidirectional flow metrics. Calculate packet count forward/backward, byte volume forward/backward, packet size distribution statistics (min, max, mean, stddev, skewness), flow duration, active and idle duration, TCP flag distributions (SYN, ACK, FIN, RST, PSH, URG), inter-arrival time (IAT) distribution, and coefficient of variation ($CV_{	ext{IAT}} = \sigma_{	ext{IAT}} / \mu_{	ext{IAT}}$) for beaconing/jitter analysis. Enforce strict numerical determinism across re-runs.  
+**1. Phase ID & Title:** `ONTF-A5: Statistical Flow & Inter-Arrival Feature Engineering`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement a reproducible, zero-data-leakage feature-engineering pipeline extracting 80+ bidirectional and unidirectional flow metrics. Calculate packet count forward/backward, byte volume forward/backward, packet size distribution statistics (min, max, mean, stddev, skewness), flow duration, active and idle duration, TCP flag distributions (SYN, ACK, FIN, RST, PSH, URG), inter-arrival time (IAT) distribution, and coefficient of variation ($CV_{	ext{IAT}} = \sigma_{	ext{IAT}} / \mu_{	ext{IAT}}$) for beaconing/jitter analysis. Enforce strict numerical determinism across re-runs.
 **4. Topics & Subtopics:**
 - 80+ Bidirectional Flow Metrics: Standard flow statistics compatible with CICFlowMeter definitions.
 - Inter-Arrival Time (IAT) Statistics: Forward and backward IAT mean, stddev, min, max, and jitter.
@@ -3285,9 +3315,9 @@ Feature engineering modules implemented and passing all parity and performance t
 
 ### Phase ONTF-A6: Dual-Mode Scoping & Target-Device Attribution Engine
 
-**1. Phase ID & Title:** `ONTF-A6: Dual-Mode Scoping & Target-Device Attribution Engine`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement the dual-mode operational architecture: Mode A (Whole-Capture Analysis) and Mode B (Target-Device-Centred Analysis). Build the device attribution engine correlating candidate IP addresses, MAC addresses (with IEEE OUI vendor resolution), DHCP lease transactions (Option 12 Hostname, Option 55 Parameter Request List, Option 60 Vendor Class Identifier), ARP/NDP tables, and connection frequencies. Assign Attribution Confidence Tiers (Tier 1: High, Tier 2: Medium, Tier 3: Low, Tier 4: Inconclusive) and enforce the 9 mandatory attribution caveats.  
+**1. Phase ID & Title:** `ONTF-A6: Dual-Mode Scoping & Target-Device Attribution Engine`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the dual-mode operational architecture: Mode A (Whole-Capture Analysis) and Mode B (Target-Device-Centred Analysis). Build the device attribution engine correlating candidate IP addresses, MAC addresses (with IEEE OUI vendor resolution), DHCP lease transactions (Option 12 Hostname, Option 55 Parameter Request List, Option 60 Vendor Class Identifier), ARP/NDP tables, and connection frequencies. Assign Attribution Confidence Tiers (Tier 1: High, Tier 2: Medium, Tier 3: Low, Tier 4: Inconclusive) and enforce the 9 mandatory attribution caveats.
 **4. Topics & Subtopics:**
 - Mode A vs Mode B Filtering: Scoping analysis to the full capture or a candidate target device and its peers.
 - Device Identifier Correlation: Resolving IP, MAC, DHCP, ARP, and DNS records into candidate device profiles.
@@ -3338,9 +3368,9 @@ Attribution engine and mode routers implemented, passing all test cases with ver
 
 ### Phase ONTF-A7: Deterministic Threat & Port Scan Detection Engine
 
-**1. Phase ID & Title:** `ONTF-A7: Deterministic Threat & Port Scan Detection Engine`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement explainable, rule-based deterministic threat detection modules. Detect horizontal port scans (single destination port probed across $\ge 15$ destination IPs in 60s), vertical port scans ($\ge 25$ distinct destination ports on a single host in 60s), stealth scans (SYN-only, FIN, XMAS, NULL), suspicious DNS activity (Iodine/DNScat2 TXT tunneling, high Shannon entropy domain names $> 3.8$ bits/char indicating DGA, NXDOMAIN storms $> 50$ failures/min), periodic C2 beaconing ($CV_{	ext{IAT}} < 0.15$ with $\ge 20$ recurring flows), and protocol port/flag anomalies.  
+**1. Phase ID & Title:** `ONTF-A7: Deterministic Threat & Port Scan Detection Engine`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement explainable, rule-based deterministic threat detection modules. Detect horizontal port scans (single destination port probed across $\ge 15$ destination IPs in 60s), vertical port scans ($\ge 25$ distinct destination ports on a single host in 60s), stealth scans (SYN-only, FIN, XMAS, NULL), suspicious DNS activity (Iodine/DNScat2 TXT tunneling, high Shannon entropy domain names $> 3.8$ bits/char indicating DGA, NXDOMAIN storms $> 50$ failures/min), periodic C2 beaconing ($CV_{	ext{IAT}} < 0.15$ with $\ge 20$ recurring flows), and protocol port/flag anomalies.
 **4. Topics & Subtopics:**
 - Network Reconnaissance Detection: Horizontal, vertical, and stealth TCP/UDP port scans.
 - DNS Anomaly Analysis: Shannon entropy calculation, TXT record size thresholding, and NXDOMAIN tracking.
@@ -3390,9 +3420,9 @@ Threat detection modules committed and validated against benchmark test captures
 
 ### Phase ONTF-A8: Machine Learning Anomaly & Traffic Baselines Engine
 
-**1. Phase ID & Title:** `ONTF-A8: Machine Learning Anomaly & Traffic Baselines Engine`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Build, calibrate, and evaluate machine learning models for network traffic anomaly detection and classification. Implement unsupervised anomaly detection (Isolation Forest, Local Outlier Factor) to identify outliers deviating from benign traffic baselines; implement supervised flow classification (LightGBM, Random Forest) trained on standard open datasets (CIC-IDS2017, UNSW-NB15, CTU-13) with strict temporal and host-partitioned cross-validation (zero data leakage); apply TreeSHAP for explainable feature attribution; and enforce Mahalanobis out-of-distribution (OOD) gating.  
+**1. Phase ID & Title:** `ONTF-A8: Machine Learning Anomaly & Traffic Baselines Engine`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Build, calibrate, and evaluate machine learning models for network traffic anomaly detection and classification. Implement unsupervised anomaly detection (Isolation Forest, Local Outlier Factor) to identify outliers deviating from benign traffic baselines; implement supervised flow classification (LightGBM, Random Forest) trained on standard open datasets (CIC-IDS2017, UNSW-NB15, CTU-13) with strict temporal and host-partitioned cross-validation (zero data leakage); apply TreeSHAP for explainable feature attribution; and enforce Mahalanobis out-of-distribution (OOD) gating.
 **4. Topics & Subtopics:**
 - Unsupervised Anomaly Detection: Isolation Forest trained on benign flow feature baselines.
 - Supervised Flow Classification: LightGBM / Random Forest classifying attack categories (DoS, Probe, C2, Exfil).
@@ -3442,9 +3472,9 @@ ML models implemented, calibrated, and passing zero-leakage evaluation benchmark
 
 ### Phase ONTF-A9: Optional Temporal Sequence & Graph Models
 
-**1. Phase ID & Title:** `ONTF-A9: Optional Temporal Sequence & Graph Models`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Evaluate and optionally implement temporal sequence models and communication graph architectures for advanced traffic forensics. Construct host-to-host directed graphs with packet/byte edge weights using NetworkX; calculate graph centrality metrics (PageRank, betweenness, in-degree/out-degree hubs); evaluate sequential flow order using LSTM/Transformer models on discretized flow token sequences; and integrate bounded 5-step world-model rollouts for hypothetical defensive threat forecasting, strictly segregating historical facts from simulated forecasts.  
+**1. Phase ID & Title:** `ONTF-A9: Optional Temporal Sequence & Graph Models`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Evaluate and optionally implement temporal sequence models and communication graph architectures for advanced traffic forensics. Construct host-to-host directed graphs with packet/byte edge weights using NetworkX; calculate graph centrality metrics (PageRank, betweenness, in-degree/out-degree hubs); evaluate sequential flow order using LSTM/Transformer models on discretized flow token sequences; and integrate bounded 5-step world-model rollouts for hypothetical defensive threat forecasting, strictly segregating historical facts from simulated forecasts.
 **4. Topics & Subtopics:**
 - Host Communication Graph Construction: Directed multigraph with nodes as hosts and edges as aggregated flows.
 - Graph Centrality Metrics: PageRank, betweenness centrality, and in/out degree ratios identifying pivots and hubs.
@@ -3494,9 +3524,9 @@ Graph modules implemented, tested, and integrated with caveat enforcement.
 
 ### Phase ONTF-A10: Multi-Stage Attack Correlation & MITRE ATT&CK Mapping
 
-**1. Phase ID & Title:** `ONTF-A10: Multi-Stage Attack Correlation & MITRE ATT&CK Mapping`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Correlate isolated deterministic findings, ML anomaly scores, and communication graph anomalies into coherent multi-stage attack scenarios across time (e.g., Reconnaissance -> Exploitation -> C2 Establishment -> Lateral Movement -> Data Exfiltration). Map validated findings to MITRE ATT&CK v14 Enterprise tactics and techniques (e.g., T1046 Network Service Discovery, T1071.004 DNS C2, T1048 Exfiltration Over Alternative Protocol, T1059 Command and Scripting Interpreter); attach source packet/flow evidence pointers; and formulate causation caveats.  
+**1. Phase ID & Title:** `ONTF-A10: Multi-Stage Attack Correlation & MITRE ATT&CK Mapping`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Correlate isolated deterministic findings, ML anomaly scores, and communication graph anomalies into coherent multi-stage attack scenarios across time (e.g., Reconnaissance -> Exploitation -> C2 Establishment -> Lateral Movement -> Data Exfiltration). Map validated findings to MITRE ATT&CK v14 Enterprise tactics and techniques (e.g., T1046 Network Service Discovery, T1071.004 DNS C2, T1048 Exfiltration Over Alternative Protocol, T1059 Command and Scripting Interpreter); attach source packet/flow evidence pointers; and formulate causation caveats.
 **4. Topics & Subtopics:**
 - Multi-Stage Attack Synthesis: Grouping temporal alerts into coherent incident timelines.
 - MITRE ATT&CK v14 Taxonomy Mapping: Mapping findings to Enterprise tactics (TA0007, TA0011, TA0010) and techniques.
@@ -3546,9 +3576,9 @@ Correlation engine and ATT&CK mapper committed and validated against multi-stage
 
 ### Phase ONTF-A11: Forensic Investigation Workbench & Graph UI
 
-**1. Phase ID & Title:** `ONTF-A11: Forensic Investigation Workbench & Graph UI`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Develop interactive web frontend components for forensic investigators to explore offline network captures. Build an interactive timeline scrubber with packet rate spikes, a force-directed communication graph visualizer (highlighting the candidate target device and external peers), protocol breakdown charts (sunburst and stacked bar), a Target Device Profile card with attribution confidence badge and limitation warnings, a flow inspection table with search, column filters, and deep packet header inspection, and an examiner finding annotation system.  
+**1. Phase ID & Title:** `ONTF-A11: Forensic Investigation Workbench & Graph UI`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Develop interactive web frontend components for forensic investigators to explore offline network captures. Build an interactive timeline scrubber with packet rate spikes, a force-directed communication graph visualizer (highlighting the candidate target device and external peers), protocol breakdown charts (sunburst and stacked bar), a Target Device Profile card with attribution confidence badge and limitation warnings, a flow inspection table with search, column filters, and deep packet header inspection, and an examiner finding annotation system.
 **4. Topics & Subtopics:**
 - Interactive Traffic Timeline: Scrubbing packet and byte volume time series with zoomable anomaly regions.
 - Force-Directed Graph Visualizer: Interactive network topology rendering host relationships with node sizing by volume.
@@ -3598,9 +3628,9 @@ Workbench components implemented, tested, and integrated into the platform exami
 
 ### Phase ONTF-A12: Section 65B/63 BSA Legal Dossier & Forensic Certification
 
-**1. Phase ID & Title:** `ONTF-A12: Section 65B/63 BSA Legal Dossier & Forensic Certification`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Implement the automated legal reporting engine compiling the court-admissible electronic evidence forensic certificate and technical annexure in PDF (WeasyPrint) and JSON-LD formats. Generate the complete 11-part dossier: (1) Seizure metadata, (2) Dual SHA-256 and SHA3-512 hashes, (3) Capture environment and tool versions manifest, (4) Operational mode (Mode A / Mode B), (5) Target device profile with attribution tier, (6) 9 mandatory attribution caveats, (7) Protocol and volume statistics, (8) Suspicious flow findings with source packet references, (9) MITRE ATT&CK mapping matrix, (10) Evidence communication graph snapshot, and (11) Examiner declaration with Ed25519 digital signature and RFC 3161 TSA timestamp.  
+**1. Phase ID & Title:** `ONTF-A12: Section 65B/63 BSA Legal Dossier & Forensic Certification`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the automated legal reporting engine compiling the court-admissible electronic evidence forensic certificate and technical annexure in PDF (WeasyPrint) and JSON-LD formats. Generate the complete 11-part dossier: (1) Seizure metadata, (2) Dual SHA-256 and SHA3-512 hashes, (3) Capture environment and tool versions manifest, (4) Operational mode (Mode A / Mode B), (5) Target device profile with attribution tier, (6) 9 mandatory attribution caveats, (7) Protocol and volume statistics, (8) Suspicious flow findings with source packet references, (9) MITRE ATT&CK mapping matrix, (10) Evidence communication graph snapshot, and (11) Examiner declaration with Ed25519 digital signature and RFC 3161 TSA timestamp.
 **4. Topics & Subtopics:**
 - 11-Part Legal Dossier Structure: Standardized sections compliant with Indian courtroom standards.
 - Section 65B IEA & Section 63 BSA Compliance: Formulating statutory examiner certificates.
@@ -3650,9 +3680,9 @@ Reporting engine implemented and passing all dossier compilation and cryptograph
 
 ### Phase ONTF-A13: End-to-End Network Validation & Benchmark Corpus
 
-**1. Phase ID & Title:** `ONTF-A13: End-to-End Network Validation & Benchmark Corpus`  
-**2. Current Status:** `PLANNED`  
-**3. Purpose:** Formulate a comprehensive end-to-end regression test harness and curated benchmark evaluation corpus for the ONTF subsystem. Assemble test PCAPs covering benign enterprise baselines, malformed/truncated captures, large captures (500 MB), IPv4 and IPv6 dual-stack traffic, Nmap port scans, DNS tunnels (Iodine/DNScat2), Cobalt Strike C2 beaconing, and ransomware data exfiltration; verify bit-for-bit bitstream immutability on original exhibits; assert 5-run deterministic score reproducibility; validate parser sandbox resource quotas; verify 100% offline air-gapped execution; and compile the Final ONTF Subsystem Verification Report.  
+**1. Phase ID & Title:** `ONTF-A13: End-to-End Network Validation & Benchmark Corpus`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Formulate a comprehensive end-to-end regression test harness and curated benchmark evaluation corpus for the ONTF subsystem. Assemble test PCAPs covering benign enterprise baselines, malformed/truncated captures, large captures (500 MB), IPv4 and IPv6 dual-stack traffic, Nmap port scans, DNS tunnels (Iodine/DNScat2), Cobalt Strike C2 beaconing, and ransomware data exfiltration; verify bit-for-bit bitstream immutability on original exhibits; assert 5-run deterministic score reproducibility; validate parser sandbox resource quotas; verify 100% offline air-gapped execution; and compile the Final ONTF Subsystem Verification Report.
 **4. Topics & Subtopics:**
 - Benchmark Capture Corpus: Curated dataset of genuine and synthetic attack PCAPs with ground truth.
 - Bitstream Immutability Invariant: Verifying source PCAP bytes remain identical before and after analysis.
@@ -3701,17 +3731,767 @@ All 14 ONTF phases completed and verified; benchmark report published; all 56 ch
 
 ---
 
-## 8. Unified Platform Delivery & Security Milestones
+## 8. Dedicated Cross-Modal Deepfake Validation Engineering Playbook (CDVF-A0 through CDVF-A11)
 
-The platform delivery, dashboard, and hackathon packaging milestones synthesize findings across all forensic domains (AURAS Audio, VISTA Video, AIF Image, and ONTF Offline Network Traffic):
+The Cross-Modal Deepfake Validation Framework (CDVF) establishes a shared, scientifically defensible, statistically calibrated, and legally admissible evaluation backbone across image (AIF), audio (AURAS), and video/CCTV (VISTA) forensics engines. It provides twelve sequential engineering phases governing model checkpoint integrity, dataset quality tiers, leakage-proof source-group splits, 19-parameter benchmark execution, in-domain/cross-dataset/unseen-generator protocols (Modes A through G), Platt/temperature/isotonic calibration (ECE $\le 0.05$), Mahalanobis OOD gating, 7-state first-class abstention, manipulation localisation metrics (spatial IoU, audio/video tIoU), cross-modal DAG fusion with anti-averaging invariants, 12-gate scoped approval, continuous regression testing, and court-admissible 24-item WORM evaluation bundles conforming to Section 65B IEA and Section 63 BSA 2023:
+
+---
+
+### Phase CDVF-A0: Repository Audit, Model Reconciliation & Validation Baseline
+
+**1. Phase ID & Title:** `CDVF-A0: Repository Audit, Model Reconciliation & Validation Baseline`
+**2. Current Status:** `IMPLEMENTED_AND_VERIFIED`
+**3. Purpose:** Execute comprehensive audit across existing repository architecture, dependency locks, and planned detection models in AIF, AURAS, and VISTA. Construct an internal multi-dimensional status gap matrix separating documentation from verified implementation and execution. Establish canonical terminology, mathematical invariants, and validation boundaries. Formulate the zero-implementation invariant ensuring documentation changes do not falsely claim code, weights, or datasets exist before engineering implementation.
+**4. Topics & Subtopics:**
+- Repository State Audit: Git tree inspection, dependency lockfile analysis (`pyproject.toml`), and existing subsystem boundaries.
+- Model Candidate Reconciliation: Audit candidate architectures across AIF (TruFor, multi-branch ViT/CNN, face-swap), AURAS (RawNet2, AASIST, WavLM Base+, LFCC/CQCC), and VISTA (Xception, EfficientNet, FTCN, VideoMAE, 3D FFT).
+- Multi-Dimensional Status Matrix: Independent tracking across `DOCUMENTATION_STATUS`, `IMPLEMENTATION_STATUS`, and `VALIDATION_STATUS`.
+- Canonical Forensic Terminology: Precise mathematical and legal definitions for Detection, Localisation, Calibration, OOD, Abstention, Scoped Approval, and Section 65B/63 BSA dossier integration.
+- Anti-Hallucination & Zero-Implementation Safety Rules: Strict separation of architecture specifications from runtime verification evidence.
+**5. Exact Tasks:**
+1. Inspect Git status, working directory changes, and package manifests to verify baseline integrity.
+2. Reconcile documented detection models across AIF, AURAS, and VISTA against practical forensic deployment constraints.
+3. Establish the CDVF cross-subsystem integration boundary preserving AIF, AURAS, and VISTA as independent domain engines.
+4. Formulate the canonical validation taxonomy and mathematical definitions across `README.md`, `PRD.md`, `TRD.md`, and `PHASES.md`.
+5. Execute multi-document verification confirming zero code modifications during documentation phases.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    AuditStart["Git Status & Tree Audit"] --> LockCheck["pyproject.toml Inspection"]
+    LockCheck --> ModelAudit["AIF / AURAS / VISTA Candidate Audit"]
+    ModelAudit --> GapMatrix["Construct Multi-Dimensional Gap Matrix"]
+    GapMatrix --> BoundaryContract["Define CDVF Shared Governance Boundary"]
+    BoundaryContract --> InvariantFormulation["Establish Anti-Averaging & Inconclusive Invariants"]
+    InvariantFormulation --> BaselineLocked["CDVF-A0 Baseline Verified & Locked"]
+```
+**7. Technologies, Tools & Frameworks:**
+Git, Python 3.12, Markdown, Mermaid, PowerShell.
+**8. Prerequisites & Dependencies:**
+Phase 0 platform architecture baseline completed; master repository documentation available.
+**9. Expected Files, Artifacts & Contracts:**
+- `README.md` (Updated with CDVF capabilities, architecture diagram, and status)
+- `PRD.md` (Updated with Section 12 CDVF requirements `CDVF-01` through `CDVF-20`)
+- `TRD.md` (Updated with Section 11.B architecture, Section 12 Pydantic contracts, and traceability)
+- `PHASES.md` (Updated with Section 8 engineering playbook and Section 11 traceability matrix)
+**10. Failure Cases & Risk Mitigations:**
+- Risk of conflating planned models with executed code: Mitigated by mandatory `PLANNED` status flags and explicit audit gap matrix.
+- Risk of breaking existing subsystem phase numbering: Mitigated by introducing dedicated `CDVF-A0` through `CDVF-A11` prefix.
+**11. Security & Privacy Considerations:**
+Pure documentation phase; zero external network calls, zero sensitive forensic data processed.
+**12. Acceptance Criteria:**
+- 100% agreement between PRD, TRD, PHASES, and README regarding CDVF scope and contracts.
+- Explicit status matrix distinguishing documented vs implemented capabilities.
+- Zero source-code, weight, or dataset modifications in this task.
+**13. Definition of Done:**
+All four canonical architecture documents updated, cross-referenced, verified, and locked.
+**14. Explicit Status:** `IMPLEMENTED_AND_VERIFIED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **CDVF-CP-00-01** | Multi-Modal Model Architecture Audit & Gap Matrix | Documented gap matrix separating documentation, code, and test status across AIF, AURAS, and VISTA | `IMPLEMENTED_AND_VERIFIED` | Completed in master architecture task |
+| **CDVF-CP-00-02** | Canonical Terminology & Mathematical Invariants Contract | Unified mathematical formulations for ECE, Brier, IoU, tIoU, Mahalanobis OOD, and Selective Risk locked in TRD/PRD | `IMPLEMENTED_AND_VERIFIED` | Completed in master architecture task |
+| **CDVF-CP-00-03** | Zero-Implementation Safety Invariant Audit | Verification that no unverified source code, mock tests, or dummy weights are added to repository | `IMPLEMENTED_AND_VERIFIED` | Verified via git status check |
+| **CDVF-CP-00-04** | Multi-Document Architectural Consistency Verification | Exact traceability across `CDVF-01`..`CDVF-20` verified between PRD, TRD, PHASES, and README | `IMPLEMENTED_AND_VERIFIED` | Completed in master architecture task |
+
+---
+
+### Phase CDVF-A1: Model Registry, Cryptographic Provenance & Licensing Contracts
+
+**1. Phase ID & Title:** `CDVF-A1: Model Registry, Cryptographic Provenance & Licensing Contracts`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the Pydantic v2 `ModelRegistryEntry` schema, local WORM-backed JSON registry storage, SHA-256 cryptographic weight hash verification, immutable model revision tracking, deployment license audit, and the 6-state model approval state machine (`CANDIDATE`, `EVALUATION_PENDING`, `VALIDATED_FOR_DEFINED_SCOPE`, `REJECTED`, `DEPRECATED`, `REVALIDATION_REQUIRED`). Formulate the 12 automated revalidation trigger monitors that lock down models against silent weight drift or dependency mutations.
+**4. Topics & Subtopics:**
+- Registry Data Schema: Implementation of `ModelRegistryEntry` under `src/ps05/cdvf/registry/model_card.py`.
+- Cryptographic Weight Verification: Streaming chunked SHA-256 hasher validating model checkpoints against immutable registry manifests prior to GPU loading.
+- Licensing Compliance Engine: Automated check enforcing Apache 2.0, MIT, or permissible research licenses; blocking non-commercial or proprietary checkpoints from judicial deployment.
+- 6-State Lifecycle Controller: State machine enforcing valid state transitions and audit logging.
+- 12 Revalidation Trigger Rules: Automated hash, dependency, and preprocessing diff detectors triggering re-evaluation.
+**5. Exact Tasks:**
+1. Create `src/ps05/cdvf/registry/` package and implement `ModelRegistryEntry` using Pydantic v2.
+2. Implement `CheckpointProvenanceVerifier` with streaming SHA-256 calculation and tamper gating.
+3. Implement `LicensePolicyEnforcer` checking license strings against permissible open forensic operational policies.
+4. Build `ModelLifecycleManager` supporting the 6 canonical approval states with JSON-backed audit logs.
+5. Implement `RevalidationTriggerDetector` inspecting git hashes, torch versions, preprocessing configs, and calibration artifacts.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    WeightPath["Candidate Weight File"] --> HashStream["Streaming SHA-256 Calculation"]
+    HashStream --> HashMatch{"Matches Registry Manifest?"}
+    HashMatch -- No --> TamperReject["Reject: CheckpointIntegrityError"]
+    HashMatch -- Yes --> LicenseCheck{"Permissible License?"}
+    LicenseCheck -- No --> LicenseReject["Reject: LicenseComplianceError"]
+    LicenseCheck -- Yes --> InitState["State: CANDIDATE"]
+    InitState --> EvalPending["State: EVALUATION_PENDING"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, Pydantic v2, hashlib, PyTorch 2.6+, pytest.
+**8. Prerequisites & Dependencies:**
+Phase CDVF-A0 verified; PyTorch installed; local WORM storage vault mounted.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/cdvf/registry/__init__.py`
+- `src/ps05/cdvf/registry/model_card.py`
+- `src/ps05/cdvf/registry/verifier.py`
+- `src/ps05/cdvf/registry/lifecycle.py`
+- `tests/unit/cdvf/test_model_registry.py`
+**10. Failure Cases & Risk Mitigations:**
+- Hash mismatch on download: Immediate hard abort trapping corrupted or backdoored weights.
+- Ambiguous or dual-licensing clauses: Flagged for mandatory legal officer sign-off before state advancement.
+**11. Security & Privacy Considerations:**
+Weights must never be loaded into executable Python context prior to cryptographic hash validation.
+**12. Acceptance Criteria:**
+- 100% of candidate checkpoints validated for SHA-256 bitstream match before initialization.
+- Unauthorized license types automatically fail registration.
+- Any modification to preprocessing parameters transitions model status to `REVALIDATION_REQUIRED`.
+**13. Definition of Done:**
+Registry package implemented, 100% unit test pass rate, typing verified via `mypy --strict`.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **CDVF-CP-01-01** | Model Registry Schema & Serialization | `ModelRegistryEntry` passes bidirectional JSON round-trip validation with all 24 metadata fields | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-01-02** | Checkpoint SHA-256 Verification & Tamper Gating | `CheckpointProvenanceVerifier` aborts execution and raises `CheckpointIntegrityError` on single-bit weight mutation | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-01-03** | Licensing & Deployment Scope Compliance Guard | Automated rejection of restricted non-commercial model licenses during registration | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-01-04** | Revalidation Trigger Event Monitor | Automated detection of altered preprocessing parameters resulting in transition to `REVALIDATION_REQUIRED` | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase CDVF-A2: Dataset Governance, Quality Tiers & Leakage Prevention
+
+**1. Phase ID & Title:** `CDVF-A2: Dataset Governance, Quality Tiers & Leakage Prevention`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the `DatasetCard` and `DatasetSplitManifest` schemas, 4-tier label provenance classification (`DIRECT_PHYSICAL`, `PIPELINE_GENERATED`, `HUMAN_VERIFIED`, `WEAK_DISPUTED`), dual-label normalization (preserving original dataset labels alongside standardized CDVF target labels), source-group splitting algorithms (`GroupShuffleSplit` on subject ID, source recording, camera device), and automated disjoint-set leak detection assertions ($G_{\text{train}} \cap G_{\text{cal}} \cap G_{\text{val}} \cap G_{\text{test}} = \emptyset$).
+**4. Topics & Subtopics:**
+- Dataset Governance Schema: Implementation of `DatasetCard` under `src/ps05/cdvf/datasets/card.py`.
+- 4-Tier Provenance Taxonomy: Classifying ground truth by generation and verification method.
+- Dual-Label Normalization Engine: Mapping diverse benchmark annotations to canonical task labels without losing raw metadata.
+- Group-Level Leakage-Proof Splitting: Partitioning datasets strictly by root source identity, recording session, or capture device.
+- Automated Disjoint-Set Leak Detection: Enforcing zero overlap between training, calibration, validation, and test splits.
+**5. Exact Tasks:**
+1. Create `src/ps05/cdvf/datasets/` package and implement `DatasetCard` and `DatasetSplitManifest`.
+2. Build `LabelNormalizationPipeline` mapping dataset-specific labels into standardized forensic states.
+3. Implement `SourceGroupSplitter` applying grouped stratification on subject identity and source capture hashes.
+4. Implement `LeakageAssertionHarness` calculating set intersections across all split group IDs and raising `DataLeakageError` on failure.
+5. Create split manifest generator producing deterministic, SHA-256 hashed split files.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    RawDataset["Raw Benchmark Dataset"] --> CardSpec["Compile DatasetCard"]
+    CardSpec --> TierAssign["Assign Provenance Tier 1-4"]
+    TierAssign --> DualLabel["Normalize Labels (Raw + Canonical)"]
+    DualLabel --> GroupExtract["Extract Root Group IDs (Subject, Device, File)"]
+    GroupExtract --> SplitGen["GroupShuffleSplit Partitioning"]
+    SplitGen --> LeakAssert{"Disjoint Set Intersection == Empty?"}
+    LeakAssert -- No --> FailSplit["Raise DataLeakageError & Abort"]
+    LeakAssert -- Yes --> ManifestLock["Generate SHA-256 Hashed Split Manifest"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, Pydantic v2, Scikit-learn (GroupShuffleSplit), NumPy, Pandas, hashlib.
+**8. Prerequisites & Dependencies:**
+Phase CDVF-A1 completed; benchmark corpus metadata accessible.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/cdvf/datasets/__init__.py`
+- `src/ps05/cdvf/datasets/card.py`
+- `src/ps05/cdvf/datasets/splitter.py`
+- `src/ps05/cdvf/datasets/normalizer.py`
+- `tests/unit/cdvf/test_dataset_splitting.py`
+**10. Failure Cases & Risk Mitigations:**
+- Derivative media leakage across splits (e.g. video frames from same clip in train and test): Trapped by mandatory source-clip grouping keys.
+- Ambiguous ground truth in wild datasets: Relegated to `WEAK_DISPUTED` tier and excluded from core benchmark gates.
+**11. Security & Privacy Considerations:**
+Subject identity keys must be stored as one-way HMAC-SHA256 tokens to protect research subject privacy.
+**12. Acceptance Criteria:**
+- 100% of split manifests achieve zero group overlap ($G_i \cap G_j = \emptyset$).
+- Raw dataset annotations preserved unaltered in `DatasetSampleRecord.raw_dataset_label`.
+- Any detected cross-split contamination raises a fatal test failure.
+**13. Definition of Done:**
+Dataset governance schemas and splitting algorithms implemented, test suite verifying zero leakage passed.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **CDVF-CP-02-01** | Dataset Card Specification & Registration Harness | `DatasetCard` schema correctly captures all 24 metadata fields and passes validation | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-02-02** | Dual-Label Normalisation & Quality Tier Pipeline | Normalizer preserves raw label while mapping to canonical target classes with assigned provenance tier | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-02-03** | Source-Group Split Manifest Generator | Split manifest correctly partitions multi-frame videos and audio sessions by parent recording ID | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-02-04** | Automated Zero-Leakage Disjoint Set Assertion Suite | Pytest suite asserts zero intersection of source IDs across train/cal/val/test splits ($G \cap G' = \emptyset$) | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase CDVF-A3: Unified 19-Parameter Benchmark Runner & Statistical Evaluation Harness
+
+**1. Phase ID & Title:** `CDVF-A3: Unified 19-Parameter Benchmark Runner & Statistical Evaluation Harness`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the deterministic `BenchmarkRunner` engine under `src/ps05/cdvf/runner/`, executing benchmark runs configured with the canonical 19-parameter execution context. Implement the complete metric computation library (Precision, Recall, Specificity, F1, Balanced Accuracy, ROC-AUC, PR-AUC, EER) with mathematical zero-division handling. Implement grouped bootstrap resampling ($B=2000$) for 95% confidence interval estimation, runtime memory/latency profiling, and JSON/WORM export.
+**4. Topics & Subtopics:**
+- 19-Parameter Execution Context: Full parameter encapsulation under `BenchmarkRunConfig`.
+- Deterministic Execution Engine: Seed fixing across NumPy, PyTorch, Python random, and CUDA deterministic flags.
+- Comprehensive Metric Suite: Exact implementations of TPR, FPR, Specificity, Balanced Accuracy, and EER.
+- Grouped Bootstrap Uncertainty: Stratified grouped bootstrap resampling ($B=2000$) computing empirical 95% CIs.
+- Execution Profiling & WORM Packaging: Recording peak VRAM, CPU utilization, wall-clock latency, and output hashing.
+**5. Exact Tasks:**
+1. Create `src/ps05/cdvf/runner/` package and implement `BenchmarkRunner` class.
+2. Build `MetricCalculator` implementing classification, ranking, and calibration metrics with safe zero-denominator handling.
+3. Implement `GroupedBootstrapEngine` executing $B=2000$ bootstrap iterations at the subject/source group level.
+4. Build runtime environment capture utility logging hardware IDs, OS kernel, GPU driver, CUDA version, and git commit.
+5. Implement JSON benchmark report serializer writing immutable run bundles into the platform WORM vault.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    Config["19-Parameter BenchmarkRunConfig"] --> EnvLock["Lock Deterministic Seeds & Environment"]
+    EnvLock --> ModelLoad["Load & Cryptographically Verify Model Checkpoint"]
+    ModelLoad --> SplitLoad["Load Validated Group Split Manifest"]
+    SplitLoad --> InferenceLoop["Execute Batch Inference & Measure Latency/VRAM"]
+    InferenceLoop --> MetricCompute["Compute Point Metrics (AUC, F1, EER, BalAcc)"]
+    MetricCompute --> BootstrapCI["Grouped Bootstrap Resampling (B=2000, 95% CI)"]
+    BootstrapCI --> WORMExport["Write Signed Benchmark Run Record to WORM Vault"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, PyTorch 2.6+, Scikit-learn, NumPy, SciPy, Pydantic v2.
+**8. Prerequisites & Dependencies:**
+Phase CDVF-A1 and CDVF-A2 completed; GPU acceleration environment configured.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/cdvf/runner/__init__.py`
+- `src/ps05/cdvf/runner/benchmark.py`
+- `src/ps05/cdvf/runner/metrics.py`
+- `src/ps05/cdvf/runner/bootstrap.py`
+- `tests/unit/cdvf/test_metrics_and_bootstrap.py`
+**10. Failure Cases & Risk Mitigations:**
+- Zero division in degenerate test slices (e.g. zero positive predictions): Handled via explicit `ZeroDivisionError` fallback returning `0.0` or `NaN` with logged warning.
+- Bootstrapping individual dependent video frames: Trapped and rejected by mandatory grouping key requirement in bootstrap engine.
+**11. Security & Privacy Considerations:**
+Benchmark runner must execute with restricted filesystem write permissions, writing solely to the designated benchmark artifact directory.
+**12. Acceptance Criteria:**
+- All 19 configuration parameters strictly required and validated before run initiation.
+- Point metrics match Scikit-learn reference values to within $10^{-6}$ relative tolerance.
+- Bootstrap 95% confidence intervals properly bracket point estimates across 2000 iterations.
+**13. Definition of Done:**
+Benchmark runner and metric calculation engine implemented, unit and statistical property tests passed.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **CDVF-CP-03-01** | 19-Parameter Benchmark Runner Execution Core | `BenchmarkRunner` validates all 19 configuration fields and executes reproducible test pass | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-03-02** | Metric Calculation Engine with Zero-Division Traps | Precision, Recall, Specificity, F1, AUC, and EER calculate correctly without crashing on all-negative slices | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-03-03** | Grouped Bootstrap Confidence Interval Harness ($B=2000$) | Bootstrap engine generates valid 95% empirical percentile intervals grouped at subject/clip level | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-03-04** | Benchmark Output JSON Schema & WORM Vault Exporter | Evaluation run bundle serializes to valid `BenchmarkRun` schema with calculated manifest SHA-256 | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase CDVF-A4: AIF Image Deepfake & Manipulation Detection Validation Suite
+
+**1. Phase ID & Title:** `CDVF-A4: AIF Image Deepfake & Manipulation Detection Validation Suite`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the image-forensic validation harness for AIF detection models across four explicit forensic tasks (IMG-1: Authentic vs AI-Generated, IMG-2: Authentic vs Manipulated, IMG-3: Face Swap/Morphing, IMG-4: Pixel Manipulation Localisation). Implement spatial mask metrics (pixel-level IoU, boundary F1, Dice coefficient). Build the 14-condition synthetic degradation engine simulating real-world forensic evidence conditions (JPEG recompression QF 30-95, Gaussian blur, additive noise, resizing, screenshot recapture, social recompression).
+**4. Topics & Subtopics:**
+- Task-Specific Protocols: Disaggregated evaluation suites for AI generation, splicing, and face morphing.
+- Spatial Localisation Metric Engine: Mask IoU, Dice coefficient, and contour boundary F1 score ($\tau=2\text{ px}$).
+- 14-Condition Image Degradation Engine: Parametric transformations under `ImageRobustnessGrid`.
+- Localisation vs Classification Consistency Check: Trapping cases where an image is classified as manipulated but localisation fails or indicates zero pixels.
+- Multi-Branch Model Integration: Adapting AIF TruFor and ViT feature extractors into standard CDVF input/output contracts.
+**5. Exact Tasks:**
+1. Create `src/ps05/cdvf/modality/image/` package and implement `ImageValidationProtocol`.
+2. Build `SpatialLocalizationMetrics` computing pixel IoU, Dice, and boundary F1 for binary masks.
+3. Implement `ImageDegradationEngine` providing parametric transforms (JPEG, blur, noise, crop, social media compression).
+4. Implement task-specific evaluation suites for IMG-1 through IMG-4.
+5. Create automated test verifying unlocalised manipulation handling (logging classification confidence without bogus mask generation).
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    ImgExhibit["Image Input (RGB Tensor)"] --> TaskBranch{"Task Type"}
+    TaskBranch -- IMG-1/2/3 --> ClfPipeline["Classification Pipeline"]
+    TaskBranch -- IMG-4 --> LocPipeline["Localisation Pipeline"]
+    ClfPipeline --> ClfMetrics["Compute ROC-AUC, BalAcc, EER"]
+    LocPipeline --> MaskGen["Generate Predicted Manipulation Mask"]
+    MaskGen --> MaskMetrics["Compute Pixel IoU, Dice, Boundary F1"]
+    ClfPipeline & LocPipeline --> RobustGrid["14-Condition Robustness Perturbations"]
+    RobustGrid --> DegradeReport["Plot Performance vs Degradation Curves"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, PyTorch 2.6+, torchvision, Pillow, OpenCV, Albumentations, NumPy.
+**8. Prerequisites & Dependencies:**
+Phase CDVF-A3 completed; AIF model candidate interfaces documented.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/cdvf/modality/image/__init__.py`
+- `src/ps05/cdvf/modality/image/protocol.py`
+- `src/ps05/cdvf/modality/image/localization.py`
+- `src/ps05/cdvf/modality/image/robustness.py`
+- `tests/unit/cdvf/test_image_validation.py`
+**10. Failure Cases & Risk Mitigations:**
+- Zero ground-truth mask for genuine images: IoU defined as $1.0$ if predicted mask is empty, $0.0$ if false-alarm mask predicted.
+- High classification confidence with unlocalised manipulation: Explicitly reported as `DETECTED_LOCALISATION_UNAVAILABLE`.
+**11. Security & Privacy Considerations:**
+Image decoding must be defended against decompression bombs (PIL `MAX_IMAGE_PIXELS` ceiling enforced).
+**12. Acceptance Criteria:**
+- Mask IoU and boundary F1 calculate accurately against synthetic geometric shapes with known overlap.
+- Robustness grid executes all 14 degradation conditions without runtime exceptions.
+- Detection and localisation metrics reported in separate, non-conflated report sections.
+**13. Definition of Done:**
+Image validation suite implemented, verified against synthetic test data, 100% pytest pass rate.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **CDVF-CP-04-01** | Image Classification Benchmark Protocol Harness | Clean execution of IMG-1, IMG-2, and IMG-3 evaluation pipelines on standardized image tensors | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-04-02** | Spatial Mask IoU & Boundary F1 Localisation Engine | `SpatialLocalizationMetrics` matches theoretical IoU on synthetic circle/square ground truth masks | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-04-03** | 14-Condition Image Degradation & Robustness Suite | Complete sweep over JPEG QF 30-95, blur, noise, and resizing producing performance degradation matrices | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-04-04** | Unlocalised Manipulation Fallback & Consistency Trap | Pipeline cleanly handles manipulated images lacking pixel-level masks without hallucinating contours | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase CDVF-A5: AURAS Audio Deepfake & Speech Manipulation Validation Suite
+
+**1. Phase ID & Title:** `CDVF-A5: AURAS Audio Deepfake & Speech Manipulation Validation Suite`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the audio-forensic validation harness for AURAS detection models across four forensic tasks (AUD-1: Bona Fide vs Synthetic Speech, AUD-2: Voice Conversion / Cloning, AUD-3: Partial Splicing, AUD-4: Segment Localisation). Implement temporal interval metrics (temporal IoU [tIoU], boundary precision/recall, onset/offset timing error $\Delta t_{\text{boundary}} \le 50\text{ ms}$). Build the audio robustness engine evaluating lossy codecs (Opus, AAC, AMR, MP3 at 8-128 kbps), background acoustic noise (SNR 0-30 dB), reverberation, and sample-rate mismatches.
+**4. Topics & Subtopics:**
+- Audio Task Protocols: Independent evaluation protocols for synthetic speech, cloning, and partial splices.
+- Temporal Localisation Metric Engine: Temporal IoU, boundary tolerance matching, and segment-level F1.
+- Chunked Sliding Window Aggregation: Frame-level pooling ($p$-norm, max-pooling) from overlapping 3.0s windows.
+- Audio Degradation & Robustness Grid: Parametric perturbations under `AudioRobustnessGrid`.
+- Short-Segment Handling: Formal boundary behavior for clips $< 1.0\text{ s}$ duration.
+**5. Exact Tasks:**
+1. Create `src/ps05/cdvf/modality/audio/` package and implement `AudioValidationProtocol`.
+2. Build `TemporalLocalizationMetrics` computing tIoU and onset/offset boundary error against millisecond ground truth.
+3. Implement `AudioDegradationEngine` applying lossy transcoding, additive environmental noise, and reverberation.
+4. Build `WindowAggregationValidator` comparing max-pooling, mean-pooling, and soft-attention pooling across chunks.
+5. Create automated test verifying graceful degradation on short audio segments ($< 1.0\text{ s}$).
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    AudioExhibit["Audio Input (16kHz PCM Waveform)"] --> Windowing["Sliding Window Chunker (3s, 50% hop)"]
+    Windowing --> ModelInference["Model Inference (RawNet2 / AASIST / WavLM)"]
+    ModelInference --> WindowScores["Extract Window Scores & Latent Vectors"]
+    WindowScores --> Aggregation["Window Aggregation (Max / p-Norm / Attention)"]
+    Aggregation --> RecordingScore["Recording-Level Classification Score"]
+    WindowScores --> TempLocalise["Temporal Segment Localisation (tIoU, Boundary Error)"]
+    RecordingScore & TempLocalise --> AudioRobust["Codec & Acoustic Robustness Sweep"]
+    AudioRobust --> AudioReport["Compile Audio Validation Report"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, PyTorch 2.6+, TorchAudio, Librosa, SoundFile, FFmpeg, NumPy.
+**8. Prerequisites & Dependencies:**
+Phase CDVF-A3 completed; AURAS model interfaces and audio preprocessing contracts available.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/cdvf/modality/audio/__init__.py`
+- `src/ps05/cdvf/modality/audio/protocol.py`
+- `src/ps05/cdvf/modality/audio/localization.py`
+- `src/ps05/cdvf/modality/audio/robustness.py`
+- `tests/unit/cdvf/test_audio_validation.py`
+**10. Failure Cases & Risk Mitigations:**
+- Codec re-encoding introducing phase shifts: Mitigated via energy envelope alignment before boundary evaluation.
+- Silent or near-silent segments ($< -50\text{ dBFS}$): Trapped by VAD pre-filter and assigned `INSUFFICIENT_EVIDENCE`.
+**11. Security & Privacy Considerations:**
+Audio files must be parsed using defensive decoders (FFmpeg subprocess sandbox) trapping malformed headers.
+**12. Acceptance Criteria:**
+- Temporal IoU and boundary errors calculate correctly against millisecond timecode annotations.
+- Audio robustness engine executes Opus, AAC, and noise sweeps without pipeline interruption.
+- Audio segments $< 0.5\text{ s}$ cleanly return `INSUFFICIENT_EVIDENCE` without model NaN propagation.
+**13. Definition of Done:**
+Audio validation suite implemented, verified with synthetic multi-segment audio, 100% pytest pass rate.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **CDVF-CP-05-01** | Speech Synthesis & Cloning Evaluation Harness | Clean execution of AUD-1 and AUD-2 evaluation pipelines on 16kHz audio waveforms | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-05-02** | Temporal Segment Localisation (tIoU & Boundary Error) | `TemporalLocalizationMetrics` verifies boundary accuracy to within $\le 50\text{ ms}$ on spliced audio test set | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-05-03** | Lossy Codec & Acoustic Degradation Robustness Grid | Automated execution of Opus/AAC transcoding and SNR 0-30 dB sweeps producing robustness curves | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-05-04** | Sliding Window Aggregation & Window Hop Validation | Verification of recording-level aggregation stability under 10% to 75% window hop variations | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase CDVF-A6: VISTA Video & CCTV Deepfake Detection Validation Suite
+
+**1. Phase ID & Title:** `CDVF-A6: VISTA Video & CCTV Deepfake Detection Validation Suite`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the video-forensic validation harness for VISTA detection models across five forensic tasks (VID-1: Frame Deepfake, VID-2: Video Manipulated, VID-3: Synthetic Video, VID-4: Temporal Manipulation, VID-5: Spatial/Temporal Localisation). Enforce the fundamental video frame non-independence rule. Implement the dedicated CCTV evaluation domain capturing real-world investigative constraints (CIF/D1/720p resolution, IR night-vision, variable frame rates 5-15 fps, DVR H.264 macroblock compression, timestamp OSD overlays, camera vibration).
+**4. Topics & Subtopics:**
+- Video Task Protocols: Independent evaluation protocols for frame-level, temporal, and CCTV manipulation.
+- Frame Non-Independence Invariant: Grouped evaluation ensuring frames from one source video cannot bias metrics.
+- Video-Level Aggregation Strategies: Evaluating top-$k$ frame pooling, temporal convolutions, and LSTM/Transformer pooling.
+- Dedicated CCTV Domain Benchmark: Low-resolution, low-framerate, and night-vision CCTV test suite.
+- Spatio-Temporal Localisation: Combined bounding-box tracking and frame interval localization.
+**5. Exact Tasks:**
+1. Create `src/ps05/cdvf/modality/video/` package and implement `VideoValidationProtocol`.
+2. Build `VideoAggregationEvaluator` comparing frame-pooling strategies against video-level ground truth.
+3. Implement `CCTVDomainBenchmarkHarness` simulating low frame-rates (5-15 fps), IR noise, and DVR artifacts.
+4. Implement `SpatioTemporalLocalizationMetrics` calculating 3D bounding-box IoU across video frame sequences.
+5. Create automated test enforcing source-video grouping during video evaluation.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    VideoExhibit["Video Exhibit (.mp4, .avi, CCTV DVR)"] --> Demux["Demux Frames & Timestamps (FFmpeg)"]
+    Demux --> FaceDetect["Face Detection & Spatial Cropping"]
+    FaceDetect --> FrameInference["Spatial Frame Model Inference (Xception/EfficientNet)"]
+    Demux --> TempInference["Temporal Model Inference (FTCN / VideoMAE / 3D FFT)"]
+    FrameInference & TempInference --> VideoPool["Video-Level Aggregation (Top-k / Attention)"]
+    VideoPool --> VideoMetrics["Compute Video-Level AUC, BalAcc, EER"]
+    VideoPool --> CCTVSweep["Dedicated CCTV Domain Perturbation Sweep"]
+    CCTVSweep --> VideoReport["Compile Video & CCTV Validation Report"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, PyTorch 2.6+, torchvision, Decord, OpenCV, FFmpeg, NumPy.
+**8. Prerequisites & Dependencies:**
+Phase CDVF-A3 completed; VISTA video processing and frame demuxing engines available.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/cdvf/modality/video/__init__.py`
+- `src/ps05/cdvf/modality/video/protocol.py`
+- `src/ps05/cdvf/modality/video/cctv.py`
+- `src/ps05/cdvf/modality/video/localization.py`
+- `tests/unit/cdvf/test_video_validation.py`
+**10. Failure Cases & Risk Mitigations:**
+- Video treated as independent frames inflating sample size $N$: Trapped by mandatory video-level sample grouping assertions.
+- Non-face CCTV footage fed to face-detector models: Trapped and diverted to `INCONCLUSIVE_OOD` or scene-level detector.
+**11. Security & Privacy Considerations:**
+Video demuxers must run in sandboxed worker processes with memory limits to prevent FFmpeg buffer overflows.
+**12. Acceptance Criteria:**
+- Video-level metrics calculate strictly over independent video entities ($N_{\text{videos}}$).
+- CCTV domain harness evaluates down to 5 fps and 352x288 resolution without pipeline crash.
+- Spatio-temporal bounding boxes evaluate accurately across synthetic moving objects.
+**13. Definition of Done:**
+Video and CCTV validation suite implemented, verified against synthetic test clips, 100% pytest pass rate.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **CDVF-CP-06-01** | Video-Level Aggregation & Frame Non-Independence Guard | Benchmark runner asserts video sample independence and evaluates top-$k$ frame pooling | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-06-02** | Spatio-Temporal Video Localisation Evaluation | Localisation engine correctly calculates 3D bounding-box IoU across multi-frame sequences | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-06-03** | Dedicated CCTV Domain Robustness Benchmark Suite | Validation suite successfully evaluates low-resolution (D1/CIF), 5-15 fps, and IR night-vision clips | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-06-04** | Lip-Sync & Audio-Visual Desynchronisation Verification | Validation suite verifies AV correlation and traps audio-visual timing misalignments | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase CDVF-A7: Cross-Dataset Generalisation & Unseen-Generator Protocols (Modes A–G)
+
+**1. Phase ID & Title:** `CDVF-A7: Cross-Dataset Generalisation & Unseen-Generator Protocols (Modes A–G)`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the generalisation evaluation matrix executing Modes A through G: Mode A (In-Domain), Mode B (Cross-Dataset), Mode C (Unseen-Generator), Mode D (Cross-Compression), Mode E (Cross-Source/Device), Mode F (Realistic Degraded Forensic Evidence), and Mode G (Temporal Holdout). Enforce the anti-hallucination invariant that prohibits models from claiming "generalises to unseen generators" unless validated under a strict leave-one-out generator protocol (Mode C).
+**4. Topics & Subtopics:**
+- 7-Mode Benchmark Matrix: Implementation of `GeneralizationMatrixRunner` under `src/ps05/cdvf/generalization/matrix.py`.
+- Leave-One-Out Generator Protocol (Mode C): Automated training/test generation partitioning (e.g. hold out StyleGAN3, Diffusion, or StarGAN).
+- Cross-Dataset Domain Shift (Mode B): Evaluating models trained on Dataset $X$ directly on Dataset $Y$ with zero tuning.
+- Cross-Compression Degradation Curves (Mode D): Measuring performance decay from pristine raw media to heavy recompression.
+- Automated Generalisation Gap Computation: Calculating $\Delta\operatorname{AUC}_{\text{gen}} = \operatorname{AUC}_{\text{in-domain}} - \operatorname{AUC}_{\text{unseen}}$ and flagging severe degradation ($> 0.15$).
+**5. Exact Tasks:**
+1. Create `src/ps05/cdvf/generalization/` package and implement `GeneralizationMatrixRunner`.
+2. Build `UnseenGeneratorProtocol` dynamically excluding selected generator architectures from training partitions.
+3. Build `CrossDatasetProtocol` automating cross-corpus evaluation pipelines.
+4. Implement `GeneralizationDegradationReporter` calculating degradation ratios and plotting performance delta bars.
+5. Create automated test asserting that generalisation claims fail if Mode C evaluation evidence is absent.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    ModeSelect["Select Evaluation Mode (A through G)"] --> SplitGen["Generate Mode-Specific Partition"]
+    SplitGen --> RunBench["Execute Benchmark Runner (CDVF-A3)"]
+    RunBench --> InDomainMetric["Record In-Domain Baseline (Mode A)"]
+    RunBench --> ShiftMetric["Record Shifted Metric (Mode B/C/D/E/F/G)"]
+    InDomainMetric & ShiftMetric --> GapCalc["Calculate Generalisation Gap (Delta-AUC, Delta-EER)"]
+    GapCalc --> GateCheck{"Generalisation Gap <= Allowable Ceiling?"}
+    GateCheck -- No --> ScopeLimit["Restrict Approved Scope to In-Domain Only"]
+    GateCheck -- Yes --> ScopeApprove["Permit Scoped Cross-Domain Approval"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, PyTorch 2.6+, Scikit-learn, NumPy, Pandas, Matplotlib.
+**8. Prerequisites & Dependencies:**
+Phases CDVF-A3, CDVF-A4, CDVF-A5, and CDVF-A6 completed; multi-generator corpora catalogued.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/cdvf/generalization/__init__.py`
+- `src/ps05/cdvf/generalization/matrix.py`
+- `src/ps05/cdvf/generalization/unseen_generator.py`
+- `src/ps05/cdvf/generalization/cross_dataset.py`
+- `tests/unit/cdvf/test_generalization_matrix.py`
+**10. Failure Cases & Risk Mitigations:**
+- Severe performance collapse on unseen generators (AUC dropping from 0.98 to 0.52): System automatically restricts approval to known generator families.
+- Shared training identity across distinct datasets: Filtered via cross-dataset subject hash matching.
+**11. Security & Privacy Considerations:**
+Generalisation reports must clearly disclose tested vs untested generator families to prevent misleading judicial testimony.
+**12. Acceptance Criteria:**
+- Modes A through G execute deterministically from split manifests.
+- Generalisation gap $\Delta\operatorname{AUC}$ calculated accurately across all mode pairs.
+- Unseen-generator claims rejected unless backed by verified Mode C execution records.
+**13. Definition of Done:**
+Generalisation matrix runner implemented, tested across synthetic shifted distributions, 100% pytest pass rate.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **CDVF-CP-07-01** | Cross-Dataset Evaluation Protocol Engine (Mode B) | Automated pipeline executes cross-dataset evaluation across independent corpora | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-07-02** | Unseen-Generator Leave-One-Out Test Harness (Mode C) | Harness partitions generators and produces valid unseen-generator degradation report | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-07-03** | Cross-Compression & Forensic Export Grid (Mode D & F) | Evaluation sweep across multiple compression pipelines producing delta-performance curves | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-07-04** | Generalisation Degradation Reporting & Anti-Exaggeration Guard | System blocks generalisation claims in report when Mode C gap exceeds 0.20 AUC | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase CDVF-A8: Confidence Calibration Engine & OOD Domain Shift Gating
+
+**1. Phase ID & Title:** `CDVF-A8: Confidence Calibration Engine & OOD Domain Shift Gating`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the confidence calibration pipeline under `src/ps05/cdvf/calibration/`, executing Platt scaling (logistic calibration), Temperature scaling, and Isotonic regression on strictly isolated calibration splits ($D_{\text{cal}}$). Implement 15-bin Expected Calibration Error (ECE $\le 0.05$), Brier score, and reliability diagram generation. Implement Out-of-Distribution (OOD) gating using Penultimate-Layer Mahalanobis distance with Ledoit-Wolf covariance shrinkage, Free Energy score, and Prediction Entropy. Enforce the OOD gating invariant: OOD samples trigger abstention rather than uncalibrated classification.
+**4. Topics & Subtopics:**
+- Calibration Data Isolation: Enforcing $D_{\text{cal}} \cap D_{\text{train}} = \emptyset$ and $D_{\text{cal}} \cap D_{\text{test}} = \emptyset$.
+- Calibration Algorithms: Platt scaling, Temperature scaling, and Isotonic regression.
+- Calibration Metrics: 15-bin ECE with adaptive/uniform binning, Brier score, and reliability diagrams.
+- OOD Scoring Algorithms: Mahalanobis distance on penultimate layer representations with Ledoit-Wolf shrinkage, Free Energy, and Entropy.
+- OOD Gating Policy: Intercepting inputs where $S_{\text{OOD}} > \tau_{\text{OOD}}$ and diverting to `INCONCLUSIVE_OOD`.
+**5. Exact Tasks:**
+1. Create `src/ps05/cdvf/calibration/` and `src/ps05/cdvf/ood/` packages.
+2. Build `ConfidenceCalibrator` implementing temperature scaling, Platt scaling, and isotonic regression.
+3. Build `CalibrationEvaluator` calculating 15-bin ECE and generating reliability diagram coordinate points.
+4. Build `MahalanobisOODDetector` fitting class-conditional Gaussian distributions with Ledoit-Wolf covariance shrinkage.
+5. Implement `OODDecisionGate` evaluating test embeddings against OOD thresholds and routing to abstention.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    TestInput["Test Sample (Image / Audio / Video)"] --> Preprocess["Frozen Preprocessor"]
+    Preprocess --> FeatureExtract["Extract Penultimate Layer Representation (z) & Logits (l)"]
+    FeatureExtract --> OODCheck["Compute Mahalanobis Distance / Free Energy"]
+    OODCheck --> OODThreshold{"OOD Score > Tau_OOD?"}
+    OODThreshold -- Yes --> OODAbstain["Emit INCONCLUSIVE_OOD (Zero Categorical Verdict)"]
+    OODThreshold -- No --> CalibrateScore["Apply Frozen Calibration (Temperature / Platt)"]
+    CalibrateScore --> ReliabilityCheck{"ECE <= 0.05 on Val Domain?"}
+    ReliabilityCheck -- No --> WarnUncalibrated["Emit Alert: Uncalibrated In-Domain Score"]
+    ReliabilityCheck -- Yes --> EmittedScore["Emit Calibrated Probability & 95% CI"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, PyTorch 2.6+, Scikit-learn (IsotonicRegression, LedoitWolf), SciPy, NumPy.
+**8. Prerequisites & Dependencies:**
+Phases CDVF-A1, CDVF-A2, and CDVF-A3 completed; frozen model checkpoints available.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/cdvf/calibration/__init__.py`
+- `src/ps05/cdvf/calibration/calibrator.py`
+- `src/ps05/cdvf/calibration/metrics.py`
+- `src/ps05/cdvf/ood/__init__.py`
+- `src/ps05/cdvf/ood/mahalanobis.py`
+- `tests/unit/cdvf/test_calibration_and_ood.py`
+**10. Failure Cases & Risk Mitigations:**
+- Singular covariance matrix in Mahalanobis calculation: Mitigated via Ledoit-Wolf shrinkage ensuring positive-definite inversion.
+- Calibration fitted on test data: Trapped by split identity verification asserting $D_{\text{fit}} == D_{\text{cal}}$.
+**11. Security & Privacy Considerations:**
+Calibration parameters and covariance matrices must be saved as immutable, hashed artifacts linked to the model registry.
+**12. Acceptance Criteria:**
+- Post-calibration ECE $\le 0.05$ on in-domain validation split.
+- Mahalanobis OOD detector achieves AUROC $\ge 0.85$ distinguishing in-distribution from shifted distributions.
+- OOD gating intercept properly aborts classification when threshold is exceeded.
+**13. Definition of Done:**
+Calibration and OOD packages implemented, tested on synthetic and real embeddings, 100% pytest pass rate.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **CDVF-CP-08-01** | Calibration Fitting Pipeline on Disjoint Split ($D_{\text{cal}}$) | Calibrator fits temperature/Platt parameters on isolated calibration set without test data exposure | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-08-02** | 15-Bin ECE & Brier Score Validation Harness | Metrics engine correctly evaluates 15-bin ECE and Brier score before and after calibration | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-08-03** | Mahalanobis Covariance Shrinkage & Energy OOD Engine | OOD detector fits stable covariance matrices with Ledoit-Wolf shrinkage and scores test samples | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-08-04** | OOD Decision Gating Invariant & Threshold Locker | System intercepts OOD test samples and forces `INCONCLUSIVE_OOD` outcome without guessing | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase CDVF-A9: First-Class Abstention Policy & Cross-Modal Fusion DAG
+
+**1. Phase ID & Title:** `CDVF-A9: First-Class Abstention Policy & Cross-Modal Fusion DAG`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the formal first-class abstention policy under `src/ps05/cdvf/decision/`, supporting the seven canonical forensic outcome states (`CLASSIFIED_WITHIN_VALIDATED_SCOPE`, `INCONCLUSIVE_OOD`, `INCONCLUSIVE_LOW_QUALITY`, `INCONCLUSIVE_MODEL_DISAGREEMENT`, `INSUFFICIENT_EVIDENCE`, `UNSUPPORTED_INPUT`, `ANALYSIS_FAILED`). Implement Selective Classification evaluation computing Coverage ($C$) and Selective Risk ($R(C)$). Implement the Cross-Modal Evidence Fusion Directed Acyclic Graph (DAG) that aggregates AIF, AURAS, and VISTA findings, enforces the anti-averaging invariant, exposes cross-engine disagreements, and tracks shared evidentiary lineage.
+**4. Topics & Subtopics:**
+- 7-State Abstention Engine: Complete state mapping and reasoning under `CDVFDecisionEngine`.
+- Selective Classification Analytics: Computing coverage vs selective risk curves across threshold sweeps.
+- Cross-Modal Fusion DAG: Dependency-aware aggregation of multi-modal evidence without naive score averaging.
+- Anti-Averaging Invariant: Prohibition against scalar arithmetic averaging of image, audio, and video scores.
+- Evidentiary Lineage & Disagreement Tracker: Highlighting conflicts (e.g. video face real, audio voice cloned) in judicial reports.
+**5. Exact Tasks:**
+1. Create `src/ps05/cdvf/decision/` and `src/ps05/cdvf/fusion/` packages.
+2. Build `AbstentionDecisionEngine` evaluating input quality, OOD scores, model agreement, and calibration scope.
+3. Build `SelectiveClassificationEvaluator` plotting coverage vs risk trade-off curves.
+4. Build `CrossModalFusionDAG` modeling multi-modal evidence dependencies and propagating uncertainty.
+5. Create automated test asserting that naive arithmetic score averaging raises an explicit `ArchitectureViolationError`.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    ModalityFindings["Modality Findings (AIF Image, AURAS Audio, VISTA Video)"] --> PreCheck["Pre-Flight Quality & Format Check"]
+    PreCheck -- Corrupted / Empty --> InconQuality["Emit INCONCLUSIVE_LOW_QUALITY"]
+    PreCheck -- Valid --> OODGate["Evaluate Modality OOD Scores"]
+    OODGate -- Any Out-of-Domain --> InconOOD["Emit INCONCLUSIVE_OOD"]
+    OODGate -- In-Domain --> DisagreementCheck{"Model Findings Conflict?"}
+    DisagreementCheck -- Conflicting Verdicts --> InconDisagree["Emit INCONCLUSIVE_MODEL_DISAGREEMENT"]
+    DisagreementCheck -- Consistent --> FusionDAG["Cross-Modal Dependency DAG (Anti-Averaging)"]
+    FusionDAG --> ScopedVerdict["Emit Scoped Structured Finding Dossier"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, NetworkX (DAG representation), Pydantic v2, NumPy, Matplotlib.
+**8. Prerequisites & Dependencies:**
+Phases CDVF-A4, CDVF-A5, CDVF-A6, and CDVF-A8 completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/cdvf/decision/__init__.py`
+- `src/ps05/cdvf/decision/engine.py`
+- `src/ps05/cdvf/decision/selective_risk.py`
+- `src/ps05/cdvf/fusion/__init__.py`
+- `src/ps05/cdvf/fusion/dag.py`
+- `tests/unit/cdvf/test_decision_and_fusion.py`
+**10. Failure Cases & Risk Mitigations:**
+- Missing audio stream in video exhibit: System evaluates video independently and flags audio as `INSUFFICIENT_EVIDENCE` without penalizing video verdict.
+- Naive averaging attempts in presentation layer: Intercepted by DAG contract validating that fused output is a structured finding graph, not a single percentage.
+**11. Security & Privacy Considerations:**
+Abstention decisions must record complete technical rationales in the forensic audit log to justify non-classification under cross-examination.
+**12. Acceptance Criteria:**
+- All seven canonical states emitted correctly based on deterministic input conditions.
+- Coverage vs risk curves calculate monotonic risk reduction as coverage is restricted.
+- Cross-modal fusion DAG preserves individual modality findings and explicitly flags multi-modal conflicts.
+**13. Definition of Done:**
+Decision engine and fusion DAG implemented, verified with conflict test scenarios, 100% pytest pass rate.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **CDVF-CP-09-01** | 7-State Abstention & Selective Classification Evaluator | Decision engine outputs all 7 canonical states based on simulated threshold/quality triggers | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-09-02** | Coverage vs Selective Risk Curve Generator | Analytics engine computes empirical risk-coverage curves demonstrating error reduction under abstention | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-09-03** | Cross-Modal Dependency DAG & Lineage Tracker | Fusion DAG correctly models shared source relationships and prevents double-counting derived frames | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-09-04** | Anti-Averaging Invariant Enforcement & Disagreement Exposer | System blocks naive score averaging and emits explicit cross-engine conflict alerts | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase CDVF-A10: Subgroup Fairness, Robustness & 12-Gate Scoped Model Approval
+
+**1. Phase ID & Title:** `CDVF-A10: Subgroup Fairness, Robustness & 12-Gate Scoped Model Approval`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement multi-subgroup fairness and robustness evaluation under `src/ps05/cdvf/approval/`, stratifying performance across demographic, environmental, and capture conditions (image: face vs non-face, skin tone, resolution; audio: languages, accents, SNR, codecs; video: pose, lighting, CCTV DVR formats). Flag any subgroup performance disparity exceeding the $2.0\times$ threshold. Implement the 12-gate scoped model approval state machine enforcing all mandatory release gates, ensuring models receive `VALIDATED_FOR_DEFINED_SCOPE` rather than unwarranted universal approval.
+**4. Topics & Subtopics:**
+- Subgroup Stratification Engine: Segmenting test metrics by metadata attributes under `SubgroupFairnessEvaluator`.
+- Disparity Ratio Analytics: Calculating FPR/FNR disparity ratios across subgroups ($R_{\text{disp}} = \max(M_g) / \min(M_g)$).
+- 12-Gate Approval State Machine: Exhaustive verification across G-1 (Provenance) through G-12 (Judicial Readiness).
+- Scoped Operational Envelope: Restricting model deployment to validated domains (e.g. validated for speech $> 12\text{ kHz}$ only).
+- Examiner Interpretation Guide: Generating human-readable operating boundaries for forensic experts.
+**5. Exact Tasks:**
+1. Create `src/ps05/cdvf/approval/` package and implement `SubgroupFairnessEvaluator`.
+2. Build `ApprovalGateEngine` evaluating all 12 mandatory approval gates.
+3. Build `OperationalEnvelopeCompiler` defining valid deployment ranges (resolution, SNR, codec, generators).
+4. Implement automated alert when subgroup disparity exceeds $2.0\times$ ratio.
+5. Create examiner interpretation template generator translating technical gates into court-ready guidance.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    BenchResults["Benchmark & Calibration Results"] --> SubgroupStrat["Subgroup Stratification (Demographics, Codecs, CCTV)"]
+    SubgroupStrat --> DisparityCalc["Calculate Disparity Ratios across Subgroups"]
+    DisparityCalc --> DisparityCheck{"Disparity Ratio <= 2.0x?"}
+    DisparityCheck -- No --> FlagDisparity["Flag Disparity Alert & Restrict Operational Scope"]
+    DisparityCheck -- Yes --> GateSweep["Execute 12 Mandatory Approval Gates (G-1 to G-12)"]
+    GateSweep --> AllGatesPass{"All 12 Gates Passed?"}
+    AllGatesPass -- No --> RejectOrPending["State: REJECTED or REVALIDATION_REQUIRED"]
+    AllGatesPass -- Yes --> ScopedApproval["State: VALIDATED_FOR_DEFINED_SCOPE"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, Pydantic v2, Scikit-learn, Pandas, NumPy.
+**8. Prerequisites & Dependencies:**
+Phases CDVF-A1 through CDVF-A9 completed.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/cdvf/approval/__init__.py`
+- `src/ps05/cdvf/approval/fairness.py`
+- `src/ps05/cdvf/approval/gates.py`
+- `src/ps05/cdvf/approval/envelope.py`
+- `tests/unit/cdvf/test_approval_gates.py`
+**10. Failure Cases & Risk Mitigations:**
+- Universal approval granted despite severe low-quality degradation: Prevented by mandatory operational envelope gating.
+- Insufficient subgroup sample size ($N_g < 30$): Flagged with wide confidence intervals and marked `INSUFFICIENT_SUBGROUP_POWER`.
+**11. Security & Privacy Considerations:**
+Demographic metadata must be strictly sourced from consented, anonymized research benchmark cards with zero PII retention.
+**12. Acceptance Criteria:**
+- Subgroup disparity ratios calculated accurately across all metadata slices.
+- Model cannot advance to `VALIDATED_FOR_DEFINED_SCOPE` if any of the 12 gates fail.
+- Operational envelope explicitly documents restricted conditions and unvalidated domains.
+**13. Definition of Done:**
+Fairness evaluator and 12-gate approval engine implemented, verified with passing/failing mock models, 100% pytest pass rate.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **CDVF-CP-10-01** | Multi-Subgroup Stratification & Disparity Ratio Engine | Evaluator segments benchmark metrics across subgroups and flags disparities $> 2.0\times$ | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-10-02** | 12-Gate Approval State Machine & Audit Trail | State machine executes all 12 gates and transitions model to `VALIDATED_FOR_DEFINED_SCOPE` | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-10-03** | Scoped Operational Envelope Enforcement Guard | System blocks inference requests falling outside approved operational envelope | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-10-04** | Forensic Examiner Interpretation Guide Generator | Automated compilation of human-readable operating limits and judicial caveats | `NOT_STARTED` | Awaits phase activation |
+
+---
+
+### Phase CDVF-A11: Continuous Regression, 24-Item WORM Bundle & Release Readiness
+
+**1. Phase ID & Title:** `CDVF-A11: Continuous Regression, 24-Item WORM Bundle & Release Readiness`
+**2. Current Status:** `PLANNED`
+**3. Purpose:** Implement the continuous regression harness under `src/ps05/cdvf/regression/`, evaluating candidate models and updated dependencies against immutable golden benchmark manifests. Enforce regression tolerance ceilings ($\Delta\operatorname{AUC} \ge -0.010$, $\Delta\operatorname{ECE} \le +0.010$). Build the automated 24-item WORM evaluation bundle packager compiling model cards, dataset cards, split manifests, metrics, calibration plots, and approval decisions into a cryptographically sealed ZIP/tarball. Generate the court-admissible Section 65B/63 BSA validation appendix.
+**4. Topics & Subtopics:**
+- Golden Manifest Regression Suite: Automated CI/CD regression harness executing fixed test slices.
+- Regression Tolerance Ceilings: Enforcing $\Delta\operatorname{AUC} \ge -0.010$ and $\Delta\operatorname{ECE} \le +0.010$ limits.
+- 24-Item WORM Evaluation Bundle: Automated packager compiling all 24 canonical evaluation artifacts.
+- Cryptographic Sealing & Manifest Hashing: SHA-256 manifest of manifests locked into WORM vault.
+- Section 65B/63 BSA Technical Calibration Dossier: Court-admissible certificate of forensic reliability.
+**5. Exact Tasks:**
+1. Create `src/ps05/cdvf/regression/` and `src/ps05/cdvf/bundle/` packages.
+2. Build `RegressionTestHarness` comparing new model outputs against golden baseline records.
+3. Build `WORMBundlePackager` assembling the complete 24-item artifact bundle with SHA-256 checksums.
+4. Build `LegalCalibrationDossierExporter` generating PDF/JSON technical calibration appendices.
+5. Create automated end-to-end smoke test validating the complete CDVF lifecycle from registry to legal dossier.
+**6. Detailed Execution Workflow:**
+```mermaid
+flowchart TD
+    ModelCandidate["Validated Model Candidate"] --> RegressHarness["Execute Golden Manifest Regression Suite"]
+    RegressHarness --> DeltaCheck{"Delta-AUC >= -0.010 and Delta-ECE <= +0.010?"}
+    DeltaCheck -- No --> RegressAlert["Fail CI/CD: RegressionExceededError"]
+    DeltaCheck -- Yes --> BundleAssembler["Assemble 24-Item WORM Evaluation Bundle"]
+    BundleAssembler --> ChecksumManifest["Compute Root SHA-256 Checksum Manifest"]
+    ChecksumManifest --> WORMVaultLock["Lock in POSIX 0400 WORM Vault"]
+    WORMVaultLock --> LegalDossier["Compile Section 65B/63 BSA Legal Calibration Dossier"]
+    LegalDossier --> ReleaseReady["Release Gate Passed: Ready for Production Deployment"]
+```
+**7. Technologies, Tools & Frameworks:**
+Python 3.12, WeasyPrint / ReportLab, Pydantic v2, hashlib, zipfile, pytest.
+**8. Prerequisites & Dependencies:**
+Phases CDVF-A1 through CDVF-A10 completed; WORM vault storage active.
+**9. Expected Files, Artifacts & Contracts:**
+- `src/ps05/cdvf/regression/__init__.py`
+- `src/ps05/cdvf/regression/harness.py`
+- `src/ps05/cdvf/bundle/__init__.py`
+- `src/ps05/cdvf/bundle/packager.py`
+- `src/ps05/cdvf/bundle/legal_dossier.py`
+- `tests/integration/cdvf/test_end_to_end_validation.py`
+**10. Failure Cases & Risk Mitigations:**
+- Silent model regression due to PyTorch dependency upgrade: Trapped by automated golden manifest regression check in CI/CD.
+- Tampering with evaluation bundle: Prevented by POSIX 0400 WORM vault locking and cryptographic manifest hashing.
+**11. Security & Privacy Considerations:**
+Evaluation bundles must be cryptographically signed with forensic examiner ed25519 keys prior to court submission.
+**12. Acceptance Criteria:**
+- Regression suite automatically blocks builds violating performance tolerance ceilings.
+- 24-item WORM bundle contains all required files and verifies with 100% checksum match.
+- Section 65B/63 BSA validation appendix renders accurately with legal disclaimers.
+**13. Definition of Done:**
+Continuous regression harness and bundle packager implemented, end-to-end integration test passed.
+**14. Explicit Status:** `PLANNED`
+**15. Checkpoint Table:**
+
+| Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
+| :--- | :--- | :--- | :--- | :--- |
+| **CDVF-CP-11-01** | Golden Manifest Regression Suite & Delta Threshold Alerter | Regression harness detects performance drop and triggers build failure on $\Delta\operatorname{AUC} < -0.010$ | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-11-02** | 24-Item WORM Validation Bundle Packager & Checksum Vault | Bundle packager compiles all 24 artifacts into cryptographically sealed archive with SHA-256 root manifest | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-11-03** | Section 65B/63 BSA Technical Calibration Dossier Exporter | Exporter produces court-ready calibration certificate detailing validated scope and limitations | `NOT_STARTED` | Awaits phase activation |
+| **CDVF-CP-11-04** | End-to-End CDVF Lifecycle Smoke Test & Release Gate | Automated test suite verifies full pipeline from model registration to WORM legal dossier export | `NOT_STARTED` | Awaits phase activation |
+
+
+---
+
+## 9. Unified Platform Delivery & Security Milestones
+
+The platform delivery, dashboard, and hackathon packaging milestones synthesize findings across all forensic domains (AURAS Audio, VISTA Video, AIF Image, ONTF Offline Network Traffic, and CDVF Shared Validation):
 
 ### Phase 7: Unified Platform Cross-Engine Reporting
 - **Status:** `PLANNED`
-- **Scope:** Cross-engine finding aggregation across audio (AURAS), image (AIF), video/CCTV (VISTA), and offline network traffic (ONTF) evidence; Section 65B Indian Evidence Act / Section 63 Bharatiya Sakshya Adhiniyam (BSA 2023) certified PDF compilation; Archify JSON IR visual dossier export.
+- **Scope:** Cross-engine finding aggregation across audio (AURAS), image (AIF), video/CCTV (VISTA), offline network traffic (ONTF), and cross-modal validation (CDVF); Section 65B Indian Evidence Act / Section 63 Bharatiya Sakshya Adhiniyam (BSA 2023) certified PDF compilation; Archify JSON IR visual dossier export.
 
 ### Phase 8: Web Dashboard & Forensic Examiner Workbench
 - **Status:** `PLANNED`
-- **Scope:** Next.js / React interactive web frontend; multi-modal evidence viewer with synchronized audio waveform, spectrogram, video frame player, image ELA/TruFor error-sliders, and interactive network traffic flow / communication graph explorer.
+- **Scope:** Next.js / React interactive web frontend; multi-modal evidence viewer with synchronized audio waveform, spectrogram, video frame player, image ELA/TruFor error-sliders, interactive network traffic flow / communication graph explorer, and CDVF model calibration / OOD uncertainty inspector.
 
 ### Phase 9: Security Hardening & Air-Gapped Deployment
 - **Status:** `PLANNED`
@@ -3719,15 +4499,16 @@ The platform delivery, dashboard, and hackathon packaging milestones synthesize 
 
 ### Phase 10: Final Hackathon Demonstration & Release
 - **Status:** `PLANNED`
-- **Scope:** End-to-end platform validation, automated demonstration script (`scripts/run_demo.py`), curated multi-modal evidence showcase (audio, video, image, and network capture), and technical presentation defense.
+- **Scope:** End-to-end platform validation, automated demonstration script (`scripts/run_demo.py`), curated multi-modal evidence showcase (audio, video, image, network capture, and CDVF validation reports), and technical presentation defense.
 
 
 ---
-## 9. Development Roadmap Timeline (Gantt Chart)
+
+## 10. Development Roadmap Timeline (Gantt Chart)
 
 ```mermaid
 gantt
-    title PS-05 Multi-Modal Forensics Roadmap (AURAS, VISTA, AIF & ONTF)
+    title PS-05 Multi-Modal Forensics Roadmap (AURAS, VISTA, AIF, ONTF & CDVF)
     dateFormat  YYYY-MM-DD
     axisFormat  %b %d
 
@@ -3789,12 +4570,26 @@ gantt
     ONTF-A5: Statistical Flow Feature Eng   :         na5, 2026-10-29, 2026-10-31
     ONTF-A6: Dual-Mode Scoping & Attribution :         na6, 2026-10-29, 2026-11-01
     ONTF-A7: Deterministic Threat & Scans    :         na7, 2026-11-01, 2026-11-03
-    ONTF-A8: ML Anomaly & Traffic Baselines  :         na8, 2026-11-03, 2026-11-05
+    ONTF-A8: Machine Learning Anomaly & Traffic:       na8, 2026-11-03, 2026-11-05
     ONTF-A9: Temporal Sequence & Graph Models:         na9, 2026-11-05, 2026-11-07
     ONTF-A10: Multi-Stage Attack Correlation :         na10, 2026-11-07, 2026-11-09
     ONTF-A11: Investigation Workbench & UI   :         na11, 2026-11-09, 2026-11-11
     ONTF-A12: Sec 65B/63 BSA Legal Dossier   :         na12, 2026-11-11, 2026-11-13
     ONTF-A13: End-to-End Network Validation  :         na13, 2026-11-13, 2026-11-14
+
+    section CDVF Cross-Modal Validation Workstream
+    CDVF-A0: Repo Audit & Baseline Gap Matrix:done,    ca0, 2026-10-21, 2026-10-22
+    CDVF-A1: Model Registry & Provenance     :         ca1, 2026-10-22, 2026-10-24
+    CDVF-A2: Dataset Governance & Splitting  :         ca2, 2026-10-24, 2026-10-26
+    CDVF-A3: 19-Param Benchmark Runner & CI  :         ca3, 2026-10-26, 2026-10-28
+    CDVF-A4: Image Detection Validation (AIF):         ca4, 2026-10-28, 2026-10-31
+    CDVF-A5: Audio Detection Validation (AURAS):       ca5, 2026-10-31, 2026-11-03
+    CDVF-A6: Video & CCTV Validation (VISTA) :         ca6, 2026-11-03, 2026-11-06
+    CDVF-A7: Cross-Dataset & Unseen (Modes A-G):       ca7, 2026-11-06, 2026-11-08
+    CDVF-A8: Calibration (ECE<=0.05) & OOD   :         ca8, 2026-11-08, 2026-11-10
+    CDVF-A9: Abstention Policy & Fusion DAG  :         ca9, 2026-11-10, 2026-11-12
+    CDVF-A10: Subgroup Fairness & 12 Gates   :         ca10, 2026-11-12, 2026-11-13
+    CDVF-A11: Regression & 24-Item WORM Bundle:        ca11, 2026-11-13, 2026-11-14
 
     section Platform Delivery
     Phase 7: Cross-Engine Legal Reporting   :         p7, 2026-11-10, 2026-11-11
@@ -3802,3 +4597,32 @@ gantt
     Phase 9: Security Hardening & Air-Gap   :         p9, 2026-11-13, 2026-11-14
     Phase 10: Final Hackathon Demonstration :         p10, 2026-11-14, 2026-11-15
 ```
+
+---
+
+## 11. CDVF Master Requirement Traceability Matrix (CDVF-01 through CDVF-20)
+
+The following master traceability matrix maps every canonical Cross-Modal Deepfake Validation Framework requirement (`CDVF-01` through `CDVF-20`) to its authoritative specification in `PRD.md`, its technical contract in `TRD.md`, its designated implementation phase in `PHASES.md`, its primary verification checkpoint, and the mandatory empirical evidence required for approval:
+
+| Requirement ID | Functional Requirement Summary | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Verification Evidence |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **CDVF-01** | Model Registry & Version Tracking | PRD §12.4, §12.19 | TRD §11.B.2, §12.3 | **CDVF-A1** | `CDVF-CP-01-01` | `ModelRegistryEntry` schema validation with all 24 fields, immutable revision IDs, and JSON WORM persistence. |
+| **CDVF-02** | Checkpoint SHA-256 Provenance & Tamper Gating | PRD §12.4, §12.19 | TRD §11.B.2, §11.B.19 | **CDVF-A1** | `CDVF-CP-01-02` | Automated streaming SHA-256 calculation raising `CheckpointIntegrityError` upon single-bit weight tampering. |
+| **CDVF-03** | Dataset Provenance, Quality Tiers & Cards | PRD §12.5, §12.19 | TRD §11.B.3, §12.3 | **CDVF-A2** | `CDVF-CP-02-01` | `DatasetCard` specification, 4 quality tiers, dual-label mapping (raw vs canonical), and license compliance flags. |
+| **CDVF-04** | Leakage-Resistant Source-Group Splitting | PRD §12.6, §12.19 | TRD §11.B.4, §12.3 | **CDVF-A2** | `CDVF-CP-02-03` | Grouped splitting on root identity/clip and pytest asserting zero group overlap ($G_i \cap G_j = \emptyset$). |
+| **CDVF-05** | Standardised 19-Parameter Benchmark Execution | PRD §12.7, §12.19 | TRD §11.B.5, §12.3 | **CDVF-A3** | `CDVF-CP-03-01` | Reproducible benchmark runner validating all 19 context parameters and fixed deterministic random seeds. |
+| **CDVF-06** | Image Forensic Detection & Localisation (AIF) | PRD §12.8, §12.19 | TRD §11.B.6, §11.B.17 | **CDVF-A4** | `CDVF-CP-04-01` | Evaluation suites for IMG-1..IMG-4, pixel IoU/boundary F1 for masks, and unlocalised manipulation fallbacks. |
+| **CDVF-07** | Audio Forensic Detection & Localisation (AURAS) | PRD §12.8, §12.19 | TRD §11.B.6, §11.B.17 | **CDVF-A5** | `CDVF-CP-05-01` | Evaluation suites for AUD-1..AUD-4, temporal IoU (tIoU), onset/offset timing error $\le 50\text{ ms}$, and window aggregation. |
+| **CDVF-08** | Video & CCTV Detection & Localisation (VISTA) | PRD §12.8, §12.19 | TRD §11.B.6, §11.B.17 | **CDVF-A6** | `CDVF-CP-06-01` | Video-level aggregation, frame non-independence assertion, 3D box IoU, and dedicated CCTV degradation suite. |
+| **CDVF-09** | Cross-Dataset Generalisation Benchmarking (Mode B) | PRD §12.9, §12.19 | TRD §11.B.7, §11.B.12 | **CDVF-A7** | `CDVF-CP-07-01` | Zero-shot evaluation across independent corpora measuring transfer performance drop $\Delta\operatorname{AUC}_{\text{cross}}$. |
+| **CDVF-10** | Unseen-Generator Leave-One-Out Evaluation (Mode C) | PRD §12.9, §12.19 | TRD §11.B.7, §11.B.12 | **CDVF-A7** | `CDVF-CP-07-02` | Leave-one-out generator isolation protocol with automated block on unsubstantiated generalisation claims. |
+| **CDVF-11** | Modality-Specific Robustness Grids (Modes D, E, F) | PRD §12.8, §12.9 | TRD §11.B.8, §11.B.12 | **CDVF-A4..A6**| `CDVF-CP-04-03` | 14-condition image perturbation, lossy audio codec sweeps, and CCTV video degradation matrices. |
+| **CDVF-12** | Confidence Calibration & ECE Thresholding | PRD §12.10, §12.19 | TRD §11.B.9, §12.3 | **CDVF-A8** | `CDVF-CP-08-01` | Temperature/Platt scaling fitted on disjoint $D_{\text{cal}}$, achieving 15-bin ECE $\le 0.05$ and Brier score validation. |
+| **CDVF-13** | Out-of-Distribution (OOD) Gating | PRD §12.11, §12.19 | TRD §11.B.10, §12.3 | **CDVF-A8** | `CDVF-CP-08-03` | Penultimate-layer Mahalanobis distance with Ledoit-Wolf shrinkage and Free Energy gating test samples. |
+| **CDVF-14** | First-Class Abstention & Selective Risk Analytics | PRD §12.12, §12.19 | TRD §11.B.11, §11.B.19 | **CDVF-A9** | `CDVF-CP-09-01` | 7 canonical outcome states, coverage $C$ vs selective risk $R(C)$ curves, and refusal to force binary verdicts. |
+| **CDVF-15** | Manipulation Localisation Metrics (IoU & tIoU) | PRD §12.13, §12.19 | TRD §11.B.13, §12.3 | **CDVF-A4..A6**| `CDVF-CP-04-02` | Mathematical IoU for spatial masks, tIoU for audio/video intervals, and strict separation from classification AUC. |
+| **CDVF-16** | Cross-Modal Fusion DAG & Anti-Averaging Invariant | PRD §12.14, §12.19 | TRD §11.B.14, §11.B.17 | **CDVF-A9** | `CDVF-CP-09-03` | Dependency DAG tracking evidence lineage, exposing cross-engine conflicts, and blocking naive score averaging. |
+| **CDVF-17** | Demographic, Quality & Subgroup Fairness | PRD §12.15, §12.19 | TRD §11.B.15, §11.B.18 | **CDVF-A10** | `CDVF-CP-10-01` | Subgroup stratification, disparity ratio alerts ($> 2.0\times$), and sample size power guards ($N_g \ge 30$). |
+| **CDVF-18** | 12-Gate Scoped Model Approval Workflow | PRD §12.17, §12.19 | TRD §11.B.15, §12.3 | **CDVF-A10** | `CDVF-CP-10-02` | 12 mandatory approval gates transitioning model to `VALIDATED_FOR_DEFINED_SCOPE` or `REJECTED`. |
+| **CDVF-19** | Standard 24-Item WORM Evaluation Bundle | PRD §12.18, §12.19 | TRD §11.B.16, §11.B.18 | **CDVF-A11** | `CDVF-CP-11-02` | Complete compilation of 24 evaluation artifacts with root SHA-256 manifest locked into POSIX 0400 WORM vault. |
+| **CDVF-20** | Continuous Regression Testing & BSA Calibration Dossier | PRD §12.16, §12.20 | TRD §11.B.16, §11.B.20 | **CDVF-A11** | `CDVF-CP-11-01` | Golden manifest regression suite ($\Delta\operatorname{AUC} \ge -0.010$) and Section 65B/63 BSA certified calibration dossier. |

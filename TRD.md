@@ -1,11 +1,11 @@
 # Technical Requirements Document (TRD)
 
 ## Project: Digital Evidence Authenticity & Integrity Verification Platform (PS-05)
-**Hackathon:** Bihar Government Cyber Hackathon 2026 (C-DAC Patna, CCSU, Bihar Police)  
-**Track:** Digital Forensics  
-**Problem Statement:** PS-05 — Digital Evidence Authenticity and Integrity Verification Platform  
-**Document Version:** 1.1.0  
-**Status:** Approved Technical Architecture Baseline (Deepened Audio Forensics Specification)  
+**Hackathon:** Bihar Government Cyber Hackathon 2026 (C-DAC Patna, CCSU, Bihar Police)
+**Track:** Digital Forensics
+**Problem Statement:** PS-05 — Digital Evidence Authenticity and Integrity Verification Platform
+**Document Version:** 1.1.0
+**Status:** Approved Technical Architecture Baseline (Deepened Audio Forensics Specification)
 
 ---
 
@@ -1202,7 +1202,7 @@ flowchart TB
 
     subgraph AURAS_CORE["🎧 AURAS Subsystem Boundary"]
         AUDIO_DISPATCH["Audio Orchestrator & Task Router"]
-        
+
         subgraph ARTIFACT_PIPELINE["Reproducible Derived Artifact Pipeline"]
             NORM_DECODE["FFmpeg Channel-Preserving Decoder"]
             RESAMPLE_SINC["Band-Limited Sinc Resampler (16 kHz / 24 kHz)"]
@@ -1262,18 +1262,18 @@ flowchart TB
     WORM_STORE --> AUDIO_DISPATCH
     CELERY_QUEUE --> AUDIO_DISPATCH
     AUDIO_DISPATCH --> NORM_DECODE --> RESAMPLE_SINC --> SLIDING_WIN
-    
+
     NORM_DECODE -.->|Native Multi-Channel| ARE_ENGINE
     RESAMPLE_SINC -.->|16 kHz Mono Float32| MVSI_ENGINE
     SLIDING_WIN -.->|2.0s Slices| ADDE_ENGINE
-    
+
     MODEL_REG -.-> ADDE_ENGINE
     MODEL_REG -.-> MVSI_ENGINE
 
     ARE_ENGINE --> DB_POSTGRES
     MVSI_ENGINE --> DB_POSTGRES
     ADDE_ENGINE --> DB_POSTGRES
-    
+
     DB_POSTGRES --> CROSS_CORR --> DOSSIER_GEN
 ```
 
@@ -1403,16 +1403,16 @@ The diarization engine natively supports multiple active speakers in the same ti
 flowchart TD
     AUDIO_16K["16 kHz Normalized Mono WAV"] --> VAD["MVSI-02: Silero VAD v4 (TorchScript)"]
     VAD --> CHUNKS["Speech Segments (Pauses Stripped)"]
-    
+
     CHUNKS --> OSD_BRANCH["MVSI-04: Overlapped Speech Detector (PyAnnote OSD)"]
     CHUNKS --> EMB_BRANCH["MVSI-05: ECAPA-TDNN 192-d Embeddings"]
     CHUNKS --> LID_BRANCH["MVSI-09: Whisper / MMS Language ID"]
-    
+
     EMB_BRANCH --> CLUST["MVSI-06: Agglomerative Hierarchical Clustering (Cosine Distance)"]
-    
+
     CLUST & OSD_BRANCH --> OVERLAP_DIAR["MVSI-07/08: Overlap-Aware Diarization Assembly"]
     LID_BRANCH --> CODE_SW["MVSI-10: Intra-Utterance Code-Switch Boundary Refinement"]
-    
+
     OVERLAP_DIAR & CODE_SW --> ALIGN["MVSI-12: Speaker-Language Analytics Merger"]
     ALIGN --> TIMELINE["Multi-Speaker Overlap Timeline & Duration Breakdown"]
 ```
@@ -1448,30 +1448,30 @@ ADDE is an independent, pluggable, multi-detector engine designed to detect synt
 ```mermaid
 flowchart TD
     SLICES["Standardized 16 kHz Audio Slices (2.0s Window / 0.5s Stride)"] --> PRE["ADDE-01: Quality Gate & Sinc Interpolation"]
-    
+
     PRE --> FORWARD_PASS
-    
+
     subgraph FORWARD_PASS["Parallel Multi-Branch Inference"]
         RAW["ADDE-02: RawNet2 (Time-Domain Waveform)"]
         GRAPH["ADDE-03: AASIST (Spectro-Temporal Graph Attention)"]
         SSL["ADDE-04: WavLM Base+ (Self-Supervised Foundation)"]
         SPEC["ADDE-05: LFCC + Light-CNN (Spectral Vocoder Artifacts)"]
     end
-    
+
     RAW --> Z1["Logit $z_1$"]
     GRAPH --> Z2["Logit $z_2$"]
     SSL --> Z3["Logit $z_3$"]
     SPEC --> Z4["Logit $z_4$"]
-    
+
     Z1 & Z2 & Z3 & Z4 --> CALIB["ADDE-09: Platt Scaling & Temperature Calibration"]
     CALIB --> PROBS["Calibrated Probabilities $p_i \in [0, 1]$"]
-    
+
     PROBS --> FUSION["ADDE-10: Quality-Weighted Late Fusion Ensemble"]
     SSL -.->|Embedding Vector $e$| OOD["ADDE-11: Mahalanobis Distance OOD Check"]
-    
+
     FUSION --> FINAL_SCORE["Aggregate Suspicion Score $P(\text{fake})$"]
     OOD --> UNCERTAINTY["OOD Uncertainty Flag (LOW / MED / HIGH)"]
-    
+
     FINAL_SCORE & UNCERTAINTY --> HEATMAP["ADDE-12: Millisecond Suspicion Heatmap Curve"]
 ```
 
@@ -1524,7 +1524,7 @@ flowchart TB
     subgraph AIF_CORE["🖼️ AIF Subsystem Core & Task-Aware Router"]
         ROUTER["Task-Aware Forensic Router & Tiling Dispatcher"]
         LINEAGE_DAG["Derived Artifact DAG & Linear Affine Transform Mapper"]
-        
+
         subgraph IVE_ENGINE["1️⃣ IVE: Visual Evidence & Understanding Engine"]
             IVE01["IVE-01: Universal Ingestion Profiling"]
             IVE02["IVE-02: 150-Category Hierarchical Taxonomy"]
@@ -1569,12 +1569,12 @@ flowchart TB
 
     RAW_IMAGE --> CEIPL_HASH --> WORM_STORE
     CEIPL_HASH --> SAFE_DEC --> ROUTER
-    
+
     ROUTER --> LINEAGE_DAG
     LINEAGE_DAG --> IVE_ENGINE
     LINEAGE_DAG --> IRE_ENGINE
     LINEAGE_DAG --> AIM_ENGINE
-    
+
     IVE06 --> FPA_MODULE
     FPA_MODULE -.->|Face Crops & Landmarks| AIM03
     FPA_MODULE -.->|Authorized Biometric Embedding| IVE07
@@ -1583,7 +1583,7 @@ flowchart TB
     IRE_ENGINE --> POSTGRES
     AIM_ENGINE --> POSTGRES
     FPA_MODULE --> DERIVED_STORE
-    
+
     POSTGRES --> FUSION
 ```
 
@@ -1610,10 +1610,10 @@ sequenceDiagram
     activate Hasher
     Hasher-->>API: Compute raw_sha256, raw_sha3_512, byte_length
     deactivate Hasher
-    
+
     API->>WORM: Write unmodified bitstream to WORM path (`evidence_id.bin`)
     API->>WORM: Apply write-block chmod 0400
-    
+
     API->>Worker: Dispatch raw bytes to isolated sub-process (max_memory=2GB, timeout=30s)
     activate Worker
     Worker->>Worker: Check magic bytes via python-magic (reject executable polyglots)
@@ -1625,7 +1625,7 @@ sequenceDiagram
     API->>DB: INSERT INTO evidence (id, sha256_hash, sha3_512_hash, storage_uri)
     API->>DB: INSERT INTO image_exhibits (evidence_id, detected_format, width, height, safe_decode_status)
     API->>DB: INSERT INTO custody_events (event_type='EVIDENCE_RECEIVED', actor_identity, event_data_hash)
-    
+
     API->>Celery: Publish forensic task `orchestrator.dispatch_image_analysis(evidence_id)`
     API-->>Officer: 201 Created (evidence_id, sha256_hash, safe_decode_status)
     deactivate API
@@ -1682,20 +1682,20 @@ The Face, Portrait & Biometric Analysis module enforces strict judicial privacy 
 flowchart TD
     IN_IMG["RGB Normalized Image Array"] --> DET["FPA-01: RetinaFace / SCRFD Face Detector"]
     DET --> BBOX["Detected Face Bounding Boxes $[y_1, x_1, y_2, x_2]$"]
-    
+
     BBOX --> QUAL{"Face Quality Gate<br/>Resolution $\ge 64\times 64$, Blur $< 0.85$, Pose $|\theta| \le 45^\circ$"}
-    
+
     QUAL -- No --> LOW_QUAL["Tag FACE_DEGRADED_UNSUITABLE_FOR_BIOMETRIC"]
     LOW_QUAL --> AIM_ROUTING["Forward to AIM-03 for Face-Swap / Retouching Forensics"]
-    
+
     QUAL -- Yes --> LM["FPA-02: MediaPipe 468 3D Facial Mesh Landmarker"]
     LM --> ALIGN["5-Point Similarity Affine Transform Alignment (112x112)"]
-    
+
     ALIGN --> ROUTE_AUTH{"Authorized 1:1 Reference Mugshot Provided?"}
-    
+
     ROUTE_AUTH -- "No (General Triage)" --> NO_BIO["Record Landmarks & Pose Angles Only<br/>(ZERO Biometric Feature Storage)"]
     NO_BIO --> AIM_ROUTING
-    
+
     ROUTE_AUTH -- "Yes (Court Order / Case Token Valid)" --> EMB["FPA-04: ArcFace / MagFace 512-d Feature Extractor"]
     EMB --> ENCRYPT["AES-256-GCM Encrypt Embedding Vector"]
     ENCRYPT --> COSINE["Compute Cosine Distance vs Reference Mugshot"]
@@ -1751,7 +1751,7 @@ AIM provides a multi-branch, multi-scale architecture for detecting AI-generated
 ```mermaid
 flowchart TD
     IMG["Working Image Exhibit (RGB)"] --> TILES["Tiling Dispatcher (512x512 with 64px overlap)"]
-    
+
     subgraph BRANCH1["Branch 1: Whole-Image Generative Classifier (AIM-01)"]
         CLIP_B["SigLIP / ViT-L/14 Feature Backbone"]
         CNN_B["ResNet50 / EfficientNet Spatial Texture Backbone"]
@@ -2645,7 +2645,7 @@ sequenceDiagram
     activate Core
     Core->>Hasher: Re-verify raw bitstream against original SHA-256
     Hasher-->>Core: Checksum Verified (Bit-for-bit identity confirmed)
-    
+
     Core->>JCS: Compile structured exhibit manifest into Canonical JSON (RFC 8785)
     activate JCS
     JCS-->>Core: Return deterministic byte string $B_{\text{canonical}}$
@@ -2687,12 +2687,12 @@ flowchart TD
         L2["Leaf 2: $H_2$"]
         L3["Leaf 3: $H_3$"]
         L4["Leaf 4: $H_4$"]
-        
+
         N12["Node 1-2: $\text{SHA-256}(0x01 \parallel L_1 \parallel L_2)$"]
         N34["Node 3-4: $\text{SHA-256}(0x01 \parallel L_3 \parallel L_4)$"]
-        
+
         ROOT["Merkle Root $R_{\text{batch}} = \text{SHA-256}(0x01 \parallel N_{12} \parallel N_{34})$"]
-        
+
         L1 & L2 --> N12
         L3 & L4 --> N34
         N12 & N34 --> ROOT
@@ -3032,10 +3032,10 @@ sequenceDiagram
     CEIPL-->>AFB: DAG Node Created (Parent: Video, Child: Audio)
     AFB->>REDIS: Dispatch Celery Job (Profile: VIDEO_AUDIO_DEEP_INSPECTION)
     AFB-->>VISTA: Return AFBJobReference(job_id, audio_evidence_id)
-    
+
     REDIS->>AURAS: Execute ARE (Splicing/Signal), MVSI (Diarization/LID), ADDE (Deepfake)
     AURAS->>DB: Persist findings, speaker intervals, deepfake suspicion curves
-    
+
     VISTA->>DB: Poll / Await Job Completion
     DB-->>VISTA: Return AURAS Findings & Speaker Timestamps
     VISTA->>VISTA: Forward Audio Intervals to AVSC for Lip-Sync Evaluation
@@ -3137,7 +3137,7 @@ sequenceDiagram
     FaceTrack-->>VISTA: Return N Active Face Trajectories {track_1, ..., track_N}
     VISTA->>AURAS_MVSI: get_speech_segments(audio_artifact_id)
     AURAS_MVSI-->>VISTA: Active speech intervals [t_start, t_end] & speaker labels
-    
+
     loop For Each Face Trajectory i in 1..N
         VISTA->>CropNorm: extract_mouth_roi_sequence(track_i, [t_start, t_end])
         CropNorm-->>VISTA: Standardized 112x112 Greyscale Lip Sequence V_i(t)
@@ -3202,7 +3202,7 @@ The Video Deepfake & AI-Generation Detection Engine (VDF) integrates spatial fra
 ```mermaid
 flowchart TD
     WINDOW["16-Frame Face / Video Sliding Window (8-Frame Stride)"] --> BRANCHES
-    
+
     subgraph BRANCHES["Parallel Multi-Family Detection Heads"]
         XCEPT["Frame Spatial: XceptionNet (Logit z_1)"]
         EFF["Frame Dual-Domain: EfficientNet-B4 (Logit z_2)"]
@@ -3220,7 +3220,7 @@ flowchart TD
     VMAE -.->|Feature Vector e in R^768| MAHALANOBIS["Mahalanobis Distance OOD Estimator"]
 
     CALIB1 & CALIB2 & CALIB3 & CALIB4 & CALIB5 --> FUSION["Quality-Weighted Late Fusion Ensemble"]
-    
+
     FUSION --> P_FINAL["Calibrated Suspicion Score P(fake) in [0, 1]"]
     MAHALANOBIS --> OOD_METRIC["OOD Metric (IN_DIST / MILD_OOD / HIGH_OOD)"]
 
@@ -3430,20 +3430,20 @@ To maintain strict evidentiary provenance under Section 65B IEA / Section 63 BSA
 flowchart TD
     INGEST["📥 Video Exhibit Ingested & SHA-256 Hashed"] --> PRE_EXT["1. Pre-Questioning Metadata Extraction<br/>(FFprobe / PyAV / ExifTool / OSD PaddleOCR)"]
     PRE_EXT --> TRIAGE{"2. CCTV-01: Multi-Signal Source Triage"}
-    
+
     TRIAGE -->|Confidence Score| CLASS_RES["Classify Source Type:<br/>LIKELY_CCTV_FOOTAGE | POSSIBLE_CCTV_FOOTAGE |<br/>GENERAL_VIDEO | SCREEN_RECORDING_CANDIDATE | UNKNOWN_SOURCE_TYPE"]
-    
+
     CLASS_RES --> POPULATE["3. Populate Initial CCTVContext Record<br/>(Mark Machine Observations as MACHINE_EXTRACTED)"]
-    
+
     POPULATE --> EVAL_MISSING{"4. Evaluate Critical Missing Parameters<br/>(Source Type? Native Export? Clock Timezone?)"}
-    
+
     EVAL_MISSING -->|All Critical Context Extracted| SKIP_Q["Skip Questionnaire: Zero Redundant Prompts"]
     EVAL_MISSING -->|Context Missing & Relevant| FORM_Q["5. Formulate Adaptive Questions (A–E)<br/>(Present Auto-Extracted Clues to Examiner for Confirmation)"]
-    
+
     FORM_Q --> USER_PROMPT["Present Adaptive Questionnaire to Examiner"]
     USER_PROMPT -->|User Submits Responses| MERGE_RESP["Merge User Responses<br/>(Tag each field strictly as USER_REPORTED)"]
     USER_PROMPT -->|User Skips / Timeout| CONTINUE_SKIP["Enforce Continuation Invariant<br/>(Tag missing fields as NOT_PROVIDED; Widen Uncertainty Bounds)"]
-    
+
     SKIP_Q --> EXEC_ENGINES["6. Dispatch VISTA Forensic Engines (VRE, AVSC, VDF, VCI, CCTV)"]
     MERGE_RESP --> EXEC_ENGINES
     CONTINUE_SKIP --> EXEC_ENGINES
@@ -3486,14 +3486,14 @@ sequenceDiagram
     PARSER->>PARSER: Parse XML / SMIL Signature Box (urn:onvif:media-signing)
     PARSER->>CERT: Extract Embedded Signing Certificate
     CERT->>CERT: Validate Chain of Trust & Expiration
-    
+
     PARSER->>HASH_VAL: Stream Raw H.264/H.265 NAL Units
     HASH_VAL->>HASH_VAL: Compute Continuous SHA-256 NAL Hash Chain
     HASH_VAL-->>VERIFIER: Computed Stream Digest
-    
+
     PARSER->>VERIFIER: Extract Signed Digest from Media Signature Atom
     VERIFIER->>VERIFIER: Verify RSA-SHA256 / ECDSA-SHA256 Signature
-    
+
     alt Signature Matches & Hash Chain Intact
         VERIFIER-->>EXHIBIT: Status: ONVIF_MEDIA_SEAL_VERIFIED (Untampered)
     else Signature Invalid or Hash Mismatch
@@ -3537,7 +3537,7 @@ Every downstream derivative produced during forensic processing is registered as
 ```mermaid
 flowchart TD
     RAW["Raw Seized Video File<br/>(evidence_id, SHA-256, SHA3-512)"]
-    
+
     RAW --> ART_AUDIO_RAW["1. EXTRACTED_AUDIO_STREAM<br/>Lossless bitstream (-c:a copy)<br/>SHA-256 Linked"]
     RAW --> ART_FRAMES["4. DECODED_FRAME_EXTRACT<br/>Lossless PNG at exact PTS<br/>SHA-256 Linked"]
     RAW --> ART_VRE_PTS["VRE Bitstream & Cadence JSON<br/>Atom & PTS Log"]
@@ -3681,7 +3681,7 @@ erDiagram
     ANALYSIS_JOB ||--o{ FINDING : emits
     ANALYSIS_JOB ||--o{ ENGINE_RUN : executes
     DERIVED_ARTIFACT ||--o{ FINDING : supports
-    
+
     CCTV_CONTEXT ||--o{ QUESTIONNAIRE_RESPONSE : records
     ANALYSIS_JOB ||--|| COMPOSITE_REPORT : compiles
     COMPOSITE_REPORT ||--|| CERTIFICATE_65B : certifies
@@ -3746,43 +3746,43 @@ erDiagram
 ```mermaid
 stateDiagram-v2
     [*] --> INGESTED: Exhibit Uploaded & Pre-Hashed (SHA-256 / SHA3-512)
-    
+
     INGESTED --> DEFENSIVE_PARSING: WORM Storage Locked (POSIX 0400)
-    
+
     DEFENSIVE_PARSING --> PARSE_FAILED: Bitstream Corrupted / Format Bomb
     PARSE_FAILED --> [*]: Quarantine Exhibit & Log Failure
-    
+
     DEFENSIVE_PARSING --> TRIAGE_EVAL: PyAV / FFprobe Extraction Successful
-    
+
     TRIAGE_EVAL --> CCTV_DISCOVERY: Source Class == CCTV_CANDIDATE
     TRIAGE_EVAL --> PIPELINE_DISPATCH: Source Class == GENERAL_VIDEO
-    
+
     CCTV_DISCOVERY --> ADAPTIVE_PROMPT: Context Missing & Meaningful
     CCTV_DISCOVERY --> PIPELINE_DISPATCH: All Critical Context Extracted
-    
+
     ADAPTIVE_PROMPT --> PIPELINE_DISPATCH: Examiner Submits Responses (USER_REPORTED)
     ADAPTIVE_PROMPT --> PIPELINE_DISPATCH: Examiner Skips (Continuation Invariant)
-    
+
     state PIPELINE_DISPATCH {
         [*] --> VRE_EXEC: Bitstream & Cadence Analysis
         [*] --> AFB_EXEC: Audio Stream Extraction & AURAS Dispatch
         [*] --> VDF_EXEC: Deepfake & Generative Video Models
         [*] --> VCI_EXEC: Taxonomy, Person Tracking & OCR
-        
+
         AFB_EXEC --> AVSC_EXEC: Audio Waveform Available for Lip-Sync
     }
-    
+
     PIPELINE_DISPATCH --> EVIDENCE_FUSION: All Dispatched Engine Runs Completed
-    
+
     EVIDENCE_FUSION --> DRAFT_REPORT: Cross-Modal Conflict Rules Evaluated
-    
+
     DRAFT_REPORT --> EXAMINER_REVIEW: Human Examiner Audits Findings & Heatmaps
-    
+
     EXAMINER_REVIEW --> RE_ANALYSIS: Examiner Requests Deep Examination Profile
     RE_ANALYSIS --> PIPELINE_DISPATCH
-    
+
     EXAMINER_REVIEW --> REPORT_SEALED: Examiner Signs Report with Ed25519 Token
-    
+
     REPORT_SEALED --> CERTIFIED_DOSSIER: RFC 3161 TSA Attached & Section 65B/63 BSA Generated
     CERTIFIED_DOSSIER --> [*]
 ```
@@ -3885,7 +3885,7 @@ To prevent computational bottlenecks on long surveillance exhibits (e.g. 24-hour
 ## 11.B Cross-Modal Deepfake Validation Framework (CDVF) Technical Specification
 
 ### 11.B.1 Framework Boundaries & Shared Architecture
-The **Cross-Modal Deepfake Validation Framework (CDVF)** is a centralized evaluation, calibration, and model-governance capability within PS-05. It serves as the common scientific validation backbone across the **AIF (Image)**, **AURAS (Audio)**, and **VISTA (Video/CCTV)** forensic detection engines. 
+The **Cross-Modal Deepfake Validation Framework (CDVF)** is a centralized evaluation, calibration, and model-governance capability within PS-05. It serves as the common scientific validation backbone across the **AIF (Image)**, **AURAS (Audio)**, and **VISTA (Video/CCTV)** forensic detection engines.
 
 CDVF does **NOT** act as a fourth standalone media-detection engine. It does not ingest questioned evidence files directly or perform primary forensic extraction; rather, it governs, benchmarks, stress-tests, calibrates, and certifies the detection models operating inside AIF, AURAS, and VISTA.
 
@@ -4025,7 +4025,7 @@ flowchart TD
     CORPUS["Raw Media Corpus"] --> GROUP_KEYS["Extract Root Grouping Keys\n(Root Video ID, Actor Identity, Session ID)"]
     GROUP_KEYS --> HIERARCHY["Hierarchical Group Stratification Engine"]
     HIERARCHY --> SPLIT_GEN["Grouped Stratified Partitioning\n(Train 60% / Calibration 10% / Val 10% / Test 20%)"]
-    
+
     SPLIT_GEN --> T_SET["Train Partition (Frozen)"]
     SPLIT_GEN --> C_SET["Calibration Partition (Isolated)"]
     SPLIT_GEN --> V_SET["Validation Partition (Tuning)"]
@@ -4251,7 +4251,7 @@ flowchart TD
     INPUT["Questioned Exhibit (Image / Audio / Video)"] --> FEATURE["Extract Latent Embedding Vectors: z = f_backbone(x)"]
     FEATURE --> OOD_SCORE["Compute OOD Score S_OOD(x)\n(Mahalanobis Distance / Energy Score)"]
     OOD_SCORE --> GATING{"S_OOD(x) <= tau_OOD\n(Within Validated Manifold?)"}
-    
+
     GATING -->|Yes: In-Distribution| CALIB["Apply Calibration Scaling\nOutput Calibrated P(Manipulated)"]
     GATING -->|No: Domain Shift| ABSTAIN["ABSTAIN FROM VERDICT\nStatus: INCONCLUSIVE_OOD\nExplain: Distribution Shift Detected"]
 ```
@@ -4320,19 +4320,19 @@ $$\text{Authenticity} \neq \frac{\text{Score}_{\text{Image}} + \text{Score}_{\te
 ```mermaid
 flowchart TB
     EXHIBIT["Seized Multi-Modal Video Exhibit (MP4)"] --> DEMUX["Lossless Demuxer (PyAV / FFmpeg)"]
-    
+
     DEMUX --> VIDEO_STREAM["Extracted Video Frames (YUV420p)"]
     DEMUX --> AUDIO_STREAM["Extracted Audio Track (WAV 16kHz)"]
-    
+
     VIDEO_STREAM --> VDF["VISTA: VDF Video Deepfake Detector\n(Spatial Xception + Temporal FTCN)"]
     AUDIO_STREAM --> ADDE["AURAS: ADDE Audio Deepfake Detector\n(AASIST + WavLM SSL)"]
-    
+
     VIDEO_STREAM & AUDIO_STREAM --> AVSC["VISTA: AVSC SyncNet Engine\n(Lip-Sync Offset Delta t & Acoustic Match)"]
-    
+
     VDF --> F_V["Finding: Video Face Spliced\n(Frame 120-180, p=0.96)"]
     ADDE --> F_A["Finding: Speech Bona Fide\n(Natural Vocoder Phase, p=0.08)"]
     AVSC --> F_SYNC["Finding: Lip-Sync Desynchronized\n(Delta t = +380ms Discontinuity)"]
-    
+
     F_V & F_A & F_SYNC --> DAG["Cross-Modal Evidence DAG\n(Tracks Shared Stream Dependencies)"]
     DAG --> FUSION_SUMMARY["Cross-Modal Forensic Finding\n'Selective Video Manipulation Detected with Intact Original Audio'\n(Zero Naive Score Averaging)"]
 ```
@@ -4375,7 +4375,7 @@ flowchart TD
     G9 --> G10["Gate 10: Localisation Mask IoU >= 0.65 (Where Supported)"]
     G10 --> G11["Gate 11: Subgroup Disparity Ratio <= 2.0x"]
     G11 --> G12["Gate 12: Inference Latency & Peak VRAM <= 8GB Certified"]
-    
+
     G12 --> DECISION{"All 12 Gates Passed?"}
     DECISION -->|Yes| APPROVE["Sign ValidationApproval\nState: VALIDATED_FOR_DEFINED_SCOPE"]
     DECISION -->|Partial / Scope Restricted| SCOPE_APPROVE["Approve with Explicit Scope Boundaries\n(e.g. Valid only for JPEG Q >= 75)"]
@@ -4482,6 +4482,113 @@ src/ps05/cdvf/
     ├── __init__.py
     └── contracts.py               # Pydantic v2 data models for all CDVF entities
 ```
+
+---
+
+### 11.B.17 Model Input/Output Contracts & Standardization Engine
+
+To ensure that disparate deepfake detection models from AIF, AURAS, and VISTA can be evaluated, calibrated, and gated within CDVF without ad-hoc shims, CDVF enforces rigid input/output tensor contracts:
+
+#### 1. Input Tensor Standardization Specifications
+- **Image Models (AIF):**
+  - Tensor geometry: $[B, C, H, W]$ where $B \in [1, 64]$, $C=3$ (RGB), and $(H, W) \in \{(224, 224), (256, 256), (512, 512)\}$.
+  - Data type: `torch.float32`.
+  - Normalization: ImageNet statistics ($\mu = [0.485, 0.456, 0.406]$, $\sigma = [0.229, 0.224, 0.225]$) or zero-centered $[-1.0, +1.0]$.
+  - Face alignment: When task requires facial ROI, bounding box is scaled with a mandatory $1.3\times$ margin and 5-point similarity transformation alignment.
+- **Audio Models (AURAS):**
+  - Tensor geometry: $[B, 1, T]$ where $T = 32,000$ samples corresponding to a standardized $2.0\text{ s}$ window at $16,000\text{ Hz}$.
+  - Stride / Hop: Sliding window hop size is fixed at $0.5\text{ s}$ ($8,000$ samples).
+  - Data type: `torch.float32`, mono channel.
+  - Normalization: Peak amplitude normalization to $[-1.0, +1.0]$ or zero-mean unit-variance.
+- **Video Models (VISTA):**
+  - Tensor geometry: $[B, T, C, H, W]$ where $T \in \{16, 32\}$ contiguous or uniformly sampled frames ($5\text{ fps}$), $C=3$, and $(H, W) \in \{(224, 224), (256, 256)\}$.
+  - Cropping: Extracted facial sequences preserve fixed bounding boxes to prevent synthetic temporal jitter.
+
+#### 2. Model Inference Output Standardization
+Every model evaluated under CDVF must emit a standardized `CDVFModelInferenceOutput` dictionary:
+- `raw_logits`: Tensor $[B, K]$ representing pre-softmax / pre-sigmoid activations.
+- `probabilities`: Calibrated or uncalibrated posterior probabilities $[B, K] \in [0.0, 1.0]$.
+- `penultimate_embeddings`: Latent feature representation $\mathbf{z}(x) \in \mathbb{R}^D$ ($D \in [128, 2048]$) extracted from the penultimate layer, utilized exclusively for OOD Mahalanobis distance calculation.
+- `spatial_mask`: Optional localization heatmap $[B, 1, H, W] \in [0.0, 1.0]$ representing pixel-level manipulation probabilities.
+- `temporal_segments`: Optional list of localized tampered intervals with start and end timestamps in milliseconds.
+- `inference_latency_ms`: Measured forward pass wall-clock time in milliseconds.
+
+---
+
+### 11.B.18 Asynchronous Orchestration, Worker Routing & Resource Limits
+
+CDVF leverages the platform's distributed Celery / Redis task queue to execute high-compute benchmark runs, cross-dataset transfer sweeps, and calibration fitting without blocking active casework:
+
+```mermaid
+flowchart TD
+    API["FastAPI / CLI Dispatcher\n(POST /cdvf/benchmarks/run)"] --> TASK_GEN["Task Partitioning Engine\n(Chunks 10,000 items into 20 batches of 500)"]
+    TASK_GEN --> REDIS["Redis Task Broker\n(Queue: 'cdvf_benchmark_queue')"]
+
+    REDIS --> W1["Worker 1 (GPU cgroup: 8GB VRAM)\nBatches 1-5"]
+    REDIS --> W2["Worker 2 (GPU cgroup: 8GB VRAM)\nBatches 6-10"]
+    REDIS --> W3["Worker 3 (GPU cgroup: 8GB VRAM)\nBatches 11-15"]
+    REDIS --> W4["Worker 4 (GPU cgroup: 8GB VRAM)\nBatches 16-20"]
+
+    W1 & W2 & W3 & W4 --> REDUCE["Benchmark Metric Reducer\n(Aggregates Logits, Computes AUC, ECE, CIs)"]
+    REDUCE --> WORM_SAVE["WORM Storage Vault\n(Saves Signed BenchmarkRun Manifest)"]
+```
+
+#### Celery Task Signatures
+1. `cdvf.tasks.execute_benchmark_run(run_id: str, model_id: str, split_manifest_id: str, operational_params: dict) -> dict`
+2. `cdvf.tasks.fit_calibration_artifact(calibration_id: str, model_id: str, cal_split_id: str, method: str) -> dict`
+3. `cdvf.tasks.compute_ood_reference_manifold(model_id: str, in_dist_dataset_id: str) -> dict`
+4. `cdvf.tasks.execute_regression_suite(candidate_model_id: str, baseline_model_id: str) -> dict`
+
+#### Resource Quotas & Isolation
+- **GPU Memory Cgroup Isolation:** Every benchmark worker is assigned an exclusive GPU memory cgroup capped at $8\text{ GB}$ VRAM. PyTorch caching allocator is configured with `max_split_size_mb = 256` to prevent memory fragmentation.
+- **System Memory Ceiling:** Worker processes are bound by `RLIMIT_AS` capped at $16\text{ GB}$ RAM. Any worker exceeding memory quotas is terminated by cgroup OOM killer without affecting parent processes.
+- **Execution Timeout Quota:** Single-sample inference timeout is enforced at $2,000\text{ ms}$; batch jobs time out after $15\text{ minutes}$ per $1,000$ samples.
+
+---
+
+### 11.B.19 Comprehensive Error-Handling Semantics & Exception Taxonomy
+
+CDVF implements explicit, trapped forensic exceptions to guarantee that no benchmark or operational failure results in silent degradation or arbitrary verdicts:
+
+| Exception Class | Trigger Condition | System Action | Evidentiary Log Level |
+| :--- | :--- | :--- | :--- |
+| **`CHECKPOINT_INTEGRITY_VIOLATION`** | Checkpoint weights file SHA-256 does not match `cdvf_model_registry.checkpoint_sha256`. | Instantly aborts model instantiation; transitions model to state `REJECTED`. | `CRITICAL_SECURITY_ALERT` |
+| **`DATASET_LEAKAGE_DETECTED`** | Automated set intersection detects shared grouping keys between calibration/training and test sets. | Halts benchmark execution immediately; marks run as `LEAKAGE_DETECTED`; quarantines split manifest. | `CRITICAL_EVIDENTIARY_ERROR` |
+| **`LICENSE_UNVERIFIED`** | Upstream weights license string contains terms prohibiting commercial or law enforcement forensic use. | Prohibits registration in production registry; restricts model to sandbox research. | `SECURITY_WARNING` |
+| **`INSUFFICIENT_AUDIO_DURATION`** | Audio sample duration $< 0.5\text{ s}$, preventing sliding-window feature extraction. | Returns decision state `INSUFFICIENT_EVIDENCE`; logs duration warning. | `OPERATIONAL_NOTICE` |
+| **`NO_FACES_DETECTED`** | Video or image exhibit submitted to facial model contains zero detectable face crops. | Emits `TASK_PRECONDITION_FAILED`; routes exhibit to non-facial scene detectors. | `OPERATIONAL_NOTICE` |
+| **`TASK_PRECONDITION_FAILED`** | Exhibit violates structural preconditions (e.g. landscape image to face-swap model). | Rejects analysis with explicit explanation; avoids emitting false manipulation scores. | `OPERATIONAL_WARNING` |
+| **`CALIBRATION_DOMAIN_SHIFT`** | Held-out calibration evaluation partition exhibits $\operatorname{ECE} > 0.05$ after fitting. | Rejects calibration artifact; prompts re-fitting or annotates model as uncalibrated. | `EVALUATION_WARNING` |
+| **`SUBGROUP_SAMPLE_SIZE_INSUFFICIENT`**| Evaluated demographic or device subgroup has fewer than 50 independent samples. | Suppresses statistical disparity metric; marks subgroup as `SAMPLE_SIZE_INSUFFICIENT`. | `STATISTICAL_NOTICE` |
+| **`REGRESSION_LIMIT_EXCEEDED`** | Candidate model shows performance drop $\Delta\operatorname{AUC} < -0.010$ or $\Delta\operatorname{ECE} > +0.010$ against baseline. | Aborts automated model promotion pipeline; generates regression breakdown report. | `EVALUATION_FAILURE` |
+| **`REVALIDATION_REQUIRED_EXCEPTION`**| Operational execution attempted on a model whose dependencies or preprocessing shifted. | Watermarks output with `UNCERTIFIED_MODEL_EXECUTION`; triggers background validation job. | `EVIDENTIARY_WARNING` |
+
+---
+
+### 11.B.20 Master Requirement Traceability Matrix (CDVF-01 through CDVF-20)
+
+| Requirement ID | PRD Title & Summary | TRD Subsection | Data Contract / Pydantic Model | Implementation Phase | Automated Test Reference |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **CDVF-01** | Model Registry, Checkpoint Provenance & Version Tracking | § 11.B.2, § 11.B.17 | `ModelRegistryEntry`, `CDVFModelInputSpec` | CDVF-A1 | `tests/unit/cdvf/test_registry_provenance.py` |
+| **CDVF-02** | Dataset Provenance, Dataset Cards & Quality Governance | § 11.B.3 | `DatasetCard`, `CDVFQualityTier` | CDVF-A2 | `tests/unit/cdvf/test_dataset_provenance.py` |
+| **CDVF-03** | Leakage-Resistant Source-Group Splitting & Manifests | § 11.B.3 | `DatasetSplitManifest` | CDVF-A2 | `tests/unit/cdvf/test_leakage_prevention.py` |
+| **CDVF-04** | Standardised Cross-Modal Benchmark Execution Protocol | § 11.B.4 | `BenchmarkRun`, `EvaluationMetric` | CDVF-A3 | `tests/benchmarks/cdvf/test_benchmark_runner.py` |
+| **CDVF-05** | AIF Image Deepfake & Manipulation Detection Validation | § 11.B.5.1 | `BenchmarkRun`, `LocalizationEvaluationResult` | CDVF-A4 | `tests/benchmarks/cdvf/test_image_validation.py` |
+| **CDVF-06** | AURAS Audio Deepfake & Speech Manipulation Validation | § 11.B.5.2 | `BenchmarkRun`, `LocalizationEvaluationResult` | CDVF-A5 | `tests/benchmarks/cdvf/test_audio_validation.py` |
+| **CDVF-07** | VISTA Video & CCTV Deepfake Detection Validation | § 11.B.5.3, § 11.B.5.4| `BenchmarkRun`, `LocalizationEvaluationResult` | CDVF-A6 | `tests/benchmarks/cdvf/test_video_validation.py` |
+| **CDVF-08** | Cross-Dataset Generalisation Testing Protocol | § 11.B.6 | `BenchmarkRun` (Mode B) | CDVF-A7 | `tests/benchmarks/cdvf/test_cross_dataset.py` |
+| **CDVF-09** | Unseen-Generator & Novel Architecture Testing | § 11.B.6 | `BenchmarkRun` (Mode C) | CDVF-A7 | `tests/benchmarks/cdvf/test_unseen_generators.py` |
+| **CDVF-10** | Post-Processing & Environmental Robustness Benchmarks | § 11.B.5, § 11.B.6 | `BenchmarkRun` (Mode D, F) | CDVF-A10 | `tests/benchmarks/cdvf/test_robustness_perturbations.py` |
+| **CDVF-11** | Confidence Calibration, Brier Score & ECE Evaluation | § 11.B.8 | `CalibrationArtifact` | CDVF-A8 | `tests/unit/cdvf/test_calibration_engine.py` |
+| **CDVF-12** | Out-of-Distribution (OOD) Detection & Domain Shift Gating | § 11.B.9 | `OODEvaluationResult` | CDVF-A8 | `tests/unit/cdvf/test_ood_detection.py` |
+| **CDVF-13** | Abstention, Inconclusive Outcomes & Selective Prediction | § 11.B.10 | `CDVFDecisionState`, `SelectiveRiskResult` | CDVF-A9 | `tests/unit/cdvf/test_abstention_policy.py` |
+| **CDVF-14** | Manipulation-Localisation (Spatial & Temporal) Evaluation | § 11.B.7.4 | `LocalizationEvaluationResult` | CDVF-A4..A6 | `tests/benchmarks/cdvf/test_localization_metrics.py` |
+| **CDVF-15** | Cross-Modal Evidence Consistency & Anti-Averaging Fusion | § 11.B.11 | `CrossModalConsistencyMatrix`, `EvidenceDAG` | CDVF-A9 | `tests/unit/cdvf/test_cross_modal_fusion.py` |
+| **CDVF-16** | Demographic, Device & Environmental Subgroup Evaluation | § 11.B.12 | `SubgroupDisparityResult` | CDVF-A10 | `tests/benchmarks/cdvf/test_subgroup_evaluation.py` |
+| **CDVF-17** | Determinism, Reproducibility & Continuous Regression | § 11.B.14 | `RegressionResult` | CDVF-A11 | `tests/regression/cdvf/test_regression_suite.py` |
+| **CDVF-18** | Scoped Model Approval, Operating Gates & Governance | § 11.B.13 | `ValidationApproval`, `CDVFApprovalState` | CDVF-A10 | `tests/unit/cdvf/test_model_approval_gates.py` |
+| **CDVF-19** | Machine-Readable Evaluation Manifests & Artifacts | § 11.B.15 | `StandardArtifactBundleManifest` | CDVF-A11 | `tests/integration/cdvf/test_artifact_bundle.py` |
+| **CDVF-20** | Unified Human-Readable Forensic Evaluation Dossier | § 11.B.15, § 13.5 | `Section65BEvaluationDossier` | CDVF-A11 | `tests/integration/cdvf/test_evaluation_dossier.py` |
 
 ---
 
@@ -4850,7 +4957,7 @@ class GranularityEnum(str, Enum):
 
 class GeospatialObservationSchema(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    
+
     observation_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     case_id: uuid.UUID
     evidence_id: uuid.UUID
@@ -4879,7 +4986,7 @@ class GeospatialObservationSchema(BaseModel):
 
 class GeospatialCandidateSchema(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    
+
     candidate_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     case_id: uuid.UUID
     evidence_id: uuid.UUID
@@ -4900,7 +5007,7 @@ class GeospatialCandidateSchema(BaseModel):
 
 class GeospatialTrackImportRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    
+
     case_id: uuid.UUID
     evidence_id: uuid.UUID
     track_format: str = Field(..., pattern="^(GPX|KML|NMEA|FIT|CSV)$")
@@ -4909,7 +5016,7 @@ class GeospatialTrackImportRequest(BaseModel):
 
 class GeospatialAnalysisRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    
+
     case_id: uuid.UUID
     evidence_id: uuid.UUID
     enable_visual_recovery: bool = True
@@ -4920,7 +5027,7 @@ class GeospatialAnalysisRequest(BaseModel):
 
 class GeospatialAnalysisResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    
+
     analysis_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     case_id: uuid.UUID
     evidence_id: uuid.UUID
@@ -4971,7 +5078,7 @@ class CDVFDecisionStatus(str, Enum):
 
 class ModelRegistryEntry(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
-    
+
     registry_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     model_id: str = Field(..., max_length=100)
     model_family: str = Field(..., max_length=50) # RAWNET2, AASIST, WAVLM, EFFICIENTNET, XCEPTION, TRUFOR, VIDEOMAE
@@ -4993,7 +5100,7 @@ class ModelRegistryEntry(BaseModel):
 
 class DatasetCard(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
-    
+
     dataset_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     dataset_name_slug: str = Field(..., max_length=100)
     official_name: str = Field(..., max_length=150)
@@ -5008,7 +5115,7 @@ class DatasetCard(BaseModel):
 
 class DatasetSplitManifest(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
-    
+
     split_manifest_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     dataset_id: uuid.UUID
     manifest_version: str = Field(..., max_length=50)
@@ -5024,7 +5131,7 @@ class DatasetSplitManifest(BaseModel):
 
 class EvaluationMetric(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    
+
     metric_name: str
     value: float
     confidence_interval_95: Optional[List[float]] = None # [p025, p975]
@@ -5033,7 +5140,7 @@ class EvaluationMetric(BaseModel):
 
 class BenchmarkRun(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    
+
     run_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     model_id: uuid.UUID
     split_manifest_id: uuid.UUID
@@ -5052,7 +5159,7 @@ class BenchmarkRun(BaseModel):
 
 class CalibrationArtifact(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
-    
+
     calibration_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     model_id: uuid.UUID
     calibration_split_id: uuid.UUID
@@ -5068,7 +5175,7 @@ class CalibrationArtifact(BaseModel):
 
 class OODEvaluationResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    
+
     evaluation_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     model_id: uuid.UUID
     method: str = Field(..., pattern="^(MAHALANOBIS|ENERGY|PREDICTION_ENTROPY)$")
@@ -5082,7 +5189,7 @@ class OODEvaluationResult(BaseModel):
 
 class LocalizationEvaluationResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    
+
     evaluation_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     model_id: uuid.UUID
     modality: str = Field(..., pattern="^(IMAGE|AUDIO|VIDEO)$")
@@ -5095,7 +5202,7 @@ class LocalizationEvaluationResult(BaseModel):
 
 class ValidationApproval(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
-    
+
     approval_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     model_id: uuid.UUID
     benchmark_run_id: uuid.UUID
@@ -5111,7 +5218,7 @@ class ValidationApproval(BaseModel):
 
 class RegressionResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    
+
     regression_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     candidate_model_id: uuid.UUID
     baseline_model_id: uuid.UUID
@@ -5120,6 +5227,45 @@ class RegressionResult(BaseModel):
     failing_slices: List[str] = Field(default_factory=list)
     ci_bounds: Dict[str, List[float]]
     checked_at: datetime = Field(default_factory=datetime.utcnow)
+
+class CDVFModelInputSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    modality: str = Field(..., pattern="^(IMAGE|AUDIO|VIDEO)$")
+    tensor_shape: List[int] # e.g. [1, 3, 224, 224] or [1, 1, 32000]
+    dtype: str = "float32"
+    channels: int = Field(..., ge=1, le=3)
+    sampling_rate: Optional[int] = None # 16000 for audio
+    temporal_frames: Optional[int] = None # 16 or 32 for video
+    normalization_policy: str = Field(..., max_length=100) # e.g. "IMAGENET_MEAN_STD" or "MIN_MAX_FLOAT"
+    face_alignment_required: bool = False
+    face_crop_margin: Optional[float] = 1.3
+
+class CDVFModelInferenceOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    model_id: uuid.UUID
+    sample_id: str
+    raw_logits: List[float]
+    calibrated_probabilities: List[float]
+    penultimate_embeddings: List[float] # D-dimensional vector for Mahalanobis OOD
+    spatial_mask_compressed: Optional[str] = None # Base64 zlib compressed binary mask
+    temporal_segments: Optional[List[Dict[str, float]]] = None # [{"start_ms": 120.0, "end_ms": 450.0, "conf": 0.94}]
+    inference_latency_ms: float
+    ood_score: Optional[float] = None
+    gated_decision_state: str # One of the 7 canonical decision states
+
+class CDVFTaskPreconditions(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    task_id: str
+    min_resolution: Optional[List[int]] = None # [H, W]
+    min_audio_duration_seconds: float = 0.5
+    min_snr_db: float = 5.0
+    min_jpeg_quality: int = 30
+    max_h264_qp: int = 38
+    faces_required: bool = False
+    supported_codecs: List[str] = Field(default_factory=list)
 ```
 
 ---
@@ -5154,7 +5300,7 @@ flowchart TD
             V_CCTV["CCTV Clock Drift & ONVIF Seal Tests"]
         end
     end
-    
+
     AUDIO_TESTS --> CI_GATE["CI/CD Automated Gate (Exit Code 0)"]
     IMAGE_TESTS --> CI_GATE
     VIDEO_TESTS --> CI_GATE
@@ -5403,4 +5549,3 @@ All deepfake detection model validation, benchmarking, calibration, and governan
 6. **OOD Score Purpose Limitation:** An Out-of-Distribution score measures mathematical distance from the model's certified training manifold. An OOD score must NEVER be reported, interpreted, or cited in courtroom testimony as affirmative evidence of deepfake tampering.
 7. **Scoped Approval Invariant:** A model marked `VALIDATED_FOR_DEFINED_SCOPE` is legally and forensically certified only for the specific tasks, media formats, quality bounds, and decision thresholds documented in its validation record. Executing the model outside its approved scope automatically generates an uncertified finding watermark.
 8. **Immutability of Historical Evaluation Artefacts:** Benchmark run manifests, split records, calibration transforms, regression logs, and examiner approvals must be stored in the CEIPL WORM vault with POSIX `0400` permissions. Once written, benchmark records can never be overwritten, modified, or deleted.
-
