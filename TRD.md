@@ -307,7 +307,14 @@ d:/NextHackathon/
 │       │       │   ├── tracker.py     # VCI-03: ByteTrack / BoT-SORT multi-object trajectory tracker
 │       │       │   ├── people_count.py# VCI-03: Distinct unique person counting vs per-frame count
 │       │       │   ├── actions.py     # VCI-04: VideoMAE / SlowFast action & anomaly localization
-│       │       │   └── ocr_overlay.py # VCI-05: PaddleOCR / Tesseract OSD timestamp & channel reader
+│       │       │   ├── ocr_overlay.py # VCI-05: PaddleOCR / Tesseract OSD timestamp & channel reader
+│       │       │   ├── scene_context.py # VCI-06: Hierarchical multi-label scene & environment classifier
+│       │       │   ├── object_inventory.py # VCI-07: Generalised object inventory & open-vocabulary taxonomy
+│       │       │   ├── vehicle_attributes.py # VCI-08: Fine-grained vehicle type, colour & attribute extractor
+│       │       │   ├── alpr.py        # VCI-09: Separately versioned ALPR / ANPR & Indian HSRP validator
+│       │       │   ├── hazard_triage.py # VCI-10: Hazardous object candidate detector & examiner alerting
+│       │       │   ├── summariser.py  # VCI-11: Structured video summarisation & timeline descriptor
+│       │       │   └── search_rag.py  # VCI-12: Evidence-indexed visual search & Case RAG integration
 │       │       │
 │       │       └── cctv/              # Dedicated CCTV Forensic Profile (Cross-Cutting)
 │       │           ├── triage.py      # CCTV-01: Automated multi-signal CCTV source classification
@@ -3079,6 +3086,12 @@ flowchart TB
             VCI_TRACK["VCI-03: ByteTrack Trajectory & Distinct Person Counting"]
             VCI_ACTION["VCI-04: VideoMAE Anomaly & Action Localization"]
             VCI_OCR["VCI-05: PaddleOCR OSD Timestamp Extraction"]
+            VCI_SCENE["VCI-06: Scene & Environmental Context (Multi-Label)"]
+            VCI_INVENT["VCI-07: Generalised Object Inventory & Open-Vocab"]
+            VCI_VEHICLE["VCI-08: Fine-Grained Vehicle Attributes & Colour"]
+            VCI_ALPR["VCI-09: Separately Versioned ALPR & HSRP Syntax"]
+            VCI_HAZARD["VCI-10: Hazardous Object Triage & Examiner Alert"]
+            VCI_RAG["VCI-11: Evidence-Indexed Search & Case RAG"]
         end
     end
 
@@ -3501,6 +3514,308 @@ The platform categorizes video exhibits across 15 standard forensic operational 
 - Applies perspective rectification, morphological binarization, and OCR recognition via PaddleOCR and Tesseract.
 - Matches text against datetime patterns (`YYYY-MM-DD HH:MM:SS`, `DD/MM/YYYY HH:MM:SS.fff`).
 - Emits structured array of parsed clock values $T_{\text{ocr}}(t)$ indexed by frame number.
+- **Strict Architectural Separation:** `ocr_overlay.py` exclusively parses camera OSD clock overlays and channel watermarks. It is completely decoupled from vehicle license plate OCR, which is independently versioned in `alpr.py`.
+
+#### 11.6.6 Hierarchical Multi-Label Scene & Environmental Context (`ps05.engines.vista.vci.scene_context`)
+The scene context module analyzes physical, environmental, and architectural surroundings across video exhibits.
+
+- **Fundamental Distinction from Source Taxonomy:**
+  - `ps05.engines.vista.vci.taxonomy` categorizes the operational recording mode or capture device profile (e.g., `CCTV_FIXED_SURVEILLANCE`, `DASHCAM_VEHICLE`, `MOBILE_SMARTPHONE_HANDHELD`).
+  - `ps05.engines.vista.vci.scene_context` classifies the semantic real-world physical environment depicted inside the video frames, independent of the capture hardware.
+- **Hierarchical Multi-Label Scene Categories:**
+  1. `RURAL_VILLAGE`: Unpaved/dirt roads, agricultural fields, open countryside, village dwellings, rural settlements.
+  2. `URBAN_COMMERCIAL`: Paved urban streets, sidewalks, shopfronts, commercial signboards, urban markets, crowded bazaars.
+  3. `HIGHWAY_JUNCTION_PARKING`: Expressways, multi-lane highways, traffic roundabouts, signalized intersections, open-air or multi-level parking lots.
+  4. `EDUCATIONAL_INSTITUTIONAL`: Classrooms, indoor corridors, hallways, lecture halls, science laboratories, libraries, auditoriums.
+  5. `RESIDENTIAL_INTERIOR`: Domestic living rooms, bedrooms, domestic kitchens, residential entryways, stairwells.
+  6. `WORKPLACE_INDUSTRIAL`: Corporate offices, conference rooms, industrial warehouses, factory floors, storage depots, retail shops.
+  7. `OUTDOOR_PUBLIC_GROUNDS`: Public parks, playgrounds, open plazas, sports fields, riverfronts, vacant lots.
+  8. `UNKNOWN_MIXED_ENVIRONMENT`: Ambiguous perspective, occluded lens, transition zones, or mixed indoor/outdoor boundaries.
+- **Time-Segmented Temporal Partitioning:**
+  - Videos are not forced into a single global scene label. The video sequence is dynamically segmented into homogeneous temporal intervals:
+    $$\mathcal{S} = \{ S_m = [t_{\text{start}}^{(m)}, t_{\text{end}}^{(m)}] \}_{m=1}^M$$
+    using PySceneDetect and optical flow motion vector divergence.
+  - For each segment $S_m$, SigLIP / Places365 ViT computes multi-label probability distributions $\mathbf{p}_m \in [0, 1]^K$.
+  - A segment may hold multiple valid labels (e.g., `HIGHWAY_JUNCTION_PARKING` and `URBAN_COMMERCIAL`).
+  - If the peak probability $\max_k p_{m, k} < \tau_{\text{scene}}$ (threshold $\tau_{\text{scene}} = 0.45$), the system abstains from guessing and tags the interval as `UNKNOWN_ENVIRONMENT`.
+
+#### 11.6.7 Generalised Object Inventory & Bounded Forensic Taxonomy (`ps05.engines.vista.vci.object_inventory`)
+The object inventory module transforms raw neural object detections into an auditable, timestamp-indexed physical evidence register.
+
+- **Component Decoupling & Responsibility Boundaries:**
+  - `detector.py`: Executes low-level keyframe object detection (YOLOv8x/v10, RT-DETR), emitting raw bounding boxes $[x, y, w, h]$, raw class indices, and logits.
+  - `segmentor.py`: Manages interactive and prompted Segment Anything Model 2 (SAM 2) instance mask propagation, emitting polygon contours and spatial area time series.
+  - `object_inventory.py`: Maintains the authoritative physical evidence catalogue, aggregates temporal presence, enforces bounded forensic taxonomies, executes open-vocabulary candidate expansion, and applies strict classification abstention.
+- **Bounded Forensic Taxonomy:**
+  - Supported Primary Categories: `PERSON`, `VEHICLE` (subdivided in §11.6.8), `BAG_LUGGAGE` (backpack, handbag, suitcase, duffle bag), `PHONE_TABLET`, `LAPTOP_COMPUTER`, `DOCUMENT_PAPER`, `FURNITURE` (chair, table, desk, counter), `TOOL_IMPLEMENT` (hammer, wrench, pry bar), `CONTAINER` (box, crate, bottle, can, drum), `HAZARD_CANDIDATE` (subdivided in §11.6.11).
+- **Open-Vocabulary Candidate Expansion:**
+  - When authorized examiners configure specific case queries (e.g., "blue plastic drum", "black duffle bag"), Grounding DINO / OWLv2 executes prompted zero-shot candidate proposal.
+- **Non-Hallucination & Forensic Abstention Policy:**
+  - When an object candidate exhibits detector confidence below threshold $\tau_{\text{class}}$ or out-of-vocabulary ambiguity, the system emits `UNKNOWN_OBJECT_CANDIDATE` alongside its bounding box, visual quality score, and crop hash.
+  - The engine strictly prohibits inventing speculative forensic classes or forcing ungrounded classifications.
+
+#### 11.6.8 Fine-Grained Vehicle Classification & Visible Attribute Extraction (`ps05.engines.vista.vci.vehicle_attributes`)
+Specialized vehicular forensic intelligence tailored for traffic collisions, hit-and-run incidents, and vehicle movement analysis across diverse international and Indian transit ecosystems.
+
+- **Supported Fine-Grained Vehicle Classes:**
+  1. `MOTORCYCLE_SCOOTER`: Motorized two-wheelers (motorcycles, mopeds, gearless scooters).
+  2. `BICYCLE`: Non-motorized human-powered bicycles.
+  3. `THREE_WHEELER_AUTO_RICKSHAW`: Passenger auto-rickshaws, e-rickshaws, cargo tempos, cycle rickshaws.
+  4. `CAR_SUV`: Sedans, hatchbacks, SUVs, multi-utility vehicles (MUVs), station wagons.
+  5. `BUS`: Public transport buses, school buses, mini-buses, private coaches.
+  6. `TRUCK_VAN`: Light commercial vehicles (LCVs), heavy goods trucks, tippers, container trailers, delivery vans, pickup trucks.
+  7. `OTHER_SUPPORTED_VEHICLE`: Agricultural tractors, construction backhoes, emergency service vehicles, animal-drawn carts.
+- **Visible Colour Extraction Algorithm:**
+  1. Vehicle region is isolated via bounding box and instance mask from `segmentor.py`, eliminating background tarmac and sky pixels.
+  2. Image patch is converted from sRGB to CIE $L^*a^*b^*$ and HSV colour spaces.
+  3. Ambient illumination normalization applies Gray-World and White-Patch Retinex algorithms to mitigate color casting from sodium-vapour streetlights or tinted windows.
+  4. Dominant colour clusters are extracted using Gaussian Mixture Modeling (GMM) and mapped to a standard forensic colour palette: `BLACK`, `WHITE`, `SILVER_GREY`, `RED`, `BLUE`, `GREEN`, `YELLOW_GOLD`, `BROWN`, `ORANGE`, `PURPLE`, `MULTI_TONE`.
+- **Make and Model Non-Claim Boundary:**
+  - Unless an officially calibrated, verified vehicle make/model classifier with pinned weights and evaluated test benchmark is explicitly active, the engine mandates `make_model: null` and sets status flag `MAKE_MODEL_UNVERIFIED`.
+  - The system strictly forbids asserting unverified make, model, or manufacturing year claims in courtroom evidence.
+- **Lighting and Atmospheric Limitations:**
+  - Under monochrome infrared (IR) night illumination or sodium monochromatic lighting, the system outputs `color: "INDETERMINATE"` with reason code `COLOR_INDETERMINATE_IR_LIGHTING`.
+
+#### 11.6.9 Separately Versioned ALPR Pipeline & Format Validation (`ps05.engines.vista.vci.alpr`)
+An independent, forensic-grade Automatic License Plate Recognition pipeline engineered to prevent hallucination and maintain chain-of-custody integrity.
+
+- **Decoupled Pipeline Architecture:**
+  - `alpr.py` operates completely independently of `ocr_overlay.py` with its own versioning, model weights, preprocessing filters, and character grammars.
+- **Eight-Stage Forensic ALPR Lifecycle:**
+  1. *Plate Localisation:* YOLO-Plate detector localizes candidate license plate regions $[x, y, w, h]$ with confidence $C_{\text{loc}}$.
+  2. *Perspective Rectification:* Spatial Transformer Network (STN) or 4-corner homography estimates the plate quadrangle and transforms oblique/tilted plates into fronto-parallel canonical dimensions ($240 \times 80\text{ px}$).
+  3. *Region Enhancement:* Applies Contrast Limited Adaptive Histogram Equalization (CLAHE), bilateral edge-preserving smoothing, and unsharp masking.
+  4. *Character-Level OCR:* Dual PP-OCRv4 and CRNN character segmentation model reads individual alphanumeric characters.
+  5. *Partial Character Recognition:* Emits decoded string $\mathbf{S} = [s_1, s_2, \dots, s_L]$ with per-character confidence vector $\mathbf{c} = [c_1, c_2, \dots, c_L]$, where $c_i \in [0.0, 1.0]$.
+  6. *Plate-Level Confidence Aggregation:*
+     $$C_{\text{plate}} = C_{\text{loc}} \cdot \left( \prod_{i=1}^L c_i \right)^{\frac{1}{L}}$$
+  7. *Jurisdiction-Specific Format Validation:*
+     - Indian High Security Registration Plate (HSRP) / MoRTH Standards:
+       - Standard Format: `^[A-Z]{2}[0-9]{2}[A-Z]{1,3}[0-9]{4}$` (State code + RTO district + series + 4 digits, e.g., `BR01AB1234`).
+       - Bharat Series (BH): `^[0-9]{2}BH[0-9]{4}[A-Z]{1,2}$` (e.g., `22BH1234AA`).
+       - Commercial (yellow), Electric (green), Diplomatic (blue), and Military (arrow prefix) syntactic checks.
+     - International Syntax Filters: Configurable regex rules for non-Indian jurisdictions.
+     - Emits `format_validity: VALID_HSRP_SYNTAX`, `INVALID_SYNTAX`, or `UNCHECKED_JURISDICTION`.
+  8. *Degraded & Obscured Plate Classification:*
+     - Plates with resolution $< 16\text{ px}$ vertical height, severe motion blur ($Laplacian < 40$), or occlusion $> 40\%$ are explicitly classified as `UNREADABLE_PLATE_CANDIDATE` or `OBSCURED_PLATE_CANDIDATE`.
+- **Absolute Non-Hallucination Invariant:**
+  - The pipeline strictly prohibits using language model auto-completion, contextual guessing, or synthetic interpolation to fill in occluded, blurry, or missing characters.
+  - Partially readable plates output unreadable slots as explicit placeholder characters (`?` or `_`), preserving character position without speculation.
+- **Cryptographic Lineage Preservation:**
+  - Both the raw unrectified plate crop and the rectified planar crop are hashed via SHA-256 and committed as derived child artifacts in CEIPL, cryptographically bound to parent frame number and video evidence ID.
+
+#### 11.6.10 Mobile Phone & Electronic Device Detection (`ps05.engines.vista.vci.device_detect`)
+Specialized detection of personal electronic devices across video streams to establish digital recording, communication, or contraband presence.
+
+- **Target Electronic Categories:** Mobile smartphones, feature phones, tablets, laptops, handheld two-way radios, and body-worn covert recorders.
+- **Proximity & Keypoint Association:**
+  - Evaluates spatial distance between detected electronic device bounding box and person wrist/hand keypoints (from HRNet / YOLO-Pose).
+  - Categorizes interaction state: `HELD_TO_EAR`, `HOLDING_HAND`, `TABLE_REST`, `TYPING_INTERACTION`, `POCKET_CARRIED`, `UNKNOWN_INTERACTION`.
+- **Small-Object Forensic Caveats:**
+  - Detections with bounding box height $< 24\text{ px}$ are tagged with `LOW_RESOLUTION_SMALL_OBJECT` advisory, alerting examiners to visual uncertainty.
+
+#### 11.6.11 Potentially Hazardous Object Candidate Triage & Examiner Alerting (`ps05.engines.vista.vci.hazard_triage`)
+Forensic triage capability detecting candidate weapons and hazardous physical items with strict legal neutrality.
+
+- **Forensic Neutrality & Admissibility Invariants:**
+  - Machine learning models cannot determine subjective human intent, criminal culpability, or absolute physical weapon confirmation.
+  - Under Section 65B IEA / Section 63 BSA, all visual hazards are designated strictly as `CANDIDATE_HAZARDOUS_OBJECT_ALERT`.
+  - The software prohibits generating definitive claims such as "weapon confirmed" or "assailant weapon".
+- **Supported Candidate Hazard Classes:**
+  1. `FIREARM_LIKE_OBJECT`: Handguns, pistols, revolvers, shotguns, rifles, long guns.
+  2. `KNIFE_BLADE_OBJECT`: Fixed blades, pocket knives, kitchen knives, machetes, swords, daggers.
+  3. `SHARP_IMPLEMENT_OBJECT`: Broken glass bottles, screwdrivers, crowbars, metal spikes.
+  4. `CONFIGURABLE_FORENSIC_ALERT`: Jerrycans, chemical containers, suspicious packages, unidentifiable hand-carried bundles.
+- **Alert Dispatch Contract (`VCIHazardCandidateAlert`):**
+  - Timestamp (millisecond PTS) and frame sequence index.
+  - Bounding box coordinates $[x, y, w, h]$ and normalized confidence score.
+  - Cropped object region SHA-256 hash registered in CEIPL WORM store.
+  - Pinned detector model ID and version string.
+  - Mandatory Examiner Review State: `PENDING_EXAMINER_REVIEW`, `VERIFIED_AS_HAZARD`, `DISMISSED_FALSE_POSITIVE`, `INCONCLUSIVE_RESOLUTION`.
+  - Mandatory Legal Disclaimer: *"Automated candidate alert generated for examiner triage. Does not constitute judicial determination of a weapon or criminal intent."*
+
+#### 11.6.12 Temporal Object Tracking & Re-Appearance Architecture (`ps05.engines.vista.vci.tracker`)
+Multi-object tracking engine providing temporal trajectory coherence and movement analytics while respecting strict counting definitions.
+
+- **Separation of Four Independent Forensic Metrics:**
+  1. *Per-Frame Detections ($N_{\text{frame}}(t)$):* Instantaneous object count detected at discrete time $t$.
+  2. *Per-Video Object Tracklets ($T_{\text{tracklet}}$):* Unique continuous tracking IDs maintained by ByteTrack / BoT-SORT across consecutive frames.
+  3. *Estimated Unique Individuals ($\hat{U}_{\text{video}} \pm \sigma$):* Modeled entity count accounting for track fragmentation, directional tripwire crossings, and entrance/exit zone events.
+  4. *Cross-Camera Candidate Associations ($C_{\text{cross-camera}}$):* Multi-camera appearance re-identification (ReID) similarity scores between tracklets, explicitly bounded with cosine distance and ambiguity flags.
+- **Legal Caveat on Headcounts:**
+  - Tracklet counts ($|T_{\text{tracklet}}|$) must never be represented as exact real-world headcounts in statutory certificates.
+  - The system reports tracking fragmentation indices (ID switch count, fragmentation frequency, occlusion gaps) to quantify tracking reliability.
+
+#### 11.6.13 Temporal Scene Description & Structured Video Summarisation (`ps05.engines.vista.vci.summariser`)
+Compiles discrete engine observations into an auditable, chronological event narrative and structured timeline.
+
+- **Chronological Event Synthesis:**
+  - Aggregates scene transitions, participant entries and exits, vehicular movements, license plate events, device interactions, and action intervals into an ordered timeline.
+- **Strict Factual Non-Speculative Summarisation:**
+  - All summary statements are generated from deterministic rule templates bound to verified timestamp intervals.
+  - Speculative narrative language (e.g., "subject appeared nervous", "suspiciously entered") is prohibited. The system outputs strictly factual descriptors (e.g., "Person Track 04 entered frame at 14:02:11.200, moved east, exited at 14:02:45.600").
+- **Evidence Anchors:**
+  - Every summarized event contains direct clickable links to source frame indices, millisecond PTS timestamps, and child artifact SHA-256 hashes.
+
+#### 11.6.14 Evidence-Indexed Visual Search & Case RAG Integration (`ps05.engines.vista.vci.search_rag`)
+Enables semantic search, investigative question-answering, and Case RAG retrieval across video evidence archives.
+
+- **Multimodal Visual & Text Indexing:**
+  - Extracts 768-dimensional SigLIP / CLIP vision-language embeddings for keyframes and cropped evidentiary entities.
+  - Builds sparse inverted index (BM25) over structured metadata: scene tags, vehicle categories, visible colours, plate OCR strings, device observations, and action categories.
+- **Read-Only Verification Boundary:**
+  - Indexing and search operations are strictly read-only with respect to original evidence.
+  - Queries return structured hit records containing: parent `evidence_id`, millisecond timestamp range $[t_1, t_2]$, bounding box polygon, thumbnail crop SHA-256, and similarity score.
+
+#### 11.6.15 Unified Video Evidence Inventory Schema (`ps05.engines.vista.vci.schemas`)
+
+The comprehensive VCI engine produces an authoritative, schema-validated JSON report representing all visual intelligence findings.
+
+```python
+from datetime import datetime
+from enum import Enum
+from typing import Dict, List, Optional
+from pydantic import BaseModel, Field
+
+class SceneCategory(str, Enum):
+    RURAL_VILLAGE = "RURAL_VILLAGE"
+    URBAN_COMMERCIAL = "URBAN_COMMERCIAL"
+    HIGHWAY_JUNCTION_PARKING = "HIGHWAY_JUNCTION_PARKING"
+    EDUCATIONAL_INSTITUTIONAL = "EDUCATIONAL_INSTITUTIONAL"
+    RESIDENTIAL_INTERIOR = "RESIDENTIAL_INTERIOR"
+    WORKPLACE_INDUSTRIAL = "WORKPLACE_INDUSTRIAL"
+    OUTDOOR_PUBLIC_GROUNDS = "OUTDOOR_PUBLIC_GROUNDS"
+    UNKNOWN_MIXED_ENVIRONMENT = "UNKNOWN_MIXED_ENVIRONMENT"
+
+class VehicleCategory(str, Enum):
+    MOTORCYCLE_SCOOTER = "MOTORCYCLE_SCOOTER"
+    BICYCLE = "BICYCLE"
+    THREE_WHEELER_AUTO_RICKSHAW = "THREE_WHEELER_AUTO_RICKSHAW"
+    CAR_SUV = "CAR_SUV"
+    BUS = "BUS"
+    TRUCK_VAN = "TRUCK_VAN"
+    OTHER_SUPPORTED_VEHICLE = "OTHER_SUPPORTED_VEHICLE"
+
+class HazardCategory(str, Enum):
+    FIREARM_LIKE_OBJECT = "FIREARM_LIKE_OBJECT"
+    KNIFE_BLADE_OBJECT = "KNIFE_BLADE_OBJECT"
+    SHARP_IMPLEMENT_OBJECT = "SHARP_IMPLEMENT_OBJECT"
+    CONFIGURABLE_FORENSIC_ALERT = "CONFIGURABLE_FORENSIC_ALERT"
+
+class ExaminerReviewState(str, Enum):
+    PENDING_EXAMINER_REVIEW = "PENDING_EXAMINER_REVIEW"
+    VERIFIED_AS_HAZARD = "VERIFIED_AS_HAZARD"
+    DISMISSED_FALSE_POSITIVE = "DISMISSED_FALSE_POSITIVE"
+    INCONCLUSIVE_RESOLUTION = "INCONCLUSIVE_RESOLUTION"
+
+class VCISceneSegment(BaseModel):
+    start_time_ms: int
+    end_time_ms: int
+    start_frame: int
+    end_frame: int
+    primary_scene: SceneCategory
+    multi_labels: List[SceneCategory]
+    confidence: float = Field(ge=0.0, le=1.0)
+    is_mixed_environment: bool
+
+class VCIVehicleRecord(BaseModel):
+    tracklet_id: int
+    vehicle_type: VehicleCategory
+    visible_color: str
+    color_confidence: float = Field(ge=0.0, le=1.0)
+    start_time_ms: int
+    end_time_ms: int
+    bounding_box: List[float] = Field(description="[x, y, w, h] normalized")
+    make_model: Optional[str] = None
+    make_model_verified: bool = False
+    quality_score: float = Field(ge=0.0, le=1.0)
+
+class VCIALPRRecord(BaseModel):
+    plate_id: str
+    tracklet_id: Optional[int] = None
+    frame_index: int
+    timestamp_ms: int
+    bounding_box: List[float]
+    raw_crop_sha256: str
+    rectified_crop_sha256: str
+    plate_text: str = Field(description="Unreadable slots as '?' or '_'")
+    character_confidences: List[float]
+    plate_confidence: float = Field(ge=0.0, le=1.0)
+    format_validity: str
+    is_readable: bool
+    unreadable_reason: Optional[str] = None
+
+class VCIDeviceRecord(BaseModel):
+    device_id: str
+    associated_person_tracklet: Optional[int] = None
+    frame_index: int
+    timestamp_ms: int
+    bounding_box: List[float]
+    device_category: str
+    interaction_state: str
+    screen_illuminated: Optional[bool] = None
+    confidence: float = Field(ge=0.0, le=1.0)
+
+class VCIHazardAlertRecord(BaseModel):
+    alert_id: str
+    frame_index: int
+    timestamp_ms: int
+    bounding_box: List[float]
+    crop_sha256: str
+    hazard_category: HazardCategory
+    confidence: float = Field(ge=0.0, le=1.0)
+    model_version: str
+    examiner_review_state: ExaminerReviewState = ExaminerReviewState.PENDING_EXAMINER_REVIEW
+    examiner_notes: Optional[str] = None
+    legal_disclaimer: str
+
+class VCIObjectInventoryItem(BaseModel):
+    category: str
+    total_detections: int
+    unique_tracklets: int
+    first_seen_ms: int
+    last_seen_ms: int
+    representative_crop_sha256: Optional[str] = None
+
+class VCIPersonTrackingSummary(BaseModel):
+    peak_concurrent_occupancy: int
+    total_unique_tracklets: int
+    estimated_unique_persons: float
+    estimation_uncertainty_sigma: float
+    id_switches_detected: int
+
+class VCIUnifiedInventoryReport(BaseModel):
+    schema_version: str = "1.0.0"
+    evidence_id: str
+    camera_id: Optional[str] = None
+    channel_id: Optional[str] = None
+    analysis_timestamp: datetime
+    source_taxonomy_category: str
+    scene_segments: List[VCISceneSegment]
+    person_tracking: VCIPersonTrackingSummary
+    vehicles: List[VCIVehicleRecord]
+    license_plates: List[VCIALPRRecord]
+    electronic_devices: List[VCIDeviceRecord]
+    hazard_alerts: List[VCIHazardAlertRecord]
+    object_inventory: List[VCIObjectInventoryItem]
+    action_event_intervals: List[Dict[str, str]]
+    quality_limitations: List[str]
+    examiner_adjudication_status: str
+
+```
+
+#### 11.6.16 Cross-Engine Integration Boundaries & Forensic Invariants
+The expanded VCI engine operates within strictly governed platform boundaries:
+
+- **CEIPL (Cryptographic Integrity):** VCI ingests read-only video frames from WORM storage. All derived crops (plate crops, hazard alert crops, representative object crops) are hashed via SHA-256 and registered into the CEIPL Merkle DAG lineage before being displayed or reported. VCI components possess zero write permissions to authoritative original evidence.
+- **CMMS (Cross-Media Metadata Service):** VCI receives normalised video stream container parameters, frame rates, timebases, and ExifTool tags from CMMS contract records without duplicating parser logic.
+- **CSTV (Cross-Source Timestamp Verification):** VCI timestamp OCR outputs ($T_{\text{ocr}}(t)$) and visual event intervals are routed into CSTV for regression analysis against container PTS ($T_{\text{pts}}(t)$) and multi-camera timeline synchronization.
+- **AFB / AURAS (Audio Forensic Bridge):** Audio streams are demuxed by AFB and forwarded to AURAS. VCI does not perform acoustic analysis directly; instead, visual action intervals (e.g., altercation, fall) are cross-correlated with AURAS acoustic event tags (gunshots, screams) via AVSC.
+- **AVSC (Audio-Visual Synchronization):** VCI provides person tracklets and facial bounding boxes to AVSC for mouth-motion extraction and SyncNet lip-sync verification.
+- **VDF (Video Deepfake Detection):** VDF deepfake probability scores are cross-referenced with VCI object detections. If an object or face region is determined to be synthetic, VCI flags the associated inventory item as `SYNTHETIC_GENERATED_ENTITY` to prevent synthetic props from being catalogued as physical evidence.
+- **UFD (Unified Forensic Display):** VCI emits bounding boxes, segmentation polygons, plate crops, and hazard alerts directly to the examiner workbench with interactive inspection tools.
+- **UFREDF (Forensic Report Framework):** VCI exports the validated `VCIUnifiedInventoryReport` directly into the Archify JSON IR graph and the Section 65B IEA / Section 63 BSA certified PDF dossier annexures.
+- **Case RAG:** VCI populates vector and keyword search indices across approved evidence findings, enabling cross-case investigative discovery with strict lineage links.
 
 ---
 
@@ -4051,6 +4366,13 @@ The following comparative selection matrices detail the algorithmic, mathematica
 | `ps05.engines.vista.vci.detector` | Promptable video object mask segmentation | **SAM 2 (Segment Anything 2)** | Ravi et al., Meta AI 2024; `https://github.com/facebookresearch/segment-anything-2` | Apache 2.0 | Video frame sequence + point/box prompt | Frame-by-frame binary segmentation masks | Physical object boundary tracking, tamper localization | CUDA (8GB VRAM) | `sam2_hiera_base_plus.pt` | SA-V dataset J&F benchmark ($> 75.0$) | Memory bloat on long video clips ($> 1000$ frames) | PyTorch, TorchVision | `RESEARCH_CANDIDATE` | Mask2Former, Track-Anything |
 | `ps05.engines.vista.vci.ocr_overlay`| OSD timestamp and camera channel OCR extraction | **PaddleOCR v4 + Tesseract 5** | `https://github.com/PaddlePaddle/PaddleOCR` | Apache 2.0 | Cropped OSD clock region ($H \imes W \imes 3$) | Extracted string, bounding polygon, confidence | Timestamp string parsing, camera channel identification | CPU / optional CUDA | PP-OCRv4 server model + Tesseract 5.3 | Character-level accuracy on 500 CCTV clock crops ($> 98\%$) | Dot-matrix LCD fonts or low-contrast text over white backgrounds | PaddlePaddle / Tesseract binary | `PLANNED` | EasyOCR, TrOCR |
 | `ps05.engines.vista.vci.actions` | Spatio-temporal human action and anomaly localization | **VideoMAE / SlowFast** | Feichtenhofer et al., ICCV 2019; Tong et al., 2022 | Apache 2.0 | 32-frame video clip ($32 \imes 3 \imes 224 \imes 224$) | Top-k action categories, temporal boundaries | Violence, fall, running, camera tampering detection | CUDA (6GB VRAM) | Pinned PyTorch weights on Kinetics-400 | Top-1 accuracy on UCF101 / Kinetics ($> 80\%$) | High inference latency on long CCTV clips | PyTorch | `RESEARCH_CANDIDATE` | X3D, TimeSformer |
+| `ps05.engines.vista.vci.scene_context` | Hierarchical multi-label scene & environment classification | **SigLIP ViT-SO400M / Places365 ViT** | Zhai et al., 2023; Zhou et al., 2018 | Apache 2.0 | Sampled keyframe ($384 \times 384 \times 3$) | Multi-label probabilities across 8 scene environments | Scene context extraction, environmental verification | CUDA (4GB VRAM) / CPU | HuggingFace pinned SigLIP checkpoint | Macro-F1 on Places365 and surveillance environment test set | Mixed indoor/outdoor transitional doorway viewpoints | PyTorch, Transformers | `PLANNED` | CLIP ViT-B/16, ResNet-50 Places365 |
+| `ps05.engines.vista.vci.object_inventory` | Open-vocabulary candidate proposal & evidence cataloging | **Grounding DINO / OWLv2** | Liu et al., 2023; Minderer et al., 2024 | Apache 2.0 | Video frame ($800 \times 800 \times 3$) + text prompts | Bounding boxes, open-vocab class names, logits | Physical evidence inventory, forensic object discovery | CUDA (6GB VRAM) | `groundingdino_swint_ogc.pth` | Zero-shot mAP on LVIS / forensic evidence objects | False positives on abstract background textures | PyTorch, Transformers | `PLANNED` | GLIP, OWL-ViT |
+| `ps05.engines.vista.vci.vehicle_attributes` | Fine-grained vehicle type & visible colour extraction | **YOLOv8-Vehicle + CIELAB GMM Color** | Ultralytics, 2023; Retinex Normalizer | AGPL-3.0 / BSD | Cropped vehicle bounding box ($256 \times 256 \times 3$) | Fine-grained type, dominant colour, quality score | Vehicle identification, traffic incident reconstruction | CUDA (2GB VRAM) / CPU | Fine-tuned weights on Indian/Global traffic dataset | Classification accuracy on multi-class vehicle test set | Monochrome IR night-vision obscures vehicle body colour | PyTorch, OpenCV, Scikit-learn | `PLANNED` | ResNet-50 Vehicle Attribute Net |
+| `ps05.engines.vista.vci.alpr` | Forensic ALPR & Indian HSRP syntax validation | **YOLO-Plate + STN + PP-OCRv4 + Regex** | Du et al., 2020; PaddlePaddle, 2023 | Apache 2.0 | Cropped license plate region ($240 \times 80 \times 3$) | Character string, per-char confidence vector, format validity | Vehicle plate extraction, MoRTH HSRP validation | CPU / optional CUDA | Pinned character recognition weights + STN homography | Character recognition accuracy on 1,000 traffic plate crops | Dirty, bent, or heavily occluded license plates | PyTorch, PaddlePaddle | `PLANNED` | LPRNet, CRNN, TrOCR |
+| `ps05.engines.vista.vci.device_detect` | Mobile phone, tablet & electronic device detection | **YOLOv8x-Electronics + Pose Keypoint** | Ultralytics, 2023; Sun et al., 2019 (HRNet) | AGPL-3.0 / MIT | Keyframe + human keypoint skeleton | Device bbox, interaction state (`HELD_TO_EAR`, etc.) | Electronic contraband, distracted driving investigation | CUDA (4GB VRAM) | Pinned fine-tuned weights on handheld electronics | Precision/recall on small electronics surveillance test set | Tiny devices ($< 16\text{ px}$) blended against dark clothing | PyTorch, Ultralytics | `PLANNED` | RT-DETR Handheld |
+| `ps05.engines.vista.vci.hazard_triage` | Potentially hazardous candidate object triage & alerts | **YOLO-Hazard Candidate + CEIPL Crop Logger** | Specialized forensic fine-tuning | Apache 2.0 / AGPL | High-res keyframe patch ($640 \times 640 \times 3$) | Candidate hazard alert, bbox, crop SHA-256, review state | Weapon candidate triage, officer safety review | CUDA (4GB VRAM) / CPU | Pinned hazard candidate detector checkpoint | Recall on curated security screening & altercation corpus | Everyday tools/phones triggering candidate alert (mitigated by examiner review) | PyTorch, CEIPL | `PLANNED` | Faster R-CNN Hazard Head |
+| `ps05.engines.vista.vci.search_rag` | Multimodal visual embedding & Case RAG search indexer | **SigLIP SO400M + Qdrant / FAISS** | Zhai et al., 2023; Johnson et al., 2019 | Apache 2.0 | Frame image / object crop ($384 \times 384$) or text query | 768-dim dense embedding + BM25 sparse metadata vector | Natural language evidence search, visual query matching | CUDA (4GB VRAM) / CPU | Pinned SigLIP image-text projection heads | Recall@k and retrieval latency on forensic query benchmark | Highly ambiguous short text queries without timestamps | Qdrant client, FAISS, PyTorch | `PLANNED` | CLIP ViT-L/14, OpenCLIP |
 
 #### 11.10.6 Cryptographic Integrity, Storage & Manifest Signing Family
 

@@ -56,7 +56,7 @@ flowchart TD
         VA1 --> VA4["VISTA-A4: AFB Stream-Copy & AURAS Subsystem Bridge"]
         VA3 & VA4 --> VA5["VISTA-A5: AVSC Lip-Sync & Sound-Visual Correspondence"]
 
-        VA2 --> VA6["VISTA-A6: VCI Source Taxonomy, Tracking & Unique Counting"]
+        VA2 --> VA6["VISTA-A6: Video Content & Scene Intelligence Engine (VCI)"]
         VA2 & VA6 --> VA7["VISTA-A7: CCTV Automated Triage & Adaptive Questionnaire"]
         VA7 --> VA8["VISTA-A8: CCTV Clock Drift Regression & ONVIF Seals"]
 
@@ -184,7 +184,7 @@ flowchart TD
 | **VISTA-A3**| Advanced VRE: Macroblock QP & Splicing | VRE Advanced | `PLANNED` | VISTA-A2 Gate | Macroblock QP parser, PySceneDetect transitions, ExifTool, RIFE flow |
 | **VISTA-A4**| AFB Stream-Copy & AURAS Subsystem Bridge | AFB Engine | `PLANNED` | VISTA-A1 Gate | FFmpeg stream-copy, 16kHz float32 factory, DAG lineage, AURAS client |
 | **VISTA-A5**| AVSC Lip-Sync & Audio-Visual Sync | AVSC Engine | `PLANNED` | VISTA-A3, A4 Gates | Container AV alignment, RetinaFace/ByteTrack, SyncNet correlation |
-| **VISTA-A6**| VCI Taxonomy, Tracking & Unique Counting| VCI Engine | `PLANNED` | VISTA-A2 Gate | 15-category taxonomy, YOLOv8/v10, SAM 2, ByteTrack unique count |
+| **VISTA-A6**| Video Content & Scene Intelligence (VCI)| VCI Engine | `PLANNED` | VISTA-A2 Gate | Source taxonomy, multi-label scene, object inventory, vehicle/ALPR, hazard triage, tracking |
 | **VISTA-A7**| CCTV Discovery & Adaptive Questionnaire | CCTV Baseline | `PLANNED` | VISTA-A2, A6 Gates | Automated triage, pre-questioning extractor, adaptive questions A-E |
 | **VISTA-A8**| CCTV Clock Drift & Native Export Seals | CCTV Advanced | `PLANNED` | VISTA-A7 Gate | OSD clock drift regression delta(t), freeze detector, ONVIF verifier |
 | **VISTA-A9**| VDF Frame Deepfake & Spatial Heads | VDF Baseline | `PLANNED` | VISTA-A5 Gate | XceptionNet, EfficientNet-B4 dual-domain, face swap/inpainting heads |
@@ -1299,57 +1299,106 @@ AVSC pipeline fully operational, SyncNet benchmarks passing, multi-face disambig
 
 ---
 
-### Phase VISTA-A6: Video Content Intelligence, Detection & Tracking (VCI)
+### Phase VISTA-A6: Video Content & Scene Intelligence Engine (VCI)
 
-**1. Phase ID & Title:** `VISTA-A6: Video Content Intelligence, Detection & Tracking (VCI)`
+**1. Phase ID & Title:** `VISTA-A6: Video Content & Scene Intelligence Engine (VCI)`
 **2. Current Status:** `PLANNED`
-**3. Purpose:** Build the Video Content Intelligence Engine (VCI): classify video recordings into a hierarchical 15-category source taxonomy, perform real-time object detection (YOLOv8/v10), promptable video object segmentation (SAM 2), unique person counting via trajectory tracking (ByteTrack), spatio-temporal action understanding (VideoMAE), and OSD timestamp/channel OCR extraction (PaddleOCR / Tesseract).
+**3. Purpose:** Build the comprehensive Video Content & Scene Intelligence Engine (VCI): classify video recordings into a hierarchical 15-category source taxonomy, perform time-segmented multi-label scene and environmental classification, execute generalised object detection and per-class physical evidence inventory, perform fine-grained vehicle classification and visible colour attribute extraction, implement a separately versioned ALPR/ANPR pipeline with perspective rectification, character-level OCR, and jurisdiction-specific format validation (Indian HSRP / MoRTH), detect mobile phones and electronic devices, execute potentially hazardous object candidate triage and examiner alerting with strict legal neutrality, maintain temporal object tracking with rigorous separation of four counting metrics, localize actions and anomalies (VideoMAE), extract burned-in OSD clock timestamps (PaddleOCR / Tesseract), generate structured chronological video summaries, and build evidence-indexed visual search and Case RAG integration contracts.
 **4. Topics & Subtopics:**
-- 15-Category Video Source Taxonomy: CCTV, dashcam, bodycam, drone, mobile, broadcast, screen-record, etc.
-- Surveillance Object Detection: YOLOv8x / YOLOv10 detecting persons, vehicles, firearms, and backpacks.
-- SAM 2 Prompted Video Segmentation: Spatio-temporal object boundary tracking and mask propagation.
-- Distinct Unique Person Counting: Tracklet association maintaining cumulative unique person counts.
-- Action & Anomaly Localization: VideoMAE / SlowFast classifying physical actions (violence, fall, running).
-- OSD Clock & Channel OCR: PaddleOCR v4 and Tesseract 5 extracting visible recorder timestamps.
+- 15-Category Video Source Taxonomy: CCTV infrastructure, body-worn, dashcam, drone aerial, mobile handheld, screen recording, broadcast, etc.
+- Multi-Label Scene & Environmental Context: Rural roads/village, urban streets/commercial, highways/junctions/parking, educational/laboratories/libraries, residential interiors, workplace/industrial, outdoor grounds/plazas, unknown/mixed environments; dynamic temporal segmentation without forcing a single global scene label.
+- Generalised Object Detection & Per-Class Physical Inventory: YOLOv8x / YOLOv10 and RT-DETR across configurable forensic taxonomies (person, vehicle, bag, phone, laptop, document, furniture, tool, container); Grounding DINO / OWLv2 open-vocabulary candidate expansion; strict non-hallucination policy emitting `UNKNOWN_OBJECT_CANDIDATE`.
+- Fine-Grained Vehicle Classification & Visible Colour Attribution: Motorcycles/scooters, bicycles, three-wheelers/auto-rickshaws, cars/SUVs, buses, trucks/vans, other supported vehicles; CIE $L^*a^*b^*$ and HSV colour palette extraction with Gray-World/White-Patch Retinex illumination normalization; strict make/model abstention (`MAKE_MODEL_UNVERIFIED`).
+- Separately Versioned ALPR Pipeline & Format Validation: YOLO-Plate localisation, STN homography rectification, CLAHE enhancement, dual PP-OCRv4 / CRNN character recognition, per-character confidence vectors, Indian HSRP regex (`^[A-Z]{2}[0-9]{2}[A-Z]{1,3}[0-9]{4}$`), Bharat series (`^[0-9]{2}BH[0-9]{4}[A-Z]{1,2}$`), strict non-hallucination invariant (missing characters as `?` or `_`), unreadable/obscured plate classification (`UNREADABLE_PLATE_CANDIDATE`).
+- Mobile Phone & Electronic Device Detection: Handheld smartphones, feature phones, tablets, laptops, two-way radios; hand/wrist keypoint proximity association; interaction states (`HELD_TO_EAR`, `HOLDING_HAND`, `TABLE_REST`, `TYPING_INTERACTION`).
+- Potentially Hazardous Object Candidate Triage & Examiner Alerting: Firearms, knives/blades, sharp objects, suspicious containers; mandatory legal disclaimer; examiner review state workflow (`PENDING_EXAMINER_REVIEW`, `VERIFIED_AS_HAZARD`, `DISMISSED_FALSE_POSITIVE`).
+- Distinct Entity Tracking & Invariant Metric Counting: ByteTrack / BoT-SORT; rigorous separation of four metrics: per-frame detections $N_{\text{frame}}(t)$, video tracklets $T_{\text{tracklet}}$, estimated unique entities $\hat{U}_{\text{video}} \pm \sigma$, and cross-camera candidate associations $C_{\text{cross-camera}}$.
+- Spatio-Temporal Action Understanding: VideoMAE / SlowFast physical altercation, slip/fall, vehicle crash, loitering.
+- OSD Clock & Channel OCR: PaddleOCR v4 and Tesseract 5; strictly decoupled from vehicle license plate OCR.
+- Temporal Scene Description & Structured Video Summarisation: Deterministic chronological narrative synthesis, verifiable evidence anchors.
+- Evidence-Indexed Visual Search & Case RAG Integration: 768-dim SigLIP vision-language embeddings, BM25 metadata inversion, read-only WORM query contract.
 **5. Exact Tasks:**
-1. Implement source taxonomy classifier in `src/ps05/engines/vista/vci/taxonomy.py`.
-2. Build object detector wrapper in `detector.py` executing YOLOv8x on sampled keyframes.
-3. Integrate SAM 2 in `segmenter.py` for interactive or prompted evidence object mask tracking.
-4. Implement trajectory person counter in `tracker.py` distinguishing instantaneous count from unique person count.
-5. Build action localization module in `actions.py` utilizing VideoMAE for event boundary detection.
-6. Implement OSD OCR extractor in `ocr_overlay.py` with custom whitelist regex for CCTV date/time stamps.
+1. Implement 15-category source taxonomy classifier in `src/ps05/engines/vista/vci/taxonomy.py`.
+2. Implement time-segmented multi-label scene and environmental classifier in `scene_context.py`.
+3. Build keyframe object detector in `detector.py` executing YOLOv8x/v10 and RT-DETR.
+4. Integrate SAM 2 instance segmentation in `segmentor.py` for interactive evidence contour mask extraction.
+5. Implement physical evidence inventory in `object_inventory.py` with bounded taxonomies and `UNKNOWN_OBJECT_CANDIDATE` abstention.
+6. Build fine-grained vehicle attribute and visible colour extractor in `vehicle_attributes.py` with Retinex colour normalization.
+7. Implement separately versioned ALPR pipeline in `alpr.py` with STN homography, Indian HSRP regex validation, and zero character hallucination.
+8. Build mobile phone and electronic device detector in `device_detect.py` with hand-proximity association.
+9. Implement hazardous object candidate detector and examiner alert dispatcher in `hazard_triage.py`.
+10. Implement multi-object tracker in `tracker.py` and distinct unique person counting in `people_count.py` enforcing the 4-metric counting invariants.
+11. Build action and anomaly localization module in `actions.py` utilizing VideoMAE.
+12. Implement OSD OCR clock and channel extractor in `ocr_overlay.py` with datetime whitelist regex.
+13. Build structured video summariser in `summariser.py` generating chronological evidence timelines.
+14. Implement multimodal visual search indexer and Case RAG integration in `search_rag.py`.
 **6. Detailed Execution Workflow:**
-Sampled Frames -> Source Taxonomy Predicted -> Objects Detected -> Trajectories Associated -> Unique Person Count Maintained -> OSD Clock Crops Extracted -> OCR Executed -> `VCITimelineResult` Emitted.
+Raster Frames Ingested -> Source Taxonomy & Temporal Scene Segmentation -> Multi-Label Environment Classification -> Keyframe Object & Vehicle Detection -> Fine-Grained Vehicle Attributes & CIELAB Colour Normalization -> Independent ALPR Localisation, STN Rectification & HSRP Validation -> Electronic Device Proximity Analysis -> Hazard Candidate Triage & Examiner Alert Dispatch -> ByteTrack Trajectory Association & Unique Entity Estimation -> VideoMAE Action Localization -> OSD Clock Extraction -> Structured Chronological Summarisation -> SigLIP Embedding Generation & Case RAG Indexing -> Unified JSON Report & CEIPL Lineage DAG Binding.
 **7. Technologies, Tools & Models:**
-YOLOv8x / YOLOv10 (Ultralytics), SAM 2 (Meta AI), ByteTrack, VideoMAE (HuggingFace), PaddleOCR v4, Tesseract 5.
+YOLOv8x / YOLOv10 (Ultralytics), SAM 2 (Meta AI), ByteTrack / BoT-SORT, SigLIP ViT-SO400M (HuggingFace), Places365 ViT, Grounding DINO / OWLv2, STN Homography Rectifier, PP-OCRv4 (PaddlePaddle), Tesseract 5, VideoMAE (HuggingFace), Qdrant / FAISS, Pydantic v2, Python 3.12.
 **8. Prerequisites & Dependencies:**
-Phase VISTA-A2 Gate passed; decoded raster frames available.
+Phase VISTA-A2 Gate passed; decoded raster frames available in memory buffer.
 **9. Expected Files, Artifacts & Contracts:**
 - `src/ps05/engines/vista/vci/taxonomy.py`
+- `src/ps05/engines/vista/vci/scene_context.py`
 - `src/ps05/engines/vista/vci/detector.py`
+- `src/ps05/engines/vista/vci/segmentor.py`
+- `src/ps05/engines/vista/vci/object_inventory.py`
+- `src/ps05/engines/vista/vci/vehicle_attributes.py`
+- `src/ps05/engines/vista/vci/alpr.py`
+- `src/ps05/engines/vista/vci/device_detect.py`
+- `src/ps05/engines/vista/vci/hazard_triage.py`
 - `src/ps05/engines/vista/vci/tracker.py`
+- `src/ps05/engines/vista/vci/people_count.py`
 - `src/ps05/engines/vista/vci/actions.py`
 - `src/ps05/engines/vista/vci/ocr_overlay.py`
+- `src/ps05/engines/vista/vci/summariser.py`
+- `src/ps05/engines/vista/vci/search_rag.py`
+- `src/ps05/engines/vista/vci/schemas.py`
 - `tests/unit/test_vci_pipeline.py`
+- `tests/unit/test_vci_alpr.py`
+- `tests/unit/test_vci_vehicle_attributes.py`
+- `tests/unit/test_vci_scene_context.py`
+- `tests/unit/test_vci_hazard_triage.py`
 **10. Failure Cases & Risks:**
-- Extreme crowd density: Mitigated by reporting peak concurrent occupancy alongside unique track count with confidence bounds.
-- Degraded OSD clock contrast: Mitigated by dual-pass thresholding (Otsu + adaptive Gaussian).
-**11. Security Considerations:**
-Zero face recognition biometric indexing; tracking IDs are strictly local to the individual video exhibit.
+- Distant small objects ($< 16\text{ px}$): Mitigated by reporting resolution quality score and setting `LOW_RESOLUTION_SMALL_OBJECT` advisory.
+- Prolonged occlusions: Mitigated by tracklet splitting and logging fragmentation metrics rather than false trajectory merges.
+- Monochrome IR lighting: Mitigated by abstaining from colour guessing with `COLOR_INDETERMINATE_IR_LIGHTING`.
+- Dirty/obscured license plates: Mitigated by classifying as `UNREADABLE_PLATE_CANDIDATE` and marking unreadable character positions as `?` without guessing.
+- Ambiguous weapons / everyday tools: Mitigated by mandatory `CANDIDATE_HAZARDOUS_OBJECT_ALERT` labeling and examiner review workflow.
+**11. Security & Forensic Neutrality Considerations:**
+Zero face biometric indexing; read-only WORM integrity guaranteed; derived crops hashed via SHA-256 into CEIPL Merkle DAG; mandatory legal disclaimers on candidate hazard alerts prohibiting assertions of guilt or intent.
 **12. Acceptance Criteria:**
 - Correctly classifies surveillance footage into `CCTV_SURVEILLANCE` taxonomy category.
-- Unique person counting error <= 10% on standard surveillance evaluation sequences.
-- PaddleOCR extracts OSD timestamp strings with character accuracy >= 98%.
+- Multi-label scene classifier baseline established on representative forensic dataset; abstains on ambiguous views with `UNKNOWN_ENVIRONMENT`.
+- Object inventory detects physical items with baseline mAP; outputs `UNKNOWN_OBJECT_CANDIDATE` for ungrounded items.
+- Vehicle attribute extractor classifies fine-grained vehicle types and visible colours under daylight, night, and IR; enforces `MAKE_MODEL_UNVERIFIED`.
+- Separately versioned ALPR pipeline parses full/partial plates with 0% character hallucination on partial/obscured characters; validates Indian HSRP syntax; abstains on unreadable plates.
+- Electronic device detector identifies phones and laptops with small-object recall baseline.
+- Hazard candidate triage alerts emitted with SHA-256 crop hashes, model metadata, and `PENDING_EXAMINER_REVIEW` state without intent language.
+- Multi-object tracker bounds ID switches; tracklet counts strictly distinguished from real-world unique headcounts.
+- Video summariser compiles factual chronological timeline without speculative narrative.
+- Visual search retrieves timestamped frame events in $< 1\text{ s}$ with 100% verified parent-frame cryptographic lineage.
 **13. Definition of Done (DoD):**
-VCI engine modules implemented, taxonomy classifier validated, OCR timestamp extractor passing test suite.
+All 16 VCI modules implemented, Pydantic schemas validated, unit test suite passing, and CEIPL lineage integration verified.
 **14. Checkpoint Table:**
 
 | Checkpoint ID | Verification item | Expected evidence | Status | Notes/blockers |
 | :--- | :--- | :--- | :--- | :--- |
 | **VISTA-CP-06-01** | Hierarchical Source Taxonomy Classification | Footage correctly classified into 15-category taxonomy | `NOT_STARTED` | Awaits phase activation |
-| **VISTA-CP-06-02** | Unique Person Trajectory Counting | Distinguishes 5 unique persons crossing frame from 20 re-entries | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-02** | Unique Person Trajectory Counting & Distinct Occupancy | Distinguishes 5 unique persons crossing frame from 20 re-entries | `NOT_STARTED` | Awaits phase activation |
 | **VISTA-CP-06-03** | SAM 2 Object Segmentation Tracking | Precise mask propagation across 300-frame video sequence | `NOT_STARTED` | Awaits phase activation |
 | **VISTA-CP-06-04** | OSD Timestamp & Channel OCR Extraction | PaddleOCR extracts date/time overlay matching ground truth | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-05** | Hierarchical Multi-Label Scene Classification | Correct multi-label tagging across time-segmented environment intervals | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-06** | Generalised Object Detection & Evidence Inventory | Detection and cataloging of forensic objects; UNKNOWN abstention | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-07** | Fine-Grained Vehicle & Visible Colour Attribution | Accurate categorization of 7 vehicle classes; Retinex colour palette | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-08** | Separately Versioned ALPR & HSRP Syntax Validation | Plate OCR with 0% hallucination; Indian HSRP regex verification | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-09** | Mobile Phone & Electronic Device Detection | Phone/device localization with hand/wrist proximity association | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-10** | Hazardous Object Candidate Triage & Examiner Alerting | Candidate weapon alert with SHA-256 crop and review workflow | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-11** | Temporal Object Tracking & Re-Appearance Analysis | Trajectory persistence across occlusions; 4-metric separation | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-12** | Structured Video Summarisation & Event Chronology | Factual chronological narrative with clickable timestamp anchors | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-13** | Evidence-Indexed Visual Search & Case RAG Integration | Sub-second visual query retrieval with parent-frame SHA-256 DAG | `NOT_STARTED` | Awaits phase activation |
+| **VISTA-CP-06-14** | Unified Video Evidence Inventory Schema & CEIPL Sealing | `VCIUnifiedInventoryReport` validates against Pydantic schema | `NOT_STARTED` | Awaits phase activation |
 
 ---
 
@@ -5574,7 +5623,7 @@ gantt
     VISTA-A3: Advanced VRE (QP, Scene, RIFE):         va3, 2026-10-26, 2026-10-28
     VISTA-A4: AFB Stream-Copy & AURAS Bridge:         va4, 2026-10-24, 2026-10-26
     VISTA-A5: AVSC Lip-Sync & Face Tracking :         va5, 2026-10-28, 2026-10-31
-    VISTA-A6: VCI Source Taxonomy & Tracking:         va6, 2026-10-26, 2026-10-29
+    VISTA-A6: Video Content & Scene Intelligence:      va6, 2026-10-26, 2026-10-29
     VISTA-A7: CCTV Triage & Questionnaire   :         va7, 2026-10-29, 2026-11-01
     VISTA-A8: CCTV Clock Drift & ONVIF Seals:         va8, 2026-11-01, 2026-11-03
     VISTA-A9: VDF Frame Deepfake & Spatial  :         va9, 2026-10-31, 2026-11-03
