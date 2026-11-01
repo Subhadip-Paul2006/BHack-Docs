@@ -43,7 +43,9 @@ flowchart TD
         A6 --> A7["AURAS-A7: ADDE Advanced (WavLM SSL, Partial Splice, Robustness)"]
         A7 --> A8["AURAS-A8: ADDE Ensemble, Calibration & OOD Uncertainty"]
 
-        A2 & A5 & A8 --> A9["AURAS-A9: Audio Orchestration & Reviewer Workflow"]
+        A2 --> A9["AURAS-A9: Audio Orchestration & Reviewer Workflow"]
+        A5 --> A9
+        A8 --> A9
         A9 --> A10["AURAS-A10: End-to-End Audio Validation & Benchmark"]
     end
 
@@ -54,16 +56,22 @@ flowchart TD
         VA2 --> VA3["VISTA-A3: Advanced VRE (Macroblock QP, ExifTool, RIFE)"]
 
         VA1 --> VA4["VISTA-A4: AFB Stream-Copy & AURAS Subsystem Bridge"]
-        VA3 & VA4 --> VA5["VISTA-A5: AVSC Lip-Sync & Sound-Visual Correspondence"]
+        VA3 --> VA5["VISTA-A5: AVSC Lip-Sync & Sound-Visual Correspondence"]
+        VA4 --> VA5
 
         VA2 --> VA6["VISTA-A6: Video Content & Scene Intelligence Engine (VCI)"]
-        VA2 & VA6 --> VA7["VISTA-A7: CCTV Automated Triage & Adaptive Questionnaire"]
+        VA2 --> VA7["VISTA-A7: CCTV Automated Triage & Adaptive Questionnaire"]
+        VA6 --> VA7
         VA7 --> VA8["VISTA-A8: CCTV Clock Drift Regression & ONVIF Seals"]
 
         VA5 --> VA9["VISTA-A9: VDF Frame Deepfake & Spatial Manipulation Heads"]
         VA9 --> VA10["VISTA-A10: VDF Temporal Models, 3D FFT & OOD Calibration"]
 
-        VA3 & VA5 & VA6 & VA8 & VA10 --> VA11["VISTA-A11: Cross-Engine Video Evidence Fusion"]
+        VA3 --> VA11["VISTA-A11: Cross-Engine Video Evidence Fusion"]
+        VA5 --> VA11
+        VA6 --> VA11
+        VA8 --> VA11
+        VA10 --> VA11
         VA11 --> VA12["VISTA-A12: Video Legal Reporting & Sec 65B/63 BSA Dossier"]
         VA12 --> VA13["VISTA-A13: End-to-End Video Validation & Benchmark Corpus"]
     end
@@ -81,11 +89,16 @@ flowchart TD
         IA7 --> IA8["AIF-A8: Classical CV & Geometric Forensics"]
         IA8 --> IA9["AIF-A9: CMFD Splicing & PRNU Sensor Noise"]
 
-        IA3 & IA7 --> IA10["AIF-A10: Multi-Branch AI-Gen & TruFor Inpainting"]
+        IA3 --> IA10["AIF-A10: Multi-Branch AI-Gen & TruFor Inpainting"]
+        IA7 --> IA10
         IA5 --> IA11["AIF-A11: Face Swap, Morphing & Synthesis Forensics"]
         IA2 --> IA12["AIF-A12: Steganalysis & Malformed File Defense"]
 
-        IA1 & IA9 & IA10 & IA11 & IA12 --> IA13["AIF-A13: CEIPL Provenance & Custody Hardening"]
+        IA1 --> IA13["AIF-A13: CEIPL Provenance & Custody Hardening"]
+        IA9 --> IA13
+        IA10 --> IA13
+        IA11 --> IA13
+        IA12 --> IA13
         IA13 --> IA14["AIF-A14: Evidence Fusion & Examiner Reporting"]
         IA14 --> IA15["AIF-A15: End-to-End Image Validation & Release"]
     end
@@ -94,12 +107,18 @@ flowchart TD
         direction TB
         GA0["AIF-GEO-00: Audit & Architecture Baseline"] --> GA1["AIF-GEO-01: GPS Extraction & Validation"]
         GA0 --> GA2["AIF-GEO-02: Geodesy & Uncertainty Models"]
-        GA1 & GA2 --> GA3["AIF-GEO-03: Geographic Enrichment & Map Interface"]
-        GA1 & GA2 --> GA4["AIF-GEO-04: Track Correlation & Timeline Reconstruction"]
+        GA1 --> GA3["AIF-GEO-03: Geographic Enrichment & Map Interface"]
+        GA2 --> GA3
+        GA1 --> GA4["AIF-GEO-04: Track Correlation & Timeline Reconstruction"]
+        GA2 --> GA4
         GA0 --> GA5["AIF-GEO-05: Visual Geolocation & Landmark Matching"]
-        GA1 & GA2 --> GA6["AIF-GEO-06: Environmental & Terrain Consistency"]
-        GA1 & GA5 --> GA7["AIF-GEO-07: Location Manipulation & Hardware Clues"]
-        GA3 & GA4 & GA7 --> GA8["AIF-GEO-08: Cross-Evidence Spatio-Temporal Graph"]
+        GA1 --> GA6["AIF-GEO-06: Environmental & Terrain Consistency"]
+        GA2 --> GA6
+        GA1 --> GA7["AIF-GEO-07: Location Manipulation & Hardware Clues"]
+        GA5 --> GA7
+        GA3 --> GA8["AIF-GEO-08: Cross-Evidence Spatio-Temporal Graph"]
+        GA4 --> GA8
+        GA7 --> GA8
         GA8 --> GA9["AIF-GEO-09: Investigator Workbench & Reports"]
         GA9 --> GA10["AIF-GEO-10: Benchmarking, Privacy & Release"]
     end
@@ -109,14 +128,22 @@ flowchart TD
         NA0["ONTF-A0: Network Architecture & Sandbox Baseline"] --> NA1["ONTF-A1: Intake, Dual Hashing & WORM Vault"]
         NA1 --> NA2["ONTF-A2: Defensive Packet Parsing (TShark & Scapy)"]
         NA1 --> NA3["ONTF-A3: Offline Zeek Batch Processing Engine"]
-        NA2 & NA3 --> NA4["ONTF-A4: Common Network Telemetry Schema & Normalisation"]
+        NA2 --> NA4["ONTF-A4: Common Network Telemetry Schema & Normalisation"]
+        NA3 --> NA4
         NA4 --> NA5["ONTF-A5: Statistical Flow & Inter-Arrival Feature Engineering"]
         NA4 --> NA6["ONTF-A6: Dual-Mode Scoping & Target-Device Attribution"]
-        NA5 & NA6 --> NA7["ONTF-A7: Deterministic Threat & Port Scan Detection"]
-        NA5 & NA6 --> NA8["ONTF-A8: Machine Learning Anomaly & Traffic Baselines"]
-        NA5 & NA6 --> NA9["ONTF-A9: Optional Temporal Sequence & Graph Models"]
-        NA7 & NA8 & NA9 --> NA10["ONTF-A10: Multi-Stage Attack Correlation & MITRE ATT&CK"]
-        NA4 & NA6 & NA10 --> NA11["ONTF-A11: Forensic Investigation Workbench & Graph UI"]
+        NA5 --> NA7["ONTF-A7: Deterministic Threat & Port Scan Detection"]
+        NA6 --> NA7
+        NA5 --> NA8["ONTF-A8: Machine Learning Anomaly & Traffic Baselines"]
+        NA6 --> NA8
+        NA5 --> NA9["ONTF-A9: Optional Temporal Sequence & Graph Models"]
+        NA6 --> NA9
+        NA7 --> NA10["ONTF-A10: Multi-Stage Attack Correlation & MITRE ATT&CK"]
+        NA8 --> NA10
+        NA9 --> NA10
+        NA4 --> NA11["ONTF-A11: Forensic Investigation Workbench & Graph UI"]
+        NA6 --> NA11
+        NA10 --> NA11
         NA11 --> NA12["ONTF-A12: Section 65B/63 BSA Legal Dossier & Certification"]
         NA12 --> NA13["ONTF-A13: End-to-End Network Validation & Benchmark Corpus"]
     end
@@ -125,13 +152,16 @@ flowchart TD
         direction TB
         CA0["CDVF-A0: Repo Audit & Cross-Modal Contracts"] --> CA1["CDVF-A1: Model Registry & Checkpoint Provenance"]
         CA0 --> CA2["CDVF-A2: Dataset Governance & Leakage Prevention"]
-        CA1 & CA2 --> CA3["CDVF-A3: Unified 19-Parameter Benchmark Runner"]
+        CA1 --> CA3["CDVF-A3: Unified 19-Parameter Benchmark Runner"]
+        CA2 --> CA3
 
         CA3 --> CA4["CDVF-A4: Image Detection & Localisation (AIF)"]
         CA3 --> CA5["CDVF-A5: Audio Detection & Localisation (AURAS)"]
         CA3 --> CA6["CDVF-A6: Video & CCTV Detection (VISTA)"]
 
-        CA4 & CA5 & CA6 --> CA7["CDVF-A7: Cross-Dataset & Unseen-Generators (Modes A-G)"]
+        CA4 --> CA7["CDVF-A7: Cross-Dataset & Unseen-Generators (Modes A-G)"]
+        CA5 --> CA7
+        CA6 --> CA7
         CA7 --> CA8["CDVF-A8: Confidence Calibration (ECE <= 0.05) & OOD Gating"]
         CA8 --> CA9["CDVF-A9: Abstention Policy & Cross-Modal DAG Fusion"]
         CA9 --> CA10["CDVF-A10: Subgroup Fairness, Robustness & 6-Gate Scoped Model Approval"]
@@ -153,7 +183,13 @@ flowchart TD
     end
 
     subgraph PLATFORM_DELIVERY["🚀 Platform Delivery & Statutory Certificate Preparation"]
-        A10 & VA13 & IA15 & NA13 & GA10 & CA11 & EA10 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
+        A10 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
+        VA13 --> P7
+        IA15 --> P7
+        NA13 --> P7
+        GA10 --> P7
+        CA11 --> P7
+        EA10 --> P7
         P7 --> P8["Phase 8: Web Dashboard & Examiner Workbench"]
         P8 --> P9["Phase 9: Security Hardening & Air-Gapped Packaging"]
         P9 --> P10["Phase 10: Final Hackathon Demonstration & Release"]
