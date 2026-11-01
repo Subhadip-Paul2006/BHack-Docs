@@ -22,6 +22,7 @@ The PS-05 development lifecycle is structured into eleven platform-level phases 
 - **CCTV Frame Integrity & Temporal Sequence Analysis (CFITSA):** Ten dedicated engineering phases (**VISTA-CFI-00 through VISTA-CFI-09**), providing specialized temporal sequence, variable-frame-rate cadence, motion continuity, and CCTV clock integrity validation embedded within VRE and the CCTV Forensic Profile.
 - **Audio Edit and Splice Localisation (AESL):** Eleven dedicated engineering phases (**AURAS-AESL-00 through AURAS-AESL-10**), providing sample-accurate boundary localisation, multi-resolution segmentation, time/spectral/noise/channel signal analysis, copy-move detection, change-point analysis, learned localisation (TCN/CRNN/ASLNet), and Section 65B/63 BSA certified reporting embedded within the Audio Reverse Engineering Engine (ARE).
 - **Cross-Source Timestamp Verification (CSTV):** Eleven dedicated engineering phases (**CSTV-A0 through CSTV-A10**), providing platform-wide temporal evidence contracts, timezone/GPS leap-second normalization, relative clock offset & robust drift modeling, piecewise clock reset segmentation, cross-source event anchor matching, Allen's interval algebra, sequence conflict graph analysis, and case-wide timeline reconstruction.
+- **Cross-Channel Concealment & Hidden-Data Forensics (CCHDF) & Specialist Physical Emissions Analysis (PSEA):** Nine dedicated engineering phases (**CCHDF-A0 through CCHDF-A8**), providing universal 10-step triage, shared multi-modal steganography & covert channel orchestration across image, audio, video, document, filesystem slack/ADS, network covert timing, semantic steganography, and calibrated physical side-channel emission analysis.
 - **Shared Platform Layer:** Common pre-decode dual-hashing, WORM vault persistence, Celery worker orchestration, and Section 65B/63 BSA legal reporting infrastructure.
 
 ```mermaid
@@ -152,8 +153,20 @@ flowchart TD
         EA9 --> EA10["CEIPL-EIV-10: Security, Performance & Release Readiness"]
     end
 
+    subgraph CCHDF_WORKSTREAM["🕵️ CCHDF Cross-Channel Concealment Playbook"]
+        direction TB
+        CCH0["CCHDF-A0: Architecture, Contracts & Triage Scanner"] --> CCH1["CCHDF-A1: Image Steganalysis Deepening (AIF/AIM)"]
+        CCH0 --> CCH2["CCHDF-A2: Audio Steganalysis & Anomaly Engine (AURAS/ARE)"]
+        CCH0 --> CCH3["CCHDF-A3: Video Temporal, Motion & GOP Steganalysis (VRE)"]
+        CCH0 --> CCH4["CCHDF-A4: Document, Unicode & Polyglot Concealment Forensics"]
+        CCH0 --> CCH5["CCHDF-A5: Forensic Disk Image, Slack Space & ADS Forensics"]
+        CCH0 --> CCH6["CCHDF-A6: Network Covert Timing Channel Analysis (ONTF)"]
+        CCH0 --> CCH7["CCHDF-A7: Semantic, Nomenclator & Linguistic Obfuscation Engine"]
+        CCH0 --> CCH8["CCHDF-A8: Physical Emissions Analysis (PSEA Specialist Milestone)"]
+    end
+
     subgraph PLATFORM_DELIVERY["🚀 Platform Delivery & Statutory Certificate Preparation"]
-        A10 & VA13 & IA15 & NA13 & GA10 & CA11 & EA10 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
+        A10 & VA13 & IA15 & NA13 & GA10 & CA11 & EA10 & CCH8 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
         P7 --> P8["Phase 8: Web Dashboard & Examiner Workbench"]
         P8 --> P9["Phase 9: Security Hardening & Air-Gapped Packaging"]
         P9 --> P10["Phase 10: Final Hackathon Demonstration & Release"]
@@ -287,7 +300,16 @@ flowchart TD
 | **CEIPL-EIV-08** | Independent Verification & Recovery | CEIPL / EIV | `PLANNED` | EIV-07 Gate | Standalone zero-PyPI CLI, 15 REST APIs, restore runbook |
 | **CEIPL-EIV-09** | Cross-Subsystem & UFREDF Integration | CEIPL / EIV | `PLANNED` | EIV-08 Gate | Engine intake adapters, Section 63 BSA PDF dossier |
 | **CEIPL-EIV-10** | Security, Performance & Release Readiness | CEIPL / EIV | `PLANNED` | EIV-09 Gate | 16-mutation test suite, 500 fixtures, air-gap Docker |
-| **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15, NA13, GA10, CDVF-A11 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
+| **CCHDF-A0** | Architecture Baseline, Evidence Contracts, Quarantine Vault & Triage Scanner | CCHDF Shared | `PLANNED` | Phase 0 Gate | `ConcealmentFinding` Pydantic v2 schemas, universal 10-step triage, inert POSIX 0400 quarantine vault, examiner extraction gates |
+| **CCHDF-A1** | Image Steganalysis Deepening & AIM-04 Calibration | AIF / AIM | `PLANNED` | CCHDF-A0 Gate | Bit-plane slicing, Sample Pair Analysis, RS analysis, SRM rich model features, JPEG DCT coefficient histograms, PNG chunk audit |
+| **CCHDF-A2** | Audio Steganalysis & Acoustic Signal Anomaly Engine | AURAS / ARE | `PLANNED` | CCHDF-A0 Gate | PCM LSB variance, Welch spectral flux anomaly, echo hiding cepstrum detection, phase coding discontinuity analysis |
+| **CCHDF-A3** | Video Temporal, Motion Vector & GOP Steganalysis | VISTA / VRE | `PLANNED` | CCHDF-A0 Gate | Frame-by-frame bit-plane slicing, P/B-frame motion vector angular perturbation, codec GOP prediction residual steganography |
+| **CCHDF-A4** | Document, Unicode & Polyglot Concealment Forensics | Document Adapter | `PLANNED` | CCHDF-A0 Gate | Zero-width character parser (ZWSP/ZWNJ/ZWJ), homoglyph confusable matching, PDF incremental xref & hidden object extractor |
+| **CCHDF-A5** | Forensic Disk Image, Slack Space & NTFS ADS Forensics | Filesystem Adapter | `PLANNED` | CCHDF-A0 Gate | Raw/dd, E01, VMDK, VHD forensic image parser, acquisition invariant validation, NTFS alternate data streams, sector slack scanner |
+| **CCHDF-A6** | Network Covert Timing Channel & Inter-Arrival Analysis | ONTF | `PLANNED` | CCHDF-A0 Gate | Flow packet inter-arrival time (IAT) series, autocorrelation covert signal detection, Kolmogorov-Smirnov baseline variance scoring |
+| **CCHDF-A7** | Semantic, Nomenclator & Linguistic Obfuscation Engine | Semantic Adapter | `PLANNED` | CCHDF-A0 Gate | Historical cipher & narcotics codebook matcher, Sentence-BERT contextual semantic dissonance, masked LM alternative perplexity scoring |
+| **CCHDF-A8** | Physical Side-Channel & Emissions Analysis (PSEA Specialist) | PSEA Specialist | `PLANNED` | CCHDF-A0 Gate | Laboratory measurement provenance validator, SDR I/Q spectrogram demodulation, Van Eck phreaking / TEMPEST reconstruction, thermal profile analysis |
+| **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15, NA13, GA10, CDVF-A11, CCHDF-A8 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
 | **UFREDF-A0** | Reporting Architecture & Legal Standards Discovery | UFREDF / Core | `PLANNED` | Phase 0 Gate | Section 65B/63 BSA legal checklist, Archify IR integration map |
 | **UFREDF-A1** | Canonical JSON IR Schema & RFC 8785 Serializer | UFREDF / Core | `PLANNED` | UFREDF-A0 Gate | RFC 8785 JCS canonical serializer, Pydantic v2 schemas |
 | **UFREDF-A2** | Evidence Inventory & CEIPL Fixity Attestation | UFREDF / Data | `PLANNED` | UFREDF-A1 Gate | Intake schedule compiler, dual-hash tables, Merkle custody parser |
@@ -5691,6 +5713,17 @@ gantt
     CDVF-A10: Subgroup Fairness & 6 Gates   :         ca10, 2026-11-12, 2026-11-13
     CDVF-A11: Regression & 24-Item WORM Bundle:        ca11, 2026-11-13, 2026-11-14
 
+    section CCHDF Concealment & Hidden-Data Workstream
+    CCHDF-A0: Architecture, Contracts & Triage :         cch0, 2026-10-21, 2026-10-24
+    CCHDF-A1: Image Steganalysis Deepening (AIF):        cch1, 2026-10-24, 2026-10-27
+    CCHDF-A2: Audio Steganalysis Engine (AURAS):        cch2, 2026-10-27, 2026-10-30
+    CCHDF-A3: Video Motion & GOP Stego (VISTA) :         cch3, 2026-10-30, 2026-11-02
+    CCHDF-A4: Document & Unicode Forensics     :         cch4, 2026-11-02, 2026-11-04
+    CCHDF-A5: Disk Image, Slack Space & ADS    :         cch5, 2026-11-04, 2026-11-07
+    CCHDF-A6: Network Covert Timing Analysis   :         cch6, 2026-11-07, 2026-11-09
+    CCHDF-A7: Semantic & Nomenclator Analysis  :         cch7, 2026-11-09, 2026-11-11
+    CCHDF-A8: Physical Emissions Analysis (PSEA):        cch8, 2026-11-11, 2026-11-13
+
     section Platform Delivery
     Phase 7: Cross-Engine Legal Reporting   :         p7, 2026-11-10, 2026-11-11
     Phase 8: Web Dashboard & Workbench     :         p8, 2026-11-11, 2026-11-13
@@ -8149,3 +8182,354 @@ flowchart LR
 | **REP-28** | Cryptographic Verification Receipt Generation| PRD §21.3 | TRD §21.2 | `UFREDF-A8` | `UFREDF-CP-08-01` | Receipt Validation Test | `PLANNED` |
 | **REP-29** | Bilingual Statutory Certificate Headers | PRD §21.3 | TRD §21.3 | `UFREDF-A7` | `UFREDF-CP-07-01` | Linguistic & Form Audit | `PLANNED` |
 | **REP-30** | CEIPL Immutable Merkle Ledger Anchoring | PRD §21.3 | TRD §21.10 | `UFREDF-A10` | `UFREDF-CP-10-01` | Merkle Inclusion Test | `PLANNED` |
+
+---
+
+## 25. Dedicated Cross-Channel Concealment & Hidden-Data Forensics Engineering Playbook (CCHDF-A0 through CCHDF-A8)
+
+```mermaid
+flowchart TD
+    C0["CCHDF-A0: Architecture Baseline, Contracts & Triage Scanner"] --> C1["CCHDF-A1: Image Steganalysis Deepening (AIF/AIM)"]
+    C0 --> C2["CCHDF-A2: Audio Steganalysis & Acoustic Anomaly (AURAS/ARE)"]
+    C0 --> C3["CCHDF-A3: Video Temporal, Motion Vector & GOP Steganalysis (VRE)"]
+    C0 --> C4["CCHDF-A4: Document, Unicode & Polyglot Concealment Forensics"]
+    C0 --> C5["CCHDF-A5: Forensic Disk Image, Slack Space & ADS Forensics"]
+    C0 --> C6["CCHDF-A6: Network Covert Timing Channel Analysis (ONTF)"]
+    C0 --> C7["CCHDF-A7: Semantic, Nomenclator & Linguistic Obfuscation Engine"]
+    C0 --> C8["CCHDF-A8: Physical Emissions Analysis (PSEA Specialist Milestone)"]
+    C1 & C2 & C3 & C4 & C5 & C6 & C7 & C8 --> CREP["Section 63 BSA & Examiner Reporting Integration"]
+```
+
+---
+
+### Phase CCHDF-A0: Architecture Baseline, Evidence Contracts, Quarantine Vault & Universal Triage Scanner
+
+- **Objective:** Establish the foundational architecture, standard data contracts, inert quarantined payload storage, zero-execution security posture, and universal 10-step first-stage carrier triage scanner for cross-channel concealment analysis across all 8 forensic carrier domains.
+- **Prerequisites:** Completion of Phase 0 platform architecture baseline; CEIPL pre-decode dual-hashing foundation; access to `src/ps05/shared/`.
+- **Scope:**
+  - *Included:* Pydantic v2 schemas for `ConcealmentFinding`, `CarrierType`, `AnalysisDomain`, `FindingReviewStatus`, `OODStatus`, and 7 modality-specific `SourceLocation` coordinate models; universal 10-step triage engine (`cchdf/triage.py`); inert quarantine vault (`cchdf/quarantine.py`) enforcing POSIX `0400` permissions and MIME neutralization; prompt-injection defensive sanitization (`<untrusted_evidence_data>` tags); Celery triage task dispatching.
+  - *Explicit Exclusions:* Modality-specific deep detection algorithms (deferred to `CCHDF-A1` through `CCHDF-A8`); autonomous unvetted payload execution (permanently forbidden under platform safety policy).
+- **Detailed Tasks:**
+  1. Author `src/ps05/shared/cchdf/schemas.py` containing syntactically valid Pydantic v2 schemas implementing the 20 mandatory fields of `ConcealmentFinding` and the 7 coordinate types (`ByteRangeLocation`, `SpatialPixelLocation`, `AudioTimeFrequencyLocation`, `VideoTemporalLocation`, `DocumentStructureLocation`, `FilesystemLocation`, `NetworkFlowLocation`).
+  2. Implement `UniversalTriageEngine` in `src/ps05/shared/cchdf/triage.py` executing the 10-step pipeline: magic bytes identification, container stream inventory via FFprobe/PyAV/TShark, extension mismatch audit, logical EOF trailing byte detector, embedded archive scanner, metadata structural audit, Shannon entropy calculation ($H = -\sum p_i \log_2 p_i$), byte-value distribution histogram, polyglot signature check, and adapter routing decision.
+  3. Implement `InertQuarantineVault` in `src/ps05/shared/cchdf/quarantine.py`: store extracted payloads under `/data/quarantine_vault/` with randomized non-executable filenames (`.bin`), enforce POSIX `0400` read-only permissions, record SHA-256 and SHA3-512 hashes in CEIPL Merkle custody ledger, and block direct filesystem execution (`chmod -x`).
+  4. Implement `ExaminerExtractionGate`: require dual-credential authorization before any extracted payload can be decrypted or exported for dynamic sandboxing.
+  5. Implement prompt-injection defense wrapper for LLM/RAG engines: enclose all extracted strings, metadata, and candidate plaintexts within `<untrusted_evidence_data>` boundary tags with strict instruction-escape filtering.
+  6. Author Section 63 BSA legal reporting generator for triage findings: compile formal statutory annexures disclosing tool provenance, hardware specifications, calibration status, and scientific error bounds.
+- **Dependencies:** `python-magic`, `numpy`, `pydantic>=2.5.0`, `celery`, CEIPL cryptographic dual-hasher.
+- **Deliverables:** `src/ps05/shared/cchdf/schemas.py`, `src/ps05/shared/cchdf/triage.py`, `src/ps05/shared/cchdf/quarantine.py`, `src/ps05/shared/cchdf/orchestrator.py`, test suite `tests/cchdf/test_triage.py`.
+- **Unit Tests:** `test_cchdf_magic_bytes()`, `test_cchdf_entropy_calculation()`, `test_cchdf_trailing_bytes()`, `test_cchdf_polyglot_detection()`, `test_cchdf_finding_schema_serialization()`.
+- **Integration Tests:** `test_triage_to_quarantine_pipeline()`, asserting extracted trailing bytes are deposited into WORM vault with POSIX `0400` and registered in CEIPL ledger without process crashes.
+- **Security & Invariant Tests:** Verify zero file descriptor execution (`os.access(W_OK | X_OK) == False`); verify prompt-injection payloads inside evidence cannot escape `<untrusted_evidence_data>` tags.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :---: |
+  | `CCHDF-CP-00-01` | Universal Triage Pipeline Verification | 100% of 10 triage steps pass on synthetic 50-file test corpus | Halt ingestion pipeline | `PLANNED` |
+  | `CCHDF-CP-00-02` | `ConcealmentFinding` Schema Integrity | 100% Pydantic v2 round-trip validation with 20 mandatory fields | Reject non-compliant finding models | `PLANNED` |
+  | `CCHDF-CP-00-03` | Quarantined Storage Invariance | POSIX `0400` verified on all extracted artifacts; 0 executable bits | Rollback vault write operations | `PLANNED` |
+  | `CCHDF-CP-00-04` | Prompt-Injection Isolation | Zero prompt leak on 100 adversarial stego-text inputs | Re-sanitize LLM context boundary | `PLANNED` |
+- **Acceptance Criteria:** Triage executes within $\le 500\text{ ms}$ for files $\le 100\text{ MB}$; 100% of non-standard trailing bytes flagged; quarantined artifacts immutably sealed.
+- **Risks & Mitigations:** High-entropy compressed files (e.g., encrypted zip) misclassified as stego: mitigated by container-aware entropy thresholding and structural parsing.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase CCHDF-A1: Image Steganalysis Deepening & AIM-04 Calibration (AIF/AIM)
+
+- **Objective:** Deepen existing `AIM-FR-004` image steganalysis within the AIF/AIM subsystem without duplicating algorithms in CCHDF; calibrate spatial and frequency detectors, rich model feature extractors, and bit-plane visualizers to provide court-admissible concealment findings.
+- **Prerequisites:** Completion of `CCHDF-A0`; AIF baseline (`AIF-A0` through `AIF-A2`); access to `src/ps05/image/aim/`.
+- **Scope:**
+  - *Included:* Bit-plane decomposition ($2^0$ through $2^7$ across RGB/YCbCr channels); Sample Pair Analysis (SPA); RS (Regular/Singular) Steganalysis for spatial domain LSB; Spatial Rich Models (SRM) 34,671-dimensional submodel features; JPEG DCT coefficient histogram anomaly analysis (Chi-square test); PNG ancillary chunk audit (`eXIf`, `tEXt`, `zTXt`, `iTXt`); generation of `ConcealmentFinding` records with `SpatialPixelLocation` coordinates.
+  - *Explicit Exclusions:* Standalone file routing (handled by `CCHDF-A0`); deepfake generation detection (handled by `AIF-A10`/`AIM`).
+- **Detailed Tasks:**
+  1. Deepen `src/ps05/image/aim/steganalysis.py`: implement optimized NumPy bit-plane slicing across 8 planes for R, G, B, and luminance $Y$ channels.
+  2. Implement Sample Pair Analysis (SPA) and RS Steganalysis: calculate $R_M, S_M, R_{-M}, S_{-M}$ curves under standard dual masks $M = [0, 1, 1, 0]$; estimate hidden bit length $p \in [0, 1]$ with standard error $\sigma_p$.
+  3. Implement JPEG DCT coefficient audit via `libjpeg` / `pillow`: extract quantized DCT coefficients, calculate generalized Cauchy distribution fit parameters, and execute Chi-square goodness-of-fit test against pristine calibration tables.
+  4. Implement PNG ancillary chunk parser: detect non-standard chunk headers, check CRC-32 validity, and flag hidden payloads embedded between `IEND` and physical EOF.
+  5. Standardize output into `ConcealmentFinding` with `SpatialPixelLocation(x, y, width, height, color_channel, bit_plane)`.
+  6. Integrate with CDVF calibration gate: apply temperature scaling to output confidence scores ensuring empirical Expected Calibration Error $\text{ECE} \le 0.05$.
+- **Dependencies:** `scipy`, `numpy`, `pillow`, `libjpeg-turbo`, AIF/AIM framework.
+- **Deliverables:** `src/ps05/image/aim/steganalysis.py`, `src/ps05/image/aim/srm_features.py`, test suite `tests/image/test_steganalysis_deepening.py`.
+- **Unit Tests:** `test_rs_steganalysis_synthetic_lsb()`, `test_sample_pair_analysis_clean_vs_stego()`, `test_jpeg_dct_histogram_chisquare()`, `test_png_ancillary_chunk_quarantine()`.
+- **Integration Tests:** End-to-end AIF intake test: verify steganographic image generates calibrated `ConcealmentFinding` bound to parent evidence in CEIPL ledger.
+- **Security & Invariant Tests:** Verify zero image execution; verify malformed EXIF/PNG chunk parser handles decompression bombs (`zTXt`) with max memory quota $\le 256\text{ MB}$.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :---: |
+  | `CCHDF-CP-01-01` | LSB & RS Analysis Sensitivity | Detect LSB steganography down to $0.05\text{ bpp}$ embedding rate | Retune spatial mask thresholds | `PLANNED` |
+  | `CCHDF-CP-01-02` | JPEG DCT Chi-Square Accuracy | True positive rate $\ge 92\%$ at false positive rate $\le 3\%$ | Re-estimate baseline Cauchy distribution | `PLANNED` |
+  | `CCHDF-CP-01-03` | Ancillary Chunk & CRC Validation | 100% detection of corrupted CRC or trailing `IEND` data | Flag container anomaly | `PLANNED` |
+  | `CCHDF-CP-01-04` | Finding Schema Conformance | 100% compliance with `SpatialPixelLocation` contract | Invalidate finding record | `PLANNED` |
+- **Acceptance Criteria:** RS analysis completes in $\le 1.2\text{ s}$ for 12 MP images; zero unhandled exceptions on corrupted JPEG DCT markers.
+- **Risks & Mitigations:** High natural image texture falsely triggering RS detector: mitigated by combining RS with SRM rich model feature classifiers.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase CCHDF-A2: Audio Steganalysis & Acoustic Signal Anomaly Engine (AURAS/ARE)
+
+- **Objective:** Extend the AURAS Audio Reverse Engineering Engine (ARE) with comprehensive audio carrier steganalysis, acoustic signal anomaly detection, and phase/echo manipulation analysis, generating calibrated findings for the CCHDF orchestrator.
+- **Prerequisites:** Completion of `CCHDF-A0`; AURAS baseline (`AURAS-A0` through `AURAS-A2`); access to `src/ps05/audio/are/`.
+- **Scope:**
+  - *Included:* PCM least-significant bit (LSB) variance analysis; high-frequency spectral flux anomaly detection via Welch PSD; echo hiding detection via auto-cepstrum peak analysis ($\hat{c}(n) = \mathcal{F}^{-1}\{\log |\mathcal{F}\{x(n)\}|^2\}$); phase coding discontinuity detection; inaudible high-frequency carrier audit ($18\text{ kHz} - 24\text{ kHz}$ ultrasonic signaling); generation of `ConcealmentFinding` with `AudioTimeFrequencyLocation` coordinates.
+  - *Explicit Exclusions:* Deepfake voice cloning detection (strictly isolated within `AURAS-A6..A8` / ADDE); speech diarization (isolated within MVSI).
+- **Detailed Tasks:**
+  1. Author `src/ps05/audio/are/steganalysis.py`: implement bit-plane extraction on 16-bit and 24-bit linear PCM uncompressed audio buffers.
+  2. Implement Welch power spectral density (PSD) anomaly detector: compute spectral flatness, spectral roll-off, and spectral flux across $20\text{ ms}$ frames with $50\%$ overlap; flag localized high-frequency energy anomalies.
+  3. Implement echo hiding detector: compute real cepstrum over sliding windows; detect periodic pulse trains in cepstral domain corresponding to artificial delay times $\tau \in [0.5\text{ ms}, 5.0\text{ ms}]$.
+  4. Implement phase coding detector: apply Short-Time Fourier Transform (STFT); compute unwrapped phase difference across consecutive frames $\Delta \phi(t, \omega)$; flag unnatural phase quantization or abrupt artificial shifts.
+  5. Implement ultrasonic band scanner: audit energy concentration in $18.0\text{ kHz} - 22.05\text{ kHz}$ band; detect frequency-shift keying (FSK) or chirp-spread-spectrum (CSS) acoustic beacons.
+  6. Standardize findings into `ConcealmentFinding` with `AudioTimeFrequencyLocation(start_time_s, end_time_s, channel_id, frequency_band_hz, sample_range)`.
+- **Dependencies:** `scipy.signal`, `numpy`, `torchaudio`, `librosa`, AURAS/ARE framework.
+- **Deliverables:** `src/ps05/audio/are/steganalysis.py`, `src/ps05/audio/are/cepstrum.py`, test suite `tests/audio/test_audio_steganalysis.py`.
+- **Unit Tests:** `test_pcm_lsb_variance_clean_vs_stego()`, `test_cepstral_echo_detection()`, `test_phase_discontinuity_locator()`, `test_ultrasonic_beacon_detector()`.
+- **Integration Tests:** Integrate with AURAS Celery worker: verify an uploaded WAV exhibit with hidden echo payload triggers `ConcealmentFinding` with exact millisecond bounds.
+- **Security & Invariant Tests:** Enforce safe decoding limits: audio file duration $\le 4\text{ hours}$, allocation $\le 1\text{ GB}$ virtual memory.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :---: |
+  | `CCHDF-CP-02-01` | PCM LSB Steganalysis Sensitivity | Detect random bit injection $\ge 1\text{ bit/sample}$ with accuracy $\ge 94\%$ | Retune variance estimator | `PLANNED` |
+  | `CCHDF-CP-02-02` | Echo Hiding Cepstrum Peak SNR | Detect echo hiding down to $-15\text{ dB}$ echo-to-signal ratio | Increase cepstral averaging window | `PLANNED` |
+  | `CCHDF-CP-02-03` | Ultrasonic Beacon Localization | Localize covert acoustic beacon timestamps within $\pm 50\text{ ms}$ | Flag high-frequency anomaly | `PLANNED` |
+  | `CCHDF-CP-02-04` | Audio Coordinate Schema Compliance | 100% compliance with `AudioTimeFrequencyLocation` contract | Reject finding record | `PLANNED` |
+- **Acceptance Criteria:** Analysis processing time $\le 0.15\times$ real-time playback duration; zero crashes on silence-only or heavily saturated audio.
+- **Risks & Mitigations:** Lossy compression (MP3/AAC) masking LSB modifications: mitigated by switching to MDCT coefficient steganalysis when lossy compression is detected by FFprobe.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase CCHDF-A3: Video Temporal, Motion Vector & GOP Steganalysis (VISTA/VRE)
+
+- **Objective:** Extend the VISTA Video Reverse Engineering Engine (VRE) with video-specific temporal, motion vector, and GOP structure steganalysis, isolating hidden communication channels without interfering with deepfake (VDF) or content (VCI) models.
+- **Prerequisites:** Completion of `CCHDF-A0`; VISTA baseline (`VISTA-A0` through `VISTA-A3`); access to `src/ps05/video/vre/`.
+- **Scope:**
+  - *Included:* Frame-by-frame bit-plane slicing on uncompressed raw video frames; P-frame and B-frame motion vector perturbation analysis; Group of Pictures (GOP) prediction residual steganalysis; DCT/DWT inter-frame coefficient modification detection; container-level video stream padding audit; generation of `ConcealmentFinding` with `VideoTemporalLocation` coordinates.
+  - *Explicit Exclusions:* Deepfake facial synthesis detection (handled by `VISTA-A9..A10`/VDF); video scene classification (handled by `VISTA-A6`/VCI); CCTV frame-drop regression (handled by `VISTA-CFI`).
+- **Detailed Tasks:**
+  1. Author `src/ps05/video/vre/steganalysis.py`: integrate with PyAV to extract raw motion vectors $(\Delta x, \Delta y)$ and macroblock types from compressed video streams without full raster decode.
+  2. Implement motion vector angular perturbation detector: compute local motion vector variance $\text{Var}(\vec{v}_{x,y})$ and motion entropy; identify high-frequency directional fluctuations characteristic of motion vector steganography algorithms (e.g., MV-Stego, AoRMV).
+  3. Implement GOP prediction residual auditor: measure energy of inter-frame prediction error $E(t) = ||I_t - \hat{I}_t||^2$; detect periodic or anomalous spikes inconsistent with natural motion dynamics.
+  4. Implement spatial bit-plane temporal consistency analyzer: track LSB transition entropy across consecutive intra (I) frames; flag spatial bit-planes that do not correlate temporally with structural scene motion.
+  5. Audit video container stream packets: check for non-standard auxiliary data streams (e.g., unrecognized SEI NAL units in H.264/H.265, unreferenced mdat payload chunks in MP4).
+  6. Standardize output into `ConcealmentFinding` with `VideoTemporalLocation(start_pts, end_pts, start_frame_index, end_frame_index, spatial_bbox, macroblock_indices)`.
+- **Dependencies:** `av` (PyAV), `numpy`, `scipy`, VISTA/VRE framework.
+- **Deliverables:** `src/ps05/video/vre/steganalysis.py`, `src/ps05/video/vre/motion_stego.py`, test suite `tests/video/test_video_steganalysis.py`.
+- **Unit Tests:** `test_motion_vector_stego_synthetic()`, `test_sei_nal_unit_covert_data()`, `test_gop_residual_anomaly()`, `test_video_temporal_location_contract()`.
+- **Integration Tests:** End-to-end VISTA VRE worker test: verify MP4 exhibit with motion vector steganography produces verified `ConcealmentFinding` bound to video timestamp.
+- **Security & Invariant Tests:** PyAV demuxer safety limits: enforce max video duration $\le 60\text{ minutes}$, frame count quota $\le 108,000\text{ frames}$, zero memory leakage across GOP iterations.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :---: |
+  | `CCHDF-CP-03-01` | Motion Vector Stego Detection | Sensitivity $\ge 88\%$ on $0.1\text{ bit/MV}$ embedding rate | Retune angular variance threshold | `PLANNED` |
+  | `CCHDF-CP-03-02` | SEI NAL Covert Payload Flagging | 100% extraction of non-conforming SEI user-data payloads | Quarantine payload in vault | `PLANNED` |
+  | `CCHDF-CP-03-03` | Temporal Bit-Plane Consistency | Distinguish natural camera noise from artificial temporal LSB modulation | Calibrate temporal noise baseline | `PLANNED` |
+  | `CCHDF-CP-03-04` | Video Coordinate Schema Validation | 100% compliance with `VideoTemporalLocation` contract | Reject finding record | `PLANNED` |
+- **Acceptance Criteria:** Motion vector parsing speed $\ge 120\text{ fps}$ on 1080p stream; zero fatal demuxer aborts on variable frame rate streams.
+- **Risks & Mitigations:** High-motion scenes causing high natural MV variance: mitigated by computing normalized motion prediction residuals relative to neighboring macroblocks.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase CCHDF-A4: Document, Unicode & Polyglot Concealment Forensics (Document Adapter)
+
+- **Objective:** Implement dedicated document, text, and polyglot concealment forensics, detecting hidden data inside PDF, Microsoft Office OpenXML, RTF, and plain text evidence without executing any embedded macros or scripts.
+- **Prerequisites:** Completion of `CCHDF-A0`; shared sandboxing infrastructure; access to `src/ps05/shared/cchdf/adapters/`.
+- **Scope:**
+  - *Included:* Zero-width Unicode character detection (ZWSP, ZWNJ, ZWJ, LTR/RTL marks); Unicode homoglyph and confusable script substitution analysis; PDF incremental update and cross-reference table (`xref`) version reconstruction; PDF hidden object detection (`/OCG` optional content groups, white-on-white text, off-canvas rendering `/CropBox`); Office OpenXML embedded payload audit (`word/_rels`, unreferenced media parts); polyglot container dissection; generation of `ConcealmentFinding` with `DocumentStructureLocation` coordinates.
+  - *Explicit Exclusions:* Standard text OCR (handled by `AIF-A6`); visual document forgery/tampering (handled by `AIF-IML`).
+- **Detailed Tasks:**
+  1. Author `src/ps05/shared/cchdf/adapters/document.py`: implement regular-expression and byte-level scanning for invisible Unicode sequences (`U+200B`, `U+200C`, `U+200D`, `U+FEFF`, `U+2060..U+206F`).
+  2. Implement homoglyph substitution auditor: cross-reference characters against Unicode Technical Report #36 (UTR-36) confusable tables; detect mixed Latin/Cyrillic/Greek script usage within single lexical tokens.
+  3. Implement defensive PDF parser using low-level token stream scanner (zero rendering engine): parse incremental update revisions, rebuild chained `/XRef` tables, and extract objects overwritten by subsequent edits.
+  4. Implement PDF hidden layer detector: identify `/OCG` layers marked `OFF`, font color matching background color ($\Delta E < 1.0$), text placed outside standard `/MediaBox` and `/CropBox` coordinates, and non-standard JavaScript `/JS` actions.
+  5. Implement Office OpenXML (ZIP-based) structural auditor: extract ZIP central directory; inspect unreferenced XML relationships, hidden VBA macro projects (`vbaProject.bin`), and non-standard parts outside ECMA-376 schema.
+  6. Standardize findings into `ConcealmentFinding` with `DocumentStructureLocation(document_type, page_number, object_id, structural_path, character_offset, bounding_box)`.
+- **Dependencies:** `regex`, `pypdf` (defensive AST mode), `defusedxml`, `unicodedata`, CCHDF framework.
+- **Deliverables:** `src/ps05/shared/cchdf/adapters/document.py`, `src/ps05/shared/cchdf/unicode_scanner.py`, test suite `tests/cchdf/test_document_adapter.py`.
+- **Unit Tests:** `test_zero_width_stego_extraction()`, `test_homoglyph_confusable_detection()`, `test_pdf_overwritten_xref_recovery()`, `test_openxml_hidden_part_detection()`.
+- **Integration Tests:** Ingest multi-revision PDF evidence: verify hidden text in earlier revision is extracted, quarantined in WORM vault, and mapped to `ConcealmentFinding`.
+- **Security & Invariant Tests:** PDF parser fuzzing test: verify zero arbitrary code execution, zero external URI fetching (`/Launch`, `/URI` actions neutralized), memory ceiling $\le 512\text{ MB}$.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :---: |
+  | `CCHDF-CP-04-01` | Invisible Unicode Detection | 100% detection of zero-width bitstreams down to single-character payload | Flag document stego | `PLANNED` |
+  | `CCHDF-CP-04-02` | Homoglyph Confusable Flagging | Flag 100% of mixed-script words matching known look-alike mappings | Record linguistic finding | `PLANNED` |
+  | `CCHDF-CP-04-03` | PDF Historical Revision Recovery | Recover 100% of superseded objects across chained incremental updates | Trace document revision history | `PLANNED` |
+  | `CCHDF-CP-04-04` | Document Schema Conformance | 100% compliance with `DocumentStructureLocation` contract | Reject finding record | `PLANNED` |
+- **Acceptance Criteria:** Document scan completes in $\le 2.0\text{ s}$ for 100-page PDF; zero macro or script execution under any circumstance.
+- **Risks & Mitigations:** Complex PDF compression filters (`/FlateDecode`, `/JBIG2Decode`) causing DoS: mitigated by enforcing strict decompression ratio quotas ($\le 20\times$).
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase CCHDF-A5: Forensic Disk Image, Slack Space & NTFS ADS Forensics (Filesystem Adapter)
+
+- **Objective:** Implement forensic disk and volume image forensics to uncover hidden data in filesystem slack space, NTFS Alternate Data Streams (ADS), unallocated clusters, and journal metadata, enforcing the acquisition invariant that disk-level forensic operations require full bitstream images.
+- **Prerequisites:** Completion of `CCHDF-A0`; read-only disk mount sandbox; access to `src/ps05/shared/cchdf/adapters/`.
+- **Scope:**
+  - *Included:* Acquisition invariant validation (`AcquisitionInvariantException` raised if non-disk file supplied); raw/dd (`.raw`, `.dd`, `.img`), Expert Witness Compression Format (`.E01`), VMDK, and VHD format parsing; NTFS Master File Table (`$MFT`) record analysis; Alternate Data Stream (`$DATA`) enumeration; partition and volume slack space carving; file slack (RAM slack and sector drive slack) inspection; unallocated cluster boundary scanning; generation of `ConcealmentFinding` with `FilesystemLocation` coordinates.
+  - *Explicit Exclusions:* Standalone user file uploads (cannot claim slack space analysis without physical image backing); live kernel filesystem manipulation (zero live mounting on host).
+- **Detailed Tasks:**
+  1. Author `src/ps05/shared/cchdf/adapters/filesystem.py`: enforce `AcquisitionInvariantException`: if input exhibit is a standalone document, audio, video, or image file without sector structure, refuse execution with statutory diagnostic memo.
+  2. Integrate low-level forensic disk image parsers (`pytsk3` / The Sleuth Kit bindings, `libewf` Python bindings) operating in user space without kernel loopback mounts.
+  3. Implement NTFS Alternate Data Stream (ADS) enumerator: parse `$MFT` record attribute lists; extract all non-unnamed `$DATA` attributes (e.g., `filename.ext:hidden_payload`); record stream name, allocation size, and MD5/SHA-256 digests.
+  4. Implement sector slack space scanner: for every allocated file, calculate physical cluster allocation boundary vs logical file length; extract remaining bytes within final cluster; run Shannon entropy scan on slack bytes.
+  5. Implement volume slack and unallocated space carver: scan unallocated cluster runs between active partition boundaries; locate deleted file signatures (magic bytes) and orphan `$MFT` records.
+  6. Standardize findings into `ConcealmentFinding` with `FilesystemLocation(filesystem_type, partition_index, cluster_number, sector_offset, inode_mft_record, stream_name, is_slack_space)`.
+- **Dependencies:** `pytsk3`, `libewf-python`, `numpy`, CCHDF framework.
+- **Deliverables:** `src/ps05/shared/cchdf/adapters/filesystem.py`, `src/ps05/shared/cchdf/slack_scanner.py`, test suite `tests/cchdf/test_filesystem_adapter.py`.
+- **Unit Tests:** `test_acquisition_invariant_rejection_on_standalone_jpeg()`, `test_e01_image_mounting_readonly()`, `test_ntfs_ads_enumeration()`, `test_cluster_slack_space_entropy()`.
+- **Integration Tests:** Ingest synthesized NTFS E01 disk image containing hidden ADS and slack payload: assert both findings are captured in `ConcealmentFinding` models with forensic sector addresses.
+- **Security & Invariant Tests:** Host protection invariant: assert zero write access permitted (`read_only=True` enforced at file descriptor and C-library layers); fail closed if image partition table is maliciously malformed.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :---: |
+  | `CCHDF-CP-05-01` | Acquisition Invariant Enforcement | 100% rejection of standalone loose files attempting slack space scan | Throw `AcquisitionInvariantException` | `PLANNED` |
+  | `CCHDF-CP-05-02` | E01 & Raw Forensic Image Intake | 100% bit-accurate partition discovery across E01, DD, VMDK | Abort image intake | `PLANNED` |
+  | `CCHDF-CP-05-03` | NTFS ADS & Slack Discovery | Detect 100% of synthetic hidden alternate streams and sector slack | Retune sector offset math | `PLANNED` |
+  | `CCHDF-CP-05-04` | Filesystem Coordinate Accuracy | 100% compliance with `FilesystemLocation` contract | Invalidate finding record | `PLANNED` |
+- **Acceptance Criteria:** Slack space scanning throughput $\ge 25\text{ MB/s}$; zero host kernel filesystem modifications or leaks.
+- **Risks & Mitigations:** Corrupted or fragmented filesystem structures crashing low-level C parser: mitigated by running `pytsk3` parsing inside an isolated sandboxed worker process with memory and CPU watchdog timers.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase CCHDF-A6: Network Covert Timing Channel & Inter-Arrival Analysis (ONTF)
+
+- **Objective:** Extend the ONTF Network Traffic Forensics Subsystem with covert timing channel detection and statistical inter-arrival time (IAT) analysis, uncovering intentional microsecond-level timing modulations used for covert exfiltration without active network interaction.
+- **Prerequisites:** Completion of `CCHDF-A0`; ONTF baseline (`ONTF-A0` through `ONTF-A4`); access to `src/ps05/network/`.
+- **Scope:**
+  - *Included:* Ingestion of offline PCAP/PCAPNG packet traces; extraction of unidirectional flow packet timestamp series $\{t_1, t_2, \dots, t_N\}$; inter-arrival time computation $\Delta t_i = t_{i+1} - t_i$; discrete timing modulation detection (binary interval keying, JitterBug); autocorrelation and spectral analysis of IAT sequences; Kolmogorov-Smirnov test against baseline Poisson traffic; generation of `ConcealmentFinding` with `NetworkFlowLocation` coordinates.
+  - *Explicit Exclusions:* Live packet sniffing or promiscuous socket listening (permanently forbidden under offline digital evidence integrity policy); deep packet payload threat analysis (handled by `ONTF-A7`).
+- **Detailed Tasks:**
+  1. Author `src/ps05/network/covert_timing.py`: interface with ONTF packet demuxer (`tshark` / `scapy`) to extract high-precision microsecond/nanosecond packet arrival times per 5-tuple flow.
+  2. Implement Inter-Arrival Time (IAT) sequence calculator: filter out zero-length retransmissions and window updates; construct high-fidelity time-delta series for client-to-server and server-to-client flows.
+  3. Implement statistical autocorrelation detector: compute IAT autocorrelation function $R_{\Delta t}(k)$ for lag $k \in [1, 50]$; detect periodic spikes indicating algorithmic timing modulation or clock synchronization beacons.
+  4. Implement variance and entropy irregularity scanner: calculate regularity index $r = \sigma_{\Delta t} / \mu_{\Delta t}$; execute two-sample Kolmogorov-Smirnov (KS) test comparing observed IAT distribution against baseline empirical distributions from clean training corpus.
+  5. Implement binary timing covert channel decoder: test candidate threshold intervals $\theta$ to recover candidate embedded bit sequences; quarantine decoded bitstream in `/data/quarantine_vault/`.
+  6. Standardize findings into `ConcealmentFinding` with `NetworkFlowLocation(pcap_id, packet_number_start, packet_number_end, flow_id, source_ip, dest_ip, protocol, frame_count)`.
+- **Dependencies:** `scipy.stats`, `numpy`, `scapy`, `dpkt`, ONTF framework.
+- **Deliverables:** `src/ps05/network/covert_timing.py`, `src/ps05/network/iat_analyzer.py`, test suite `tests/network/test_covert_timing.py`.
+- **Unit Tests:** `test_iat_calculation_precision()`, `test_autocorrelation_covert_spike()`, `test_ks_test_anomaly_detection()`, `test_binary_interval_keying_demodulation()`.
+- **Integration Tests:** Ingest synthetic PCAP exhibit containing JitterBug covert timing channel: verify flow is flagged with $p < 0.01$ and mapped into `ConcealmentFinding`.
+- **Security & Invariant Tests:** Offline zero-network invariant: assert zero network socket creation (`socket.socket` patched to raise `PermissionError`); max packet count ceiling $\le 1,000,000\text{ packets}$ per flow.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :---: |
+  | `CCHDF-CP-06-01` | Microsecond IAT Extraction Precision | Packet arrival timestamps extracted with zero drift vs PCAP hardware header | Fail flow parser | `PLANNED` |
+  | `CCHDF-CP-06-02` | Timing Channel Sensitivity | Detect covert timing modulation down to $5\text{ ms}$ jitter amplitude | Retune KS significance alpha | `PLANNED` |
+  | `CCHDF-CP-06-03` | Autocorrelation Spike Detection | Flag periodic lag peaks with statistical significance $z \ge 3.5$ | Re-estimate noise floor | `PLANNED` |
+  | `CCHDF-CP-06-04` | Network Coordinate Compliance | 100% compliance with `NetworkFlowLocation` contract | Reject finding record | `PLANNED` |
+- **Acceptance Criteria:** IAT analysis processes $\ge 50,000\text{ packets/s}$; zero false alarms on standard TCP keep-alive or NTP periodic traffic.
+- **Risks & Mitigations:** Real-world network jitter masking covert timing channels: mitigated by multi-scale wavelet decomposition of IAT sequences to isolate signal from network jitter noise.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase CCHDF-A7: Semantic, Nomenclator & Linguistic Obfuscation Engine (Semantic Adapter)
+
+- **Objective:** Develop a specialized semantic and linguistic obfuscation analysis engine capable of detecting pre-agreed codebooks (nomenclators), contextual semantic dissonance, and masked language anomalies within investigative communications, maintaining strict prompt-injection defenses.
+- **Prerequisites:** Completion of `CCHDF-A0`; local offline LLM / embedding models; access to `src/ps05/shared/cchdf/adapters/`.
+- **Scope:**
+  - *Included:* Historical cipher and narcotics/contraband nomenclator pattern matching; contextual semantic dissonance detection using Sentence-BERT cosine distance; masked language model (BERT/RoBERTa) word replacement perplexity scoring; candidate alternative plaintext generation; prompt-injection defensive sandboxing (`<untrusted_evidence_data>` tags); generation of `ConcealmentFinding` with `DocumentStructureLocation` coordinates.
+  - *Explicit Exclusions:* General translation (handled by translation modules); unconstrained autonomous LLM inference without deterministic prompt wrappers.
+- **Detailed Tasks:**
+  1. Author `src/ps05/shared/cchdf/adapters/semantic.py`: implement regex and token-based codebook matching against forensic dictionary databases (e.g., narcotics slang, financial fraud code words, historical book ciphers).
+  2. Implement contextual embedding dissonance scanner using offline `sentence-transformers`: compute embedding vectors for each sentence; measure cosine distance between local token embeddings and global paragraph centroid; flag sentences exhibiting anomalous semantic divergence.
+  3. Implement masked language model (MLM) replacement auditor via offline `bert-base-uncased`: for high-dissonance words, compute pseudo-perplexity $\text{PPL}(w_i | w_{\setminus i})$; flag terms where original word probability is statistically unnatural compared to top candidates ($P(\text{original}) < 10^{-4}$ while $P(\text{candidate}) > 0.3$).
+  4. Implement candidate plaintext hypothesis generator: generate structured investigative leads detailing possible decoded meanings with explicit probabilistic confidence bounds.
+  5. Enforce prompt-injection security wrapper: wrap all extracted tokens, candidate sentences, and hypothesis outputs inside `<untrusted_evidence_data>` tags, stripping control sequences and forbidding instruction override.
+  6. Standardize findings into `ConcealmentFinding` with `DocumentStructureLocation(document_type="chat_transcript", character_offset=offset, structural_path=message_id)`.
+- **Dependencies:** `transformers`, `sentence-transformers`, `torch`, `numpy`, CCHDF framework.
+- **Deliverables:** `src/ps05/shared/cchdf/adapters/semantic.py`, `src/ps05/shared/cchdf/nomenclator_db.py`, test suite `tests/cchdf/test_semantic_adapter.py`.
+- **Unit Tests:** `test_nomenclator_codebook_lookup()`, `test_semantic_dissonance_scoring()`, `test_mlm_perplexity_anomaly_detection()`, `test_prompt_injection_containment()`.
+- **Integration Tests:** Ingest simulated chat exhibit with encoded contraband code words: assert semantic adapter outputs calibrated `ConcealmentFinding` identifying disguised keywords.
+- **Security & Invariant Tests:** Execute 50 adversarial prompt-injection test cases embedded within chat exhibits; verify model never deviates from analytical output schema or reveals system instructions.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :---: |
+  | `CCHDF-CP-07-01` | Nomenclator Matcher Accuracy | 100% recall on curated 200-term forensic slang and codebook catalog | Expand dictionary lookup | `PLANNED` |
+  | `CCHDF-CP-07-02` | Contextual Dissonance Separation | Area Under ROC Curve $\text{AUC} \ge 0.85$ distinguishing stego-text from natural prose | Retune embedding distance metric | `PLANNED` |
+  | `CCHDF-CP-07-03` | MLM Perplexity Sensitivity | Flag anomalous lexical substitutions with false positive rate $\le 5\%$ | Re-calibrate LM perplexity ceiling | `PLANNED` |
+  | `CCHDF-CP-07-04` | Prompt-Injection Defense Seal | Zero context escaping or instruction hijacking across all test fixtures | Block model output export | `PLANNED` |
+- **Acceptance Criteria:** Processing latency $\le 100\text{ ms}$ per sentence on CPU; strictly deterministic output across identical model seeds.
+- **Risks & Mitigations:** Slang or non-standard regional English being misflagged as stego: mitigated by integrating regional Indian English and Hinglish vernacular dictionaries.
+- **Current Status:** `PLANNED`
+
+---
+
+### Phase CCHDF-A8: Physical Side-Channel & Emissions Analysis (PSEA - Gated Specialist Milestone)
+
+- **Objective:** Establish the specialist laboratory research framework for Physical Side-Channel & Emissions Analysis (PSEA), encompassing electromagnetic eavesdropping (Van Eck phreaking / TEMPEST), optical/LED modulation, acoustic emissions, and thermal imaging forensics, enforcing strict laboratory measurement provenance invariants.
+- **Prerequisites:** Completion of `CCHDF-A0`; dedicated laboratory calibration testbed; access to `src/ps05/specialist/psea/`.
+- **Scope:**
+  - *Included:* Laboratory hardware provenance validation (`LaboratoryCalibrationException` raised if uncalibrated consumer capture is presented); Software-Defined Radio (SDR) raw I/Q recording intake (`.iq`, `.cfile`, `.sigmf`); raster video frame reconstruction from electromagnetic emissions (Van Eck phreaking); high-speed optical photodiode / LED modulation signal demodulation; acoustic side-channel ultrasonic/acoustic analysis; high-resolution thermal imaging heat dissipation timeline reconstruction; generation of `ConcealmentFinding` with `ByteRangeLocation` or `SpatialPixelLocation` coordinates.
+  - *Explicit Exclusions:* Attempting TEMPEST or EMSEC analysis on consumer CCTV video or standard network PCAPs (strictly barred under scientific validity invariant); operational deployment without ISO/IEC 17025 accredited laboratory metadata.
+- **Detailed Tasks:**
+  1. Author `src/ps05/specialist/psea/calib_gate.py`: implement `LaboratoryCalibrationValidator`: inspect intake metadata for sensor calibration records, antenna gain profiles, receiver noise figures, and ISO/IEC 17025 laboratory accreditation certificates; throw `LaboratoryCalibrationException` if requirements are not met.
+  2. Implement SigMF (Signal Metadata Format) parser in `src/ps05/specialist/psea/sigmf_parser.py`: read complex float32/int16 I/Q samples, sample rate ($f_s \ge 20\text{ MS/s}$), center frequency ($f_c$), and timestamp calibration headers.
+  3. Implement Van Eck Phreaking reconstruction pipeline: compute FFT spectrogram; identify horizontal sync frequency ($f_h$) and vertical sync frequency ($f_v$) peaks; de-interleave raw AM-demodulated I/Q magnitude into 2D raster frame arrays; apply Wiener deconvolution filter to sharpen reconstructed display images.
+  4. Implement optical/LED covert channel demodulator: parse microsecond-sampled optical sensor recordings; execute digital bandpass filtering; demodulate On-Off Keying (OOK) or Pulse-Width Modulation (PWM) covert exfiltration signals emitted by device status LEDs.
+  5. Implement thermal dissipation timeline analyzer: parse radiometric thermal camera sequences (e.g., FLIR SEQ format); track localized temperature decay curves over CPU/memory areas; infer recent computational activity and key entry events.
+  6. Standardize findings into `ConcealmentFinding` with explicit laboratory metadata, sensor URN, and scientific calibration parameters.
+- **Dependencies:** `scipy.signal`, `numpy`, `sigmf`, `matplotlib`, PSEA specialist framework.
+- **Deliverables:** `src/ps05/specialist/psea/calib_gate.py`, `src/ps05/specialist/psea/tempest.py`, `src/ps05/specialist/psea/thermal.py`, test suite `tests/specialist/test_psea.py`.
+- **Unit Tests:** `test_laboratory_calibration_validator_rejection()`, `test_sigmf_iq_ingestion()`, `test_van_eck_raster_synchronization()`, `test_optical_ook_demodulation()`.
+- **Integration Tests:** Ingest synthesized SDR I/Q recording of HDMI cable radiation: assert TEMPEST module synchronizes raster dimensions and outputs reconstructed text finding.
+- **Security & Invariant Tests:** Consumer evidence rejection test: assert ordinary CCTV video file (`.mp4`) or network PCAP submitted to PSEA immediately fails with `LaboratoryCalibrationException`.
+- **Checkpoints Table:**
+  | Checkpoint ID | Checkpoint Name | Success Metric | Gate Failure Consequence | Status |
+  | :--- | :--- | :--- | :--- | :---: |
+  | `CCHDF-CP-08-01` | Sensor Provenance Gate Validation | 100% rejection of non-calibrated consumer media files | Throw `LaboratoryCalibrationException` | `PLANNED` |
+  | `CCHDF-CP-08-02` | SigMF I/Q Bitstream Demodulation | Ingest and decode complex 32-bit float I/Q streams up to $50\text{ MS/s}$ | Abort RF processing | `PLANNED` |
+  | `CCHDF-CP-08-03` | TEMPEST Raster Synchronization | Lock onto horizontal refresh rate within $\pm 0.1\text{ Hz}$ accuracy | Flag unsynchronized signal | `PLANNED` |
+  | `CCHDF-CP-08-04` | PSEA Finding Schema Compliance | 100% compliance with `ConcealmentFinding` and calibration annexure | Reject finding record | `PLANNED` |
+- **Acceptance Criteria:** Raster image reconstruction completes in $\le 5.0\text{ s}$ per frame; full statutory disclosure of measurement uncertainty in generated reports.
+- **Risks & Mitigations:** High RF noise floor in non-anechoic environments: mitigated by implementing adaptive spectral subtraction and notch filtering of known ambient carriers (FM, Wi-Fi).
+- **Current Status:** `PLANNED`
+
+---
+
+## 26. CCHDF Master Requirement Traceability Matrix (CCHDF-01 through CCHDF-35)
+
+Every Cross-Channel Concealment & Hidden-Data Forensics requirement (`CCHDF-01` through `CCHDF-35`) is mapped to its PRD functional specification, TRD technical architecture section, implementing engineering phase, verification checkpoint, expected validation evidence, execution status, and technical dependencies:
+
+| Req ID | Requirement Title | PRD Section | TRD Section | Implementation Phase | Checkpoint ID | Required Validation Evidence | Status | Dependencies / Blockers |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **CCHDF-01** | Universal Magic-Byte & MIME Identification | PRD §23.7 | TRD §22.2 | **CCHDF-A0** | `CCHDF-CP-00-01` | Header inspection passes on all known forensic signature tables | `PLANNED` | Phase 0 Gate |
+| **CCHDF-02** | Container Stream Inventory Extraction | PRD §23.7 | TRD §22.2 | **CCHDF-A0** | `CCHDF-CP-00-01` | FFprobe/PyAV/TShark stream inventory validates container integrity | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-03** | Extension Mismatch Detection | PRD §23.7 | TRD §22.2 | **CCHDF-A0** | `CCHDF-CP-00-01` | Mismatched file extensions flagged with high confidence | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-04** | Logical EOF Trailing Byte Audit | PRD §23.7 | TRD §22.2 | **CCHDF-A0** | `CCHDF-CP-00-01` | Appended data beyond container marker detected and quarantined | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-05** | Entropy Scanning & Byte Histograms | PRD §23.7 | TRD §22.2 | **CCHDF-A0** | `CCHDF-CP-00-01` | Shannon entropy $H > 7.85$ and 256-bin histograms calculated | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-06** | Audio Uncompressed PCM LSB Steganalysis | PRD §23.7 | TRD §22.4 | **CCHDF-A2** | `CCHDF-CP-02-01` | LSB variance anomalies detected across linear PCM channels | `PLANNED` | `CCHDF-A0`, AURAS-A2 |
+| **CCHDF-07** | Audio Echo Hiding Detection | PRD §23.7 | TRD §22.4 | **CCHDF-A2** | `CCHDF-CP-02-02` | Auto-cepstrum peak detection locates echo delays down to $0.5\text{ ms}$ | `PLANNED` | `CCHDF-A2` |
+| **CCHDF-08** | Audio Phase Coding Anomaly Detection | PRD §23.7 | TRD §22.4 | **CCHDF-A2** | `CCHDF-CP-02-03` | STFT phase difference identifies artificial phase quantization | `PLANNED` | `CCHDF-A2` |
+| **CCHDF-09** | Video Spatial Bit-Plane Temporal Tracking | PRD §23.7 | TRD §22.5 | **CCHDF-A3** | `CCHDF-CP-03-03` | Bit-plane slicing reveals uncompressed temporal inconsistencies | `PLANNED` | `CCHDF-A0`, VISTA-A3 |
+| **CCHDF-10** | Video Motion Vector Perturbation Analysis | PRD §23.7 | TRD §22.5 | **CCHDF-A3** | `CCHDF-CP-03-01` | Angular variance and entropy detect motion vector stego | `PLANNED` | `CCHDF-A3` |
+| **CCHDF-11** | Video GOP Prediction Residual Audit | PRD §23.7 | TRD §22.5 | **CCHDF-A3** | `CCHDF-CP-03-02` | Inter-frame prediction error spikes flag hidden payload insertion | `PLANNED` | `CCHDF-A3` |
+| **CCHDF-12** | Document Invisible Unicode Detection | PRD §23.7 | TRD §22.6 | **CCHDF-A4** | `CCHDF-CP-04-01` | Zero-width character sequences (ZWSP/ZWNJ/ZWJ) extracted | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-13** | Unicode Homoglyph & Confusable Matching | PRD §23.7 | TRD §22.6 | **CCHDF-A4** | `CCHDF-CP-04-02` | UTR-36 confusable look-alike characters flagged across scripts | `PLANNED` | `CCHDF-A4` |
+| **CCHDF-14** | PDF Incremental Revisions & Hidden Layers | PRD §23.7 | TRD §22.6 | **CCHDF-A4** | `CCHDF-CP-04-03` | Superseded xref objects and invisible `/OCG` text recovered | `PLANNED` | `CCHDF-A4` |
+| **CCHDF-15** | Forensic Disk Image Format Intake | PRD §23.7 | TRD §22.7 | **CCHDF-A5** | `CCHDF-CP-05-02` | Raw, E01, VMDK, VHD containers parsed via read-only user space | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-16** | NTFS Alternate Data Stream Enumeration | PRD §23.7 | TRD §22.7 | **CCHDF-A5** | `CCHDF-CP-05-03` | Non-unnamed `$DATA` attributes discovered and hashed | `PLANNED` | `CCHDF-A5` |
+| **CCHDF-17** | Partition & Sector Slack Space Carving | PRD §23.7 | TRD §22.7 | **CCHDF-A5** | `CCHDF-CP-05-03` | Physical cluster allocation boundary slack scanned for payloads | `PLANNED` | `CCHDF-A5` |
+| **CCHDF-18** | Filesystem Unallocated Clusters & Journals | PRD §23.7 | TRD §22.7 | **CCHDF-A5** | `CCHDF-CP-05-03` | Unallocated cluster runs scanned for orphan MFT entries | `PLANNED` | `CCHDF-A5` |
+| **CCHDF-19** | Network Inter-Arrival Time Series | PRD §23.7 | TRD §22.8 | **CCHDF-A6** | `CCHDF-CP-06-01` | Microsecond-accurate packet arrival deltas computed per flow | `PLANNED` | `CCHDF-A0`, ONTF-A4 |
+| **CCHDF-20** | Network Timing Autocorrelation Detection | PRD §23.7 | TRD §22.8 | **CCHDF-A6** | `CCHDF-CP-06-03` | Periodic lag autocorrelation spikes identify covert signaling | `PLANNED` | `CCHDF-A6` |
+| **CCHDF-21** | Network Flow Jitter Baseline Comparison | PRD §23.7 | TRD §22.8 | **CCHDF-A6** | `CCHDF-CP-06-02` | Kolmogorov-Smirnov test flags deviations from Poisson baselines | `PLANNED` | `CCHDF-A6` |
+| **CCHDF-22** | Pre-Agreed Codebook & Nomenclator Match | PRD §23.7 | TRD §22.9 | **CCHDF-A7** | `CCHDF-CP-07-01` | Curated narcotics/contraband code words identified in context | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-23** | Contextual Semantic Dissonance Scoring | PRD §23.7 | TRD §22.9 | **CCHDF-A7** | `CCHDF-CP-07-02` | Sentence-BERT cosine distance flags anomalous lexical shifts | `PLANNED` | `CCHDF-A7` |
+| **CCHDF-24** | Masked LM Alternative Perplexity Scoring | PRD §23.7 | TRD §22.9 | **CCHDF-A7** | `CCHDF-CP-07-03` | BERT token pseudo-perplexity isolates suspect word substitutions | `PLANNED` | `CCHDF-A7` |
+| **CCHDF-25** | PSEA Calibration & Laboratory Invariant | PRD §23.7 | TRD §22.10 | **CCHDF-A8** | `CCHDF-CP-08-01` | Sensor calibration and ISO/IEC 17025 certificate enforcement | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-26** | EMSEC / TEMPEST Van Eck Raster Reconstruction | PRD §23.7 | TRD §22.10 | **CCHDF-A8** | `CCHDF-CP-08-03` | Synchronized AM-demodulated I/Q signals reconstruct display frames | `PLANNED` | `CCHDF-A8` |
+| **CCHDF-27** | Optical LED & Thermal Heat Dissipation Analysis | PRD §23.7 | TRD §22.10 | **CCHDF-A8** | `CCHDF-CP-08-02` | Demodulates high-speed optical pulses and thermal decay curves | `PLANNED` | `CCHDF-A8` |
+| **CCHDF-28** | Universal `ConcealmentFinding` Data Model | PRD §23.9 | TRD §22.11 | **CCHDF-A0** | `CCHDF-CP-00-02` | 20 mandatory fields validated across all 8 forensic domains | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-29** | Modality-Specific Coordinate System | PRD §23.9 | TRD §22.11 | **CCHDF-A0** | `CCHDF-CP-00-02` | 7 coordinate models provide mathematically precise locations | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-30** | CEIPL Merkle Lineage Attestation | PRD §23.8 | TRD §22.11 | **CCHDF-A0** | `CCHDF-CP-00-03` | Extracted artifacts chained into immutable custody ledger | `PLANNED` | `CCHDF-A0`, CEIPL-EIV-03 |
+| **CCHDF-31** | Inert Quarantined POSIX 0400 Storage | PRD §23.8 | TRD §22.12 | **CCHDF-A0** | `CCHDF-CP-00-03` | Non-executable read-only storage blocks payload execution | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-32** | Zero Autonomous Execution Policy | PRD §23.8 | TRD §22.12 | **CCHDF-A0** | `CCHDF-CP-00-03` | Automated pipeline statically inspects but never executes payloads | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-33** | Examiner Dual-Control Extraction Gate | PRD §23.8 | TRD §22.12 | **CCHDF-A0** | `CCHDF-CP-00-03` | Two-examiner authorization required for sandbox export | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-34** | Case RAG Prompt-Injection Defensive Isolation | PRD §23.8 | TRD §22.13 | **CCHDF-A0** | `CCHDF-CP-00-04` | `<untrusted_evidence_data>` boundary tags enclose all evidence | `PLANNED` | `CCHDF-A0` |
+| **CCHDF-35** | Section 63 BSA Technical Schedule Generation | PRD §23.8 | TRD §22.13 | **CCHDF-A0** | `CCHDF-CP-00-01` | Statutory certificates generated with scientific methodology annexures | `PLANNED` | `CCHDF-A0`, UFREDF-A7 |
+
+

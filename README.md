@@ -35,6 +35,7 @@ Manual forensic examination is time-consuming, requires scarce specialized exper
 9. **Cross-Media Metadata Service (CMMS):** A shared, evidence-aware metadata extraction, normalisation, validation, consistency-analysis and correlation layer supporting digital images, audio recordings, video files, CCTV exports, offline PCAP/PCAPNG captures, and geospatial evidence. CMMS preserves raw metadata values, produces canonically normalised representations, identifies anomalies and inconsistencies across fields and evidence items, and exposes structured metadata records to AIF, AURAS, VISTA, AIF-GEO, ONTF, CEIPL, and UFREDF without duplicating modality-specific forensic analysis inside each engine.
 10. **Cross-Source Timestamp Verification (CSTV):** A platform-wide temporal verification and correlation capability that analyzes, compares, and cross-validates timestamps across 17 distinct evidence source categories (EXIF, audio samples, video PTS/DTS, CCTV OSD overlays, offline PCAPs, GPS tracks, device/recorder logs). CSTV estimates clock offsets and linear/piecewise drift rates in parts per million (ppm), detects clock resets, aligns multimodal event anchors, evaluates Allen's interval algebra and sequence conflict graphs, and reconstructs unified multi-tiered case timelines without overwriting source metadata.
 11. **Cryptographic Evidence Package & Legal Certificate Preparation:** Automated generation of cryptographically verifiable, tamper-evident forensic evidence packages for examiner review and legal submission under **Section 65B of the Indian Evidence Act (IEA)** and **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** with Archify JSON Intermediate Representation (IR). Court admissibility is determined by the presiding judicial authority upon the authorized human examiner's statutory declaration — not by the platform software alone.
+12. **Cross-Channel Concealment & Hidden-Data Forensics (CCHDF) & Specialist PSEA:** A shared platform-wide investigation, triage, and orchestration capability that expands concealment detection beyond conventional image steganography across 8 forensic carrier domains: universal first-stage container/structural triage, image steganalysis (AIF/AIM), audio carrier steganalysis (AURAS/ARE), video/temporal steganalysis (VISTA/VRE), text/document concealment forensics (Document Adapter), forensic disk/slack-space/ADS forensics (Filesystem Adapter), network covert timing-channel analysis (ONTF), semantic/linguistic obfuscation analysis, and specialist Physical Side-Channel & Emissions Analysis (PSEA: EMSEC/TEMPEST, acoustic emissions, thermal time-series). CCHDF normalizes findings into a unified versioned `ConcealmentFinding` contract cryptographically bound via CEIPL, enforces zero-execution inert quarantined storage, and delivers structured findings to Case RAG and UFREDF reporting.
 
 ---
 
@@ -1778,6 +1779,157 @@ flowchart LR
 
 See `PRD.md Section 21`, `TRD.md Section 21`, and `PHASES.md Section 23` for full technical specifications.
 
+### 4.34 Cross-Channel Concealment & Hidden-Data Forensics (CCHDF) & Specialist Physical Emissions Analysis (PSEA)
+
+> **Shared Cross-Platform Concealment Orchestrator — Not a Replacement for Modality Engines**
+
+The **Cross-Channel Concealment & Hidden-Data Forensics (CCHDF)** subsystem provides platform-wide orchestration, baseline triage, adapter dispatch, finding normalization, and inert quarantine management for covert communications, steganographic payloads, and concealed data structures across all supported digital and physical carrier modalities.
+
+Rather than duplicating modality-specific forensic algorithms, CCHDF acts as an evidentiary router and normalizer. It identifies the evidence carrier, executes a universal first-stage structural triage, selects and invokes the appropriate modality adapter, normalizes disparate detector outputs into a versioned `ConcealmentFinding` contract cryptographically anchored via CEIPL, and delivers structured findings to Case RAG and UFREDF reporting.
+
+```mermaid
+flowchart TD
+    EVID["Seized Evidence Ingestion\n(Image, Audio, Video, Doc, Disk Image, PCAP, Calibrated Sensor)"] --> CEIPL_INTAKE["CEIPL Pre-Decode Dual Hashing\n(SHA-256 + SHA3-512 WORM Lock)"]
+    CEIPL_INTAKE --> TRIAGE["CCHDF Universal First-Stage Triage\n(Magic Bytes, Streams, Entropy, Appended Data, Polyglots)"]
+    
+    TRIAGE -->|Image Carrier| ADAPT_IMG["AIF/AIM Adapter\n(AIM-FR-004: LSB, SPA, RS, SRM, DCT, PNG Chunks)"]
+    TRIAGE -->|Audio Carrier| ADAPT_AUD["AURAS/ARE Adapter\n(PCM Bit-Planes, Echo, Phase, Spread-Spectrum)"]
+    TRIAGE -->|Video Carrier| ADAPT_VID["VISTA/VRE Adapter\n(Frame Bit-Planes, Motion Vectors, GOP Structure)"]
+    TRIAGE -->|Document/Text| ADAPT_DOC["Document/Text Adapter\n(Zero-Width Chars, Homoglyphs, OOXML, PDF Xref)"]
+    TRIAGE -->|Disk/Volume Image| ADAPT_FS["Filesystem Adapter\n(NTFS ADS, Slack Space, MFT, Journals, Deleted)"]
+    TRIAGE -->|PCAP/PCAPNG| ADAPT_NET["ONTF Network Adapter\n(Covert Timing, IAT Sequences, Jitter, Burst)"]
+    TRIAGE -->|Transcript / Text| ADAPT_SEM["Semantic Obfuscation Adapter\n(Authorized Nomenclator, Contextual Phrases)"]
+    TRIAGE -->|Calibrated Sensor| ADAPT_PSEA["Specialist PSEA Adapter (Gated Lab)\n(EMSEC/TEMPEST, Acoustic Emissions, Thermal)"]
+
+    ADAPT_IMG --> NORM["CCHDF Finding Normalizer\n(Versioned ConcealmentFinding Schema)"]
+    ADAPT_AUD --> NORM
+    ADAPT_VID --> NORM
+    ADAPT_DOC --> NORM
+    ADAPT_FS --> NORM
+    ADAPT_NET --> NORM
+    ADAPT_SEM --> NORM
+    ADAPT_PSEA --> NORM
+
+    NORM --> CEIPL_DAG["CEIPL Merkle Lineage\n(Child Artifact SHA-256 Linkage)"]
+    NORM --> QUARANTINE["Inert Quarantined Storage\n(0400 POSIX / Zero Execution / Examiner Gate)"]
+    NORM --> CASE_RAG["Case RAG & UFREDF Dossier\n(Evidence Citations & Sec 63 BSA Schedules)"]
+```
+
+#### 4.34.1 Architectural Ownership Boundaries
+
+To eliminate capability overlap and maintain judicial defensibility, CCHDF enforces strict subsystem boundaries:
+
+| Subsystem / Component | Architectural Ownership & Responsibilities | Boundary Invariant & Strict Limitation |
+| :--- | :--- | :--- |
+| **AIF / AIM** | Owns image-carrier steganalysis: LSB Chi-Square, Sample Pair Analysis (SPA), Regular-Singular (RS), Spatial Rich Models (SRM), JPEG DCT coefficient histograms, PNG ancillary chunks, and EXIF/XMP trailing bytes. | Preserves `AIM-FR-004` and zero-execution policy. Does not analyze non-image carriers. |
+| **AURAS / ARE** | Owns audio-carrier steganalysis: PCM bit-plane statistical analysis, echo-hiding anomaly detection, phase-coding indicators, spread-spectrum/watermark anomalies, and spectral phase inconsistencies. | Integrates with ARE signal contracts. Decoupled from ordinary audio watermarking and ADDE deepfake detection. |
+| **VISTA / VRE / VCI** | Owns video-carrier steganalysis: frame-level bit-plane anomalies, temporal distribution of pixel anomalies, keyframe vs non-keyframe structure, motion-vector field anomalies, GOP/compression-aware checks, and independent audio/video stream checks. | Decoupled from VDF deepfake detection and VCI scene classification. |
+| **Document Adapter** | Owns document and text-carrier examination: zero-width Unicode characters, homoglyphs/confusables, invisible whitespace, hidden text layers, OOXML unreferenced parts/revisions, and PDF hidden xref objects/streams. | Sandboxed non-executing parsers only; never evaluates dynamic macro code. |
+| **Filesystem Adapter** | Owns storage forensics on forensic disk/volume images: NTFS Alternate Data Streams (ADS), RAM/drive file slack space, unallocated clusters, deleted file remnants, MFT `$DATA` attributes, and `$LogFile`/`$UsnJrnl` reconstruction. | **Critical Acquisition Invariant:** Requires validated disk/volume images (raw/dd, E01, VMDK, VHD); cannot run on standalone uploaded files. |
+| **ONTF** | Owns network covert-channel investigation: packet inter-arrival time (IAT) sequence distributions, directional timing skew, packet-burst entropy, autocorrelation, jitter vs baseline, and protocol-state correlation. | Analyzes original PCAP/PCAPNG evidence. Distinct from periodic C2 beacon detection; does not label regular traffic as covert. |
+| **Semantic Adapter** | Owns semantic/linguistic obfuscation analysis: text/speech transcript examination against case-scoped authorized glossaries, nomenclators, contextual repeated phrase patterns, and alternative ordinary interpretations. | Must not assert innocent phrases are codewords without independent contextual corroboration or an authorized codebook. |
+| **Specialist PSEA** | Optional gated laboratory capability: EMSEC/TEMPEST compromising emanations, unintended acoustic emissions, and thermal time-series sensor anomalies. | **Prerequisite Invariant:** Requires calibrated RF/SDR/thermal sensors with calibration reports; never proven via CCTV or PCAP. |
+| **CEIPL** | Owns master evidence bitstream fixity (SHA-256/SHA3-512 dual hashing), WORM vaulting, and derived payload Merkle DAG lineage. | Does not perform forensic or steganographic interpretation of extracted data. |
+| **CMMS & CSTV** | CMMS extracts container/carrier metadata; CSTV normalizes timestamps and models clock offset/drift across multi-channel streams. | Provide metadata and temporal alignment to CCHDF without performing carrier payload decoding. |
+| **Case RAG & UFREDF** | Ingests normalized `ConcealmentFinding` records, provides evidence-indexed search, and formats Section 63 BSA legal annexures. | Enforces prompt-injection barriers: untrusted extracted text must never become LLM system instructions. |
+
+#### 4.34.2 Universal First-Stage Concealment & Structural Triage
+
+Every evidence exhibit accepted by the PS-05 platform must pass a universal 10-step triage before being routed to deep modality-specific detectors:
+
+1. **Magic-Byte & Actual Type Identification:** Inspects leading header magic bytes against a forensic signature database, establishing true MIME type regardless of reported filename.
+2. **Container & Stream Inventory:** Enumerates all elementary container tracks, multiplexed streams, channels, and structural partitions.
+3. **Extension/Content Mismatch Detection:** Flags discrepancies between declared file extension and verified magic-byte container structure.
+4. **Trailing & Appended Data Identification:** Audits bytes beyond logical end-of-file markers (JPEG `FF D9`, PNG `IEND`, PDF `%%EOF`, ZIP central directory end).
+5. **Embedded-File & Archive Discovery:** Scans internal bitstream for nested signatures (embedded PKZIP, 7z, GZIP, ELF, PE, tar, or script headers).
+6. **Metadata & Unusual Structural-Field Inspection:** Audits container metadata blocks for anomalous chunk types, unindexed tags, private EXIF tags, and malformed length fields.
+7. **Suspicious Entropy & Byte-Distribution Indicators:** Computes block-level Shannon entropy ($H \in [0, 8]$) and sliding-window byte histograms, flagging localized high-entropy regions indicative of encrypted or compressed payloads.
+8. **Polyglot & Malformed-Container Indicators:** Detects dual-format polyglot structures (e.g., valid JPEG + valid ZIP) and deliberately malformed headers intended to bypass perimeter filters.
+9. **File-Specific Static Steganalysis Adapter Routing:** Selects and dispatches candidate evidence to appropriate modality adapters based on verified container and stream characteristics.
+10. **Safe Quarantine & Evidence Lineage:** Encapsulates detected anomalies, generates a preliminary triage finding, and records lineage under CEIPL with zero payload execution.
+
+#### 4.34.3 Unified Finding Contract (`ConcealmentFinding`)
+
+All concealment findings emit a standardized, versioned contract containing 20 mandatory fields with modality-aware spatial/temporal source locations:
+
+```json
+{
+  "finding_id": "fnd-cchdf-20261101-00129",
+  "case_id": "CASE-2026-BH-0082",
+  "evidence_id": "EVID-IMG-20261101-0044",
+  "parent_artifact_id": null,
+  "carrier_type": "image",
+  "analysis_domain": "image_steganalysis",
+  "detector_id": "aim.steganalysis.lsb_rs",
+  "detector_version": "1.4.0",
+  "checkpoint_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "method_family": "statistical_regular_singular",
+  "source_location": {
+    "carrier": "image",
+    "x": 0,
+    "y": 0,
+    "width": 1920,
+    "height": 1080,
+    "color_planes": ["R", "G", "B"]
+  },
+  "temporal_location": null,
+  "observed_indicators": [
+    "RS curve slope inversion: f_R(-P) != f_R(P)",
+    "Estimated LSB embedding rate: 0.142 bpp (+/- 0.018 bpp)"
+  ],
+  "raw_metrics": {
+    "regular_groups_pos": 0.284,
+    "singular_groups_pos": 0.112,
+    "regular_groups_neg": 0.219,
+    "singular_groups_neg": 0.178,
+    "chi_square_p_value": 0.000041
+  },
+  "calibrated_confidence_or_rank": 0.884,
+  "ood_status": "in_distribution",
+  "limitations": [
+    "LSB RS analysis assumes natural continuous-tone imagery; high ISO noise may elevate false positives.",
+    "Detection of statistical anomaly does not guarantee the existence of readable decrypted plaintext."
+  ],
+  "alternative_explanations": [
+    "High camera sensor gain / thermal noise floor in low-light capture.",
+    "Custom RAW demosaicing algorithm introducing subtle color channel correlations."
+  ],
+  "review_status": "flagged_for_examiner_review",
+  "derived_artifact_ids": [
+    "art-rs-curve-0044",
+    "art-quarantined-payload-0044"
+  ]
+}
+```
+
+#### 4.34.4 Core Evidentiary, Security & Legal Invariants
+
+1. **Detection $\neq$ Intentional Concealment:** The platform records statistical and structural anomalies; it never asserts criminal intent or knowledge, which remains the sole province of the court.
+2. **Negative Result $\neq$ Absence of Concealment:** Negative detector findings mean no anomalies were observed under evaluated models; they do not mathematically prove absence of covert channels using unknown keys or sub-threshold embedding rates.
+3. **Recovered Payload $\neq$ Proof of Authorship:** Recovering an embedded file or byte stream establishes presence within the carrier; it does not establish who created or transmitted the payload.
+4. **Inert Quarantined Storage:** All extracted bitstreams, payloads, and derivative fragments are stored with POSIX `0400` read-only permissions in sandboxed WORM storage.
+5. **Zero Execution Policy:** The platform never executes recovered binaries, shell scripts, Python files, Office macros, or HTML/JavaScript payloads. Static, unprivileged dissection is strictly enforced.
+6. **Examiner-Gated Payload Extraction:** Raw payload extraction to disk is disabled by default and requires explicit cryptographic authorization by an authenticated examiner (`ROLE-EXAMINER`).
+7. **Prompt-Injection Defense:** Untrusted text extracted from carriers or recovered payloads is strictly quarantined as data payloads and never passed into LLM system prompts or agent instructions.
+8. **Filesystem Acquisition Gate:** Slack-space and ADS examination are strictly blocked on standalone file uploads and require authenticated forensic disk images (E01, raw dd, VMDK).
+9. **PSEA Specialist Calibration Gate:** Physical side-channel analysis requires accredited laboratory measurement reports, calibrated sensor hardware metadata, and environmental baseline controls.
+
+#### 4.34.5 Implementation Status
+
+| Milestone | Implementation Phase | Target Deliverable | Status |
+| :--- | :--- | :--- | :---: |
+| Architecture Baseline & Triage Scanner | `CCHDF-A0` | Universal 10-step triage engine, Pydantic schemas | `PLANNED` |
+| Image Steganalysis Calibration | `CCHDF-A1` | AIM-04 calibration, SPA, RS, SRM, DCT models | `PLANNED` |
+| Audio Steganalysis & Phase Forensics | `CCHDF-A2` | PCM bit-plane, echo hiding, phase anomaly detectors | `PLANNED` |
+| Video & Temporal Steganalysis | `CCHDF-A3` | Frame bit-plane, motion-vector, GOP structure engine | `PLANNED` |
+| Document & Unicode Concealment | `CCHDF-A4` | Zero-width, homoglyph, OOXML & PDF hidden object parsers | `PLANNED` |
+| Filesystem Slack & ADS Forensics | `CCHDF-A5` | Raw/E01 parser, NTFS ADS, RAM/drive slack analyzer | `PLANNED` |
+| Network Covert Timing Channels | `CCHDF-A6` | ONTF IAT distribution, burst entropy, jitter correlator | `PLANNED` |
+| Semantic & Linguistic Obfuscation | `CCHDF-A7` | Nomenclator matcher, context phrase anomaly engine | `PLANNED` |
+| Specialist Physical Side-Channel (PSEA) | `CCHDF-A8` | Calibrated EMSEC/Acoustic/Thermal lab evaluation gate | `PLANNED` |
+
+See `PRD.md Section 23`, `TRD.md Section 22`, and `PHASES.md Section 25` for full specifications.
+
 ## 5. Implementation Status
 
 The project architecture is finalized; core foundation artifacts and behavioral specifications have been authored, with engine implementations planned across structured engineering phases:
@@ -1848,6 +2000,15 @@ The project architecture is finalized; core foundation artifacts and behavioral 
 | **CDVF: Abstention & Cross-Modal Fusion DAG** | `PLANNED` | CDVF-A9 | NetworkX, Pydantic v2, CEIPL DAG |
 | **CDVF: Subgroup Fairness & 6-Gate Scoped Approval** | `PLANNED` | CDVF-A10 | Fairlearn concepts, Ed25519 Signer |
 | **CDVF: Continuous Regression & Evaluation Dossier**| `PLANNED`| CDVF-A11 | WeasyPrint, Jinja2, Archify JSON IR |
+| **CCHDF: Universal Triage & Adapter Router** | `PLANNED` | CCHDF-A0 | Python, libmagic, entropy calc, Pydantic v2 |
+| **CCHDF: Image Steganalysis (AIF/AIM-04)** | `PLANNED` | CCHDF-A1 | LSB Chi-Square, RS, SPA, SRM, JPEG DCT |
+| **CCHDF: Audio Steganalysis (AURAS/ARE)** | `PLANNED` | CCHDF-A2 | Librosa, SciPy, PCM bit-planes, phase coding |
+| **CCHDF: Video & Temporal Steganalysis (VISTA)**| `PLANNED` | CCHDF-A3 | PyAV, motion vectors, bit-plane sequence, GOP |
+| **CCHDF: Document & Unicode Concealment** | `PLANNED` | CCHDF-A4 | PyMuPDF, python-docx, Unicode homoglyphs, ZIP |
+| **CCHDF: Filesystem Slack Space & ADS Forensics**| `PLANNED` | CCHDF-A5 | Raw/E01 parsers, NTFS ADS, RAM/drive slack, MFT |
+| **CCHDF: Network Covert Timing Channels (ONTF)**| `PLANNED` | CCHDF-A6 | Scapy, TShark, IAT variance, burst patterns |
+| **CCHDF: Semantic Obfuscation & Nomenclators** | `PLANNED` | CCHDF-A7 | Case-scoped glossary, Levenshtein, semantic graph |
+| **CCHDF: Specialist Physical Emissions (PSEA)** | `PLANNED` | CCHDF-A8 | Calibrated RF/IQ, acoustic & thermal sensors (lab) |
 | **Platform Legal Reporting & Archify IR** | `PLANNED` | Phase 7 / AURAS-A9 / AIF-A14 / VISTA-A12 / ONTF-A12 | Jinja2, WeasyPrint, Archify |
 | **Web Dashboard & Workbench** | `PLANNED` | Phase 8 | Next.js, React, TailwindCSS |
 | **Air-Gapped Deployment Package** | `PLANNED` | Phase 9 | Docker, Docker Compose |
@@ -1870,6 +2031,7 @@ The project architecture is finalized; core foundation artifacts and behavioral 
 - **Audio Processing:** NumPy, SciPy, Librosa, SoundFile, PyWavelets, Mutagen, FAISS.
 - **Image Processing & Classical CV:** Pillow (safe limits), OpenCV (Headless), scikit-image, NumPy, SciPy, ExifTool.
 - **Video & Bitstream Processing:** FFmpeg (>= 6.0), FFprobe, PyAV (>= 12.0), MediaInfo, PySceneDetect.
+- **Concealment & Storage Forensics Tools:** StegoX research models, The A-Files evaluation suites, The Sleuth Kit (TSK) / Autopsy forensic concepts, PyMuPDF (safe parsing), python-docx (non-executing OOXML), raw/E01 forensic image readers, SciPy signal statistics.
 - **Deep Learning / AI Runtimes:** PyTorch 2.2+, TorchAudio, torchvision, timm, Hugging Face Transformers, SpeechBrain.
 - **Computer Vision & Tracking Models:** YOLOv8/v10, Grounding DINO, SAM 2, RetinaFace, SCRFD, ByteTrack, BoT-SORT, PaddleOCR, Tesseract OCR.
 - **Audio-Visual & Temporal Models:** SyncNet, FTCN, STIL, TALL, TimeSformer, VideoMAE, SlowFast, YAMNet, PANNs, AST.
@@ -2050,6 +2212,16 @@ Refer to [PHASES.md](PHASES.md) for full phase gates and definitions of done:
   - **CDVF-A9:** Abstention Policy & Cross-Modal Evidence Fusion DAG
   - **CDVF-A10:** Subgroup Fairness, Robustness & 6-Gate Scoped Model Approval
   - **CDVF-A11:** Continuous Regression, Evaluation Dossier & Release Readiness
+- **CCHDF Cross-Channel Concealment & Hidden-Data Forensics Workstream:**
+  - **CCHDF-A0:** Architecture Baseline, Adapter Contracts & Universal Triage Scanner (`PLANNED`)
+  - **CCHDF-A1:** Image Steganalysis Deepening & AIM-04 Calibration (LSB, SPA, RS, SRM, DCT) (`PLANNED`)
+  - **CCHDF-A2:** Audio Steganalysis & Acoustic Signal Anomaly Engine (PCM, Echo, Phase) (`PLANNED`)
+  - **CCHDF-A3:** Video Temporal, Motion Vector & GOP Steganalysis (VISTA/VRE) (`PLANNED`)
+  - **CCHDF-A4:** Document, Unicode & Polyglot Concealment Forensics (Zero-Width, OOXML, PDF) (`PLANNED`)
+  - **CCHDF-A5:** Forensic Disk Image, Slack Space & NTFS ADS Forensics (Raw/E01, Invariant Gate) (`PLANNED`)
+  - **CCHDF-A6:** Network Covert Timing Channel & Inter-Arrival Analysis (ONTF IAT, Jitter) (`PLANNED`)
+  - **CCHDF-A7:** Semantic, Nomenclator & Linguistic Obfuscation Engine (Glossary Matcher) (`PLANNED`)
+  - **CCHDF-A8:** Physical Side-Channel & Emissions Analysis (PSEA Specialist Lab Milestone) (`PLANNED`)
 - **Platform Delivery Track:**
   - **Phase 7:** Platform Cross-Engine Reporting (Section 65B/63 BSA Dossier)
   - **Phase 8:** Web Dashboard & Forensic Examiner Workbench
@@ -2060,9 +2232,9 @@ Refer to [PHASES.md](PHASES.md) for full phase gates and definitions of done:
 
 ## 11. Canonical Documentation Index
 
-- [PRD.md](PRD.md) — Product Requirements Document (Personas, Requirements AIF-FR, IVE-FR, IRE-FR, AIM-FR, CEIPL-FR, AUD-FR, VISTA-FR, VRE-FR, AFB-FR, AVSC-FR, VDF-FR, VCI-FR, CCTV-FR, ONTF-FR, CDVF-01..20, NFRs)
-- [TRD.md](TRD.md) — Technical Requirements Document (Component boundaries, DB schemas, API contracts, threat model, five-engine VISTA specifications, CDVF § 11.B validation framework, Pydantic v2 schemas § 12)
-- [PHASES.md](PHASES.md) — Canonical Implementation Roadmap & Milestone Acceptance Gates (Phases 0–10, AURAS-A0..A10, AIF-A0..A15, VISTA-A0..A13, CDVF-A0..A11)
+- [PRD.md](PRD.md) — Product Requirements Document (Personas, Requirements AIF-FR, IVE-FR, IRE-FR, AIM-FR, CEIPL-FR, AUD-FR, VISTA-FR, VRE-FR, AFB-FR, AVSC-FR, VDF-FR, VCI-FR, CCTV-FR, ONTF-FR, CDVF-01..20, CCHDF-FR-001..011, CCHDF-01..35, NFRs)
+- [TRD.md](TRD.md) — Technical Requirements Document (Component boundaries, DB schemas, API contracts, threat model, five-engine VISTA specifications, CDVF § 11.B validation framework, CCHDF § 22 technical architecture & ConcealmentFinding schemas, Pydantic v2 schemas § 12)
+- [PHASES.md](PHASES.md) — Canonical Implementation Roadmap & Milestone Acceptance Gates (Phases 0–10, AURAS-A0..A10, AIF-A0..A15, VISTA-A0..A13, CDVF-A0..A11, CCHDF-A0..A8, Checkpoints CCHDF-CP-00-01..08-04)
 - [AI_INSTRUCTIONS.md](AI_INSTRUCTIONS.md) — Highest-authority behavioral specification for AI coding agents
 - [archify.config.json](archify.config.json) — Archify JSON IR and report configuration
 - [pyproject.toml](pyproject.toml) — Project packaging and dependency manifest
