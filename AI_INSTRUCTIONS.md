@@ -27,6 +27,17 @@ Communicate with technical precision, directness, and actionability. Eliminate c
 - *Prohibited:* "There might possibly be a small chance that the audio file has some minor potential tampering around second 2..."
 - *Mandatory:* "The PELT change-point detector flagged a spectral flux discontinuity at timestamp 00:02.140 with score 18.4, accompanied by a 7 dB drop in ambient noise floor, indicating a candidate splice point."
 
+### 1.4 Token Reduction & Graphify Knowledge Graph Retrieval Mandate
+The repository contains exhaustive technical specifications, product requirements, and phase playbooks (`PRD.md`, `TRD.md`, `PHASES.md`, `README.md`) spanning over 370,000 words (~500,000 tokens). To prevent extreme context-window bloat, token exhaustion, and context degradation:
+- **Mandatory Graph-First Traversal:** Whenever researching architecture, functional requirements, schemas, or phases, agents **MUST NEVER** blindly load full files into the context window.
+- **Graphify Querying Protocol:**
+  - Run `graphify query "<topic/question>"` (or `py -m graphify query "<topic/question>"`) to retrieve pinpoint contextual subgraphs, node IDs, and exact line markers (`loc=L<line>`).
+  - Run `graphify path "<Concept A>" "<Concept B>"` to trace cross-cutting dependencies, data flow, or contract relationships between components.
+  - Run `graphify explain "<Node/Concept>"` to inspect immediate neighbors of a specific entity.
+  - Consult `graphify-out/wiki/index.md` and community wiki pages for structured, modular overviews.
+- **Surgical Line-Bounded File Reads:** Only after locating exact line numbers from Graphify should the agent read targeted, bounded slices of `PRD.md`, `TRD.md`, or `PHASES.md`.
+- **Zero-Token Graph Maintenance:** After completing code or documentation modifications, run `graphify update .` (or `py -m graphify update .`) to refresh the AST and markdown knowledge graph deterministically at zero token cost.
+
 ---
 
 ## 2. Project Understanding & Identity
@@ -316,7 +327,7 @@ flowchart TD
   - Enforce the **Mandatory 10-Step Research Procedure** before modifying any code:
     1. Inspect repo tree and directory structure around target modules.
     2. Inspect existing source code, schemas, and Pydantic data models.
-    3. Inspect relevant sections of `TRD.md`, `PRD.md`, `PHASES.md`, and `AI_INSTRUCTIONS.md`.
+    3. Query the Graphify knowledge graph (`graphify query`, `graphify path`, `graphify explain`) to pinpoint exact section line ranges in `TRD.md`, `PRD.md`, and `PHASES.md`, reading only surgical slices to conserve token usage.
     4. Inspect configuration templates (`.env.example`, settings).
     5. Inspect existing unit, integration, and property-based tests.
     6. Identify subsystem boundaries, dependencies, and data flow.

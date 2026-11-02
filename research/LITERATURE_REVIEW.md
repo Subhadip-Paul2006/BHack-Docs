@@ -38,7 +38,7 @@ flowchart TD
   $$\mathbf{W} = \mathbf{I} - F(\mathbf{I}) \approx \mathbf{I} \cdot \mathbf{K} + \mathbf{\Theta}$$
   where $\mathbf{K}$ is the sensor PRNU fingerprint and $\mathbf{\Theta}$ represents uncorrelated scene noise. The correlation between the camera reference fingerprint $\mathbf{K}_{\text{ref}}$ and the noise residual $\mathbf{W}$ is computed via Peak-to-Correlation Energy (PCE):
   $$\text{PCE} = \frac{r_{\text{peak}}^2}{\frac{1}{N - |\mathcal{N}|} \sum_{(i,j) \notin \mathcal{N}} r^2(i,j)}$$
-* **Forensic Significance in PS-05:** Embedded within the **IRE** engine (`IRE-05`). It serves as an empirical physical check to confirm whether two questioned photographs originated from the same physical device or to expose spliced image patches bearing foreign sensor noise ($PCE < 15$).
+* **Forensic Significance in the Platform:** Embedded within the **IRE** engine (`IRE-05`). It serves as an empirical physical check to confirm whether two questioned photographs originated from the same physical device or to expose spliced image patches bearing foreign sensor noise ($PCE < 15$).
 
 ### 2.2 Transform Domain & Quantization Forensics (DCT & ELA)
 * **Error Level Analysis (ELA):** Popularized by Krawetz (2007), ELA computes the pixel-level difference between an input JPEG image and a version intentionally re-compressed at a standardized quality level (typically Q90 or Q95). Regions previously compressed at different quality factors or modified in uncompressed space exhibit elevated error levels:

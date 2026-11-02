@@ -1,11 +1,9 @@
 # Product Requirements Document (PRD)
 
-## Project: Digital Evidence Authenticity & Integrity Verification Platform (PS-05)
-**Hackathon:** Bihar Government Cyber Hackathon 2026 (C-DAC Patna, CCSU, Bihar Police)
-**Track:** Digital Forensics
-**Problem Statement:** PS-05 — Digital Evidence Authenticity and Integrity Verification Platform
-**Document Version:** 1.1.0
-**Status:** Approved Architecture Baseline (Deepened Audio Forensics Specification)
+## Project: Digital Evidence Authenticity & Integrity Verification Platform
+**Tracks:** Dual-Track Initiative (Track A: Research & Scientific Validation | Track B: Product Engineering)
+**Document Version:** 2.0.0
+**Status:** Approved Architectural & Product Baseline
 
 ---
 
@@ -13,25 +11,41 @@
 
 In contemporary law enforcement, judicial proceedings, and cybersecurity operations, digital media—such as digital photographs, voice calls, audio recordings, video clips, and CCTV camera footage—form the bedrock of evidence. However, the democratisation of generative AI tools (deepfakes, voice cloning, diffusion models) alongside sophisticated non-AI editing suites has created a crisis of evidence credibility. Digital artifacts can be manipulated, spliced, synthetically generated, re-encoded, or timestamp-altered in ways that are undetectable to the naked eye or human ear. Manual forensic examination by cyber forensic examiners is time-consuming, prone to human error, and completely overwhelmed by the volume of digital exhibits seized in active investigations.
 
-The **PS-05 Platform (Digital Evidence Authenticity & Integrity Verification Platform)** is an enterprise-grade, modular, explainable, and auditable cyber-forensic analysis system engineered specifically for law enforcement agencies (state police departments including Bihar Police), forensic science laboratories (FSLs), and judicial authorities. The platform automates multi-modal evidence ingestion, cryptographic chain of custody preservation, multi-engine forensic analysis across audio, image, video, and CCTV footage, and structured forensic reporting and certificate schedule preparation under **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** and legacy Section 65B of the Indian Evidence Act (IEA).
+The **Digital Evidence Authenticity & Integrity Verification Platform** is an enterprise-grade, modular, explainable, and auditable cyber-forensic analysis system engineered specifically for law enforcement agencies, cyber crime investigation cells, forensic science laboratories (State and Central FSLs), authorized enterprise security incident response teams, and judicial authorities. The platform automates multi-modal evidence ingestion, cryptographic chain of custody preservation, multi-engine forensic analysis across audio, image, video, and CCTV footage, and structured forensic reporting and certificate schedule preparation under **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** and legacy Section 65B of the Indian Evidence Act (IEA).
 
 ---
 
 ## 2. Problem Statement & Context
 
-### 2.1 The Official Hackathon Challenge (PS-05)
-As specified by C-DAC Patna, CCSU, and Bihar Police:
+### 2.1 Industry Context & Operational Forensics Mandate
+Modern jurisprudence, law enforcement, national cybersecurity cells, and corporate digital investigations require rigorous multi-modal forensic verification under statutory evidentiary standards. As articulated across forensic standards, judicial requirements, and laboratory operational guidelines:
 > *"Digital images, voice recordings, videos, and CCTV footage are increasingly used as evidence, but may be altered or synthetically generated. Manual examination can be time-consuming and may overlook sophisticated manipulations.*
 >
-> *The proposed solution should address the following requirements:*
-> - *Image and Metadata Forensics: Detect image splicing and other potential manipulations; examine EXIF data, device details, GPS coordinates, and timestamps for inconsistencies or tampering.*
+> *A comprehensive forensic platform must address the following operational requirements:*
+> - *Image and Metadata Forensics: Detect image splicing, copy-move, and other manipulations; examine EXIF data, device details, GPS coordinates, and timestamps for inconsistencies or tampering.*
 > - *Compression and Editing Analysis: Examine JPEG recompression patterns and Error Level Analysis (ELA) to identify potentially edited image regions.*
 > - *CCTV Frame Integrity Validation: Detect missing, duplicated, inserted, or reordered video frames.*
 > - *Timestamp Anomaly Detection: Identify inconsistencies between embedded timestamps, metadata, and video frame sequences.*
 > - *Audio and Voice Tampering Detection: Identify manipulated, edited, or AI-generated voice recordings and examine the authenticity and integrity of audio evidence, highlighting suspicious segments where possible.*
 > - *Forensic Dashboard and Reporting: Present detected anomalies, supporting evidence, confidence indicators, and structured forensic findings.*
 >
-> *The solution should enable law-enforcement agencies and forensic laboratories to rapidly verify digital images, audio, video, and other digital artifacts, improving the reliability of electronic evidence during investigations and judicial proceedings."*
+> *The platform enables law-enforcement agencies, forensic science laboratories, and authorized investigation teams to rapidly verify digital images, audio, video, and other digital artifacts, improving the reliability and scientific admissibility of electronic evidence during investigations and judicial proceedings."*
+
+
+### 2.3 Dual-Track Alignment & Research Documentation Suite
+The platform is developed under two synchronised tracks:
+- **Track A: Research & Scientific Validation:** Theoretical modeling, hypothesis formulation, baseline comparative benchmarking, and scientific literature contributions. All research documentation is maintained in the [`research/`](research/RESEARCH_OVERVIEW.md) directory:
+  - [`research/RESEARCH_OVERVIEW.md`](research/RESEARCH_OVERVIEW.md): Foundational vision, research roadmap, and core pillars.
+  - [`research/RESEARCH_GAP_ANALYSIS.md`](research/RESEARCH_GAP_ANALYSIS.md): Comprehensive review of 7 key research gaps in current digital forensics.
+  - [`research/LITERATURE_REVIEW.md`](research/LITERATURE_REVIEW.md): Deep-dive academic synthesis across PRNU, ELA, DCT, CMFD, ENF, PELT, AASIST, C2PA.
+  - [`research/RESEARCH_OBJECTIVES.md`](research/RESEARCH_OBJECTIVES.md): Formal research questions (RQ1-RQ6), hypotheses (H1-H6), and quantitative milestones.
+  - [`research/RESEARCH_METHODOLOGY.md`](research/RESEARCH_METHODOLOGY.md): Mathematical formulations, zero-leakage data partitioning, and statistical tests.
+  - [`research/EXPERIMENTAL_FRAMEWORK.md`](research/EXPERIMENTAL_FRAMEWORK.md): Deterministic seeds, WORM experiment manifests, and hardware profiles.
+  - [`research/DATASET_STRATEGY.md`](research/DATASET_STRATEGY.md): Standard benchmark corpora and quality tiering hierarchy.
+  - [`research/EVALUATION_METRICS.md`](research/EVALUATION_METRICS.md): Rigorous mathematical definitions for EER, minDCF, MCC, ECE, IoU, and tIoU.
+  - [`research/RESEARCH_LIMITATIONS.md`](research/RESEARCH_LIMITATIONS.md): Formal physical and signal-theoretic uncertainty principles.
+  - [`research/REFERENCES.md`](research/REFERENCES.md): Complete peer-reviewed academic bibliography and forensic standards.
+- **Track B: Product Engineering:** Robust, air-gapped, high-throughput software pipelines, role-based workflows, and statutory reporting (Section 63 BSA / Section 65B IEA).
 
 ### 2.2 Operational Forensic Gaps
 1. **Tool Fragmentation:** Investigators currently rely on disparate, disconnected single-purpose scripts (e.g., ExifTool for metadata, manual Audacity spectrographs for audio, standalone open-source deepfake detectors) with zero unified case registry or evidentiary lineage.
@@ -184,6 +198,8 @@ The **CCHDF (Cross-Channel Concealment & Hidden-Data Forensics)** capability est
 | **P-3** | Public Prosecutor / Legal Counsel | Directorate of Prosecution / High Court | Needs explainable, defense-resilient evidence reports that can withstand rigorous cross-examination regarding tampering and chain of custody. | Section 65B/63 BSA certified PDF reports, visual evidence annexures, cryptographic verification logs. |
 | **P-4** | System Administrator & Evidence Custodian | Police HQ / Forensic Lab IT | Needs strict Role-Based Access Control (RBAC), multi-tenant case isolation, tamper-evident audit logging, and offline air-gapped deployment capability. | Admin portal, storage management, engine status monitoring, user role auditing, air-gapped node synchronization. |
 | **P-5** | Forensic ML Evaluation & Security Engineer | Forensic AI Research Unit / Cyber Technical Evaluation Cell | Needs reproducible evaluation protocols, detector disagreement calibration, OOD detection, model license audit, and security regression testing on malformed images. | Model registry, benchmark CLI, adversarial testing harness, cryptographic verification audit. |
+| **P-6** | Enterprise Incident Response & Forensics Investigator | Enterprise CSIRT / Fraud Investigation Unit | Investigates corporate blackmail, deepfake executive fraud (BEC), credential theft, and manipulated network/audit trails. Requires fast offline forensic pipelines. | Fast ingestion CLI, network forensic parsing (ONTF), visual tampering analysis, corporate compliance export. |
+| **P-7** | Academic Forensic Researcher & Benchmark Scientist | Independent University Lab / Forensic Science Consortium | Researches novel PRNU extraction, dialectal audio spoofing baselines, synthetic artifact detection, and open benchmark evaluations. Requires reproducible datasets. | Research documentation suite, benchmark evaluation harness, dataset split manifests, experimental metrics CLI. |
 
 ### 4.2 Primary User Journey: End-to-End Forensic Case Lifecycle
 
@@ -1656,7 +1672,7 @@ The **Cross-Modal Deepfake Validation Framework (CDVF)** is the shared validatio
 ---
 
 ### 13.3 Target User Personas
-1. **Forensic Examiner / Cyber Lab Analyst (FSL Bihar):** Reviews questioned media, executes multi-modal validation workflows, analyzes detector agreement/disagreement, and signs Section 65B/63 BSA dossiers.
+1. **Forensic Examiner / Cyber Lab Analyst (State / Central FSL or Cyber Cell):** Reviews questioned media, executes multi-modal validation workflows, analyzes detector agreement/disagreement, and signs Section 65B/63 BSA dossiers.
 2. **Forensic Model Governance Officer:** Audits model cards, validates checkpoint cryptographic hashes, oversees 6-gate approval workflows, and sets operational scope boundaries.
 3. **Forensic Benchmark Engineer:** Curates ground-truth datasets, implements group-aware disjoint partitions, executes automated benchmark suites, and tests unseen-generator robustness.
 4. **Special Public Prosecutor / Judicial Magistrate:** Considers expert testimony, examines calibration reliability diagrams, and audits cross-modal corroboration to evaluate legal weight.
@@ -2796,7 +2812,7 @@ The platform provides a dedicated forensic examiner workbench interface enabling
 
 ### 16.1 Problem Statement
 
-Every forensic subsystem in PS-05 (AIF, AURAS, VISTA, AIF-GEO, ONTF) must extract technical metadata from evidence files. Without a shared service, each engine reimplements its own EXIF reader, FFprobe wrapper, PCAP header parser, and timestamp normaliser — creating maintenance burden, inconsistent field naming, and incompatible provenance records. When metadata extracted by IRE conflicts with metadata used by VRE or AIF-GEO, there is no authoritative record of which parser ran which version against which evidence hash.
+Every forensic subsystem in the platform (AIF, AURAS, VISTA, AIF-GEO, ONTF) must extract technical metadata from evidence files. Without a shared service, each engine reimplements its own EXIF reader, FFprobe wrapper, PCAP header parser, and timestamp normaliser — creating maintenance burden, inconsistent field naming, and incompatible provenance records. When metadata extracted by IRE conflicts with metadata used by VRE or AIF-GEO, there is no authoritative record of which parser ran which version against which evidence hash.
 
 Separately, cross-evidence metadata comparisons (image timestamp vs. CCTV recording window; audio origination time vs. video container creation time) require a shared model of metadata records and comparison results. Without it, such comparisons must be reimplemented in every reporting layer.
 
@@ -4411,7 +4427,7 @@ This fragmentation introduces severe evidentiary and operational risks:
 4. **Disjointed Custody Visibility:** Evidence integrity checks are often executed as an afterthought at the time of intake, with zero real-time visibility into post-write fixity status or derivative artefact DAG lineage during active examination.
 
 #### 20.1.2 The Unified Solution (UFD / UFW)
-The **Unified Forensic Evidence Dashboard (UFD)** and its practitioner user interface, the **Unified Forensic Workbench (UFW)**, establish a single, secure, local-first, role-aware presentation and examiner workflow tier for the entire PS-05 platform. UFD bridges the end-to-end investigation lifecycle:
+The **Unified Forensic Evidence Dashboard (UFD)** and its practitioner user interface, the **Unified Forensic Workbench (UFW)**, establish a single, secure, local-first, role-aware presentation and examiner workflow tier for the entire platform. UFD bridges the end-to-end investigation lifecycle:
 
 $$\text{Case Creation} \longrightarrow \text{Evidence Registration} \longrightarrow \text{Integrity Verification} \longrightarrow \text{Forensic Processing} \longrightarrow \text{Findings Review} \longrightarrow \text{Cross-Modal Correlation} \longrightarrow \text{Examiner Assessment} \longrightarrow \text{Report Issuance}$$
 
@@ -4472,7 +4488,7 @@ To prevent unilateral tampering, collusion, or accidental missteps, the followin
 ### 20.4 End-to-End User Journeys (UFD-J01 through UFD-J10)
 
 #### Journey UFD-J01: Case Creation & Evidence Registration
-A Case Administrator creates Case `CASE-BIHAR-2026-PS05-042` with jurisdictional references and assigns Investigating Officer `IO-KUMAR` and Examiner `EX-SHARMA`. The IO registers three exhibits: a smartphone JPEG photo, a seized MP3 phone call, and an MP4 surveillance export. The workbench streams the files directly to CEIPL, computes streaming SHA-256/SHA3-512 hashes, issues an RFC 8785 intake receipt, and initiates asynchronous CMMS metadata extraction.
+A Case Administrator creates Case `CASE-2026-EVID-042` with jurisdictional references and assigns Investigating Officer `IO-KUMAR` and Examiner `EX-SHARMA`. The IO registers three exhibits: a smartphone JPEG photo, a seized MP3 phone call, and an MP4 surveillance export. The workbench streams the files directly to CEIPL, computes streaming SHA-256/SHA3-512 hashes, issues an RFC 8785 intake receipt, and initiates asynchronous CMMS metadata extraction.
 
 #### Journey UFD-J02: Evidence Fixity & Integrity Review
 The Evidence Custodian opens the Evidence Integrity Workspace. The system displays the CEIPL WORM fixity verification status, confirming that post-write bitstreams match intake hashes. A simulated bit-flip on a test exhibit immediately triggers an un-dismissible red banner `FIXITY_CHECK_FAILED`, isolates the file into `QUARANTINED` state, and locks out analysis tools until formal dual-control resolution.
@@ -5372,7 +5388,7 @@ To guide implementation without premature adoption of unvetted dependencies, CCH
 | **StegoX** | Multi-carrier steganalysis | MIT / Apache 2.0 | PyTorch, NumPy, SciPy | Open Research (CC-BY 4.0) | JPEG, PNG, BMP, WAV | Active academic research | Benchmarking LSB, RS, SRM, and deep steganalysis networks | Academic code quality; requires production hardening and memory bounding. |
 | **The A-Files** | Audio steganography evaluation | GNU GPL v3 | Python 3, Librosa, SciPy | N/A (Algorithmic) | WAV, FLAC, MP3 | Reference test suite | Comprehensive evaluation of audio LSB, phase, and echo hiding | GPL v3 license requires clean subprocess/microservice isolation; unmaintained since 2022. |
 | **The Sleuth Kit (TSK)** | Disk & Filesystem analysis | IBM Public / CPL | C/C++ core, optional Java bindings | N/A | Raw/dd, E01, VMDK, VHD, NTFS, FAT, ext4 | Highly active enterprise standard | MFT parsing, NTFS ADS extraction, inode/cluster mapping | Large native C library; must execute in isolated subprocess sandboxes to prevent memory corruption. |
-| **Autopsy** | Forensic workflow integration | Apache 2.0 | Java, TSK, Solr, PostgreSQL | N/A | Disk images, memory dumps | Active production framework | Ingestion pipelines, artifact extraction, correlation | Heavy desktop UI architecture; PS-05 adopts structural concepts, not full desktop runtime. |
+| **Autopsy** | Forensic workflow integration | Apache 2.0 | Java, TSK, Solr, PostgreSQL | N/A | Disk images, memory dumps | Active production framework | Ingestion pipelines, artifact extraction, correlation | Heavy desktop UI architecture; the platform adopts structural concepts, not full desktop runtime. |
 | **Zeek (formerly Bro)** | Network flow & protocol telemetry | BSD 3-Clause | C++, Python bindings, Spicy | N/A | PCAP, PCAPNG | Highly active enterprise standard | Offline batch dissection (`-r`), connection profiling, DNS tunnels | Native C++ runtime; requires strict sandboxed execution with cgroups memory limits. |
 | **PyMuPDF (fitz)** | PDF structural inspection | GNU AGPL v3 / Commercial | MuPDF C library, Python CFFI | N/A | PDF, XPS, EPUB | Active commercial / open source | Deep xref object inspection, stream extraction, incremental updates | AGPL v3 requires commercial license or strict microservice process boundary; memory limits required. |
 | **python-docx** | OOXML document forensics | MIT | Python, lxml | N/A | DOCX, DOTX | Active | Non-executing XML inspection, media part enumeration, revisions | Does not parse binary `.doc` formats; macro inspection requires separate static OLE parser. |

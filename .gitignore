@@ -1,0 +1,35 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment Variables
+.env
+!.env.example
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.hypothesis/
+
+# Packaging
+dist/
+build/
+*.egg-info/
+
+# Graphify temporary caches and sidecars (persistent graph.json, report, html, and wiki remain tracked)
+graphify-out/cache/
+graphify-out/.graphify_*
+graphify-out/.needs_update
+
+# IDE & agent local scratch / caches
+.gemini/
+.codex/
+

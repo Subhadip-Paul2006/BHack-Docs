@@ -1,17 +1,15 @@
 # Technical Requirements Document (TRD)
 
-## Project: Digital Evidence Authenticity & Integrity Verification Platform (PS-05)
-**Hackathon:** Bihar Government Cyber Hackathon 2026 (C-DAC Patna, CCSU, Bihar Police)
-**Track:** Digital Forensics
-**Problem Statement:** PS-05 — Digital Evidence Authenticity and Integrity Verification Platform
-**Document Version:** 1.1.0
-**Status:** Approved Technical Architecture Baseline (Deepened Audio Forensics Specification)
+## Project: Digital Evidence Authenticity & Integrity Verification Platform
+**Tracks:** Dual-Track Initiative (Track A: Research & Scientific Validation | Track B: Product Engineering)
+**Document Version:** 2.0.0
+**Status:** Approved Technical Architecture & Engineering Baseline
 
 ---
 
 ## 1. System Context & Top-Level Architecture
 
-The **PS-05 Platform** is structured as a modular, local-first, air-gap-capable cyber forensics platform designed for high-throughput, legally defensible analysis of digital media. The platform ingests four primary media modalities—**Audio Recordings, Digital Photographs, Video Clips, and Surveillance CCTV Footage**—and executes deterministic signal processing, computer vision, and neural deepfake detection while preserving cryptographic chain of custody.
+The **Digital Evidence Authenticity & Integrity Verification Platform** is structured as a modular, local-first, air-gap-capable cyber forensics platform designed for high-throughput, legally defensible analysis of digital media. The platform ingests four primary media modalities—**Audio Recordings, Digital Photographs, Video Clips, and Surveillance CCTV Footage**—and executes deterministic signal processing, computer vision, and neural deepfake detection while preserving cryptographic chain of custody.
 
 ```mermaid
 flowchart TB
@@ -125,8 +123,10 @@ flowchart TB
 The platform follows a clean, modular monolith architecture with strict layer separation, preventing cyclic imports and ensuring independent testability of all forensic engines:
 
 ```
-d:/NextHackathon/
+d:/BHack-Docs/
 ├── README.md                          # Master project entry point & overview
+├── PRODUCT_BRIEF.md                   # Executive Product Brief & Strategic Overview
+├── CCTV_VISUAL_INTELLIGENCE.md        # CCTV & Surveillance Video Forensics Specification
 ├── PRD.md                             # Product Requirements Document
 ├── TRD.md                             # Technical Requirements Document (this document)
 ├── PHASES.md                          # Development Roadmap & Implementation Milestones
@@ -135,6 +135,18 @@ d:/NextHackathon/
 ├── .env.example                       # Documented environment variables template
 ├── docker-compose.yml                 # Local container orchestration (PostgreSQL, Redis, MinIO)
 ├── archify.config.json                # Archify forensic report and IR configuration
+│
+├── research/                          # Comprehensive Scientific Research Suite (Track A)
+│   ├── RESEARCH_OVERVIEW.md           # Vision, scientific pillars & research roadmap
+│   ├── RESEARCH_GAP_ANALYSIS.md       # Analysis of 7 critical digital forensic gaps
+│   ├── LITERATURE_REVIEW.md           # Peer-reviewed synthesis across signal & AI forensics
+│   ├── RESEARCH_OBJECTIVES.md         # Formal research questions (RQ1-6) & hypotheses (H1-6)
+│   ├── RESEARCH_METHODOLOGY.md        # Formulations, GroupKFold zero-leakage, perturbation grids
+│   ├── EXPERIMENTAL_FRAMEWORK.md      # Seed determinism, hardware profiles, WORM manifests
+│   ├── DATASET_STRATEGY.md            # Benchmark corpora & tiering hierarchy
+│   ├── EVALUATION_METRICS.md          # Formulations for EER, minDCF, MCC, ECE, IoU, tIoU
+│   ├── RESEARCH_LIMITATIONS.md        # Physical uncertainty principles & abstention boundaries
+│   └── REFERENCES.md                  # Peer-reviewed bibliography & forensic standards
 │
 ├── src/
 │   └── ps05/
@@ -1212,7 +1224,7 @@ CREATE INDEX IF NOT EXISTS idx_cdvf_approvals_state ON cdvf_validation_approvals
 
 ## 5. AURAS Subsystem Technical Architecture
 
-AURAS (Audio Understanding, Reconstruction & Analysis System) operates as a self-contained, multi-engine subsystem within PS-05. It is **strictly independent** from image and video engines, but consumes the shared WORM storage and Celery orchestration infrastructure:
+AURAS (Audio Understanding, Reconstruction & Analysis System) operates as a self-contained, multi-engine subsystem within the platform. It is **strictly independent** from image and video engines, but consumes the shared WORM storage and Celery orchestration infrastructure:
 
 ```mermaid
 flowchart TB
@@ -2004,7 +2016,7 @@ flowchart TD
 
 ### 10.10 AIF-GEO Technical Specification (Geospatial Forensics & Evidence Correlation Engine)
 
-The **AIF-GEO** subsystem provides deep geospatial evidence extraction, geographic coordinate normalization, track-to-image correlation, visual location recovery, solar/shadow verification, environmental consistency auditing, multi-image clustering, and cross-evidence conflict graphing within the PS-05 platform. It integrates natively with CEIPL for cryptographic provenance and reuses core AIF visual processing infrastructure.
+The **AIF-GEO** subsystem provides deep geospatial evidence extraction, geographic coordinate normalization, track-to-image correlation, visual location recovery, solar/shadow verification, environmental consistency auditing, multi-image clustering, and cross-evidence conflict graphing within the platform. It integrates natively with CEIPL for cryptographic provenance and reuses core AIF visual processing infrastructure.
 
 ```mermaid
 flowchart TD
@@ -2862,7 +2874,7 @@ Every candidate model is validated against the 14-condition synthetic perturbati
 
 ## 10.B CEIPL: Cryptographic Evidence Integrity & Provenance Layer
 
-CEIPL is the shared, immutable cryptographic foundation serving AIF, AURAS, and VFS across the entire PS-05 platform. It enforces mathematical evidence preservation from the moment of seizure through final court presentation.
+CEIPL is the shared, immutable cryptographic foundation serving AIF, AURAS, and VFS across the entire platform. It enforces mathematical evidence preservation from the moment of seizure through final court presentation.
 
 ### 10.B.1 Cryptographic Manifest Creation & Signature Verification Sequence
 
@@ -3012,28 +3024,28 @@ The following matrix documents every planned tool, library, and deep learning mo
 | **IVE-01** | Safe format profiling & limits | Pillow + python-magic | `python-pillow/Pillow` | HPND (Permissive) | Raw image byte stream | `ImageProfile` JSON | CPU (1 core, 512MB RAM) | `Pillow==10.3.0` | Malformed Exif in rare camera RAW formats | `PLANNED` |
 | **IVE-02/03** | 150-category multi-label scene triage | SigLIP / ViT-SO400M | `google-research/big_vision` | Apache-2.0 | Normalized sRGB ($336\times 336$) | `List[TaxonomyAnnotation]` | GPU ($\ge 4\text{GB}$ VRAM) / CPU float32 | `transformers==4.40.2` | Zero-shot open vocabulary domain drift on forensic injury | `PLANNED` |
 | **IVE-04** | Object detection & instance masks | YOLOv8x / SAM 2 | `ultralytics/ultralytics`, `facebookresearch/segment-anything-2` | AGPL-3.0 / Apache-2.0 | Tiled RGB ($1024\times 1024$) | `List[DetectedObject]` | GPU ($\ge 8\text{GB}$ VRAM) | `ultralytics==8.2.14`, `sam2==1.0` | Heavy memory footprint with SAM 2; NMS boundary overlap | `PLANNED` |
-| **IVE-05** | Occlusion-aware people counting | Custom dual-head YOLO + Hungarian | `ps05.engines.image.ive` | Proprietary (PS-05) | High-res RGB tensor | `PeopleCountResult` | GPU ($\ge 4\text{GB}$ VRAM) | Internal | Severe crowd occlusion ($> 85\%$) degrades person bounding | `PLANNED` |
+| **IVE-05** | Occlusion-aware people counting | Custom dual-head YOLO + Hungarian | `ps05.engines.image.ive` | Proprietary (Platform Core) | High-res RGB tensor | `PeopleCountResult` | GPU ($\ge 4\text{GB}$ VRAM) | Internal | Severe crowd occlusion ($> 85\%$) degrades person bounding | `PLANNED` |
 | **IVE-06 / FPA**| Face detection & 468 3D landmarks | RetinaFace + MediaPipe Face Mesh | `biubug6/Pytorch_Retinaface`, `google/mediapipe` | MIT / Apache-2.0 | Bounding face crop | `FaceRegion` + 468 mesh | CPU (2 cores) / GPU | `mediapipe==0.10.14`, `retinaface-pytorch` | Degrades under extreme yaw ($> 60^\circ$) or resolution $< 48\text{px}$ | `PLANNED` |
 | **IVE-07 / FPA**| Authorized 1:1 face similarity | ArcFace (IResNet-100) / MagFace | `deepinsight/insightface` | MIT | Aligned $112\times 112$ face crop + Case Token | `BiometricComparisonResult` | GPU / CPU float32 | `insightface==0.7.3` | Cross-age and cross-resolution false match variance | `PLANNED` |
 | **IVE-08** | Document layout & OCR | Canny + Homography + PaddleOCR | `PaddlePaddle/PaddleOCR` | Apache-2.0 | Document image | `DocumentOCRResult` | CPU / GPU | `paddleocr==2.7.3` | Complex curved/wrinkled documents distort quad warp | `PLANNED` |
 | **IRE-01** | Deep EXIF/XMP/IPTC container audit | ExifTool read-only wrapper | `PhilHarvey/Image-ExifTool` | Artistic / GPL-1.0+ | File path on disk | `MetadataAuditReport` | CPU (minimal) | `exiftool==12.84` | Metadata easily stripped by messaging intermediaries | `PLANNED` |
 | **IRE-02** | 2D FFT & DCT spectral statistics | NumPy / SciPy 2D FFT | `scipy/scipy` | BSD-3-Clause | Grayscale luminance matrix | `SignalAnalysisResult` | CPU (1 core, 1GB RAM) | `scipy==1.13.0`, `numpy==1.26.4` | Downsampling removes high-frequency resampling peaks | `PLANNED` |
 | **IRE-03** | Classical CV geometric forensics | OpenCV (Canny, SIFT, RANSAC) | `opencv/opencv-python` | Apache-2.0 | Grayscale questioned + reference | `GeometricForensicResult` | CPU (2 cores) | `opencv-python-headless==4.9.0.80` | Featureless, smooth surfaces yield insufficient SIFT matches | `PLANNED` |
-| **IRE-04** | Copy-Move Forgery Detection (CMFD) | SIFT k-d tree DBSCAN + DCT | `ps05.engines.image.ire` | Proprietary (PS-05) | Full-res RGB array | `CMFDResult` + polygon masks | CPU / GPU | Internal | High computational complexity $O(N^2)$ on 50MP images | `PLANNED` |
-| **IRE-05** | Sensor PRNU noise fingerprinting | Wavelet denoising + NCC | `ps05.engines.image.ire` | Proprietary (PS-05) | Questioned image + 25 reference flats | `PRNUResult` + correlation $\rho$ | CPU (4 cores, 4GB RAM) | `PyWavelets==1.6.0` | Social-media lossy recompression damages PRNU noise | `RESEARCH_CANDIDATE` |
-| **IRE-06** | Re-compression & platform history | DQT Catalog + Blocking Discrepancy | `ps05.engines.image.ire` | Proprietary (PS-05) | JPEG binary bitstream | `CompressionProvenanceResult` | CPU (1 core) | Internal | Non-JPEG images lack standard quantization markers | `PLANNED` |
-| **AIM-01** | Synthetic AI-image classifier | Multi-branch ResNet50 + FFT + SigLIP | `ps05.engines.image.aim` | Proprietary (PS-05) | $512\times 512$ patches & full-res | `AIGenerationResult` | GPU ($\ge 8\text{GB}$ VRAM) | Internal + PyTorch 2.3 | Out-of-distribution generators (unseen architectures) | `PLANNED` |
+| **IRE-04** | Copy-Move Forgery Detection (CMFD) | SIFT k-d tree DBSCAN + DCT | `ps05.engines.image.ire` | Proprietary (Platform Core) | Full-res RGB array | `CMFDResult` + polygon masks | CPU / GPU | Internal | High computational complexity $O(N^2)$ on 50MP images | `PLANNED` |
+| **IRE-05** | Sensor PRNU noise fingerprinting | Wavelet denoising + NCC | `ps05.engines.image.ire` | Proprietary (Platform Core) | Questioned image + 25 reference flats | `PRNUResult` + correlation $\rho$ | CPU (4 cores, 4GB RAM) | `PyWavelets==1.6.0` | Social-media lossy recompression damages PRNU noise | `RESEARCH_CANDIDATE` |
+| **IRE-06** | Re-compression & platform history | DQT Catalog + Blocking Discrepancy | `ps05.engines.image.ire` | Proprietary (Platform Core) | JPEG binary bitstream | `CompressionProvenanceResult` | CPU (1 core) | Internal | Non-JPEG images lack standard quantization markers | `PLANNED` |
+| **AIM-01** | Synthetic AI-image classifier | Multi-branch ResNet50 + FFT + SigLIP | `ps05.engines.image.aim` | Proprietary (Platform Core) | $512\times 512$ patches & full-res | `AIGenerationResult` | GPU ($\ge 8\text{GB}$ VRAM) | Internal + PyTorch 2.3 | Out-of-distribution generators (unseen architectures) | `PLANNED` |
 | **AIM-02** | Generative inpainting localization | TruFor / CAT-Net | `grip-unina/TruFor` | Academic / Research | Full-res RGB array | `InpaintingLocalizationResult` | GPU ($\ge 8\text{GB}$ VRAM) | `torch==2.3.0` | False positives on natural high-contrast shadow boundaries | `PLANNED` |
-| **AIM-03** | Face swap & morphing forensics | Face X-Ray blend boundary net | `ps05.engines.image.aim` | Proprietary (PS-05) | Aligned face crop ($256\times 256$) | `FaceManipulationResult` | GPU ($\ge 4\text{GB}$ VRAM) | Internal | Heavy skin airbrushing / beauty filters mimic tampering | `PLANNED` |
-| **AIM-04** | Steganography & hidden data audit | LSB / SPA / RS / Rich Models | `ps05.engines.image.aim` | Proprietary (PS-05) | Bitstream + pixel arrays | `SteganalysisResult` | CPU (2 cores) | Internal | High miss rate on low embedding rates ($< 0.05$ bpp) | `PLANNED` |
-| **AIM-05** | Defensive file vulnerability defense | Magic bytes + trailing byte parser | `ps05.engines.image.aim` | Proprietary (PS-05) | Seized raw bitstream | `FileSecurityAudit` | CPU (1 core) | Internal | Zero-day parser vulnerabilities in underlying C libraries | `PLANNED` |
+| **AIM-03** | Face swap & morphing forensics | Face X-Ray blend boundary net | `ps05.engines.image.aim` | Proprietary (Platform Core) | Aligned face crop ($256\times 256$) | `FaceManipulationResult` | GPU ($\ge 4\text{GB}$ VRAM) | Internal | Heavy skin airbrushing / beauty filters mimic tampering | `PLANNED` |
+| **AIM-04** | Steganography & hidden data audit | LSB / SPA / RS / Rich Models | `ps05.engines.image.aim` | Proprietary (Platform Core) | Bitstream + pixel arrays | `SteganalysisResult` | CPU (2 cores) | Internal | High miss rate on low embedding rates ($< 0.05$ bpp) | `PLANNED` |
+| **AIM-05** | Defensive file vulnerability defense | Magic bytes + trailing byte parser | `ps05.engines.image.aim` | Proprietary (Platform Core) | Seized raw bitstream | `FileSecurityAudit` | CPU (1 core) | Internal | Zero-day parser vulnerabilities in underlying C libraries | `PLANNED` |
 | **CEIPL-01** | Raw direct dual-hashing | `hashlib` (FIPS OpenSSL backend) | Python standard library | Python Software Foundation | Chunked raw byte stream | SHA-256 and SHA3-512 hex | CPU (1 core) | Native Python 3.12 | None | `IMPLEMENTED` |
 | **CEIPL-02** | Deterministic canonical JSON | `canonicaljson` (RFC 8785 JCS) | `matrix-org/python-canonicaljson` | Apache-2.0 | Arbitrary JSON dict | Deterministic UTF-8 bytes | CPU (minimal) | `canonicaljson==2.0.0` | Floating-point rounding edge cases | `PLANNED` |
 | **CEIPL-03** | Digital signatures & key management | `cryptography` (Ed25519 / RFC 8032) | `pyca/cryptography` | Apache-2.0 / BSD | Canonical byte string | 64-byte Ed25519 signature | CPU (minimal) | `cryptography==42.0.7` | Key compromise without revocation mechanism | `PLANNED` |
 | **CEIPL-04** | RFC 3161 Trusted Timestamping | `rfc3161ng` / PyKCS11 | `trbs/rfc3161ng` | MIT | SHA-256 exhibit digest | ASN.1 TimeStampToken | Network I/O (HTTPS) | `rfc3161ng==2.1.3` | TSA service unavailability / network timeouts | `PLANNED` |
-| **CEIPL-05** | Append-only hash-chained custody | `ps05.core.crypto.custody_chain` | Proprietary (PS-05) | Proprietary (PS-05) | Custody event payload | 64-char hex chain hash | CPU (minimal) | Internal | Privileged DB admin rewriting all rows (requires Merkle) | `PLANNED` |
-| **CEIPL-06** | Merkle tree batch checkpoints | `ps05.core.crypto.merkle_tree` | Proprietary (PS-05) | Proprietary (PS-05) | List of leaf hashes | Merkle Root + Inclusion Proof | CPU (1 core) | Internal | Dynamic re-ordering of uncommitted batches | `PLANNED` |
-| **CEIPL-07** | Derived Artifact Lineage DAG | `ps05.core.crypto.lineage` | Proprietary (PS-05) | Proprietary (PS-05) | Parent ID + Operator + $M_{3\times 3}$ | Child Artifact Record | CPU (minimal) | Internal | Cyclic dependency attempts (rejected by DAG validator) | `PLANNED` |
+| **CEIPL-05** | Append-only hash-chained custody | `ps05.core.crypto.custody_chain` | Proprietary (Platform Core) | Proprietary (Platform Core) | Custody event payload | 64-char hex chain hash | CPU (minimal) | Internal | Privileged DB admin rewriting all rows (requires Merkle) | `PLANNED` |
+| **CEIPL-06** | Merkle tree batch checkpoints | `ps05.core.crypto.merkle_tree` | Proprietary (Platform Core) | Proprietary (Platform Core) | List of leaf hashes | Merkle Root + Inclusion Proof | CPU (1 core) | Internal | Dynamic re-ordering of uncommitted batches | `PLANNED` |
+| **CEIPL-07** | Derived Artifact Lineage DAG | `ps05.core.crypto.lineage` | Proprietary (Platform Core) | Proprietary (Platform Core) | Parent ID + Operator + $M_{3\times 3}$ | Child Artifact Record | CPU (minimal) | Internal | Cyclic dependency attempts (rejected by DAG validator) | `PLANNED` |
 | **CEIPL-08** | C2PA Content Credentials audit | `c2pa-python` (Rust C2PA library) | `contentauth/c2pa-rs` | MIT / Apache-2.0 | Image file path | `C2PAValidationResult` | CPU (1 core) | `c2pa-python==0.5.0` | Proprietary / non-standard claim formats rejected | `PLANNED` |
 
 ---
@@ -4353,7 +4365,7 @@ The following comparative selection matrices detail the algorithmic, mathematica
 | `ps05.engines.vista.afb.extractor` | Lossless audio bitstream extraction | **FFmpeg stream-copy (`-c:a copy`)** | `https://ffmpeg.org` | LGPL v2.1+ | Video container path | Extracted audio file (`.aac`, `.ac3`, `.mp3`) | Stream extraction without transcoding | CPU (1 core) | Standardized CLI invocation | Bit-for-bit parity check against container stream (`cmp -l`) | Multi-channel audio mapping confusion if stream index unpinned | System FFmpeg binary | `PLANNED` | PyAV custom demux loop |
 | `ps05.engines.vista.afb.resampler` | Resampling to standardized forensic audio format | **SoX / FFmpeg (`libswresample`)** | `https://ffmpeg.org` | LGPL v2.1+ | Raw audio stream | 16 kHz Mono Float32 WAV normalized to -23 LUFS | Standardized analysis artifact creation | CPU (1 core) | SoX 14.4.2 / FFmpeg 6.x | Frequency response fidelity; THD+N measurement ($< -90\text{ dB}$) | Phase distortion on aggressive downmixing from 5.1 surround | SoX / FFmpeg libraries | `PLANNED` | Torchaudio resampler |
 | `ps05.engines.vista.afb.separation` | Multi-speaker conversational source separation | **SpeechBrain SepFormer** | Subakan et al., 2021; `https://github.com/speechbrain/speechbrain` | Apache 2.0 | 16 kHz WAV audio buffer | N isolated single-speaker audio streams | Overlapped speech disentanglement | GPU recommended (4GB VRAM) / CPU fallback | Pretrained `sepformer-wsj02mix` | SI-SDR improvement on WSJ0-2mix and LibriMix ($> 14\text{ dB}$) | Hallucinates musical noise artifacts at low input SNR ($< 0\text{ dB}$) | PyTorch, Torchaudio | `RESEARCH_CANDIDATE` | Asteroid Conv-TasNet |
-| `ps05.engines.vista.afb.auras_client`| Dispatching audio artifact to AURAS engine suite | **AURAS Bridge Client Adapter** | Internal Subsystem Contract | Proprietary (Hackathon Core) | Extracted audio UUID + SHA-256 | Celery Task ID & AURAS Job Reference | Audio forensic inspection (ARE, MVSI, ADDE) | Distributed Worker | Pinned AURAS API contract v1.2 | Integration test on synthetic spliced audio samples | Network timeout or Redis queue exhaustion on 100MB+ audio | Redis, Celery, AURAS service | `PLANNED` | Direct in-process Python module call |
+| `ps05.engines.vista.afb.auras_client`| Dispatching audio artifact to AURAS engine suite | **AURAS Bridge Client Adapter** | Internal Subsystem Contract | Proprietary (Platform Core) | Extracted audio UUID + SHA-256 | Celery Task ID & AURAS Job Reference | Audio forensic inspection (ARE, MVSI, ADDE) | Distributed Worker | Pinned AURAS API contract v1.2 | Integration test on synthetic spliced audio samples | Network timeout or Redis queue exhaustion on 100MB+ audio | Redis, Celery, AURAS service | `PLANNED` | Direct in-process Python module call |
 
 #### 11.10.3 Audio-Visual Synchronization & Facial Analysis Family
 
@@ -4799,7 +4811,7 @@ flowchart TD
 
 ### 11.B.1 Framework Boundaries & Shared Architecture
 
-The Cross-Modal Deepfake Validation Framework (CDVF) is the centralized, scientific model evaluation and multi-modal correlation engine of the PS-05 platform. It does **not** replace the primary forensic detection engines (AIF, AURAS, VISTA). Instead, it provides an empirical, mathematically sound framework to validate detector reliability, test generalisation on unseen generators and diverse recording conditions, calibrate raw model confidence into true probabilities, detect out-of-distribution inputs, quantify inter-detector agreement, correlate multi-modal findings, and support first-class abstention when evidence is insufficient or contradictory.
+The Cross-Modal Deepfake Validation Framework (CDVF) is the centralized, scientific model evaluation and multi-modal correlation engine of the platform. It does **not** replace the primary forensic detection engines (AIF, AURAS, VISTA). Instead, it provides an empirical, mathematically sound framework to validate detector reliability, test generalisation on unseen generators and diverse recording conditions, calibrate raw model confidence into true probabilities, detect out-of-distribution inputs, quantify inter-detector agreement, correlate multi-modal findings, and support first-class abstention when evidence is insufficient or contradictory.
 
 ```mermaid
 flowchart TD
@@ -4988,7 +5000,7 @@ class DetectorResultContract(BaseModel):
 
 ### 11.B.3 Model Registry & Checkpoint Provenance
 
-The Model Registry provides immutable governance for all forensic checkpoints deployed across PS-05.
+The Model Registry provides immutable governance for all forensic checkpoints deployed across the platform.
 
 ```mermaid
 flowchart TD
@@ -6825,7 +6837,7 @@ class PackageManifestRecord(BaseModel):
 
 ## 13. Testing, Benchmark & Validation Architecture
 
-The PS-05 testing framework enforces strict separation between software reliability, mathematical correctness, and machine learning generalization across both audio and video forensic domains:
+The platform testing framework enforces strict separation between software reliability, mathematical correctness, and machine learning generalization across both audio and video forensic domains:
 
 ```mermaid
 flowchart TD
@@ -7157,13 +7169,13 @@ All cryptographic processing, evidence handling, storage operations, and reporti
 5. **Derivative Merkle Lineage Invariant:** Every derivative forensic artifact (extracted audio, extracted frames, spectrograms, crops, feature embeddings, OCR text, reports) must be registered in the CEIPL Merkle DAG with explicit references to parent exhibit IDs, parent SHA-256 hashes, exact transformation parameters, and software version commit hashes.
 6. **Fail-Closed Quarantine Invariant:** Any evidence object that fails post-write readback, retrieval verification, or scheduled fixity checks must immediately transition to the `QUARANTINED` state. Downstream analysis and export must be instantly blocked (HTTP 423 Locked). Silent repair, automatic rehashing, or overwriting reference hashes is strictly prohibited.
 7. **Verified Backup Restoration Invariant:** Restoring damaged evidence from backup media requires independent dual-hash verification of the candidate replica against the established intake `HashRecord`. A backup copy must never be restored into the active vault without verified cryptographic match against the baseline reference.
-8. **Standalone Offline Verifiability Invariant:** Every exported evidence package must be independently verifiable in an air-gapped environment using standard open-source tools (Python / OpenSSL) without requiring network connectivity, API access, or trust in the PS-05 production database.
+8. **Standalone Offline Verifiability Invariant:** Every exported evidence package must be independently verifiable in an air-gapped environment using standard open-source tools (Python / OpenSSL) without requiring network connectivity, API access, or trust in the platform production database.
 
 ## 16. Cross-Media Metadata Service (CMMS) — Technical Architecture & Specification
 
 ### 16.1 System Context, Component Boundaries & Shared-Service Integration
 
-The Cross-Media Metadata Service (CMMS) is a foundational, cross-cutting shared service within the PS-05 platform. It establishes a unified, evidence-aware metadata extraction, normalization, validation, consistency-analysis, and correlation pipeline.
+The Cross-Media Metadata Service (CMMS) is a foundational, cross-cutting shared service within the platform. It establishes a unified, evidence-aware metadata extraction, normalization, validation, consistency-analysis, and correlation pipeline.
 
 CMMS does **not** perform modality-specific forgery detection, deepfake classification, biometric facial analysis, speaker recognition, packet payload deep inspection, or cryptographic custody. Instead, CMMS operates strictly upstream of and alongside the specialized forensic engines (AIF, AURAS, VISTA, ONTF, AIF-GEO) and cryptographic subsystems (CEIPL, UFREDF), extracting and structuring raw and normalized technical metadata from every seized artifact without altering original evidence bitstreams.
 
@@ -7741,7 +7753,7 @@ Metadata parsers process untrusted binary files obtained from hostile environmen
 
 ### 16.10 Common Metadata REST API Specification
 
-CMMS exposes 10 standardized REST endpoints conforming to PS-05 API conventions:
+CMMS exposes 10 standardized REST endpoints conforming to platform API conventions:
 
 ```text
 POST /api/v1/evidence/{evidence_id}/metadata/extract
@@ -7796,7 +7808,7 @@ POST /api/v1/cases/{case_id}/metadata/export
   ```json
   {
     "comparison_id": "comp-7741-bb02",
-    "case_id": "case-bihar-2026-ps05",
+    "case_id": "case-2026-evid-001",
     "comparison_status": "COMPLETED",
     "temporal_offset_seconds": 12.45,
     "within_recording_window": true,
@@ -8055,7 +8067,7 @@ All metadata operations across CMMS are governed by eight immutable legal and te
 
 ### 17.1 System Context, Component Boundaries & Shared-Service Integration
 
-The Cross-Source Timestamp Verification (CSTV) subsystem is a platform-wide, cross-cutting temporal correlation and verification service within the PS-05 forensic architecture. It analyzes, compares, correlates, and validates temporal records across multiple independent or related digital evidence sources.
+The Cross-Source Timestamp Verification (CSTV) subsystem is a platform-wide, cross-cutting temporal correlation and verification service within the platform forensic architecture. It analyzes, compares, correlates, and validates temporal records across multiple independent or related digital evidence sources.
 
 CSTV is **not** a new modality-specific detection engine. It consumes verified or extracted outputs from existing specialist subsystems via stable contracts:
 
@@ -9032,7 +9044,7 @@ def refine_boundaries(self, evidence_id: str, candidate_samples: List[int]) -> L
 
 ### 19.1 CEIPL / EIV System Architecture & Platform Positioning
 
-The **Evidence Integrity Verification (EIV)** subsystem is architected as an integral capability of the **Cryptographic Evidence Integrity and Provenance Layer (CEIPL)**—the shared cryptographic foundation of the PS-05 platform. EIV does not instantiate an independent forensic analysis engine; rather, it governs the cryptographic lifecycle of raw evidence exhibits, derived forensic representations, metadata snapshots, and chain-of-custody ledgers across all platform operations.
+The **Evidence Integrity Verification (EIV)** subsystem is architected as an integral capability of the **Cryptographic Evidence Integrity and Provenance Layer (CEIPL)**—the shared cryptographic foundation of the platform. EIV does not instantiate an independent forensic analysis engine; rather, it governs the cryptographic lifecycle of raw evidence exhibits, derived forensic representations, metadata snapshots, and chain-of-custody ledgers across all platform operations.
 
 ```mermaid id="eivarch"
 flowchart TD
@@ -9820,7 +9832,7 @@ flowchart TD
 
 ### 20.1 System Context & Component Architecture
 
-The **Unified Forensic Evidence Dashboard (UFD)** and its practitioner user interface, the **Unified Forensic Workbench (UFW)**, constitute the shared presentation, navigation, and investigation-workflow layer for the entire PS-05 platform. UFD does not implement forensic detection algorithms, calculate deepfake inferences, or act as an authoritative evidence vault. Instead, it securely consumes, coordinates, and visualizes authoritative records produced by backend subsystems: **CEIPL** (integrity, hashing, WORM fixity, Merkle custody), **CMMS** (metadata extraction & normalization), **CSTV** (cross-source timeline verification & clock drift), **AIF** (image tampering maps & ELA), **AURAS** (audio waveform, spectrogram, voice spoofing & splice localisation), **VISTA** (video/CCTV frame cadence, PTS/DTS timeline, temporal anomalies), **ONTF** (offline network packet capture flows), **AIF-GEO** (geospatial evidence mapping), **CDVF** (model calibration, OOD gating & model governance), and **UFREDF** (statutory Section 65B/63 BSA dossier compilation).
+The **Unified Forensic Evidence Dashboard (UFD)** and its practitioner user interface, the **Unified Forensic Workbench (UFW)**, constitute the shared presentation, navigation, and investigation-workflow layer for the entire platform. UFD does not implement forensic detection algorithms, calculate deepfake inferences, or act as an authoritative evidence vault. Instead, it securely consumes, coordinates, and visualizes authoritative records produced by backend subsystems: **CEIPL** (integrity, hashing, WORM fixity, Merkle custody), **CMMS** (metadata extraction & normalization), **CSTV** (cross-source timeline verification & clock drift), **AIF** (image tampering maps & ELA), **AURAS** (audio waveform, spectrogram, voice spoofing & splice localisation), **VISTA** (video/CCTV frame cadence, PTS/DTS timeline, temporal anomalies), **ONTF** (offline network packet capture flows), **AIF-GEO** (geospatial evidence mapping), **CDVF** (model calibration, OOD gating & model governance), and **UFREDF** (statutory Section 65B/63 BSA dossier compilation).
 
 ```mermaid
 flowchart TD
@@ -10785,7 +10797,7 @@ The workbench is strictly engineered to satisfy **W3C WCAG 2.2 Level AA**:
 
 ### 21.1 System Context & Integration Architecture
 
-The **Unified Forensic Reporting & Evidence Dossier Framework (UFREDF)** is the shared reporting, dossier compilation, and legal attestation layer for the PS-05 platform. UFREDF is **not** an independent forensic detector or a replacement for the Archify visualization engine. Rather, UFREDF operates as a post-processing aggregation and legal synthesis service that consumes structured, authenticated outputs from all forensic subsystems, validates them against strict mathematical and evidentiary schemas, renders immutable RFC 8785 JSON IR snapshots, and compiles long-term archival PDF/A-1b dossiers with detached cryptographic signatures.
+The **Unified Forensic Reporting & Evidence Dossier Framework (UFREDF)** is the shared reporting, dossier compilation, and legal attestation layer for the platform. UFREDF is **not** an independent forensic detector or a replacement for the Archify visualization engine. Rather, UFREDF operates as a post-processing aggregation and legal synthesis service that consumes structured, authenticated outputs from all forensic subsystems, validates them against strict mathematical and evidentiary schemas, renders immutable RFC 8785 JSON IR snapshots, and compiles long-term archival PDF/A-1b dossiers with detached cryptographic signatures.
 
 ```mermaid
 flowchart TD

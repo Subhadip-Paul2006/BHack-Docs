@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "project": "Digital Evidence Authenticity & Integrity Verification Platform (PS-05)",
+  "project": "Digital Evidence Authenticity & Integrity Verification Platform",
   "version": "1.0.0",
   "archify": {
     "version": "0.4.2",
     "engine": "offline-static",
     "ir_version": "1.2.0",
-    "report_title": "PS-05 Forensic Analysis & Integrity Verification Dossier",
+    "report_title": "Forensic Analysis & Integrity Verification Dossier",
     "output_dir": "dist/reports",
     "theme": "forensic-dark",
     "diagram_types": [

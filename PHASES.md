@@ -1,17 +1,26 @@
 # Implementation Roadmap & Phases (PHASES.md)
 
-## Project: Digital Evidence Authenticity & Integrity Verification Platform (PS-05)
-**Hackathon:** Bihar Government Cyber Hackathon 2026 (C-DAC Patna, CCSU, Bihar Police)
-**Track:** Digital Forensics
-**Problem Statement:** PS-05 — Digital Evidence Authenticity and Integrity Verification Platform
-**Document Version:** 1.1.0
-**Status:** Canonical Implementation Roadmap & Engineering Playbook
+## Project: Digital Evidence Authenticity & Integrity Verification Platform
+**Tracks:** Dual-Track Initiative (Track A: Research & Scientific Validation | Track B: Product Engineering)
+**Document Version:** 2.0.0
+**Status:** Canonical Implementation Roadmap & Dual-Track Engineering Playbook
 
 ---
 
 ## 1. Roadmap Architecture & Phase Progression
 
-The PS-05 development lifecycle is structured into eleven platform-level phases (Phase 0 through Phase 10). Subsystems are decomposed into dedicated, sequential engineering tracks:
+The platform development lifecycle is structured around a **Dual-Track Research & Product Engineering Architecture** organized into seven macro-phases (Phases 0 through 6) accompanied by detailed subsystem-level workstreams (AURAS, VISTA, AIF, ONTF, AIF-GEO, CDVF, CEIPL, CSTV, CCHDF, UFD, UFREDF):
+
+### Dual-Track Macro Lifecycle (Phases 0 — 6)
+- **Phase 0 — Research and System Foundation:** Literature review, problem definition, research gap identification (G1-G7), system requirements, architecture baseline, threat modelling, and benchmark dataset curation.
+- **Phase 1 — Evidence Integrity Foundation:** Forensic acquisition workflows, pre-decode cryptographic dual-hashing (SHA-256 + SHA3-512), RFC 8785 canonical manifests, append-only hash-chained custody logs, and immutable WORM storage.
+- **Phase 2 — Core Forensic Engines:** Classical signal processing, image reverse engineering (IRE/IVE), audio reverse engineering (ARE/MVSI), video bitstream demuxing and PTS cadence (VRE/VCI), cross-media metadata standardization (CMMS), and offline network traffic analysis (ONTF).
+- **Phase 3 — Advanced Intelligence & Manipulation Detection:** AI-assisted manipulation detection (AIM/TruFor), deepfake audio/video detection (ADDE/VDF), facial forgery and morphing analysis (FPA), geospatial forensics (AIF-GEO), cross-source temporal correlation (CSTV), and covert channel steganalysis (CCHDF).
+- **Phase 4 — Unified Investigation Platform & Legal Reporting:** Case and exhibit management, Unified Forensic Evidence Dashboard (UFD), Unified Forensic Workbench (UFW), cross-modal findings fusion (CDVF DAG), examiner annotation, and statutory Section 63 BSA / Section 65B IEA forensic certificate dossier generation (UFREDF).
+- **Phase 5 — Research, Testing and Validation:** Standardized benchmark evaluation (ASVspoof, FF++, TruFor, CoMoFoD, CIC-IDS2017), group-disjoint cross-dataset benchmarking, empirical confidence calibration (ECE <= 0.05), Out-of-Distribution (OOD) gating, ablation studies, and academic research paper preparation.
+- **Phase 6 — Product Hardening and Air-Gapped Deployment:** Security regression testing, defensive parser sandboxing, CPU/GPU runtime optimization, air-gapped deployment bundles, offline gazetteers and verification tools, and production readiness certification.
+
+Subsystems execute across dedicated, sequential engineering workstreams:
 - **AURAS Audio Forensics Subsystem:** Eleven engineering phases (**AURAS-A0 through AURAS-A10**).
 - **VISTA Video Forensics Subsystem:** Fourteen engineering phases (**VISTA-A0 through VISTA-A13**).
 - **AIF Image Forensics Subsystem:** Retained as Phase 4 with its multi-branch visual examination modules (**AIF-A0 through AIF-A15**).
@@ -169,7 +178,7 @@ flowchart TD
         A10 & VA13 & IA15 & NA13 & GA10 & CA11 & EA10 & CCH8 --> P7["Phase 7: Cross-Subsystem Aggregation & Sec 65B/63 BSA Dossier"]
         P7 --> P8["Phase 8: Web Dashboard & Examiner Workbench"]
         P8 --> P9["Phase 9: Security Hardening & Air-Gapped Packaging"]
-        P9 --> P10["Phase 10: Final Hackathon Demonstration & Release"]
+        P9 --> P10["Phase 10: Platform Hardening, Research Evaluation & Release"]
     end
 ```
 
@@ -335,7 +344,7 @@ flowchart TD
 | **UFD-A11** | End-to-End Validation & Release Readiness | UFD / Quality | `PLANNED` | UFD-A10 Gate | 7-scenario E2E test suite, latency benchmarks, examiner sign-off |
 | **Phase 8** | Web Dashboard & Examiner Workbench | UI / Presentation | `PLANNED` | Phase 7 Gate | Next.js interactive UI, multi-modal waveform viewer |
 | **Phase 9** | Security Hardening & Air-Gapped Packaging | DevOps / Security | `PLANNED` | Phase 8 Gate | Offline Docker containers, POSIX 0400 WORM scripts |
-| **Phase 10** | Final Hackathon Demonstration & Release | Quality & Release | `PLANNED` | Phase 9 Gate | Verified demonstration scripts & curated case pack |
+| **Phase 10** | Platform Hardening, Research Evaluation & Release | Quality & Release | `PLANNED` | Phase 9 Gate | Verified demonstration scripts, research benchmarks & curated case pack |
 
 ---
 
@@ -951,7 +960,7 @@ Modules `src/ps05/core/orchestrator.py` and `src/ps05/reporting/compiler.py` imp
 **Status:** `PLANNED`
 
 **Objective:**
-Execute comprehensive regression testing, benchmark the complete audio subsystem against curated test corpora, audit dependency licensing and air-gap integrity, and establish release readiness for the hackathon demonstration.
+Execute comprehensive regression testing, benchmark the complete audio subsystem against curated test corpora, audit dependency licensing and air-gap integrity, and establish release readiness for operational deployment and research evaluation.
 
 **Scope:**
 - *Included:* Regression test suite, reproducibility audit, performance benchmarking, air-gap validation, documentation consistency audit.
@@ -969,7 +978,7 @@ Phase AURAS-A9 Gate passed; full audio pipeline operational end-to-end.
 6. **Air-Gap Integrity Verification:** Execute complete audio suite on network-isolated test runner with outbound connections blocked; assert zero HTTP requests.
 7. **Model License & Checkpoint Audit:** Verify that all pre-trained models (Silero, PyAnnote, SpeechBrain, WavLM, RawNet2) comply with open-source licenses (MIT, Apache 2.0, BSD-3-Clause).
 8. **Documentation Alignment:** Audit `README.md`, `PRD.md`, `TRD.md`, and `PHASES.md` for consistent terminology, requirement IDs, and status markers.
-9. **Hackathon Demonstration Scenario Preparation:** Package representative demonstration exhibits with pre-computed forensic dossiers.
+9. **Operational Demonstration Scenario Preparation:** Package representative demonstration exhibits with pre-computed forensic dossiers.
 10. **Final Forensic Review:** Peer review of algorithmic explainability statements and courtroom certifiability.
 
 **Execution Workflow:**
@@ -991,7 +1000,7 @@ Execute `pytest tests/` covering all unit, integration, and benchmark tests; ass
 Full test suite passes with zero failures; benchmark dossier compiled; all phase checkpoints verified.
 
 **Dependencies & Risks:**
-*Risk:* Hardware differences between development and hackathon jury laptops. *Mitigation:* Pre-configure both CPU and GPU execution modes.
+*Risk:* Hardware differences between development and target field workstation / server profiles. *Mitigation:* Pre-configure both CPU and GPU execution modes.
 
 **Checkpoint Table:**
 
@@ -1000,7 +1009,7 @@ Full test suite passes with zero failures; benchmark dossier compiled; all phase
 | **A10-CP-01** | Full Pipeline Pass | Run complete test suite on audio corpus | `pytest` exits with code 0 (100% passing) | `NOT_STARTED` | All tests pass |
 | **A10-CP-02** | Reproducibility | Compare output hashes across 5 identical runs | 100% identical JSON outputs and scores | `NOT_STARTED` | Zero non-deterministic variance |
 | **A10-CP-03** | Air-Gap Isolation | Run full suite with network adapters disabled | Suite runs completely offline without errors | `NOT_STARTED` | Zero external network calls |
-| **A10-CP-04** | License Compliance | Audit all PyPI dependencies and model licenses | All licenses verified as commercial/hackathon permissive | `NOT_STARTED` | Zero GPL/proprietary license conflicts |
+| **A10-CP-04** | License Compliance | Audit all PyPI dependencies and model licenses | All licenses verified as commercial/academic permissive | `NOT_STARTED` | Zero GPL/proprietary license conflicts |
 
 ---
 
@@ -1739,7 +1748,7 @@ Reporting pipeline complete, PDF generation verified, digital signature and TSA 
 - 5-Run Deterministic Reproducibility Audit: Verifying bit-identical findings across repeated runs on identical media.
 - Air-Gap Offline Execution: Enforcing complete zero-network isolation without DNS or HTTP egress calls.
 - Security Hardening & Penetration Testing: Testing container allocation limits, polyglots, and seccomp profiles.
-- Dependency & License Compliance Audit: Verifying commercial and hackathon-permissive software licenses.
+- Dependency & License Compliance Audit: Verifying commercial and open-source permissive software licenses.
 **5. Exact Tasks:**
 1. Curate standardized evaluation corpus containing authentic CCTV, spliced videos, face-swaps, and text-to-video clips.
 2. Build automated regression runner executing the entire 5-engine VISTA pipeline against the test corpus.
@@ -3155,7 +3164,7 @@ All AIF engines, tests/benchmarks, documentation.
 1. Assemble curated evaluation corpus: authentic camera photos, smartphone captures, CoMoFoD copy-move images, TruFor inpainting splits, AI-generated images, and C2PA signed exhibits.
 2. Execute 5-run reproducibility audit: re-run full pipeline on identical exhibits 5 times; assert bit-for-bit identical JSON manifests and scores.
 3. Verify air-gap network isolation: execute complete test suite on network-isolated runner; assert zero outbound HTTP requests.
-4. Conduct open-source dependency license audit: verify all libraries (Pillow, OpenCV, PyTorch, SAM 2, PaddleOCR, WeasyPrint) comply with permissive/hackathon licenses.
+4. Conduct open-source dependency license audit: verify all libraries (Pillow, OpenCV, PyTorch, SAM 2, PaddleOCR, WeasyPrint) comply with permissive open-source licenses.
 5. Verify documentation parity across README.md, PRD.md, TRD.md, PHASES.md, and AI_INSTRUCTIONS.md.
 
 **5. Execution Workflow:**
@@ -3889,7 +3898,7 @@ All 11 IMLF phases completed, all 44 checkpoints verified, end-to-end regression
 
 ## 6. Dedicated Geospatial Forensics Engineering Playbook (AIF-GEO-00 through AIF-GEO-10)
 
-The **AIF-GEO** workstream delivers end-to-end geospatial evidence extraction, geographic coordinate normalization, track-to-image correlation, visual location recovery, solar/shadow verification, environmental consistency auditing, multi-image clustering, and cross-evidence conflict graphing within the PS-05 platform. It integrates natively with CEIPL for cryptographic provenance and reuses core AIF visual processing infrastructure.
+The **AIF-GEO** workstream delivers end-to-end geospatial evidence extraction, geographic coordinate normalization, track-to-image correlation, visual location recovery, solar/shadow verification, environmental consistency auditing, multi-image clustering, and cross-evidence conflict graphing within the platform. It integrates natively with CEIPL for cryptographic provenance and reuses core AIF visual processing infrastructure.
 
 ```mermaid
 flowchart TD
@@ -5326,12 +5335,12 @@ flowchart TD
 - **Tests:** Automated regression tests; RFC 8785 canonical JSON hashing tests; PDF dossier compilation and digital signature verification.
 - **Checkpoints:** `CDVF-CP-11-01` (Complete CDVF framework validated; 24-item bundle sealed; structured validation dossier exported).
 - **Acceptance Criteria:** 100% of regression assertions pass; legal dossier validated against Section 63 BSA evidentiary rules.
-- **Exit Criteria:** CDVF certified for production deployment across PS-05 forensic platform.
+- **Exit Criteria:** CDVF certified for production deployment across the platform.
 - **Risks:** PDF rendering inconsistencies across platforms (mitigated via standardized WeasyPrint Docker environment).
 - **Current Status:** `PLANNED`
 ## 8.B Dedicated Cross-Media Metadata Service Engineering Playbook (CMMS-A0 through CMMS-A9)
 
-The Cross-Media Metadata Service (CMMS) is the shared, cross-cutting metadata extraction, normalization, consistency-analysis, and correlation engine of the PS-05 platform. It services all forensic modalities (AIF images, AURAS audio, VISTA video/CCTV, ONTF network captures, and AIF-GEO geospatial) without duplicating specialized detection logic.
+The Cross-Media Metadata Service (CMMS) is the shared, cross-cutting metadata extraction, normalization, consistency-analysis, and correlation engine of the platform. It services all forensic modalities (AIF images, AURAS audio, VISTA video/CCTV, ONTF network captures, and AIF-GEO geospatial) without duplicating specialized detection logic.
 
 ```mermaid
 flowchart TD
@@ -5592,7 +5601,7 @@ flowchart TD
 
 ## 9. Unified Platform Delivery & Security Milestones
 
-The platform delivery, dashboard, and hackathon packaging milestones synthesize findings across all forensic domains (AURAS Audio, VISTA Video, AIF Image, ONTF Offline Network Traffic, and CDVF Shared Validation):
+The platform delivery, dashboard, and production release packaging milestones synthesize findings across all forensic domains (AURAS Audio, VISTA Video, AIF Image, ONTF Offline Network Traffic, and CDVF Shared Validation):
 
 ### Phase 7: Unified Platform Cross-Engine Reporting
 - **Status:** `PLANNED`
@@ -5606,7 +5615,7 @@ The platform delivery, dashboard, and hackathon packaging milestones synthesize 
 - **Status:** `PLANNED`
 - **Scope:** Offline containerization (Docker Compose), local model checkpoint verification scripts, POSIX 0400 WORM vault locking, parser sandboxing (FFmpeg, TShark, Zeek), and security compliance audit.
 
-### Phase 10: Final Hackathon Demonstration & Release
+### Phase 10: Platform Hardening, Research Evaluation & Release
 - **Status:** `PLANNED`
 - **Scope:** End-to-end platform validation, automated demonstration script (`scripts/run_demo.py`), curated multi-modal evidence showcase (audio, video, image, network capture, and CDVF validation reports), and technical presentation defense.
 
@@ -5617,7 +5626,7 @@ The platform delivery, dashboard, and hackathon packaging milestones synthesize 
 
 ```mermaid
 gantt
-    title PS-05 Multi-Modal Forensics Roadmap (AURAS, VISTA, AIF, ONTF & CDVF)
+    title Multi-Modal Forensics Roadmap (AURAS, VISTA, AIF, ONTF & CDVF)
     dateFormat  YYYY-MM-DD
     axisFormat  %b %d
 
@@ -5728,7 +5737,7 @@ gantt
     Phase 7: Cross-Engine Legal Reporting   :         p7, 2026-11-10, 2026-11-11
     Phase 8: Web Dashboard & Workbench     :         p8, 2026-11-11, 2026-11-13
     Phase 9: Security Hardening & Air-Gap   :         p9, 2026-11-13, 2026-11-14
-    Phase 10: Final Hackathon Demonstration :         p10, 2026-11-14, 2026-11-15
+    Phase 10: Platform Hardening & Release :         p10, 2026-11-14, 2026-11-15
 ```
 
 ---
@@ -6334,10 +6343,10 @@ flowchart TD
   - `CSTV-CP-10-03`: False-positive suppression verified: zero false tampering alerts on authentic VFR/DST controls.
   - `CSTV-CP-10-04`: 5-run repeatability test confirms 100% bit-exact parameter reproducibility under identical inputs.
 - **9. Acceptance Criteria:** All 44 checkpoints across CSTV-A0 through CSTV-A10 fully satisfied.
-- **10. Exit Criteria:** CSTV capability officially approved and signed off for PS-05 release.
+- **10. Exit Criteria:** CSTV capability officially approved and signed off for platform release.
 - **11. Forensic & Legal Safeguards:** Complete benchmark reproducibility dossier archived in WORM vault.
 - **12. Risk Mitigation & Edge Cases:** Continuous regression testing integrated into CI/CD pipeline.
-- **13. Deferred Work:** Post-hackathon hardware GPS receiver calibration adapters.
+- **13. Deferred Work:** Long-term roadmap hardware GPS receiver calibration adapters.
 - **14. Status:** `PLANNED`
 
 ---
@@ -6778,10 +6787,10 @@ flowchart TD
   - `AESL-CP-10-03`: False-positive suppression verified on authentic speech, music, and nature controls.
   - `AESL-CP-10-04`: 5-run repeatability test confirms 100% bit-exact parameter reproducibility under identical inputs.
 - **9. Acceptance Criteria:** All 44 checkpoints across AURAS-AESL-00 through AURAS-AESL-10 fully satisfied.
-- **10. Exit Criteria:** AESL capability officially approved and signed off for PS-05 release.
+- **10. Exit Criteria:** AESL capability officially approved and signed off for platform release.
 - **11. Forensic & Legal Safeguards:** Complete benchmark reproducibility dossier archived in WORM vault.
 - **12. Risk Mitigation & Edge Cases:** Continuous regression testing integrated into CI/CD pipeline.
-- **13. Deferred Work:** Post-hackathon real-time stream splicing inspection.
+- **13. Deferred Work:** Long-term roadmap real-time stream splicing inspection.
 - **14. Status:** `PLANNED`
 
 ---
@@ -7207,7 +7216,7 @@ flowchart TD
   | `EIV-CP-10-03` | RBAC Isolation Gate | 0 unauthorized state changes across 7 defined roles | Fix role permission matrix | `PLANNED` |
   | `EIV-CP-10-04` | Air-Gap Deployment | Complete platform operates with 0 outbound network bytes | Release packaging rejected | `PLANNED` |
 - **Acceptance Criteria:** 100% pass on mutation and benchmark suites; RBAC security validated; air-gapped container verified.
-- **Exit Criteria:** Production-ready EIV capability integrated into PS-05 platform release.
+- **Exit Criteria:** Production-ready EIV capability integrated into platform release.
 - **Risks & Mitigations:** Hardware differences in field workstations affecting throughput. *Mitigation:* Auto-tuning chunk buffers based on system RAM.
 - **Current Status:** `NOT_STARTED`
 
@@ -7340,7 +7349,7 @@ flowchart LR
 
 ### Phase UFD-A0: Repository and UX Architecture Discovery
 
-- **Objective:** Audit the complete PS-05 backend and frontend repository to map existing FastAPI endpoints, Celery workers, and React/TypeScript components, establishing strict boundaries to guarantee that UFD acts purely as an aggregation and presentation tier without duplicating backend detection logic or storage vaults.
+- **Objective:** Audit the complete backend and frontend repository to map existing FastAPI endpoints, Celery workers, and React/TypeScript components, establishing strict boundaries to guarantee that UFD acts purely as an aggregation and presentation tier without duplicating backend detection logic or storage vaults.
 - **Prerequisites:** Platform Phase 0 baseline completed; CEIPL, CMMS, CSTV, AIF, AURAS, VISTA, ONTF, CDVF, and UFREDF API contracts documented.
 - **Scope:** Complete API inventory, data flow mapping, and architectural boundary definition across all 10 integrated forensic subsystems.
 - **Detailed Tasks:**

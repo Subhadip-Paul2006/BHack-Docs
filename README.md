@@ -1,22 +1,23 @@
-# Digital Evidence Authenticity & Integrity Verification Platform (PS-05)
+# Digital Evidence Authenticity & Integrity Verification Platform
 
 [![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](pyproject.toml)
 [![Architecture](https://img.shields.io/badge/architecture-modular%20forensics-green.svg)](TRD.md)
 [![Legal Standard](https://img.shields.io/badge/compliance-Sec%2065B%20IEA%20%2F%20Sec%2063%20BSA-orange.svg)](PRD.md)
-[![Hackathon Track](https://img.shields.io/badge/Bihar%20Cyber%20Hackathon%202026-PS--05-red.svg)](#hackathon-context)
+[![Track A: Research](https://img.shields.io/badge/track_A-scientific%20research-purple.svg)](research/RESEARCH_OVERVIEW.md)
+[![Track B: Engineering](https://img.shields.io/badge/track_B-product%20platform-blue.svg)](PRODUCT_BRIEF.md)
 
-> **Official Problem Statement PS-05:** Digital Evidence Authenticity and Integrity Verification Platform
-> **Organizers:** C-DAC Patna, CCSU, Bihar Police
-> **Event:** Bihar Government Cyber Hackathon 2026
-> **Track:** Digital Forensics
+> **Official Product Name:** Digital Evidence Authenticity & Integrity Verification Platform  
+> **Initiative:** Independent Long-Term Digital Forensics Research & Enterprise Product Platform  
+> **Operational Tracks:** Track A (Research & Scientific Validation) & Track B (Product Engineering)  
+> **Target Users:** Certified Forensic Examiners, Cybercrime Investigators, Forensic Science Laboratories (FSLs)
 
 ---
 
 ## 1. Executive Overview & Problem Statement
 
-In contemporary cyber-crime investigations, extortion cases, surveillance reviews, and court proceedings, digital artifacts—such as digital photographs, voice recordings, video files, and CCTV footage—serve as primary evidence. However, modern editing software and generative AI technologies (deepfakes, voice cloning, diffusion models) enable malicious actors to manipulate or synthesize evidence with high realism.
+In contemporary cyber-crime investigations, extortion cases, surveillance reviews, and court proceedings, digital artifacts—such as digital photographs, voice recordings, video files, CCTV footage, and seized network captures—serve as primary evidence. However, modern editing software and generative AI technologies (deepfakes, voice cloning, diffusion models) enable malicious actors to manipulate or synthesize evidence with high realism.
 
-Manual forensic examination is time-consuming, requires scarce specialized expertise, and struggles with complex multi-modal manipulations. The **PS-05 Platform** is an enterprise-grade, modular, explainable, and auditable digital forensics system engineered for law enforcement agencies (state police departments, Bihar Police cyber cells) and Forensic Science Laboratories (FSLs). It provides:
+Manual forensic examination is time-consuming, requires scarce specialized expertise, and struggles with complex multi-modal manipulations. The **Digital Evidence Authenticity & Integrity Verification Platform** is an enterprise-grade, modular, explainable, and auditable digital forensics system engineered for law enforcement agencies (state police departments, cyber investigation cells) and Forensic Science Laboratories (FSLs). It provides:
 
 1. **Cryptographic Chain of Custody & Evidence Integrity Verification (CEIPL / EIV):** End-to-end evidence integrity verification, Write-Once-Read-Many (WORM) storage, pre-decode streaming dual-hashing (SHA-256 and SHA3-512), RFC 8785 canonical manifests, detached Ed25519 signatures, RFC 3161 trusted timestamps, append-only hash-chained custody ledgers, derivative Merkle DAG lineage, and standalone offline verification.
 2. **AIF Advanced Image Forensics Subsystem:** High-resolution image understanding (IVE), physics/frequency reverse engineering (IRE), AI generation/steganography detection (AIM), and judicial biometric comparison (FPA).
@@ -36,6 +37,19 @@ Manual forensic examination is time-consuming, requires scarce specialized exper
 10. **Cross-Source Timestamp Verification (CSTV):** A platform-wide temporal verification and correlation capability that analyzes, compares, and cross-validates timestamps across 17 distinct evidence source categories (EXIF, audio samples, video PTS/DTS, CCTV OSD overlays, offline PCAPs, GPS tracks, device/recorder logs). CSTV estimates clock offsets and linear/piecewise drift rates in parts per million (ppm), detects clock resets, aligns multimodal event anchors, evaluates Allen's interval algebra and sequence conflict graphs, and reconstructs unified multi-tiered case timelines without overwriting source metadata.
 11. **Cryptographic Evidence Package & Legal Certificate Preparation:** Automated generation of cryptographically verifiable, tamper-evident forensic evidence packages for examiner review and legal submission under **Section 65B of the Indian Evidence Act (IEA)** and **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** with Archify JSON Intermediate Representation (IR). Court admissibility is determined by the presiding judicial authority upon the authorized human examiner's statutory declaration — not by the platform software alone.
 12. **Cross-Channel Concealment & Hidden-Data Forensics (CCHDF) & Specialist PSEA:** A shared platform-wide investigation, triage, and orchestration capability that expands concealment detection beyond conventional image steganography across 8 forensic carrier domains: universal first-stage container/structural triage, image steganalysis (AIF/AIM), audio carrier steganalysis (AURAS/ARE), video/temporal steganalysis (VISTA/VRE), text/document concealment forensics (Document Adapter), forensic disk/slack-space/ADS forensics (Filesystem Adapter), network covert timing-channel analysis (ONTF), semantic/linguistic obfuscation analysis, and specialist Physical Side-Channel & Emissions Analysis (PSEA: EMSEC/TEMPEST, acoustic emissions, thermal time-series). CCHDF normalizes findings into a unified versioned `ConcealmentFinding` contract cryptographically bound via CEIPL, enforces zero-execution inert quarantined storage, and delivers structured findings to Case RAG and UFREDF reporting.
+
+---
+
+### 1.1 Two Connected Development Tracks
+
+The platform is developed under two mutually reinforcing operational tracks:
+
+| Dimension | Track A: Research & Scientific Validation | Track B: Product Engineering |
+| :--- | :--- | :--- |
+| **Primary Goal** | Advance multimedia forensics science, address literature gaps, and prepare peer-reviewed academic papers. | Deliver an enterprise-grade, deployable, air-gapped forensic verification platform for certified examiners. |
+| **Key Outputs** | Research questions (RQ1..RQ6), empirical benchmark datasets, calibration & OOD models, academic manuscript. | Modular forensic engines (AIF, AURAS, VISTA, ONTF), WORM storage, Unified Forensic Workbench (UFW), Section 63 BSA reports. |
+| **Core Documentation** | [`research/`](research/) (10 dedicated research documents covering gaps, literature, methodology, metrics). | [`PRD.md`](PRD.md), [`TRD.md`](TRD.md), [`PRODUCT_BRIEF.md`](PRODUCT_BRIEF.md), [`CCTV_VISUAL_INTELLIGENCE.md`](CCTV_VISUAL_INTELLIGENCE.md). |
+| **Methodology** | Reproducible baselines, zero-leakage splits, ablation studies, Wilcoxon signed-rank hypothesis testing. | Defensive parsing, cgroup memory limits, asynchronous queues (Celery/Redis), POSIX 0400 WORM vaults. |
 
 ---
 
@@ -174,8 +188,8 @@ flowchart TB
 
 ## 4. Subsystem Breakdown & Deepened Audio Forensics (AURAS)
 
-> **Important Boundary Clarification:** The overall platform is the **PS-05 Digital Evidence Authenticity & Integrity Verification Platform**.
-> **AURAS (Audio Understanding, Reconstruction & Analysis System)** is strictly its audio forensics subsystem. AURAS is **NOT** the entire PS-05 platform, but a modular component responsible for all acoustic, vocal, and speech-tampering investigations.
+> **Important Boundary Clarification:** The overall platform is the **Digital Evidence Authenticity & Integrity Verification Platform**.
+> **AURAS (Audio Understanding, Reconstruction & Analysis System)** is strictly its audio forensics subsystem. AURAS is **NOT** the entire platform, but a modular component responsible for all acoustic, vocal, and speech-tampering investigations.
 
 ### 4.1 Audio Subsystem Overview
 
@@ -289,7 +303,7 @@ flowchart TD
 ### 4.6 Advanced Image Forensics Subsystem (AIF)
 
 > **Subsystem Boundary Definition:**
-> **AIF (Advanced Image Forensics)** is the specialized image forensics subsystem of the PS-05 platform, operating in parallel with the **AURAS** audio subsystem. AIF provides research-oriented, security-conscious, implementation-ready forensic verification for static digital images, document captures, scanned certificates, and photographic evidence.
+> **AIF (Advanced Image Forensics)** is the specialized image forensics subsystem of the platform, operating in parallel with the **AURAS** audio subsystem. AIF provides research-oriented, security-conscious, implementation-ready forensic verification for static digital images, document captures, scanned certificates, and photographic evidence.
 
 Image evidence in modern criminal and cyber investigations presents distinct forensic challenges. Digital images are subject to compression artifacts, multi-stage social media re-encoding, localized geometric tampering, generative AI synthesis, inpainting, facial manipulation, and steganographic payload concealment. To deliver mathematically defensible, rigorous, cryptographically verifiable forensic verification, **AIF** is organized into three decoupled principal engines, one cross-cutting biometric analysis module, and a unified cryptographic integrity foundation:
 
@@ -371,7 +385,7 @@ flowchart TD
 
 ### 4.9 Core Forensic & Cryptographic Principles
 
-All image forensic investigation across PS-05 is governed by nine strict architectural invariants:
+All image forensic investigation across the platform is governed by nine strict architectural invariants:
 
 1. **Absolute Traceability Invariant:** Every forensic finding must be traceable to a specific seized evidence artifact, an immutable analysis run ID, a pinned tool/model version, a reproducible processing configuration, and the concrete mathematical output supporting that finding.
 2. **Separation of Forensic Concepts:** The platform strictly distinguishes:
@@ -397,7 +411,7 @@ All image forensic investigation across PS-05 is governed by nine strict archite
 ### 4.10 Video Integrity, Synchronization & Tampering Analysis Subsystem (VISTA)
 
 > **Subsystem Boundary Definition:**
-> **VISTA (Video Integrity, Synchronization & Tampering Analysis)** is the specialized video forensics subsystem of the PS-05 platform, operating alongside **AIF** (images) and **AURAS** (audio). VISTA provides research-oriented, mathematically defensible, modular, and implementable forensic verification for digital video files, CCTV/DVR/NVR surveillance exports, dashcam/bodycam footage, and multimedia broadcasts.
+> **VISTA (Video Integrity, Synchronization & Tampering Analysis)** is the specialized video forensics subsystem of the platform, operating alongside **AIF** (images) and **AURAS** (audio). VISTA provides research-oriented, mathematically defensible, modular, and implementable forensic verification for digital video files, CCTV/DVR/NVR surveillance exports, dashcam/bodycam footage, and multimedia broadcasts.
 
 Video evidence combines high-volume spatial imagery, temporal motion vectors, compressed multi-stream containers, and interleaved audio tracks. Unlike single images or pure audio signals, video tampering can occur across multiple dimensions simultaneously:
 - **Spatial tampering:** Localized face swaps, inpainting, object removal, or synthetic overlays within individual frames.
@@ -406,7 +420,7 @@ Video evidence combines high-volume spatial imagery, temporal motion vectors, co
 - **Surveillance/CCTV tampering:** Altered on-screen display (OSD) clock timestamps, camera switching artifacts, or proprietary export header rewrites.
 
 #### Architectural Boundaries & Fundamental Principles
-1. **Overall Platform Alignment:** VISTA operates within the unified PS-05 architecture, sharing the evidence intake pipeline, immutable storage, audit logging, and statutory certificate preparation infrastructure.
+1. **Overall Platform Alignment:** VISTA operates within the unified platform architecture, sharing the evidence intake pipeline, immutable storage, audit logging, and statutory certificate preparation infrastructure.
 2. **Relationship to AURAS (Audio Subsystem):** VISTA does **not** reimplement audio forensics. Through its **Audio Forensic Bridge (AFB)**, VISTA extracts native audio streams with zero transcoding loss and routes them into **AURAS** (ARE for signal/edit analysis, MVSI for speech diarization/VAD/language ID, and ADDE for voice deepfake detection).
 3. **Relationship to AIF (Image Subsystem):** VISTA maintains logical decoupling from AIF while sharing foundational computer vision paradigms (e.g., face detection landmarks, frequency domain transforms, and localized inpainting detection).
 4. **Shared CEIPL Foundation:** The **Cryptographic Evidence Integrity & Provenance Layer (CEIPL)** is a shared platform core service—**not** a sixth VISTA engine. All VISTA exhibits, stream extracts, and derived artifacts are anchored in CEIPL's cryptographic DAG.
@@ -952,7 +966,7 @@ For deeper technical and implementation details, see:
 
 ### 4.26 Cross-Modal Deepfake Validation Framework (CDVF)
 
-> **Architectural Boundary Clarification:** The **Cross-Modal Deepfake Validation Framework (CDVF)** is a shared scientific evaluation, calibration, out-of-distribution (OOD) gating, and model-governance capability within PS-05.
+> **Architectural Boundary Clarification:** The **Cross-Modal Deepfake Validation Framework (CDVF)** is a shared scientific evaluation, calibration, out-of-distribution (OOD) gating, and model-governance capability within the platform.
 > CDVF does **NOT** act as a fourth standalone media-detection engine. It does not replace or compete with **AIF (Image)**, **AURAS (Audio)**, or **VISTA (Video/CCTV)**. Instead, it provides the common mathematical, statistical, and evidentiary validation backbone that governs, stress-tests, calibrates, and certifies the detection models operating within those subsystems.
 
 #### Why Shared Cross-Modal Validation is Necessary
@@ -1095,7 +1109,7 @@ For complete technical specifications, mathematical foundations, schemas, and ph
 
 > **Shared Platform Service — Not a Modality-Specific Detection Engine**
 
-CMMS is the PS-05 unified metadata pipeline. It extracts technical and embedded metadata from every evidence modality, preserves raw values, produces canonically normalised records, performs rule-based consistency analysis, and exposes structured metadata objects to consuming forensic engines — all without replacing specialised detection engines.
+CMMS is the unified metadata pipeline. It extracts technical and embedded metadata from every evidence modality, preserves raw values, produces canonically normalised records, performs rule-based consistency analysis, and exposes structured metadata objects to consuming forensic engines — all without replacing specialised detection engines.
 
 **Evidence Metadata Pipeline:**
 
@@ -1186,7 +1200,7 @@ See `PRD.md Section 15`, `TRD.md Section 16`, and `PHASES.md Section 9.B` for fu
 
 > **Platform-Wide Temporal Verification & Timeline Correlation Capability — Not a Modality-Specific Engine**
 
-Cross-Source Timestamp Verification (CSTV) is the PS-05 platform-wide temporal verification, clock drift analysis, and multi-source timeline reconstruction capability. It analyzes, compares, correlates, and validates temporal records across multiple independent or related digital evidence sources seized within a forensic case.
+Cross-Source Timestamp Verification (CSTV) is the platform-wide temporal verification, clock drift analysis, and multi-source timeline reconstruction capability. It analyzes, compares, correlates, and validates temporal records across multiple independent or related digital evidence sources seized within a forensic case.
 
 ```mermaid
 flowchart TD
@@ -1465,7 +1479,7 @@ See `PRD.md Section 17`, `TRD.md Section 18`, and `PHASES.md Section 16` for ful
 
 > **Shared Presentation, Navigation & Examiner Workflow Layer — Not a Forensic Engine**
 
-The **Unified Forensic Dashboard (UFD)** and its practitioner interface, the **Unified Forensic Workbench (UFW)**, provide the shared, secure, examiner-oriented presentation and workflow tier for the entire PS-05 platform. UFD unifies the investigation lifecycle into an unbroken, auditable operational chain:
+The **Unified Forensic Dashboard (UFD)** and its practitioner interface, the **Unified Forensic Workbench (UFW)**, provide the shared, secure, examiner-oriented presentation and workflow tier for the entire platform. UFD unifies the investigation lifecycle into an unbroken, auditable operational chain:
 
 $$\text{Case Creation} \longrightarrow \text{Evidence Registration} \longrightarrow \text{Integrity Verification} \longrightarrow \text{Forensic Processing} \longrightarrow \text{Findings Review} \longrightarrow \text{Cross-Modal Correlation} \longrightarrow \text{Examiner Assessment} \longrightarrow \text{Report Issuance}$$
 
@@ -1499,7 +1513,7 @@ flowchart TD
         end
     end
 
-    subgraph BACKEND_SERVICES["PS-05 Authoritative Forensic Subsystems"]
+    subgraph BACKEND_SERVICES["Platform Authoritative Forensic Subsystems"]
         CEIPL_SVC["CEIPL: Hashing, Fixity & Custody"]
         CMMS_SVC["CMMS: Cross-Media Metadata Service"]
         CSTV_SVC["CSTV: Cross-Source Temporal Verification"]
@@ -1611,7 +1625,7 @@ See `PRD.md Section 20`, `TRD.md Section 20`, and `PHASES.md Section 21` for ful
 
 > **Shared Cryptographic Evidence Integrity, Immutability & Provenance Layer — Residing Inside CEIPL**
 
-The **Evidence Integrity Verification (EIV)** subsystem is an enterprise-grade cryptographic integrity and provenance assurance capability embedded directly within the **Cryptographic Evidence Integrity and Provenance Layer (CEIPL)**—the shared platform foundation of the PS-05 forensic architecture.
+The **Evidence Integrity Verification (EIV)** subsystem is an enterprise-grade cryptographic integrity and provenance assurance capability embedded directly within the **Cryptographic Evidence Integrity and Provenance Layer (CEIPL)**—the shared platform foundation of the forensic architecture.
 
 EIV is **not** an independent forensic detection engine, a sixth VISTA engine, or a fourth AURAS engine. It does not evaluate deepfakes or perform signal reverse engineering. Rather, its singular mission is to ensure that original digital evidence, derived forensic representations, metadata snapshots, and chain-of-custody ledgers remain cryptographically verifiable, bit-for-bit immutable, and defense-resilient throughout their entire legal lifecycle.
 
@@ -1739,7 +1753,7 @@ See `PRD.md Section 19`, `TRD.md Section 19`, and `PHASES.md Section 19` for ful
 
 > **Shared Reporting, Synthesis & Statutory Attestation Layer — Not a Detection Engine**
 
-The **Unified Forensic Reporting & Evidence Dossier Framework (UFREDF)** serves as the authoritative legal synthesis and reporting layer for the entire PS-05 platform. UFREDF consumes structured findings, metadata, timelines, and custody records from all forensic subsystems, validates them against strict mathematical schemas, and compiles structured electronic evidence dossiers with certificate schedules prepared under **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** and legacy Section 65B IEA.
+The **Unified Forensic Reporting & Evidence Dossier Framework (UFREDF)** serves as the authoritative legal synthesis and reporting layer for the entire platform. UFREDF consumes structured findings, metadata, timelines, and custody records from all forensic subsystems, validates them against strict mathematical schemas, and compiles structured electronic evidence dossiers with certificate schedules prepared under **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** and legacy Section 65B IEA.
 
 #### 4.33.1 High-Level Architecture & Integration
 
@@ -1835,7 +1849,7 @@ To eliminate capability overlap and maintain judicial defensibility, CCHDF enfor
 
 #### 4.34.2 Universal First-Stage Concealment & Structural Triage
 
-Every evidence exhibit accepted by the PS-05 platform must pass a universal 10-step triage before being routed to deep modality-specific detectors:
+Every evidence exhibit accepted by the platform must pass a universal 10-step triage before being routed to deep modality-specific detectors:
 
 1. **Magic-Byte & Actual Type Identification:** Inspects leading header magic bytes against a forensic signature database, establishing true MIME type regardless of reported filename.
 2. **Container & Stream Inventory:** Enumerates all elementary container tracks, multiplexed streams, channels, and structural partitions.
@@ -2054,7 +2068,7 @@ The project architecture is finalized; core foundation artifacts and behavioral 
 ### Setup Steps
 ```bash
 # 1. Clone repository
-git clone https://github.com/bihar-cyber-hackathon/ps05-forensics.git
+git clone https://github.com/Subhadip-Paul2006/BHack-Docs.git
 cd ps05-forensics
 
 # 2. Create and activate virtual environment
@@ -2168,7 +2182,7 @@ Refer to [PHASES.md](PHASES.md) for full phase gates and definitions of done:
   - **AURAS-A3, A4, A5:** MVSI VAD, Overlap Diarization & Multilingual Language Analytics
   - **AURAS-A6, A7, A8:** ADDE Deepfake Detection, Foundation Models & Calibrated Ensemble
   - **AURAS-A9:** Cross-Engine Orchestration & Section 65B/63 BSA Legal Reporting
-  - **AURAS-A10:** End-to-End Audio Validation, Benchmarking & Hackathon Demonstration
+  - **AURAS-A10:** End-to-End Audio Validation, Benchmarking & System Verification
 - **VISTA Video & CCTV Forensics Workstream:**
   - **VISTA-A0:** Repository Discovery & Architecture Baseline Integration
   - **VISTA-A1:** Shared Video Evidence Contracts & Cryptographic Foundation (CEIPL)
@@ -2226,19 +2240,34 @@ Refer to [PHASES.md](PHASES.md) for full phase gates and definitions of done:
   - **Phase 7:** Platform Cross-Engine Reporting (Section 65B/63 BSA Dossier)
   - **Phase 8:** Web Dashboard & Forensic Examiner Workbench
   - **Phase 9:** Security Hardening & Air-Gapped Packaging
-  - **Phase 10:** Final Hackathon Demonstration & Release
+  - **Phase 10:** Final System Verification & Release
 
 ---
 
 ## 11. Canonical Documentation Index
 
-- [PRD.md](PRD.md) — Product Requirements Document (Personas, Requirements AIF-FR, IVE-FR, IRE-FR, AIM-FR, CEIPL-FR, AUD-FR, VISTA-FR, VRE-FR, AFB-FR, AVSC-FR, VDF-FR, VCI-FR, CCTV-FR, ONTF-FR, CDVF-01..20, CCHDF-FR-001..011, CCHDF-01..35, NFRs)
-- [TRD.md](TRD.md) — Technical Requirements Document (Component boundaries, DB schemas, API contracts, threat model, five-engine VISTA specifications, CDVF § 11.B validation framework, CCHDF § 22 technical architecture & ConcealmentFinding schemas, Pydantic v2 schemas § 12)
-- [PHASES.md](PHASES.md) — Canonical Implementation Roadmap & Milestone Acceptance Gates (Phases 0–10, AURAS-A0..A10, AIF-A0..A15, VISTA-A0..A13, CDVF-A0..A11, CCHDF-A0..A8, Checkpoints CCHDF-CP-00-01..08-04)
-- [AI_INSTRUCTIONS.md](AI_INSTRUCTIONS.md) — Highest-authority behavioral specification for AI coding agents
-- [archify.config.json](archify.config.json) — Archify JSON IR and report configuration
+### Core Architecture & Engineering Documentation (Track B)
+- [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) — Executive Product Brief (Vision, Personas, Architecture Pillars & Value Proposition)
+- [PRD.md](PRD.md) — Product Requirements Document (Personas, Functional Requirements, NFRs, Legal Frameworks)
+- [TRD.md](TRD.md) — Technical Requirements Document (Component boundaries, DB schemas, API contracts, threat model, Pydantic v2 schemas)
+- [PHASES.md](PHASES.md) — Canonical Implementation Roadmap & Milestone Acceptance Gates (Phases 0–6 Dual-Track Execution)
+- [CCTV_VISUAL_INTELLIGENCE.md](CCTV_VISUAL_INTELLIGENCE.md) — CCTV & Surveillance Video Forensics (CFITSA Cadence, OSD OCR, Multi-Cam)
+- [AI_INSTRUCTIONS.md](AI_INSTRUCTIONS.md) — Behavioral specification and invariants for AI engineering agents
+- [archify.config.json](archify.config.json) — Archify JSON IR and report visualization configuration
 - [pyproject.toml](pyproject.toml) — Project packaging and dependency manifest
-- [.env.example](.env.example) — Documented configuration template
+- [.env.example](.env.example) — Documented environment configuration template
+
+### Research & Scientific Validation Documentation Suite (Track A)
+- [research/RESEARCH_OVERVIEW.md](research/RESEARCH_OVERVIEW.md) — Research Vision, Problem Definition & Dual-Track Alignment
+- [research/RESEARCH_GAP_ANALYSIS.md](research/RESEARCH_GAP_ANALYSIS.md) — Critical Analysis of 7 Foundational Forensic Research Gaps
+- [research/LITERATURE_REVIEW.md](research/LITERATURE_REVIEW.md) — Comprehensive Literature Review (PRNU, ELA, AASIST, TruFor, RFCs)
+- [research/RESEARCH_OBJECTIVES.md](research/RESEARCH_OBJECTIVES.md) — Formal Research Questions (RQ1..RQ6) & Testable Hypotheses
+- [research/RESEARCH_METHODOLOGY.md](research/RESEARCH_METHODOLOGY.md) — Experimental Protocols, Math Formulations & Statistical Tests
+- [research/EXPERIMENTAL_FRAMEWORK.md](research/EXPERIMENTAL_FRAMEWORK.md) — Hardware Environments, Seed Determinism & Model Checkpoints
+- [research/DATASET_STRATEGY.md](research/DATASET_STRATEGY.md) — Benchmark Corpora, Quality Tiering & Dataset Governance
+- [research/EVALUATION_METRICS.md](research/EVALUATION_METRICS.md) — Mathematical Formulations for EER, minDCF, IoU, ECE & Metrics
+- [research/RESEARCH_LIMITATIONS.md](research/RESEARCH_LIMITATIONS.md) — Scientific Boundaries, Uncertainty Principles & Inconclusive Verdicts
+- [research/REFERENCES.md](research/REFERENCES.md) — Academic Bibliography, Peer-Reviewed Papers & International Standards
 
 ---
 
@@ -2246,7 +2275,7 @@ Refer to [PHASES.md](PHASES.md) for full phase gates and definitions of done:
 
 > **Status:** `PLANNED` — Architecture defined in this document. No source-code implementation exists yet.
 
-The PS-05 platform extends its forensic capability to paper-origin and digital documents submitted as evidence — including prescriptions, doctor consultation reports, laboratory reports, medical certificates, identity documents, scanned contracts, and PDF/image-embedded records. This capability is coordinated by a cross-cutting **Document Intelligence & Authenticity** layer that reuses AIF IVE/IRE/AIM components for image-based analysis and CEIPL for provenance.
+The platform extends its forensic capability to paper-origin and digital documents submitted as evidence — including prescriptions, doctor consultation reports, laboratory reports, medical certificates, identity documents, scanned contracts, and PDF/image-embedded records. This capability is coordinated by a cross-cutting **Document Intelligence & Authenticity** layer that reuses AIF IVE/IRE/AIM components for image-based analysis and CEIPL for provenance.
 
 ### 12.1 Supported document types (subject to actual parser capability)
 
@@ -2358,11 +2387,11 @@ For full technical specification, see [TRD.md § 18](TRD.md) and [PRD.md § 8](P
 
 ---
 
-## 15. MVP Demonstration Workflow
+## 15. Prototype Verification Workflow
 
 > **Status:** MVP scope is defined. Implementation is `PLANNED`.
 
-The hackathon demonstration targets a reliable, end-to-end vertical slice using a single representative case.
+The prototype verification targets a reliable, end-to-end vertical slice using a single representative case.
 
 **Demo scenario:** An investigator opens a case containing one CCTV/video clip, one image or screenshot, and one PDF/prescription-related document.
 
