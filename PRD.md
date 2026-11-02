@@ -52,7 +52,7 @@ To establish India's most trustworthy, cryptographically verifiable, and technol
 - **O-2 (Multi-Modal Analysis):** Automated forensic pipelines covering Images, CCTV Footage, Video streams, and Audio recordings across four specialized forensic engines.
 - **O-3 (Explainable Evidence):** Every positive manipulation finding must be accompanied by temporal/spatial localization, signal/spectrographic/ELA artifacts, and confidence intervals rather than a bare scalar score.
 - **O-4 (Legal Compliance):** Automated generation of forensic certificates conforming to Section 65B Indian Evidence Act / Section 63 Bharatiya Sakshya Adhiniyam (BSA 2023) with complete audit trail hash manifests.
-- **O-5 (Indian Linguistic Resilience):** Audio speaker diarization and 3.voice tampering verification that operates across Indian language environments including Scheduled Indian Languages and regional Hindi dialects.
+- **O-5 (Indian Linguistic Resilience):** Audio speaker diarization and voice tampering verification that operates across Indian language environments including Scheduled Indian Languages and regional Hindi dialects.
 
 ### 3.3 VISTA Subsystem Product Objectives
 The **VISTA (Video Integrity, Synchronization & Tampering Analysis)** subsystem fulfills thirteen foundational forensic objectives:
@@ -137,7 +137,7 @@ The **AESL (Audio Edit and Splice Localisation)** capability embedded within the
 3. **OBJ-AESL-03 (Strict Three-Engine Boundary Invariant):** Operate strictly within the existing ARE engine, reusing MVSI for speaker diarization/VAD context and ADDE for independent AI-generated voice findings without creating an unnecessary fourth AURAS engine.
 4. **OBJ-AESL-04 (Multi-Resolution Analysis Framework):** Analyze audio signals across four concurrent temporal windowing scales (Short: 10-20ms, Medium: 20-50ms, Long: 50-200ms, Macro: 200-1000ms+) to capture both abrupt transient cuts and gradual ambient mismatches.
 5. **OBJ-AESL-05 (Acoustic Environment & Noise Inconsistency Verification):** Model background noise stationarity, Room Impulse Response (RIR), reverberation decay (RT60), and Direct-to-Reverberant Ratio (DRR) to detect splices across mismatched acoustic environments.
-6. **OBJ-AESL-06 (Multi-Channel Phase & Stereo Coherence):** Evaluate inter-channel cross-correlation ($R_{xy}(	au)$), Inter-channel Time Differences (ITD), and phase continuity in stereo/multichannel recordings to detect unilateral channel splicing.
+6. **OBJ-AESL-06 (Multi-Channel Phase & Stereo Coherence):** Evaluate inter-channel cross-correlation ($R_{xy}(\tau)$), Inter-channel Time Differences (ITD), and phase continuity in stereo/multichannel recordings to detect unilateral channel splicing.
 7. **OBJ-AESL-07 (Copy-Move & Repeated Audio Localisation):** Identify cloned or re-inserted acoustic sequences within the same recording via normalized cross-correlation and dynamic time warping, suppressing false alarms on natural speech repetition.
 8. **OBJ-AESL-08 (Multi-Branch Localisation & Anti-Black-Box Fusion):** Fuse five orthogonal forensic branches (Time, Spectral, Noise/Environment, Channel/Phase, Learned TCN/CRNN/ASLNet), preserving separate branch outputs and highlighting inter-detector disagreement.
 9. **OBJ-AESL-09 (Quality Control & Alternative Benign Explanations):** Systematically evaluate 18 benign explanations (speaker/mic movement, AGC pumping, legitimate DAW edits, natural silences) and 20 explicit forensic limitations before declaring manipulation.
@@ -220,7 +220,7 @@ sequenceDiagram
 ```
 
 
-### 4.5 AIF-GEO Geospatial Data & Evidence Classification Model
+### 4.3 AIF-GEO Geospatial Data & Evidence Classification Model
 
 All geospatial findings, coordinates, and telemetry records are tagged with one of eleven immutable evidentiary classification statuses:
 1. **`USER_REPORTED`:** Manually entered by an investigator, complainant, or witness (e.g. asserted incident location).
@@ -721,7 +721,7 @@ The **CCHDF (Cross-Channel Concealment & Hidden-Data Forensics)** subsystem prov
 | **FR-CORE-001** | Ingestion | Case Registration & Exhibit Intake | System shall register forensic cases with mandatory metadata (FIR/Case number, Police Station, Investigating Officer ID, Seizure Date/Time, Evidence Type). | Case created with unique UUIDv4; all subsequent exhibits bound to case; prevents orphaned files. | P0 |
 | **FR-CORE-002** | Integrity | Cryptographic Dual-Hashing | System shall immediately compute both SHA-256 and SHA3-512 checksums upon byte intake before any file writing or processing. | Hashes recorded in immutable audit ledger; rejects truncated or corrupt network uploads. | P0 |
 | **FR-CORE-003** | Storage | Immutable Raw Evidence Storage | System shall store master exhibits in a Write-Once-Read-Many (WORM) storage partition with strictly read-only filesystem permissions. | Zero write/delete permissions granted to worker processes; prevents accidental modification of original exhibit. | P0 |
-| **FR-CORE-004** | Lineage | Derived Artifact Transformation Tracking | Any resampled, trans手游, extracted, or cropped artifact must have a deterministic manifest linking parent Exhibit ID, transform parameters, and child hash. | Complete DAG (Directed Acyclic Graph) of artifact provenance retrievable via API and visualised in UI. | P0 |
+| **FR-CORE-004** | Lineage | Derived Artifact Transformation Tracking | Any resampled, transformed, extracted, or cropped artifact must have a deterministic manifest linking parent Exhibit ID, transform parameters, and child hash. | Complete DAG (Directed Acyclic Graph) of artifact provenance retrievable via API and visualised in UI. | P0 |
 | **FR-CORE-005** | Orchestration | Asynchronous Job Queue | System shall dispatch forensic tasks to a distributed worker queue with priority scheduling, failure retries, and task heartbeats. | Long-running video/audio jobs execute without blocking HTTP API; worker crash does not corrupt database state. | P0 |
 | **FR-CORE-006** | Audit | Tamper-Evident Audit Logging | System shall log every user action, exhibit access, analysis execution, and report generation in an append-only cryptographic audit log. | Every audit record signed with previous record hash (Merkle/Hash chain); verifiable integrity of audit trail. | P1 |
 | **FR-CORE-007** | Reporting | Section 65B / BSA Section 63 Certificate Generation | System shall automatically compile a standardized electronic evidence certificate detailing hash records, hardware environment, tool versions, and examiner signatures. | Generates high-fidelity PDF compliant with statutory formats under Indian Evidence Act Sec 65B and BSA 2023 Sec 63. | P0 |
@@ -790,7 +790,7 @@ The AIF subsystem requirements are organized into five specialized modules opera
 | **CEIPL-FR-010** | CEIPL-10 | **Immutable Storage Controls (POSIX 0400 / WORM Lock):** Store exhibits on dedicated storage partitions with read-only permissions and S3 Object Lock compliance. | Physically prevents write, overwrite, or deletion operations by worker processes. | P0 | Stored exhibit file path / S3 bucket URI. | File mode `0400`, S3 Legal Hold status active. | Any write/delete attempt throws `PermissionError`; preserves raw exhibits. | `PLANNED` |
 | **CEIPL-FR-011** | CEIPL-11 | **Cryptographic Failure State Handling:** System must emit typed failure codes (`HASH_MISMATCH`, `SIGNATURE_INVALID`, etc.) without converting to false pass. | Prevents silent failures from compromising courtroom evidence integrity. | P0 | Verification event result. | Explicit error code, audit alert log, examiner notification. | Never converts a failed or inconclusive cryptographic check into PASS. | `PLANNED` |
 
-#### 6.2.6 Baseline Image Forensics Matrix (FR-IMG-001 to FR-IMG-007)
+#### 6.2.6 Baseline Image Forensics Matrix (FR-IMG-001 to FR-IMG-005)
 
 The baseline image requirements are preserved and cross-referenced with the expanded AIF engines:
 
@@ -914,7 +914,7 @@ The original platform baseline video requirements are preserved and fully mapped
 | **FR-VID-004** | CCTV Frame | Inserted & Reordered Frame Validation | Analyze background illumination variance and motion vector continuity to identify spliced external video frames or altered sequence order. | Pinpoints sudden scene changes, unnatural object teleportation, or reordered chronological events. | P0 | VRE-03 / VRE-05 |
 | **FR-VID-005** | Timeline | Timestamp OCR vs. Metadata Correlation | Perform Optical Character Recognition (OCR) on burned-in on-screen CCTV timestamp text and compare with container metadata and PTS cadence. | Detects discrepancies between the visible clock overlay on screen and the true underlying digital video timeline. | P0 | VCI-05 / CCTV-06 |
 | **FR-VID-006** | Audio-Video | AV Synchronization & Audio Extraction | Extract embedded audio tracks to an independent derived exhibit bound by cryptographic hash and compute audio-video lip-sync / event alignment. | Extracted audio seamlessly ingested into AURAS engine; original video timecode mapping perfectly preserved. | P0 | AFB-01 / AVSC-01..04 |
-| **FR-VID-007** | Face Tampering | Video Deepfake & Face-Swap Inspection | Detect temporal flickering, facial boundary warping, and biometric inconsistencies (abnormal blink rates, unnatural facial landmark trajectories). | Generates frame-by-frame face manipulation confidence timeline and visual overlay of suspicious facial boundaries. | P1 | VDF-01..05 | P1 | VDF-01..05 |
+| **FR-VID-007** | Face Tampering | Video Deepfake & Face-Swap Inspection | Detect temporal flickering, facial boundary warping, and biometric inconsistencies (abnormal blink rates, unnatural facial landmark trajectories). | Generates frame-by-frame face manipulation confidence timeline and visual overlay of suspicious facial boundaries. | P1 | VDF-01..05 |
 
 ---
 
@@ -1147,6 +1147,25 @@ The Cross-Modal Deepfake Validation Framework (CDVF) establishes a shared evalua
 - **CCHDF-NFR-006 (Calibrated Sensor Hardware Gate for PSEA):** Physical Side-Channel & Emissions Analysis (PSEA) must be strictly gated behind accredited laboratory measurement reports, calibrated sensor hardware metadata (SDR/antenna/microphone calibration curves), and environmental baseline noise profiles. The system shall reject consumer CCTV or PCAP files submitted as proof of TEMPEST emissions.
 - **CCHDF-NFR-007 (Universal Triage Performance SLA):** The universal 10-step triage scanner must execute in $< 2.5\text{ seconds}$ for exhibits up to 50 MB, and $< 10.0\text{ seconds}$ for exhibits up to 1 GB, maintaining peak worker memory strictly $< 1\text{ GB}$.
 - **CCHDF-NFR-008 (Defensive Memory Ceilings & Execution Timeouts):** All carrier parsers (document, archive, filesystem, packet timing) must execute within unprivileged sandboxes (`uid 10002`) with hard memory ceilings ($\le 2\text{ GB}$ per worker) and strict timeouts (30s header triage, 300s deep scan) to prevent denial-of-service from malformed containers.
+
+### 7.9 Platform Reliability & Security Requirements (PS-05) (PLAT-NFR)
+
+Compact, platform-level requirement summary for PS-05. Technical contracts live in the TRD (same namespaces cited below at namespace level only; specific TRD requirement numbers are being authored in parallel and are intentionally not cited here):
+
+- **PLAT-NFR-001 (Failure Containment):** A single worker, engine, or model failure must be contained to that task and cannot take down the platform or other running cases.
+- **PLAT-NFR-002 (Recovery & Resumability):** The platform must automatically recover from broker, database, storage, worker, and host failures; interrupted tasks must be resumable from their last committed checkpoint.
+- **PLAT-NFR-003 (Exactly-Once Side Effects):** Repeated task delivery must not produce duplicate side effects (duplicate findings, duplicate audit entries, duplicate artifact writes).
+- **PLAT-NFR-004 (Concurrent Case Isolation):** Multiple concurrent investigations must run without cross-case interference in data, resources, or results.
+- **PLAT-NFR-005 (Bounded Platform Consumption):** Platform CPU, RAM, GPU, and storage consumption must remain bounded and monitored so a single case cannot exhaust shared resources.
+- **PLAT-NFR-006 (Storage/Queue/DB Consistency):** Database state must remain consistent with queue delivery state and artifact storage, so no case is left with findings that cite missing evidence.
+- **PLAT-NFR-007 (End-to-End Finding Traceability):** Every finding must be traceable to its original evidence and the exact analysis version that produced it, recorded as `analysis_run_id`, model version, configuration version, and input artifact hash.
+- **PLAT-NFR-008 (Partial Failure Visibility):** Sub-task failures must be surfaced as explicit partial-result status within a case without failing the whole investigation; completed sub-results remain usable.
+- **PLAT-NFR-009 (Controlled Degradation):** The platform must support controlled degradation (reduced features/throughput) under resource pressure rather than uncontrolled failure.
+- **PLAT-NFR-010 (No Zero-Error Promise):** The platform guarantees detection and visibility of failures, not zero errors; all operational assumptions about failure tolerance are stated here and in the TRD.
+
+**Technical contract (namespace-level reference):** TRD `REO-*` (orchestration & reliability), `RES-*` (resource scheduling), `OBS-*` (observability), `STG-*` (streaming & storage), `SEC-*` (security). Canonical security home: TRD Section 15.
+
+**P0 security priorities (summary):** auth + case-level authorization; original-evidence immutability; secure secret handling; upload/parser isolation; DB/object-storage access control; audit logging; cross-case RAG isolation; model output validation; resource limits; backup + restoration verification. Compliance is not claimed until these controls are implemented and tested.
 
 ---
 
@@ -1531,7 +1550,7 @@ All concealment, covert-channel, and steganographic investigations governed by C
 
 ## 11. Human Review & Accountability Requirements
 
-### 10.1 Mandatory human review triggers
+### 11.1 Mandatory human review triggers
 
 Human review is required before any finding is treated as final in the following situations:
 
@@ -1544,7 +1563,7 @@ Human review is required before any finding is treated as final in the following
 | Machine-suggested evidence relationship | Examiner must confirm, reject, or leave unresolved before the finding appears in a dossier |
 | RAG answer marked high uncertainty | Examiner must validate before citing in any official report |
 
-### 10.2 Reviewer decision schema
+### 11.2 Reviewer decision schema
 
 ```json
 {
@@ -1557,7 +1576,7 @@ Human review is required before any finding is treated as final in the following
 }
 ```
 
-### 10.3 Platform accountability principles
+### 11.3 Platform accountability principles
 
 - The system never generates a criminal accusation, medical diagnosis, or legal decision solely from AI outputs.
 - All high-impact findings require explicit human review with rationale before appearing in a signed report.
@@ -1570,7 +1589,7 @@ Human review is required before any finding is treated as final in the following
 
 > **Status:** `PLANNED` — Scope defined. Not yet implemented.
 
-### 11.1 MVP scope definition
+### 12.1 MVP scope definition
 
 The MVP does **not** require every model to run on every file type. It prioritizes a reliable vertical slice:
 
@@ -1594,7 +1613,7 @@ The MVP does **not** require every model to run on every file type. It prioritiz
 - Large-scale multilingual document models.
 - Expanded graph-based inference.
 
-### 11.2 Acceptance criteria for MVP demonstration
+### 12.2 Acceptance criteria for MVP demonstration
 
 | Criterion | Verification method | Status |
 | :--- | :--- | :--- |
@@ -1922,13 +1941,13 @@ Every CDVF functional requirement is assigned a priority (`Must Have`, `Should H
 ### 13.7 Non-Functional Requirements (CDVF-NFR)
 - **CDVF-NFR-01 (Air-Gapped Local Execution):** All benchmark runners, split engines, calibration scalers, and report generators must execute 100% locally with zero outbound network calls.
 - **CDVF-NFR-02 (Deterministic Reproducibility):** Re-running a benchmark on identical hardware with the recorded PRNG seed must produce bit-identical evaluation metrics.
-- **CDVF-NFR-03 (Worker Resource Ceilings):** Benchmark worker processes execute in cgroups capping memory to $\le 16	ext{ GB}$ RAM and GPU VRAM to $\le 8	ext{ GB}$.
-- **CDVF-NFR-04 (Decompression Bomb Safeguards):** Image decompression is capped at $100	ext{ MP}$; zip/archive expansion ratios $> 10:1$ are immediately aborted.
-- **CDVF-NFR-05 (Calibration Computational Overhead):** Fitting post-hoc calibration transforms (Platt, temperature, isotonic) must execute in $< 30	ext{ seconds}$ for $10,000$ validation samples.
-- **CDVF-NFR-06 (Inference Latency Overhead):** In-line score calibration and OOD scoring must add $\le 5	ext{ ms}$ overhead to the primary forensic detection pipeline.
-- **CDVF-NFR-07 (Cryptographic Verification Latency):** Checkpoint SHA-256 verification must process at $\ge 200	ext{ MB/s}$ on standard NVMe storage.
-- **CDVF-NFR-08 (PostgreSQL JSONB Query Performance):** Case timeline and cross-modal finding queries across 50,000 records must execute in $< 500	ext{ ms}$.
-- **CDVF-NFR-09 (Subgroup Disparity Ceiling):** A model cannot be approved without restriction if maximum performance disparity across evaluated subgroups exceeds $2.0	imes$.
+- **CDVF-NFR-03 (Worker Resource Ceilings):** Benchmark worker processes execute in cgroups capping memory to $\le 16\text{ GB}$ RAM and GPU VRAM to $\le 8\text{ GB}$.
+- **CDVF-NFR-04 (Decompression Bomb Safeguards):** Image decompression is capped at $100\text{ MP}$; zip/archive expansion ratios $> 10:1$ are immediately aborted.
+- **CDVF-NFR-05 (Calibration Computational Overhead):** Fitting post-hoc calibration transforms (Platt, temperature, isotonic) must execute in $< 30\text{ seconds}$ for $10,000$ validation samples.
+- **CDVF-NFR-06 (Inference Latency Overhead):** In-line score calibration and OOD scoring must add $\le 5\text{ ms}$ overhead to the primary forensic detection pipeline.
+- **CDVF-NFR-07 (Cryptographic Verification Latency):** Checkpoint SHA-256 verification must process at $\ge 200\text{ MB/s}$ on standard NVMe storage.
+- **CDVF-NFR-08 (PostgreSQL JSONB Query Performance):** Case timeline and cross-modal finding queries across 50,000 records must execute in $< 500\text{ ms}$.
+- **CDVF-NFR-09 (Subgroup Disparity Ceiling):** A model cannot be approved without restriction if maximum performance disparity across evaluated subgroups exceeds $2.0\times$.
 - **CDVF-NFR-10 (Audit Log Immutability):** All model promotions, approvals, and examiner dispositions must be committed to append-only WORM logs with RFC 3161 timestamps.
 
 ---
@@ -1999,7 +2018,7 @@ where $\tau_{\text{conf}}$, $\tau_{\text{OOD}}$, and $\tau_{\text{qual}}$ are ta
 | **CDVF-RSK-04** | Uncalibrated probabilities mislead judges and defense cross-examiners | CRITICAL | HIGH | Mandate post-hoc calibration asserting $\operatorname{ECE} \le 0.05$; watermark uncalibrated scores. |
 | **CDVF-RSK-05** | Naive score averaging conceals single-modality deepfake manipulations | HIGH | MEDIUM | Strictly enforce anti-averaging invariant; trace multi-modal dependencies in a DAG. |
 | **CDVF-RSK-06** | High OOD scores are misconstrued as affirmative proof of manipulation | HIGH | MEDIUM | Codify forensic invariant in report generator: OOD triggers abstention, never a "fake" finding. |
-| **CDVF-RSK-07** | Heavy GPU VRAM usage during multi-model benchmark runs causes OOM | MEDIUM | MEDIUM | Enforce cgroup VRAM ceilings ($\le 8	ext{ GB}$), batch size caps, and sequential task queues. |
+| **CDVF-RSK-07** | Heavy GPU VRAM usage during multi-model benchmark runs causes OOM | MEDIUM | MEDIUM | Enforce cgroup VRAM ceilings ($\le 8\text{ GB}$), batch size caps, and sequential task queues. |
 
 ---
 
@@ -3224,7 +3243,7 @@ CSTV resolves these critical challenges by providing an evidence-preserving, mat
   2. CSTV detects that 02:30:00 on that date fell during the 1-hour fall-back transition, mapping to two possible UTC instants: 07:30:00 UTC and 08:30:00 UTC.
   3. CSTV issues finding `TIME_TIMEZONE_AMBIGUOUS` with two valid candidate UTC intervals.
   4. CSTV queries AIF-GEO astrometric solar positioning analysis for the image; the solar azimuth and shadow angles are compatible only with the 08:30:00 UTC instant.
-  5. CSTV resolves the ambiguity, document the astrometric evidence, and updates the timeline with full audit traceability.
+  5. CSTV resolves the ambiguity, documents the astrometric evidence, and updates the timeline with full audit traceability.
 
 ##### Journey CSTV-J06: Reconstructing an Event Timeline Across Evidence Types
 - **Context:** A complex kidnapping case involves 14 separate evidence items: 4 smartphone photos, 2 voice calls, 3 CCTV exports, 1 GPS tracker log, 2 router syslogs, and 2 police body-cam clips.
@@ -3549,24 +3568,24 @@ AESL resolves these challenges by providing an evidence-preserving, multi-branch
 - **Workflow:**
   1. The examiner ingests the 48 kHz WAV recording; CEIPL locks the exhibit with dual hashes (SHA-256 / SHA3-512).
   2. ARE/AESL executes multi-resolution segmentation, evaluating time-domain slope and spectral flux across 20ms sliding windows.
-  3. At sample 482,400 ($t = 10.050	ext{ s}$), the system detects a simultaneous jump in spectral centroid ($\Delta f_c = +840	ext{ Hz}$) and noise-floor power ($\Delta P_N = +6.2	ext{ dB}$).
-  4. AESL bounds the region as `AESL-REG-001` ($[10.045	ext{ s}, 10.055	ext{ s}]$) with boundary uncertainty $\pm 4.2	ext{ ms}$.
+  3. At sample 482,400 ($t = 10.050\text{ s}$), the system detects a simultaneous jump in spectral centroid ($\Delta f_c = +840\text{ Hz}$) and noise-floor power ($\Delta P_N = +6.2\text{ dB}$).
+  4. AESL bounds the region as `AESL-REG-001` ($[10.045\text{ s}, 10.055\text{ s}]$) with boundary uncertainty $\pm 4.2\text{ ms}$.
   5. The examiner inspects the zoomed waveform view; zero-crossing phase discontinuity confirms a hard edit boundary.
 
 ##### Journey AESL-J02: Localising a Possible Deletion
 - **Context:** A witness statement recording contains a suspected deletion of an exculpatory phrase ("I did not see him").
 - **Workflow:**
   1. AESL analyzes the ambient background room tone across a 30-second speech segment.
-  2. At sample 240,000 ($t = 5.000	ext{ s}$), the system identifies an abrupt drop in the room reverberation tail following a plosive consonant, with the decay slope severed prematurely ($RT60$ drop from $0.42	ext{ s}$ to $0.05	ext{ s}$).
-  3. The local noise-floor estimate drops discontinuously by $8.5	ext{ dB}$ across a single 10ms frame boundary.
-  4. AESL emits finding `AUDIO_EDIT_POSSIBLE_DELETION` at sample 240,000 with boundary uncertainty $\pm 2.1	ext{ ms}$.
+  2. At sample 240,000 ($t = 5.000\text{ s}$), the system identifies an abrupt drop in the room reverberation tail following a plosive consonant, with the decay slope severed prematurely ($RT60$ drop from $0.42\text{ s}$ to $0.05\text{ s}$).
+  3. The local noise-floor estimate drops discontinuously by $8.5\text{ dB}$ across a single 10ms frame boundary.
+  4. AESL emits finding `AUDIO_EDIT_POSSIBLE_DELETION` at sample 240,000 with boundary uncertainty $\pm 2.1\text{ ms}$.
   5. The report notes that while deleted content cannot be recovered without a reference copy, the acoustic discontinuity is inconsistent with uninterrupted speech.
 
 ##### Journey AESL-J03: Finding Repeated Segments (Copy-Move)
 - **Context:** In a suspected fraudulent alibi recording, background street traffic noise appears artificially continuous.
 - **Workflow:**
   1. AESL computes sliding-window acoustic fingerprints and local self-similarity matrices across the 5-minute recording.
-  2. The system identifies a 4.2-second ambient traffic segment occurring at $t = 14.0	ext{ s}$ that repeats identically at $t = 142.5	ext{ s}$ with normalized cross-correlation $R_{xy} = 0.994$.
+  2. The system identifies a 4.2-second ambient traffic segment occurring at $t = 14.0\text{ s}$ that repeats identically at $t = 142.5\text{ s}$ with normalized cross-correlation $R_{xy} = 0.994$.
   3. AESL cross-references the speech timeline from MVSI; the repeated audio occurs during a period where the suspect is allegedly speaking in one instance and silent in the other.
   4. The system flags `AUDIO_EDIT_COPY_MOVE_CANDIDATE` with two bound intervals and a shared fingerprint hash.
   5. The examiner verifies the duplicate planar waveform pattern, confirming artificial loop padding.
@@ -3575,8 +3594,8 @@ AESL resolves these challenges by providing an evidence-preserving, multi-branch
 - **Context:** An investigative journalist audio clip contains an alleged confession recorded inside a vehicle.
 - **Workflow:**
   1. AESL applies multi-resolution spectral entropy and minimum statistics noise tracking across the entire recording.
-  2. The examiner selects candidate boundary at $t = 45.2	ext{ s}$ for deep inspection.
-  3. AESL renders a dual noise-floor comparison: the 2.0-second interval prior to the boundary exhibits engine rumble concentrated at $120	ext{ Hz}$ ($SNR = 14	ext{ dB}$), while the 2.0-second interval following exhibits HVAC broadband noise at $2.4	ext{ kHz}$ ($SNR = 22	ext{ dB}$).
+  2. The examiner selects candidate boundary at $t = 45.2\text{ s}$ for deep inspection.
+  3. AESL renders a dual noise-floor comparison: the 2.0-second interval prior to the boundary exhibits engine rumble concentrated at $120\text{ Hz}$ ($SNR = 14\text{ dB}$), while the 2.0-second interval following exhibits HVAC broadband noise at $2.4\text{ kHz}$ ($SNR = 22\text{ dB}$).
   4. AESL computes the acoustic environment distance ($D_{\text{env}} = 0.78$), issuing finding `AUDIO_EDIT_ENVIRONMENT_MISMATCH`.
   5. The examiner exports the comparative spectral density curve directly into the courtroom report.
 
@@ -3584,8 +3603,8 @@ AESL resolves these challenges by providing an evidence-preserving, multi-branch
 - **Context:** A complainant alleges that a death threat phrase was inserted into an otherwise benign telephone conversation.
 - **Workflow:**
   1. AESL extracts MP3 frame allocation side-information and MDCT coefficient distributions across the recording.
-  2. The baseline audio exhibits constant-bitrate (CBR) $128	ext{ kbps}$ frame structure encoded with LAME 3.99.
-  3. For a 3.1-second phrase ($t = 22.4	ext{ s}$ to $25.5	ext{ s}$), the system detects variable quantization scalefactor bands, high-frequency cutoff shifted from $16.5	ext{ kHz}$ to $11.0	ext{ kHz}$, and double-compression ghost peaks.
+  2. The baseline audio exhibits constant-bitrate (CBR) $128\text{ kbps}$ frame structure encoded with LAME 3.99.
+  3. For a 3.1-second phrase ($t = 22.4\text{ s}$ to $25.5\text{ s}$), the system detects variable quantization scalefactor bands, high-frequency cutoff shifted from $16.5\text{ kHz}$ to $11.0\text{ kHz}$, and double-compression ghost peaks.
   4. AESL bounds the interval as `AESL-REG-004` and issues finding `AUDIO_EDIT_CODEC_TRANSITION` and `AUDIO_EDIT_POSSIBLE_INSERTION`.
   5. MVSI confirms the speaker voice in this segment has different pitch and vocal tract length parameters.
 
@@ -3593,9 +3612,9 @@ AESL resolves these challenges by providing an evidence-preserving, multi-branch
 - **Context:** A four-person board meeting recording contains an alleged verbal agreement. One participant claims their agreement was spliced in from a different topic.
 - **Workflow:**
   1. AESL ingests the audio and requests speaker diarization intervals from MVSI.
-  2. MVSI assigns Speaker 3 to interval $[112.0	ext{ s}, 115.4	ext{ s}]$ ("I accept the proposal").
-  3. AESL performs boundary-specific analysis at both ends ($112.0	ext{ s}$ and $115.4	ext{ s}$); both boundaries exhibit non-cadence zero-crossings, severed reverberation tails, and a $4.8	ext{ dB}$ step in ambient room noise.
-  4. AESL verifies that Speaker 3's acoustic room response matches a small office ($RT60 = 0.22	ext{ s}$), whereas the surrounding meeting audio was recorded in a large conference room ($RT60 = 0.68	ext{ s}$).
+  2. MVSI assigns Speaker 3 to interval $[112.0\text{ s}, 115.4\text{ s}]$ ("I accept the proposal").
+  3. AESL performs boundary-specific analysis at both ends ($112.0\text{ s}$ and $115.4\text{ s}$); both boundaries exhibit non-cadence zero-crossings, severed reverberation tails, and a $4.8\text{ dB}$ step in ambient room noise.
+  4. AESL verifies that Speaker 3's acoustic room response matches a small office ($RT60 = 0.22\text{ s}$), whereas the surrounding meeting audio was recorded in a large conference room ($RT60 = 0.68\text{ s}$).
   5. AESL generates a correlated finding binding Speaker 3's diarization segment to an environmental mismatch finding without making legal accusations.
 
 ##### Journey AESL-J07: Exporting an Evidence-Linked Localisation Report
@@ -3634,7 +3653,7 @@ AESL resolves these challenges by providing an evidence-preserving, multi-branch
 | **AESL-10** | Native Channel Preservation Invariant | P0 | ARE Ingest | Multi-channel array shape test | AESL-A1 | `PLANNED` |
 | **AESL-11** | Derived 16 kHz Mono Normalization Contract | P0 | ARE Ingest | Sample mapping verification test | AESL-A1 | `PLANNED` |
 | **AESL-12** | Decompression Bomb & Resource Ceilings | P0 | Security / ARE | Bounded memory stress test | AESL-A1 | `PLANNED` |
-| **AESL-13** | Exact Integer Sample-Index Tracking ($t = n/f_s$) | P0 | ARE Core | Precision benchmark ($< 1\mu	ext{s}$) | AESL-A1 | `PLANNED` |
+| **AESL-13** | Exact Integer Sample-Index Tracking ($t = n/f_s$) | P0 | ARE Core | Precision benchmark ($< 1\mu\text{s}$) | AESL-A1 | `PLANNED` |
 | **AESL-14** | Multi-Resolution Segmentation Engine | P0 | ARE Core | 4-scale windowing unit test | AESL-A2 | `PLANNED` |
 | **AESL-15** | Short-Window Boundary Analysis (10-20ms) | P1 | ARE Core | Transient cut boundary test | AESL-A2 | `PLANNED` |
 | **AESL-16** | Medium-Window Spectral Analysis (20-50ms) | P1 | ARE Core | Spectral continuity test suite | AESL-A2 | `PLANNED` |
@@ -3665,7 +3684,7 @@ AESL resolves these challenges by providing an evidence-preserving, multi-branch
 | **AESL-41** | Mel-Frequency Cepstral Coefficients (MFCC) | P1 | ARE Spectral | MFCC distance matrix test | AESL-A2 | `PLANNED` |
 | **AESL-42** | Evidence-Linked Forensic Spectrogram Generation | P0 | ARE Spectral | Coordinate-linked visual render | AESL-A2 | `PLANNED` |
 | **AESL-43** | Multi-Channel Independent Signal Extraction | P0 | ARE Channel | Channel separation array test | AESL-A2 | `PLANNED` |
-| **AESL-44** | Inter-Channel Cross-Correlation ($R_{xy}(	au)$) | P0 | ARE Channel | Stereo coherence benchmark | AESL-A2 | `PLANNED` |
+| **AESL-44** | Inter-Channel Cross-Correlation ($R_{xy}(\tau)$) | P0 | ARE Channel | Stereo coherence benchmark | AESL-A2 | `PLANNED` |
 | **AESL-45** | Inter-Channel Time Difference (ITD) Tracking | P1 | ARE Channel | Spatial acoustic angle test | AESL-A2 | `PLANNED` |
 | **AESL-46** | Stereo-Image & Phase Discontinuity Detection | P0 | ARE Channel | Unilateral splice detection test | AESL-A2 | `PLANNED` |
 | **AESL-47** | Channel Energy Distribution Discrepancy | P1 | ARE Channel | Channel dropout step test | AESL-A2 | `PLANNED` |
@@ -3691,7 +3710,7 @@ AESL resolves these challenges by providing an evidence-preserving, multi-branch
 | **AESL-67** | Time-Indexed Suspicion Curve Output | P0 | ARE Model | Frame-level score array test | AESL-A7 | `PLANNED` |
 | **AESL-68** | Candidate Boundary Generation at Native Resolution| P0 | ARE Region | Candidate interval constructor | AESL-A8 | `PLANNED` |
 | **AESL-69** | Dual-Threshold Hysteresis Region Aggregation | P0 | ARE Region | Hysteresis merging benchmark | AESL-A8 | `PLANNED` |
-| **AESL-70** | Micro-Interval Preservation Safeguard ($\ge 10	ext{ms}$)| P0 | ARE Region | Short-splice preservation test | AESL-A8 | `PLANNED` |
+| **AESL-70** | Micro-Interval Preservation Safeguard ($\ge 10\text{ms}$)| P0 | ARE Region | Short-splice preservation test | AESL-A8 | `PLANNED` |
 | **AESL-71** | Sample-Level Narrow-Window Boundary Refinement | P0 | ARE Region | $\pm 500$-sample refinement test | AESL-A8 | `PLANNED` |
 | **AESL-72** | Boundary Uncertainty Interval Quantification | P0 | ARE Region | Millisecond confidence bands | AESL-A8 | `PLANNED` |
 | **AESL-73** | Multi-Branch Late Fusion & Disagreement Retention| P0 | ARE Fusion | Disagreement flag assert test | AESL-A8 | `PLANNED` |
@@ -3711,15 +3730,15 @@ AESL resolves these challenges by providing an evidence-preserving, multi-branch
 | **AESL-87** | Worker Timeout & Memory Cgroup Limits (4 GB) | P0 | Celery / ARE | Cgroup memory kill test | AESL-A1 | `PLANNED` |
 | **AESL-88** | Section 65B IEA / Section 63 BSA Certified PDF Dossier| P0 | UFREDF / ARE | Courtroom PDF export benchmark | AESL-A9 | `PLANNED` |
 | **AESL-89** | Controlled 500-Fixture Evaluation Dataset | P0 | ARE QA | Leakage-free benchmark corpus | AESL-A10 | `PLANNED` |
-| **AESL-90** | Region-Level IoU & Boundary MAE Metrics | P0 | ARE QA | $IoU \ge 0.75$, MAE $\le 20	ext{ms}$ | AESL-A10 | `PLANNED` |
+| **AESL-90** | Region-Level IoU & Boundary MAE Metrics | P0 | ARE QA | $IoU \ge 0.75$, MAE $\le 20\text{ms}$ | AESL-A10 | `PLANNED` |
 
 ### 18.7 Multi-Resolution Segmentation & Sample-Index Coordinates
 1. **Coordinate Formulation:** Time $t$ is calculated from sample index $n$ and native sampling rate $f_s$:
    $$t =
-rac{n}{f_s}$$
-   A candidate interval covering $[n_{	ext{start}}, n_{	ext{end}}]$ has duration:
+\frac{n}{f_s}$$
+   A candidate interval covering $[n_{\text{start}}, n_{\text{end}}]$ has duration:
    $$\Delta t =
-rac{n_{	ext{end}} - n_{	ext{start}}}{f_s}$$
+\frac{n_{\text{end}} - n_{\text{start}}}{f_s}$$
 2. **Four Concurrently Evaluated Window Scales:**
    - **Scale 1 (Short: 10–20 ms, hop 5 ms):** Captures hard sample discontinuities, phase flips, and waveform clipping.
    - **Scale 2 (Medium: 20–50 ms, hop 10 ms):** Analyzes STFT spectral flux, LFCC/MFCC coefficients, and pitch continuity.
@@ -3730,46 +3749,46 @@ rac{n_{	ext{end}} - n_{	ext{start}}}{f_s}$$
 
 #### 18.8.1 Branch A: Time-Domain Continuity
 - **Short-Time Energy:** $E[m] =
-rac{1}{N} \sum_{n=0}^{N-1} x[mH + n]^2$, $RMS[m] = \sqrt{E[m]}$.
+\frac{1}{N} \sum_{n=0}^{N-1} x[mH + n]^2$, $RMS[m] = \sqrt{E[m]}$.
 - **Crest Factor:** $C[m] =
-rac{\max |x[mH + n]|}{RMS[m]}$.
+\frac{\max |x[mH + n]|}{RMS[m]}$.
 - **Zero-Crossing Rate (ZCR):** $ZCR[m] =
-rac{1}{2N} \sum_{n=1}^{N-1} |\operatorname{sgn}(x[mH + n]) - \operatorname{sgn}(x[mH + n - 1])|$.
+\frac{1}{2N} \sum_{n=1}^{N-1} |\operatorname{sgn}(x[mH + n]) - \operatorname{sgn}(x[mH + n - 1])|$.
 - **First-Order Difference:** $d[n] = x[n] - x[n-1]$.
 
 #### 18.8.2 Branch B: Frequency-Domain & Spectral Forensics
 - **STFT Formulation:** $X(m,k) = \sum_{n=0}^{N-1} x[mH + n] w[n] e^{-j 2\pi k n / N}$.
 - **Spectral Flux:** $SF[m] = \sum_k (|X(m,k)| - |X(m-1,k)|)^2$.
 - **Spectral Centroid:** $f_c[m] =
-rac{\sum_k f_k |X(m,k)|}{\sum_k |X(m,k)|}$.
+\frac{\sum_k f_k |X(m,k)|}{\sum_k |X(m,k)|}$.
 - **Spectral Flatness:** $SFM[m] =
-rac{\exp\left(
-rac{1}{K} \sum_k \ln |X(m,k)|^2
-ight)}{
-rac{1}{K} \sum_k |X(m,k)|^2}$.
+\frac{\exp\left(
+\frac{1}{K} \sum_k \ln |X(m,k)|^2
+\right)}{
+\frac{1}{K} \sum_k |X(m,k)|^2}$.
 
 #### 18.8.3 Branch C: Acoustic Environment & Noise Inconsistency
-- **Reverberation Decay ($RT60$):** Energy Decay Curve $EDC(t) = \int_t^\infty h^2(	au) d	au$, Schroeder integration.
+- **Reverberation Decay ($RT60$):** Energy Decay Curve $EDC(t) = \int_t^\infty h^2(\tau) d\tau$, Schroeder integration.
 - **Direct-to-Reverberant Ratio:** $DRR = 10 \log_{10}
-rac{\int_0^{t_d} h^2(	au) d	au}{\int_{t_d}^\infty h^2(	au) d	au}$.
+\frac{\int_0^{t_d} h^2(\tau) d\tau}{\int_{t_d}^\infty h^2(\tau) d\tau}$.
 - **Environment Distance:** $D_{\text{env}}(A, B) =
-rac{1}{2} D_{\text{KL}}(P_A \parallel P_B) +
-rac{1}{2} D_{\text{KL}}(P_B \parallel P_A)$.
+\frac{1}{2} D_{\text{KL}}(P_A \parallel P_B) +
+\frac{1}{2} D_{\text{KL}}(P_B \parallel P_A)$.
 
 #### 18.8.4 Branch D: Channel & Phase Consistency
-- **Cross-Channel Correlation:** $R_{xy}(	au) = \sum_n x[n] y[n + 	au]$.
+- **Cross-Channel Correlation:** $R_{xy}(\tau) = \sum_n x[n] y[n + \tau]$.
 - **Normalized Peak Coherence:** $
 ho_{\max} =
-rac{\max_	au R_{xy}(	au)}{\sqrt{\sum x^2[n] \sum y^2[n]}}$.
+\frac{\max_\tau R_{xy}(\tau)}{\sqrt{\sum x^2[n] \sum y^2[n]}}$.
 
 #### 18.8.5 Branch E: Learned Temporal Representation
 - Multi-scale Temporal Convolutional Network (TCN) or Bi-directional CRNN generating frame-level suspicion score $s[m] \in [0.0, 1.0]$.
 - Research evaluation candidate: ASLNet encoder-decoder network.
 
 ### 18.9 Region Generation, Hysteresis & Boundary Refinement
-1. **Dual-Threshold Hysteresis:** An edit region triggers when suspicion score $s[m] \ge 	au_{	ext{high}} = 0.70$ and expands to contiguous frames where $s[m] \ge 	au_{	ext{low}} = 0.40$.
-2. **Short-Interval Preservation:** Minimum region duration is set to $10	ext{ ms}$; candidate cuts are never discarded merely because they represent brief word deletions.
-3. **Sample-Accurate Boundary Refinement:** For a candidate frame boundary $m^*$, AESL extracts a narrow window of $\pm 500$ samples around $n^* = m^* H$, computing zero-crossing phase alignment and waveform slope derivatives to pin the boundary to the exact sample index $n_{	ext{refined}}$ with uncertainty $\pm \sigma_n$.
+1. **Dual-Threshold Hysteresis:** An edit region triggers when suspicion score $s[m] \ge \tau_{\text{high}} = 0.70$ and expands to contiguous frames where $s[m] \ge \tau_{\text{low}} = 0.40$.
+2. **Short-Interval Preservation:** Minimum region duration is set to $10\text{ ms}$; candidate cuts are never discarded merely because they represent brief word deletions.
+3. **Sample-Accurate Boundary Refinement:** For a candidate frame boundary $m^*$, AESL extracts a narrow window of $\pm 500$ samples around $n^* = m^* H$, computing zero-crossing phase alignment and waveform slope derivatives to pin the boundary to the exact sample index $n_{\text{refined}}$ with uncertainty $\pm \sigma_n$.
 
 ### 18.10 Quality Control & Eighteen Benign Alternative Explanations
 Every generated finding must evaluate whether the observed acoustic change can be explained by:
@@ -3799,7 +3818,7 @@ Every generated finding must evaluate whether the observed acoustic change can b
 4. Speaker head rotation alters room reverberation and high-frequency spectral rolloff.
 5. Microphone handling produces low-frequency thumps mimicking edit boundaries.
 6. Legitimate lossy compression introduces frame-boundary blocking and high-frequency cutoff artifacts.
-7. Professional crossfading ($\ge 50	ext{ ms}$) and noise-bed smoothing can conceal splice boundaries.
+7. Professional crossfading ($\ge 50\text{ ms}$) and noise-bed smoothing can conceal splice boundaries.
 8. Copy-move detection can flag naturally repeated speech words, refrains, or machine cycles.
 9. Neural network suspicion scores are uncalibrated heuristics, not mathematical probabilities of guilt.
 10. Reconstructed boundary intervals have finite temporal precision bounded by the sampling theorem.
@@ -3870,7 +3889,7 @@ EIV is architected to provide mathematically defensible, independently reproduci
 7. **Custody Auditability:** Can every access, transfer, analysis, and export event be independently audited in an append-only, tamper-evident ledger?
 8. **Attestation Validity:** Are the digital signatures (Ed25519) and trusted timestamp tokens (RFC 3161) affixed to the evidence manifest cryptographically valid and unexpired?
 9. **Storage Immutability Enforcement:** Has the storage subsystem actively enforced Write-Once Read-Many (WORM) retention locks against unauthorised deletion or overwrites?
-10. **Independent Verifiability:** Can a complete evidence package be verified offline by a defense counsel, magistrate, or independent auditor without trusting the platform software?
+10. **Independent Verifiability:** Can a complete evidence package be verified offline by a defence counsel, magistrate, or independent auditor without trusting the platform software?
 
 #### 19.2.2 Explicit Non-Goals
 1. **No Assertion of Real-World Event Truth:** EIV certifies byte-level integrity and chain-of-custody consistency; it does *not* assert that recorded real-world events are authentic, un-staged, or factual.
@@ -4377,20 +4396,20 @@ Based on the synthesis of the 10 dimensions, the evaluation returns one of eleve
 
 | Requirement Range | Focus Area | Technical Section | Implementation Phase |
 | :--- | :--- | :--- | :--- |
-| **EIV-01 to EIV-06** | CEIPL Platform Ownership & Architectural Invariants | TRD §20.1 | CEIPL-EIV-00 / EIV-01 |
-| **EIV-07 to EIV-14** | Evidence Identity, Ten-Entity Model & Deduplication | TRD §20.2 | CEIPL-EIV-01 |
-| **EIV-15 to EIV-23** | Pre-Decode Streaming Dual Hashing & Memory Buffers | TRD §20.2 | CEIPL-EIV-02 |
-| **EIV-24 to EIV-29** | Chunk Hashing, Merkle Trees & Inclusion Proofs | TRD §20.3 | CEIPL-EIV-02 |
-| **EIV-30 to EIV-37** | Evidence Manifests, RFC 8785 JCS & Canonicalization | TRD §20.4 | CEIPL-EIV-03 |
-| **EIV-38 to EIV-46** | Detached Digital Signatures, Ed25519 & KMS Lifecycle | TRD §20.5 | CEIPL-EIV-03 |
-| **EIV-47 to EIV-52** | RFC 3161 Trusted Timestamps & Air-Gapped Modes | TRD §20.6 | CEIPL-EIV-03 |
-| **EIV-53 to EIV-61** | WORM Vaults, POSIX 0400 & S3 Object Lock Immutability | TRD §20.7 | CEIPL-EIV-04 |
-| **EIV-62 to EIV-70** | Twelve Lifecycle Verification Gates & Fixity Audits | TRD §20.8 | CEIPL-EIV-05 |
-| **EIV-71 to EIV-78** | Integrity Failure, Quarantine Isolation & Incident Recovery | TRD §20.9 | CEIPL-EIV-05 / EIV-08 |
-| **EIV-79 to EIV-85** | Tamper-Evident Append-Only Chain-of-Custody Ledger | TRD §20.10 | CEIPL-EIV-06 |
-| **EIV-86 to EIV-91** | Derivative Artifact Lineage DAG & Multi-File Packages | TRD §20.11 | CEIPL-EIV-07 |
-| **EIV-92 to EIV-96** | Standalone Offline Verifier, REST APIs & Worker Jobs | TRD §20.12, §19.15 | CEIPL-EIV-08 |
-| **EIV-97 to EIV-100**| RBAC Security, Section 63 BSA Dossier & Benchmarks | TRD §20.14, §19.17 | CEIPL-EIV-09 / EIV-10 |
+| **EIV-01 to EIV-06** | CEIPL Platform Ownership & Architectural Invariants | TRD §19.1 | CEIPL-EIV-00 / EIV-01 |
+| **EIV-07 to EIV-14** | Evidence Identity, Ten-Entity Model & Deduplication | TRD §19.2 | CEIPL-EIV-01 |
+| **EIV-15 to EIV-23** | Pre-Decode Streaming Dual Hashing & Memory Buffers | TRD §19.2 | CEIPL-EIV-02 |
+| **EIV-24 to EIV-29** | Chunk Hashing, Merkle Trees & Inclusion Proofs | TRD §19.3 | CEIPL-EIV-02 |
+| **EIV-30 to EIV-37** | Evidence Manifests, RFC 8785 JCS & Canonicalization | TRD §19.4 | CEIPL-EIV-03 |
+| **EIV-38 to EIV-46** | Detached Digital Signatures, Ed25519 & KMS Lifecycle | TRD §19.5 | CEIPL-EIV-03 |
+| **EIV-47 to EIV-52** | RFC 3161 Trusted Timestamps & Air-Gapped Modes | TRD §19.6 | CEIPL-EIV-03 |
+| **EIV-53 to EIV-61** | WORM Vaults, POSIX 0400 & S3 Object Lock Immutability | TRD §19.7 | CEIPL-EIV-04 |
+| **EIV-62 to EIV-70** | Twelve Lifecycle Verification Gates & Fixity Audits | TRD §19.8 | CEIPL-EIV-05 |
+| **EIV-71 to EIV-78** | Integrity Failure, Quarantine Isolation & Incident Recovery | TRD §19.9 | CEIPL-EIV-05 / EIV-08 |
+| **EIV-79 to EIV-85** | Tamper-Evident Append-Only Chain-of-Custody Ledger | TRD §19.10 | CEIPL-EIV-06 |
+| **EIV-86 to EIV-91** | Derivative Artifact Lineage DAG & Multi-File Packages | TRD §19.11 | CEIPL-EIV-07 |
+| **EIV-92 to EIV-96** | Standalone Offline Verifier, REST APIs & Worker Jobs | TRD §19.12, §19.15 | CEIPL-EIV-08 |
+| **EIV-97 to EIV-100**| RBAC Security, Section 63 BSA Dossier & Benchmarks | TRD §19.13, §19.14, §19.17 | CEIPL-EIV-09 / EIV-10 |
 
 
 ---
@@ -4484,7 +4503,7 @@ Examiner `EX-SHARMA` opens the Image Forensic Workspace for Exhibit `IMG-001`. T
 The examiner navigates to the Audio Forensic Workspace for Exhibit `AUD-002`. The WebAudio player renders a synchronized dual-view of the raw waveform and mel-spectrogram. The examiner reviews Silero VAD speech intervals, ECAPA-TDNN speaker diarization tracks, and an ARE acoustic discontinuity marker at $t = 14.2\text{ s}$. The examiner loops the 500ms candidate cut window, evaluates the $18\text{ dB}$ noise floor step jump, and records methodology notes.
 
 #### Journey UFD-J05: Video/CCTV Frame Scrubbing & Sequence Review (VISTA)
-The examiner opens the Video Workspace for CCTV Exhibit `VID-003`. The frame-accurate scrubber displays presentation timestamps (PTS), frame indices, and GOP structure. The CFITSA panel flags a 12-frame gap between PTS `144000` and `147600`. The examiner inspects the companion NVR export XML sidecar, verifies the burned-in on-screen display (OSD) clock jump, and corroborates the missing frame sequence.
+The examiner opens the Video Workspace for CCTV Exhibit `VID-003`. The frame-accurate scrubber displays presentation timestamps (PTS), frame indices, and GOP structure. The CFITSA panel flags a 12-frame gap between PTS `144000` and `187200` (12 frames × 3600 ticks at 25 fps on the 90 kHz timebase). The examiner inspects the companion NVR export XML sidecar, verifies the burned-in on-screen display (OSD) clock jump, and corroborates the missing frame sequence.
 
 #### Journey UFD-J06: Offline Network Capture Analysis (ONTF)
 The examiner opens the Network Workspace for Exhibit `NET-004`. The packet timeline displays protocol distribution and flow bursts. The examiner filters by target IP `192.168.1.45`, inspects Zeek DNS query summaries, flags an anomalous DNS tunneling burst, and verifies that sensitive HTTP application payload bodies are omitted from general viewports.
@@ -4659,7 +4678,7 @@ flowchart TD
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **UFD-77** | The Report Workspace must provide an interactive review interface for Section 65B IEA / Section 63 BSA draft forensic dossiers. | Must Have | Examiner / Reviewer| UFREDF Subsystem | Dossier preview JSON payload | Courtroom report preview viewport | `PLANNED` |
 | **UFD-78** | Report generation must execute strictly via UFREDF backend services; client-side HTML-to-PDF assembly is strictly prohibited. | Must Have | SysAdmin | UFREDF Subsystem | Report compile request | Backend-generated signed PDF | `PLANNED` |
-| **UFD-79** | The workspace must enforce the formal report lifecycle: `DRAFT`, `GENERATED`, `UNDER_REVIEW`, `APPROVED`, `SIGNED`, `ISSUED`, `SUPERSEDED`, `WITHDRAWN`. | Must Have | Reviewer | UFREDF Subsystem | Lifecycle transition request | Validated report state transition | `PLANNED` |
+| **UFD-79** | The workspace must enforce the formal report lifecycle: `DRAFT`, `GENERATED`, `UNDER_REVIEW`, `REVIEW_REJECTED`, `APPROVED_TECHNICAL`, `APPROVED`, `SIGNED`, `ISSUED`, `SUPERSEDED`, `WITHDRAWN`. | Must Have | Reviewer | UFREDF Subsystem | Lifecycle transition request | Validated report state transition | `PLANNED` |
 | **UFD-80** | Examiners must be able to select specific validated findings, reliability diagrams, and timeline charts for annexure inclusion. | Must Have | Examiner | UFREDF Subsystem | Annexure selection payload | Customized report manifest | `PLANNED` |
 | **UFD-81** | Bypassing formal review via an arbitrary "Mark as Issued" button is strictly prohibited; issuance requires valid dual digital signatures. | Must Have | Security | UFREDF Subsystem | Issuance attempt | Dual-signature verification check | `PLANNED` |
 | **UFD-82** | Issued reports must be committed to the CEIPL WORM vault with an immutable SHA-256 digest and downloadable verification receipt. | Must Have | Custodian | CEIPL / UFREDF | Sealed PDF bitstream | WORM-locked report artifact | `PLANNED` |
@@ -4865,7 +4884,7 @@ flowchart TD
 | **REP-29** | **Bilingual Statutory Certificate Headers:** Provide certified statutory certificate headings in both English and Hindi as required under state court rules. | `ROLE-EXAMINER` | Legal Template | Linguistic & Form Audit | `PLANNED` |
 | **REP-30** | **Long-Term Fixity & Merkle Audit Trail:** Anchor issued report hashes into the CEIPL immutable Merkle ledger, ensuring permanent tamper detection. | `ROLE-AUDITOR` | CEIPL | Merkle Inclusion Test | `PLANNED` |
 
-### 21.4 Nine-State Report Lifecycle Machine
+### 21.4 Ten-State Report Lifecycle Machine
 
 UFREDF enforces an unbroken, legally auditable lifecycle state machine:
 
@@ -4892,11 +4911,11 @@ $$\text{DRAFT} \longrightarrow \text{GENERATED} \longrightarrow \text{UNDER\_REV
 
 > **Status:** `PLANNED` — Proposed in this documentation release. No source implementation exists.
 
-### 7.1 Product goal
+### 22.1.1 Product goal
 
 Help authorized examiners review, extract, and compare document exhibits — especially medical and legal records — while preserving chain of custody and explicitly surfacing uncertainty, missing fields, and unresolved verification gaps.
 
-### 7.2 Target user personas for document examination
+### 22.1.2 Target user personas for document examination
 
 | Persona | Role | Use case |
 | :--- | :--- | :--- |
@@ -4905,7 +4924,7 @@ Help authorized examiners review, extract, and compare document exhibits — esp
 | P-3 | Public Prosecutor | Needs a cited, structured finding report for evidence presentation |
 | P-4 | Evidence Custodian | Needs every document hashed and WORM-stored before any analysis |
 
-### 7.3 Functional requirements (DOC-FR)
+### 22.1.3 Functional requirements (DOC-FR)
 
 | Req ID | Module | Title | Description | Acceptance Criteria | Priority | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -4920,7 +4939,7 @@ Help authorized examiners review, extract, and compare document exhibits — esp
 | **DOC-FR-009** | Provenance | CEIPL Integration for All Derivations | Every extracted page, OCR artifact, and comparison result registered with CEIPL lineage. | Reuses existing CEIPL custody chain; no separate cryptographic system for documents. | P0 | `PLANNED` |
 | **DOC-FR-010** | Report | Document Analysis Report | Generate per-exhibit document report with: type classification, OCR completeness, field extraction status, alteration indicators, signature status, and reviewer decisions. | Report cites exact page/region evidence for every finding. | P0 | `PLANNED` |
 
-### 7.4 Document authenticity semantics
+### 22.1.4 Document authenticity semantics
 
 The following status values must be used separately and never conflated:
 
@@ -4936,7 +4955,7 @@ The following status values must be used separately and never conflated:
 | `INCONCLUSIVE` | Evidence insufficient for a determination |
 | `REQUIRES_HUMAN_REVIEW` | Examiner decision required before findings are actionable |
 
-### 7.5 Non-goals and failure cases
+### 22.1.5 Non-goals and failure cases
 
 - The system does not provide medical diagnosis or treatment recommendations.
 - An OCR mismatch is not proof of fraud.
@@ -4945,7 +4964,7 @@ The following status values must be used separately and never conflated:
 - A doctor or facility name string is not independent issuer verification.
 - Documents that look professional are not necessarily genuine.
 
-### 7.6 Medical data handling requirements
+### 22.1.6 Medical data handling requirements
 
 - Health-related fields (patient name, diagnoses, medications) are extracted only when required for the documented investigation.
 - Access to medical fields is restricted by case role and purpose.
@@ -4958,11 +4977,11 @@ The following status values must be used separately and never conflated:
 
 > **Status:** `PLANNED` — Proposed in this documentation release. No source implementation exists.
 
-### 8.1 Product goal
+### 22.2.1 Product goal
 
 Give examiners an interactive, evidence-linked view of how case exhibits, extracted facts, findings, and human decisions relate — while preserving the distinction between machine suggestions and confirmed relationships.
 
-### 8.2 Functional requirements (EGRAPH-FR)
+### 22.2.2 Functional requirements (EGRAPH-FR)
 
 | Req ID | Module | Title | Description | Acceptance Criteria | Priority | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -4976,13 +4995,13 @@ Give examiners an interactive, evidence-linked view of how case exhibits, extrac
 | **EGRAPH-FR-008** | Contradiction | Contradiction Surface | Contradictory findings (conflicting dates, inconsistent fields) remain visible and are not silently suppressed. | Contradiction nodes displayed alongside supporting and contradicting evidence. | P0 | `PLANNED` |
 | **EGRAPH-FR-009** | Persistence | Source-of-Truth Persistence | Graph state is derivable from persisted relational records. | Graph can be reconstructed or verified from the database without separate graph database backup. | P0 | `PLANNED` |
 
-### 8.3 Identity and identity-matching restrictions
+### 22.2.3 Identity and identity-matching restrictions
 
 - Two people must not be equated solely because their names are similar in OCR text.
 - Facial recognition, OCR, or document text must not be used alone to establish identity without authorized corroboration.
 - A `POSSIBLY_MATCHES` edge is a machine hypothesis, not a finding.
 
-### 8.4 Cross-document linking workflow (illustrative use case)
+### 22.2.4 Cross-document linking workflow (illustrative use case)
 
 1. A prescription image is uploaded; OCR extracts a name, date, and facility reference with stated uncertainty.
 2. A scanned doctor report is uploaded separately.
@@ -4999,17 +5018,17 @@ Give examiners an interactive, evidence-linked view of how case exhibits, extrac
 
 > **Status:** `PLANNED` — Proposed in this documentation release. No source implementation exists.
 
-### 9.1 Product goal
+### 22.3.1 Product goal
 
 Allow authorized investigators to ask natural-language questions about case evidence and receive evidence-grounded, source-cited answers — while strictly preventing legal verdicts, medical conclusions, credential disclosure, and cross-case information leakage.
 
-### 9.2 Target personas
+### 22.3.2 Target personas
 
 - **P-1 (IO):** Quick questions about case contents, missing evidence, or file status.
 - **P-2 (Examiner):** Deep questions about technical findings, contradictions, and source evidence.
 - **P-3 (Prosecutor):** Summary questions about corroborated findings and pending reviews.
 
-### 9.3 Functional requirements (RAG-FR)
+### 22.3.3 Functional requirements (RAG-FR)
 
 | Req ID | Module | Title | Description | Acceptance Criteria | Priority | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -5024,7 +5043,7 @@ Allow authorized investigators to ask natural-language questions about case evid
 | **RAG-FR-009** | Audit | Query & Response Logging | All queries, retrieved source references, model/configuration, and responses are logged according to privacy-aware policy. | Logs preserved in tamper-evident audit record. | P0 | `PLANNED` |
 | **RAG-FR-010** | Graph | Graph-Enhanced Retrieval | Retrieved evidence IDs are used to expand retrieval via the evidence graph to find corroborating or contradicting related exhibits. | Graph traversal is bounded by case isolation and query limits. | P1 | `PLANNED` |
 
-### 9.4 RAG answer schema
+### 22.3.4 RAG answer schema
 
 Each assistant response carries a structured payload (illustrative — not yet implemented):
 
@@ -5046,7 +5065,7 @@ Each assistant response carries a structured payload (illustrative — not yet i
 
 > **Note:** This schema is illustrative. All fields marked `TO_BE_VALIDATED` until implementation and testing are complete.
 
-### 9.5 Non-goals and failure cases
+### 22.3.5 Non-goals and failure cases
 
 - The assistant is not a general-purpose chatbot.
 - It does not access evidence from other cases.

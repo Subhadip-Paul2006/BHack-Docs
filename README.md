@@ -3,7 +3,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](pyproject.toml)
 [![Architecture](https://img.shields.io/badge/architecture-modular%20forensics-green.svg)](TRD.md)
 [![Legal Standard](https://img.shields.io/badge/compliance-Sec%2065B%20IEA%20%2F%20Sec%2063%20BSA-orange.svg)](PRD.md)
-[![Hackathon Track](https://img.shields.io/badge/Bihar%20Cyber%20Hackathon%202026-PS--05-red.svg)](#hackathon-context)
+[![Hackathon Track](https://img.shields.io/badge/Bihar%20Cyber%20Hackathon%202026-PS--05-red.svg)](#1-executive-overview--problem-statement)
 
 > **Official Problem Statement PS-05:** Digital Evidence Authenticity and Integrity Verification Platform
 > **Organizers:** C-DAC Patna, CCSU, Bihar Police
@@ -67,7 +67,7 @@ Manual forensic examination is time-consuming, requires scarce specialized exper
 
 ---
 
-- **NG-7:** CSTV does not determine the absolute historical truth of an incident or establish physical causality merely because two events share temporal proximity. It reconstructs and evaluates temporal consistency between evidence sources.
+- **NG-9:** CSTV does not determine the absolute historical truth of an incident or establish physical causality merely because two events share temporal proximity. It reconstructs and evaluates temporal consistency between evidence sources.
 
 ## 3. High-Level Platform Architecture
 
@@ -646,16 +646,15 @@ CFITSA provides an evidence-preserving, mathematically defensible forensic workf
 | Forensic Dimension | Technical Methodology & Algorithmic Implementation | Primary Sub-Engine |
 | :--- | :--- | :--- |
 | **Frame & Packet Identity** | Preserves 5 decoupled coordinate dimensions: `packet_index`, `decoder_output_index`, `presentation_order_index`, `source_reference_index`, `scene_relative_index`. | VRE Demuxer Core |
-| **Decode vs Presentation Order** | Enforces B-frame legal invariant: decode order $
-eq$ presentation order is recognized as legitimate codec behaviour; verified via ISO/IEC 14496-12 `ctts` atom. | VRE Bitstream Parser |
-| **Timebase & Timestamp Math** | Unrounded integer tick math scaled by exact rational timebase $t_i = PTS_i \imes \frac{TB_{\text{num}}}{TB_{\text{den}}}$. Zero floating-point rounding drift. | VRE Cadence Core |
+| **Decode vs Presentation Order** | Enforces B-frame legal invariant: decode order $\neq$ presentation order is recognized as legitimate codec behaviour; verified via ISO/IEC 14496-12 `ctts` atom. | VRE Bitstream Parser |
+| **Timebase & Timestamp Math** | Unrounded integer tick math scaled by exact rational timebase $t_i = PTS_i \times \frac{TB_{\text{num}}}{TB_{\text{den}}}$. Zero floating-point rounding drift. | VRE Cadence Core |
 | **VFR-Aware Cadence Analysis** | Robust non-parametric statistics: median interval $m$, $MAD = \operatorname{median}(\|\Delta t_i - m\|)$, modified z-score $z_i$, and PELT piecewise change-point segmentation. | VRE Cadence Core |
 | **Missing-Frame Detection (FI-01)** | Mode A (timing gaps), Mode B (reference sequence LCS/edit distance), Mode C (motion warping residual $R_i$), Mode D (companion DVR logs). | VRE Temporal Engine |
 | **Duplicate-Frame Detection (FI-02)** | 256-bit BLAKE3 exact planar raster hash, 64-bit DCT perceptual hash ($d_H \le 2$), SSIM ($\ge 0.985$), and PRNU sensor noise check to safeguard static scenes. | VRE Duplicate Detector |
 | **Inserted-Frame Detection (FI-03)** | Forward-backward optical-flow warping residual $R_i$, macroblock QP variance spikes, AI interpolation halos (RIFE/DAIN), and isolated non-cadence I-frames. | VRE Splice Detector |
 | **Frozen-Sequence Detection (FI-04)** | Consecutive frame difference $D_i < 0.001$, multi-modal freeze disambiguation cross-referencing continuous audio power and advancing OSD clock strings. | VRE / CCTV Profile |
 | **Reordered-Frame Detection (FI-05)** | Presentation order PTS monotonicity, optical flow vector continuity, ByteTrack kinematic momentum ($|\mathbf{a}_k(t)| \le a_{\max}$), and Kendall rank correlation $\tau$. | VRE / VCI Tracker |
-| **CCTV OSD Clock Correlation** | PaddleOCR corner margin detection, robust datetime parsing, and linear drift regression $\delta(t) = T_{\text{ocr}}(t) - (T_0 + t_{\text{pts}}) = lpha + eta t + \epsilon(t)$. | CCTV Profile Engine |
+| **CCTV OSD Clock Correlation** | PaddleOCR corner margin detection, robust datetime parsing, and linear drift regression $\delta(t) = T_{\text{ocr}}(t) - (T_0 + t_{\text{pts}}) = \alpha + \beta t + \epsilon(t)$. | CCTV Profile Engine |
 | **Multi-Camera Alignment** | Independent WORM exhibit preservation, UTC normalization, relative clock offset estimation $\Delta t_{\text{cam1-cam2}}$, and trajectory handoff corroboration. | CCTV Multi-Cam Engine |
 | **Audio-Visual Alignment** | AFB lossless audio stream-copy, ambient noise continuity during video freezes, and AVSC SyncNet talking-head lip-sync cross-correlation ($S_{\text{sync}}$). | AFB & AVSC Engines |
 | **Examiner Review Workbench** | Synchronized dual-timeline canvas, interactive cadence curves, similarity heatmaps, optical flow vector overlays, and side-by-side adjacent frame comparators. | VISTA Workbench UI |
@@ -664,14 +663,14 @@ eq$ presentation order is recognized as legitimate codec behaviour; verified via
 #### Evidentiary Principles & Uncertainty Governance
 - **Observable Anomaly vs Historical Deletion:** An isolated video file with cleanly rewritten timestamps cannot definitively prove that frames were deleted prior to acquisition. The system labels findings as `FRAME_GAP_OBSERVED` or `POSSIBLE_FRAME_DELETION` and strictly abstains from asserting uncorroborated historical events in court testimony.
 - **Static Scene vs Video Freeze:** A stationary camera viewing an empty room naturally yields near-identical frames ($SSIM > 0.98$). The system verifies high-frequency PRNU sensor noise and camera motion before declaring duplication, preventing false accusations on authentic static scenes.
-- **First-Class Inconclusive Verdicts:** When footage exhibits extreme network jitter, severe low-resolution optics ($< 320\imes 240$), or unresolvable clock drift, the platform issues typed inconclusive outcomes (`STATIC_SCENE_OR_FREEZE_INCONCLUSIVE`, `INCONCLUSIVE_VFR_JITTER`) rather than forcing a speculative verdict.
+- **First-Class Inconclusive Verdicts:** When footage exhibits extreme network jitter, severe low-resolution optics ($< 320\times240$), or unresolvable clock drift, the platform issues typed inconclusive outcomes (`STATIC_SCENE_OR_FREEZE_INCONCLUSIVE`, `INCONCLUSIVE_VFR_JITTER`) rather than forcing a speculative verdict.
 
 #### Actual vs. Planned Implementation Status
-- **Specification & Technical Contracts:** `DOCUMENTED` — Architectural boundaries, temporal definitions, cadence formulas, Pydantic v2 schemas, and metric formulations are fully established in [PRD.md § 14 (CFI-01..CFI-22)](PRD.md), [TRD.md § 11.12, § 12.6, § 15.5](TRD.md), and [PHASES.md § 4.B, § 13](PHASES.md).
+- **Specification & Technical Contracts:** `DOCUMENTED` — Architectural boundaries, temporal definitions, cadence formulas, Pydantic v2 schemas, and metric formulations are fully established in [PRD.md § 15 (CFI-01..CFI-22)](PRD.md), [TRD.md § 11.12, § 12.6, § 15.5](TRD.md), and [PHASES.md § 4.B, § 13](PHASES.md).
 - **Execution Harness & Code:** `PLANNED` / `NOT_STARTED` — Implementation is organized across ten dedicated engineering phases (`VISTA-CFI-00` through `VISTA-CFI-09`). No temporal detector weights have been loaded, and no test runs have been executed in this architectural specification phase.
 
 For complete technical specifications, mathematical foundations, schemas, and phase roadmaps:
-- Product requirements, user journeys, and functional inventory: [PRD.md § 14 (CFI-01..CFI-22)](PRD.md)
+- Product requirements, user journeys, and functional inventory: [PRD.md § 15 (CFI-01..CFI-22)](PRD.md)
 - Technical architecture, algorithm matrices, formulas, and Pydantic schemas: [TRD.md § 11.12, § 12.6](TRD.md)
 - Engineering execution playbook, tasks, and checkpoints: [PHASES.md § 4.B, § 13 (VISTA-CFI-00..VISTA-CFI-09)](PHASES.md)
 
@@ -811,19 +810,14 @@ The following candidate technologies are evaluated for the ONTF subsystem, categ
 
 All network traffic forensic analysis within ONTF is governed by nine strict evidentiary and scientific principles:
 
-1. **Offline Capture $
-eq$ Complete Device History:** A packet capture represents only the packets that traversed a specific monitored link during the capture window. Packet drops, uncaptured network interfaces (e.g., Bluetooth, cellular data while Wi-Fi is monitored), or local host activity not generating traffic remain invisible.
-2. **IP Address $
-eq$ Physical Device Identity:** An IP address identifies a network interface at a specific instant in time, not a physical human or hardware device. DHCP pool churn, dynamic IP re-assignments, and NAT gateways mean an IP may be shared across multiple devices over time.
+1. **Offline Capture $\neq$ Complete Device History:** A packet capture represents only the packets that traversed a specific monitored link during the capture window. Packet drops, uncaptured network interfaces (e.g., Bluetooth, cellular data while Wi-Fi is monitored), or local host activity not generating traffic remain invisible.
+2. **IP Address $\neq$ Physical Device Identity:** An IP address identifies a network interface at a specific instant in time, not a physical human or hardware device. DHCP pool churn, dynamic IP re-assignments, and NAT gateways mean an IP may be shared across multiple devices over time.
 3. **MAC Address Limitations & Volatility:** Layer-2 MAC addresses are stripped by routers at the first gateway hop and are absent in routed captures. Furthermore, modern operating systems (iOS, Android, Windows, macOS) employ MAC randomisation by default on untrusted Wi-Fi networks, and MAC addresses can be easily spoofed.
 4. **Encrypted Payload Opacity & Blind Spots:** Modern internet communications predominantly utilize TLS 1.3, QUIC, DoH (DNS over HTTPS), and SSH. In the absence of legally authorized server private keys or client session key logs (`SSLKEYLOGFILE`), packet payloads cannot be decrypted. Forensic analysis must rely on unencrypted transport metadata, handshake SNI, certificate validation, and flow dynamics.
 5. **Vantage Point Sensitivity:** The evidentiary value of a capture depends heavily on where it was recorded (e.g., local endpoint agent, home Wi-Fi access point, mirrored switch port, corporate core gateway). Gateway captures do not see local broadcast or lateral peer-to-peer traffic.
-6. **User-Reported Context $
-eq$ Verified Evidence:** Information supplied by the investigator (e.g., "This PCAP is from the suspect's iPhone") is strictly categorized as `USER_REPORTED` until corroborated by independent in-capture artifacts (e.g., DHCP Hostname matching IMEI/serial records).
-7. **Correlation $
-eq$ Confirmed Causation or Intent:** Detecting multiple failed connections or unusual ports indicates anomalous traffic; it does not independently prove criminal intent or a confirmed breach. Legitimate software bugs, network misconfigurations, P2P applications, and cloud telemetry often mimic suspicious behavior.
-8. **Forecasted States $
-eq$ Historical Reality:** Where bounded temporal world-models or graph forecasting models project potential attack propagation horizons, these candidate future states are purely probabilistic simulations. They must **NEVER** be cited as historical events that actually took place.
+6. **User-Reported Context $\neq$ Verified Evidence:** Information supplied by the investigator (e.g., "This PCAP is from the suspect's iPhone") is strictly categorized as `USER_REPORTED` until corroborated by independent in-capture artifacts (e.g., DHCP Hostname matching IMEI/serial records).
+7. **Correlation $\neq$ Confirmed Causation or Intent:** Detecting multiple failed connections or unusual ports indicates anomalous traffic; it does not independently prove criminal intent or a confirmed breach. Legitimate software bugs, network misconfigurations, P2P applications, and cloud telemetry often mimic suspicious behavior.
+8. **Forecasted States $\neq$ Historical Reality:** Where bounded temporal world-models or graph forecasting models project potential attack propagation horizons, these candidate future states are purely probabilistic simulations. They must **NEVER** be cited as historical events that actually took place.
 9. **Legitimate Inconclusive Attribution:** When packet headers lack layer-2 frames, DHCP logs are missing, multiple devices share a single NAT IP, or traffic volume is insufficient, **"Attribution Inconclusive / Insufficient Network Telemetry"** is the mandatory, examiner-reviewed scientific determination.
 
 For deeper technical and implementation details, see:
@@ -1079,15 +1073,13 @@ flowchart LR
 | **Structured Forensic Evidence Dossier** | Automated compilation of Section 63 BSA certificate schedules with bitstream SHA-256 hashes, vector polygon overlays, and examiner Ed25519 signatures. | CEIPL / Reporting |
 
 #### Actual vs. Planned Implementation Status
-- **Specification & Technical Contracts:** `DOCUMENTED` — Architectural specifications, manipulation taxonomy, Pydantic v2 schemas, and metric formulations are established in [PRD.md § 13](PRD.md), [TRD.md § 10.11, § 12.4](TRD.md), and [PHASES.md § 5.B](PHASES.md).
+- **Specification & Technical Contracts:** `DOCUMENTED` — Architectural specifications, manipulation taxonomy, Pydantic v2 schemas, and metric formulations are established in [PRD.md § 14](PRD.md), [TRD.md § 10.11, § 12.4](TRD.md), and [PHASES.md § 5.B](PHASES.md).
 - **Execution Harness & Code:** `PLANNED` / `NOT_STARTED` — Implementation is organized across eleven engineering phases (`AIF-IML-00` through `AIF-IML-10`). No detector weights have been loaded, and no test runs have been executed in this architectural specification phase.
 
 For complete technical specifications, mathematical foundations, schemas, and phase roadmaps:
-- Product requirements, user journeys, and functional inventory: [PRD.md § 13 (IML-01..IML-22)](PRD.md)
+- Product requirements, user journeys, and functional inventory: [PRD.md § 14 (IML-01..IML-22)](PRD.md)
 - Technical architecture, algorithm matrices, formulas, and Pydantic schemas: [TRD.md § 10.11, § 12.4](TRD.md)
 - Engineering execution playbook, tasks, and checkpoints: [PHASES.md § 5.B (AIF-IML-00..AIF-IML-10)](PHASES.md)
-
----
 
 ---
 
@@ -1179,7 +1171,7 @@ META_INCOMPLETE_EXTRACTION          META_EXTERNAL_ENRICHMENT_REQUIRED
 | Benchmarking and release readiness (CMMS-73..78) | CMMS-A9 | `PLANNED` |
 
 Source code implementation is **explicitly out of scope** for this documentation release.
-See `PRD.md Section 15`, `TRD.md Section 16`, and `PHASES.md Section 9.B` for full specifications.
+See `PRD.md Section 16`, `TRD.md Section 16`, and `PHASES.md Section 8.B` for full specifications.
 
 
 ### 4.29 Cross-Source Timestamp Verification (CSTV)
@@ -1325,7 +1317,7 @@ CSTV registers and analyzes temporal records across 17 distinct categories:
 | 500-fixture benchmarking, false-positive suppression, and release gates (CSTV-79..84) | CSTV-A10 | `PLANNED` |
 
 Source code implementation is **explicitly out of scope** for this documentation release.
-See `PRD.md Section 16`, `TRD.md Section 17`, and `PHASES.md Section 14` for full specifications.
+See `PRD.md Section 17`, `TRD.md Section 17`, and `PHASES.md Section 15` for full specifications.
 
 
 ### 4.30 Audio Edit and Splice Localisation (AESL)
@@ -1458,7 +1450,7 @@ AESL answers these questions by producing evidence-linked suspicious-region cand
 | 500-fixture benchmark corpus, tIoU $\ge 0.75$, boundary MAE $\le 15\text{ms}$ (AESL-89..90) | AURAS-AESL-10 | `PLANNED` |
 
 Source code implementation is **explicitly out of scope** for this documentation release.
-See `PRD.md Section 17`, `TRD.md Section 18`, and `PHASES.md Section 16` for full specifications.
+See `PRD.md Section 18`, `TRD.md Section 18`, and `PHASES.md Section 17` for full specifications.
 
 
 ### 4.31 Unified Forensic Evidence Dashboard & Examiner Workbench (UFD / UFW)
@@ -2279,7 +2271,7 @@ The PS-05 platform extends its forensic capability to paper-origin and digital d
 - A missing digital signature does not prove a paper-origin document is fraudulent.
 - A valid digital signature verifies the cryptographic binding but does not prove every medical statement in the document is true.
 
-For complete technical specification, see [TRD.md § 16](TRD.md) and [PRD.md § 7](PRD.md).
+For the complete specification, see [PRD.md § 22 (Supplementary Proposed Capabilities — Document Intelligence & Authenticity, § 22.1)](PRD.md). No dedicated TRD section yet exists for this proposed capability.
 
 ---
 
@@ -2317,7 +2309,7 @@ graph LR
 - The graph is reconstructable from persisted source records.
 - Text similarity is not proof of shared genuine origin.
 
-For schema detail, see [TRD.md § 17](TRD.md).
+For the complete specification, see [PRD.md § 22 (Supplementary Proposed Capabilities — Evidence Relationship Graph, § 22.2)](PRD.md). No dedicated TRD section yet exists for this proposed capability.
 
 ---
 
@@ -2354,7 +2346,7 @@ A case-scoped Retrieval-Augmented Generation (RAG) assistant that answers author
 - Its responses are not new sources of evidence.
 - A RAG-generated summary does not replace a certified forensic examiner report.
 
-For full technical specification, see [TRD.md § 18](TRD.md) and [PRD.md § 8](PRD.md).
+For the complete specification, see [PRD.md § 22 (Supplementary Proposed Capabilities — Case-Scoped RAG Investigator Assistant, § 22.3)](PRD.md). No dedicated TRD section yet exists for this proposed capability.
 
 ---
 

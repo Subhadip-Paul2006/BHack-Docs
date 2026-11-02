@@ -37,6 +37,7 @@ dependencies = [
 
     # Database & Storage
     "sqlalchemy[asyncio]>=2.0.28",
+    "aiosqlite>=0.20.0",
     "asyncpg>=0.29.0",
     "alembic>=1.13.0",
     "redis>=5.0.2",
@@ -83,7 +84,16 @@ ps05 = "ps05.cli.main:cli_entrypoint"
 line-length = 100
 target-version = "py311"
 
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 python_files = ["test_*.py"]

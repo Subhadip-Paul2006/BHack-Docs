@@ -19,6 +19,7 @@ flowchart TB
         WEB["Next.js / React Forensic Dashboard"]
         CLI["Forensic CLI Triage Client (ps05-cli)"]
         ARCHIFY["Archify Forensic Report & IR Viewer"]
+        UFD["UFD / UFW Unified Dashboard & Examiner Workbench (Case RAG, Timelines, Findings, UFREDF Status)"]
     end
 
     subgraph API_GATEWAY["🚪 API Gateway & Orchestration Core"]
@@ -42,7 +43,7 @@ flowchart TB
         WORM["WORM Raw Evidence Vault (POSIX 0400 / S3 Object Lock, AES-256-GCM)"]
         DERIVED["Derived Artifact DAG Cache (Lineage Manifests & Coordinates)"]
         PG["PostgreSQL Database (Cases, Exhibits, Artifacts, Findings, Merkle Log)"]
-        REDIS["Redis Message Broker & Task Queue (Celery/ARQ)"]
+        REDIS["Redis Message Broker & Task Queue (Celery)"]
     end
 
     subgraph ENGINES["🔬 Forensic Engine Subsystems"]
@@ -67,6 +68,13 @@ flowchart TB
             VCI["VCI: Video Content Intelligence Engine"]
             CCTV_PROF["CCTV Adaptive Profile (Triage, OSD, ONVIF)"]
         end
+        ONTF["🌐 ONTF: Offline Network Forensics (PCAP/PCAPNG, TShark/Zeek Dissection, Flow & Covert-Timing Analysis)"]
+        CCHDF["🕳️ CCHDF: Cross-Channel Concealment & Hidden-Data Forensics (Universal Triage + Carrier Adapters + PSEA, incl. § 11.12 CFITSA)"]
+    end
+
+    subgraph SHARED_SERVICES["🧩 Shared Cross-Modal Services"]
+        CMMS["CMMS: Cross-Media Metadata Service (Universal Metadata Schema, Anomaly Rules)"]
+        CSTV["CSTV: Cross-Source Timestamp Verification & Case-Wide Timeline"]
     end
 
     subgraph REPORTING["📜 Legal Reporting & Export Layer"]
@@ -84,23 +92,39 @@ flowchart TB
     INGEST --> DISPATCH
     DISPATCH --> REDIS
     REDIS --> ENGINES
+    REDIS --> ONTF
+    REDIS --> CCHDF
     AFB -.->|"Extracted Audio Stream (DAG Linked)"| AURAS
     ENGINES --> DERIVED
     ENGINES --> PG
+    ONTF --> PG
+    CCHDF --> PG
+    CCHDF -->|Quarantined payloads & ConcealmentFindings| DERIVED
+    ENGINES --> CMMS
+    ONTF --> CMMS
+    CMMS --> CSTV
+    ENGINES --> CSTV
+    ONTF --> CSTV
+    CCHDF --> CSTV
+    CSTV --> PG
+    CMMS --> PG
     PG --> JINJA
     JINJA --> WEASY
     WEASY --> SIGNER
-    SIGNER --> CLIENT
+    SIGNER --> UFD
+    UFD --> CLIENT
 ```
 
 ---
 
 ## 2. Component Boundaries & Responsibilities
 
+**Canonical platform database version:** PostgreSQL 15 is the minimum supported version; PostgreSQL 16 is recommended and is the target deployment version. All sections of this document citing a specific PostgreSQL minor version ("PostgreSQL 15" or "PostgreSQL 16") are read against this policy: 15 is the floor, 16 is the recommended/recommended-target. `.env.example` states "PostgreSQL 15+", consistent with this floor (out of scope for this task's edits).
+
 | Subsystem / Component | Package Boundary | Primary Responsibilities | Data Inputs | Data Outputs |
 | :--- | :--- | :--- | :--- | :--- |
 | **Shared Core & Ingestion** | `ps05.core.ingest` | Case registration, pre-flight file validation, WORM vault ingestion, metadata extraction. | Raw file stream, Case FIR metadata. | `AudioEvidence`, `ImageEvidence`, `VideoEvidence` database records. |
-| **Evidence Orchestrator** | `ps05.core.orchestrator` | Task lifecycle management, task-aware routing, high-res tiling, parallel engine dispatch. | Evidence ID, Analysis Profile flags. | Celery/ARQ tasks, job state transitions, aggregated report IR. |
+| **Evidence Orchestrator** | `ps05.core.orchestrator` | Task lifecycle management, task-aware routing, high-res tiling, parallel engine dispatch. | Evidence ID, Analysis Profile flags. | Celery tasks (brokered via Redis), task state transitions (§ 23.3–§ 23.5), outbox events, aggregated report IR. |
 | **CEIPL Cryptographic Layer** | `ps05.core.crypto` | Pre-decode SHA-256 hashing, RFC 8785 canonical manifests, Ed25519 signing, RFC 3161 TSA, hash-chained custody logs, Merkle proofs, C2PA parsing. | Seized raw bytes, event payloads, C2PA JUMBF boxes. | Canonical manifest JSON, Ed25519 signatures, Merkle inclusion proofs, custody event hashes. |
 | **AURAS - ARE** | `ps05.engines.audio.are` | Signal profiling, STFT, spectral flux, splice candidate detection, noise floor consistency, ENF analysis. | Master audio exhibit (WAV/FLAC/MP3). | Spectral heatmaps, change-point timestamps, SNR metrics, ENF match. |
 | **AURAS - MVSI** | `ps05.engines.audio.mvsi`| Voice activity detection, neural diarization, overlap speaker classification, Indian language identification. | Master audio exhibit (16kHz mono). | Speaker segments, language IDs, overlap intervals, speaker turn summaries. |
@@ -1220,7 +1244,7 @@ flowchart TB
         WORM_STORE["WORM Raw Vault (POSIX 0400 / S3 Object Lock)"]
         MERKLE_LOG["Cryptographic Merkle Audit Trail"]
         CELERY_QUEUE["Redis / Celery Task Queue"]
-        DB_POSTGRES["PostgreSQL 15 (Relational Data & JSONB Findings)"]
+        DB_POSTGRES["PostgreSQL 15/16 (Relational Data and JSONB Findings; 15 minimum, 16 recommended per sec 2)"]
     end
 
     subgraph AURAS_CORE["🎧 AURAS Subsystem Boundary"]
@@ -1585,7 +1609,7 @@ flowchart TB
     end
 
     subgraph PERSISTENCE["💾 Evidentiary Persistence & Aggregation"]
-        POSTGRES["PostgreSQL 15 (Relational Data & JSONB Findings)"]
+        POSTGRES["PostgreSQL 15/16 (Relational Data and JSONB Findings; 15 minimum, 16 recommended per sec 2)"]
         DERIVED_STORE["Derived Artifact Vault (Crops, Warps, Heatmaps, Spectra)"]
         FUSION["Evidence Fusion, Uncertainty Calibration & Cross-Engine Aggregator"]
     end
@@ -1640,7 +1664,7 @@ sequenceDiagram
     API->>Worker: Dispatch raw bytes to isolated sub-process (max_memory=2GB, timeout=30s)
     activate Worker
     Worker->>Worker: Check magic bytes via python-magic (reject executable polyglots)
-    Worker->>Worker: Verify Pillow decompression limit (Image.MAX_IMAGE_PIXELS = 128_000_000)
+    Worker->>Worker: Verify Pillow decompression limit (Image.MAX_IMAGE_PIXELS = 100_000_000, 100 MP - see sec 15.25 decision note)
     Worker->>Worker: Extract dimensions (width, height), colour_mode, EXIF header tags
     Worker-->>API: Return ImageProfile(format, dimensions, colour_space, safe_decode_status)
     deactivate Worker
@@ -1817,7 +1841,7 @@ flowchart TD
 - **Inputs:** Seized raw image file path in WORM storage.
 - **Processing Steps:**
   1. Inspects magic bytes using `python-magic` to establish real file format independently of file extension.
-  2. Sets Pillow safety boundary: `Image.MAX_IMAGE_PIXELS = 128_000_000`. Rejects images exceeding 128 Megapixels with `DECOMPRESSION_BOMB_PREVENTED`.
+  2. Sets Pillow safety boundary: `Image.MAX_IMAGE_PIXELS = 100_000_000` (100 MP platform ceiling, § 15.25 decision note), with a 10:1 decompression-ratio guard. Rejects images exceeding the limit with `DECOMPRESSION_BOMB_PREVENTED`.
   3. Executes isolated worker process decoding to capture dimensions $(W, H)$, aspect ratio, bit depth, channel configuration (RGB, RGBA, CMYK, Grayscale), colour space (sRGB, AdobeRGB, Display P3, uncalibrated), orientation flag (EXIF Tag 274), and animation frame count.
   4. Parses embedded thumbnail availability and validates structural container completeness.
 - **Outputs:** `ImageProfile(detected_format, width, height, pixel_count, aspect_ratio, bit_depth, colour_mode, colour_space, has_alpha, orientation, safe_decode_status, embedded_thumb_present)`.
@@ -2824,7 +2848,7 @@ Every candidate model is validated against the 14-condition synthetic perturbati
 7. Screenshot Recapture (Canvas blit + sRGB re-encode)
 
 #### 10.11.15 Security, Resource Ceilings & Execution Sandbox
-1. **Decompression Bomb Guard:** Strict PIL `MAX_IMAGE_PIXELS = 100_000_000` (100 MP) limit. Files with compression ratios $> 10:1$ are rejected prior to memory allocation.
+1. **Decompression Bomb Guard:** Strict PIL `MAX_IMAGE_PIXELS = 100_000_000` (100 MP) limit — the platform-wide canonical ceiling (§ 15.25 decision note; the earlier 128 MP value in this document is superseded). Files with compression ratios $> 10:1$ are rejected prior to memory allocation.
 2. **Resource Quotas:** Worker processes bound via Linux cgroups to $\le 16\text{ GB}$ RAM and $\le 8\text{ GB}$ VRAM.
 3. **Execution Ceilings:** 300-second hard SIGKILL timeout per exhibit.
 4. **Air-Gap Invariant:** Zero outbound network requests; 100% offline local model inference.
@@ -2862,7 +2886,7 @@ Every candidate model is validated against the 14-condition synthetic perturbati
 
 ## 10.B CEIPL: Cryptographic Evidence Integrity & Provenance Layer
 
-CEIPL is the shared, immutable cryptographic foundation serving AIF, AURAS, and VFS across the entire PS-05 platform. It enforces mathematical evidence preservation from the moment of seizure through final court presentation.
+CEIPL is the shared, immutable cryptographic foundation serving AIF, AURAS, and VISTA across the entire PS-05 platform. It enforces mathematical evidence preservation from the moment of seizure through final court presentation.
 
 ### 10.B.1 Cryptographic Manifest Creation & Signature Verification Sequence
 
@@ -4206,7 +4230,7 @@ Every analytical dimension in the report is assigned one of five standardized fo
 
 | Verdict Status | Formal Definition & Evidentiary Standard |
 | :--- | :--- |
-| `NO_ANOMALY_DETECTED` | All applicable engines executed successfully without detecting statistical, cryptographic, or algorithmic deviations exceeding established forensic significance thresholds ($lpha = 0.01$). |
+| `NO_ANOMALY_DETECTED` | All applicable engines executed successfully without detecting statistical, cryptographic, or algorithmic deviations exceeding established forensic significance thresholds ($\alpha = 0.01$). |
 | `SUSPICIOUS_INDICATORS`| One or more engines detected statistically significant indicators of synthetic generation, bitstream splicing, lip-sync mismatch, or timeline manipulation requiring examiner scrutiny. |
 | `INCONCLUSIVE` | Severe compression artifacts, extreme low resolution ($< 240p$), severe motion blur, or lack of facial/acoustic signals prevented reliable algorithmic verification. |
 | `VERIFICATION_FAILED` | Bitstream corruption, broken cryptographic hash chains, invalidated digital signatures, or non-monotonic frame sequences confirm structural compromise or data tampering. |
@@ -4430,6 +4454,7 @@ To prevent computational bottlenecks on long surveillance exhibits (e.g. 24-hour
   - Ingestion does not read entire files into memory; it streams directly from disk via chunked 64KB I/O.
   - Long recordings are segmented into contiguous 5-minute logical analysis chunks along keyframe (I-frame) boundaries.
   - Chunks are dispatched as independent, parallel Celery tasks across worker queues and re-assembled by the timeline merger upon completion.
+  - This chunking discipline is subsumed by the universal streaming policy of § 23.8 (deterministic chunk IDs, bounded-memory readers, offset preservation) and by the per-stage checkpoint strategy of § 23.7. The legacy "4 GB cgroup cap" ceiling stated in § 11.11.3 and § 11.12.17 is superseded: resource ceilings are now versioned, per-workload-class resource profiles governed by the admission scheduler (§ 23.9) instead of one blind per-worker memory limit.
 
 ---
 
@@ -4512,8 +4537,8 @@ The platform rejects the ambiguous conflation of physical file packets, decoder 
 
 #### 11.12.3 Decode Order vs Presentation Order Invariant
 In modern inter-frame video compression (H.264/AVC, H.265/HEVC, VP9, AV1), bidirectional predictive frames (B-frames) require backward and forward temporal reference frames for motion compensation. Consequently, a future reference frame (e.g. an I or P frame) must be transmitted and decoded **before** intermediate B-frames can be displayed:
-$$\text{Decode Order (DTS): } I_0 \o P_3 \o B_1 \o B_2 \o P_6 \o B_4 \o B_5$$
-$$\text{Presentation Order (PTS): } I_0 \o B_1 \o B_2 \o P_3 \o B_4 \o B_5 \o P_6$$
+$$\text{Decode Order (DTS): } I_0 \to P_3 \to B_1 \to B_2 \to P_6 \to B_4 \to B_5$$
+$$\text{Presentation Order (PTS): } I_0 \to B_1 \to B_2 \to P_3 \to B_4 \to B_5 \to P_6$$
 - **Evidentiary Invariant:** A non-zero difference between DTS and PTS, or a decode order that differs from display order, is **standard, legitimate codec behaviour**. The system strictly prohibits flagging B-frame decode reordering as evidence of video tampering or frame shuffling. Composition time offsets are verified directly against the ISO/IEC 14496-12 `ctts` atom or Matroska `BlockAdditions`.
 
 #### 11.12.4 Presentation Timestamps, DTS and Rational Timebases
@@ -4535,20 +4560,18 @@ Surveillance CCTV systems commonly operate in Variable Frame Rate (VFR) mode to 
   $$m = \operatorname{median}(\mathbf{\Delta t})$$
   $$MAD = \operatorname{median}(\{|\Delta t_i - m| : i \in W\})$$
   The modified robust z-score measures interval divergence:
-  $$z_i = egin{cases} \frac{0.6745 \cdot (\Delta t_i - m)}{MAD} & \text{if } MAD > 10^{-6}\text{ s} \ 0.0 & \text{if } MAD \le 10^{-6}\text{ s and } |\Delta t_i - m| \le 10^{-6}\text{ s} \ \frac{|\Delta t_i - m|}{10^{-6}} & \text{if } MAD \le 10^{-6}\text{ s and } |\Delta t_i - m| > 10^{-6}\text{ s} \end{cases}$$
+  $$z_i = \begin{cases} \frac{0.6745 \cdot (\Delta t_i - m)}{MAD} & \text{if } MAD > 10^{-6}\text{ s} \\ 0.0 & \text{if } MAD \le 10^{-6}\text{ s and } |\Delta t_i - m| \le 10^{-6}\text{ s} \\ \frac{|\Delta t_i - m|}{10^{-6}} & \text{if } MAD \le 10^{-6}\text{ s and } |\Delta t_i - m| > 10^{-6}\text{ s} \\ \end{cases}$$
 - **Piecewise Cadence Segmentation & Change-Point Detection:**
-  The system deploys Pruned Exact Linear Time (PELT) change-point detection on the time-series $\mathbf{\Delta t}$ using a normal-cost objective function with penalty $eta = 2 \ln(N)$. This segments the video into statistically homogeneous cadence regimes (e.g. Regime 1: $6.25\text{ fps}$, Regime 2: $25\text{ fps}$), preventing false alarms at legitimate camera mode switches.
+  The system deploys Pruned Exact Linear Time (PELT) change-point detection on the time-series $\mathbf{\Delta t}$ using a normal-cost objective function with penalty $\eta = 2 \ln(N)$. This segments the video into statistically homogeneous cadence regimes (e.g. Regime 1: $6.25\text{ fps}$, Regime 2: $25\text{ fps}$), preventing false alarms at legitimate camera mode switches.
 
 #### 11.12.6 Category FI-01: Missing or Deleted Frame Algorithms
 - **Mode A (Internal Timing Cadence Check):**
   Identifies presentation intervals where $z_i > \tau_{z,\text{gap}}$ (default $\tau_{z,\text{gap}} = 3.5$ marked `THRESHOLD_REQUIRES_VALIDATION`).
-  - Estimated missing frame count: $\hat{k}_{\text{missing}} = \operatorname{round}\left(\frac{\Delta t_i}{m}
-ight) - 1$.
+  - Estimated missing frame count: $\hat{k}_{\text{missing}} = \operatorname{round}\left(\frac{\Delta t_i}{m}\right) - 1$.
   - Emits: `FRAME_GAP_OBSERVED`.
 - **Mode B (Source-Reference Sequence Comparison):**
   When an authentic reference bitstream is available, frames are mapped via perceptual hash matching. Let $\mathbf{r} = (1, \dots, M)$ be the reference frame sequence and $\mathbf{q} = (q_1, \dots, q_N)$ be the questioned sequence. The Longest Common Subsequence (LCS) identifies unmapped reference indices:
-  $$\mathcal{M}_{\text{deleted}} = \{r \in \mathbf{r} : r
-otin \operatorname{LCS}(\mathbf{r}, \mathbf{q})\}$$
+  $$\mathcal{M}_{\text{deleted}} = \{r \in \mathbf{r} : r \notin \operatorname{LCS}(\mathbf{r}, \mathbf{q})\}$$
   - Emits: `CONFIRMED_FRAME_DELETION` with exact reference frame hashes.
 - **Mode C (Visual Continuity & Trajectory Rupture):**
   For candidate intervals lacking timestamp markers, inter-frame forward-backward warping residuals $R_i$ and ByteTrack bounding box centroid velocities are evaluated. If spatial velocity $\mathbf{v}_i = \frac{\mathbf{x}_{i} - \mathbf{x}_{i-1}}{\Delta t_i}$ exceeds kinematic threshold $v_{\max} = 5.0\text{ m/s}$ (or $150\text{ px/frame}$) without optical flow continuity, the system emits `POSSIBLE_FRAME_DELETION`.
@@ -4558,8 +4581,7 @@ otin \operatorname{LCS}(\mathbf{r}, \mathbf{q})\}$$
 #### 11.12.7 Category FI-02: Duplicated Frame Algorithms
 1. **Decoded-Frame Exact Digest:** Computes 256-bit BLAKE3 hash on canonical planar YUV420p raster bytes (excluding container wrappers and padding). If $\operatorname{BLAKE3}(I_i) == \operatorname{BLAKE3}(I_{i+1})$, frames are bit-exact duplicates.
 2. **Perceptual Hash Distance:** Computes 64-bit Discrete Cosine Transform (DCT) perceptual hash $h_i = \operatorname{pHash}(I_i)$. Hamming distance:
-   $$d_H(h_i, h_j) = \sum_{k=1}^{64} \mathbf{1}[h_{i,k}
-eq h_{j,k}]$$
+   $$d_H(h_i, h_j) = \sum_{k=1}^{64} \mathbf{1}[h_{i,k} \neq h_{j,k}]$$
    Near-duplicate condition: $d_H(h_i, h_j) \le \tau_{\text{pHash}}$ (default $\tau_{\text{pHash}} = 2$).
 3. **Structural Similarity (SSIM):**
    $$SSIM(x,y) = \frac{(2\mu_x\mu_y + C_1)(2\sigma_{xy} + C_2)}{(\mu_x^2 + \mu_y^2 + C_1)(\sigma_x^2 + \sigma_y^2 + C_2)}$$
@@ -4568,10 +4590,7 @@ eq h_{j,k}]$$
    Surveillance cameras in empty rooms naturally produce $SSIM > 0.98$. To prevent false accusations:
    - Evaluates sensor Photo-Response Non-Uniformity (PRNU) noise residue:
      $$W_i = I_i - \operatorname{DenoiseFilter}(I_i)$$
-   - Computes cross-correlation $
-ho(W_i, W_{i+1})$. Bit-exact duplicates have $
-ho = 1.0$ with zero noise variation. Legitimate stationary scenes maintain independent photon shot noise ($
-ho < 0.60$).
+   - Computes cross-correlation $\rho(W_i, W_{i+1})$. Bit-exact duplicates have $\rho = 1.0$ with zero noise variation. Legitimate stationary scenes maintain independent photon shot noise ($\rho < 0.60$).
    - If $d_H \le 2$ but independent camera sensor noise is active, the system classifies content as `BENIGN_STATIC_SCENE` rather than tampering.
 
 #### 11.12.8 Category FI-03: Inserted Frame Algorithms
@@ -4580,11 +4599,11 @@ ho < 0.60$).
   2. *AI-Interpolated Frame:* Synthetic frame generated via neural frame rate up-conversion (RIFE, DAIN, CAIN).
   3. *Foreign Frame Splice:* Frame sourced from an external video stream.
 - **Forward-Backward Optical Flow Consistency Warping Residual:**
-  Dense optical flow fields $\mathbf{f}_{i \o i+1} = (u_f, v_f)$ and $\mathbf{f}_{i+1 \o i} = (u_b, v_b)$ are estimated using Gunnar Farnebäck or TV-L1 algorithms. Forward-warped frame:
+  Dense optical flow fields $\mathbf{f}_{i \to i+1} = (u_f, v_f)$ and $\mathbf{f}_{i+1 \to i} = (u_b, v_b)$ are estimated using Gunnar Farnebäck or TV-L1 algorithms. Forward-warped frame:
   $$\hat{I}_{i+1}(x, y) = I_i(x + u_f(x, y), y + v_f(x, y))$$
   Normalised motion-compensated warping residual:
   $$R_i = \frac{1}{|\Omega_i|} \sum_{(x,y) \in \Omega_i} \frac{|I_{i+1}(x, y) - \hat{I}_{i+1}(x, y)|}{255.0}$$
-  where $\Omega_i$ is the non-occluded mask ($||\mathbf{f}_{i \o i+1} + \mathbf{f}_{i+1 \o i}||_2 < 1.0$).
+  where $\Omega_i$ is the non-occluded mask ($||\mathbf{f}_{i \to i+1} + \mathbf{f}_{i+1 \to i}||_2 < 1.0$).
 - **AI-Interpolation Halos:** Interpolated frames exhibit high spatial blur along occlusion edges with sharp textural patches. A sudden residual peak $R_i > \tau_{\text{warp}}$ accompanied by a dropped prediction error in the succeeding frame flags an interpolated insertion (`INSERTED_FRAME_CANDIDATE`).
 - **GOP Boundary Anomaly:** An isolated I-frame appearing mid-GOP (e.g. frame 7 of a 60-frame GOP) with discontinuous Macroblock QP distribution indicates a foreign spliced frame.
 
@@ -4592,7 +4611,7 @@ ho < 0.60$).
 - **Consecutive Frame Difference:**
   $$D_i = \frac{1}{W \imes H \imes C} \sum_{x=1}^W \sum_{y=1}^H \sum_{c=1}^C |I_i(x,y,c) - I_{i-1}(x,y,c)|$$
 - **Freeze Interval Extraction:**
-  A continuous sequence of frames $[i_{\text{start}}, i_{\text{end}}]$ where $D_i < \heta_{\text{diff}}$ and $d_H(h_i, h_{i-1}) = 0$ for duration $\Delta T_{\text{freeze}} = t_{i_{\text{end}}} - t_{i_{\text{start}}} \ge 1.0\text{ s}$.
+  A continuous sequence of frames $[i_{\text{start}}, i_{\text{end}}]$ where $D_i < \eta_{\text{diff}}$ and $d_H(h_i, h_{i-1}) = 0$ for duration $\Delta T_{\text{freeze}} = t_{i_{\text{end}}} - t_{i_{\text{start}}} \ge 1.0\text{ s}$.
 - **Multi-Modal Freeze Disambiguation Invariant:**
   The system cross-references candidate freezes with audio and OSD telemetry:
   - *Case A (Deliberate Video Freeze Attack):* Decoded pixels frozen ($D_i < 0.001$), but burned-in OSD clock advances normally, AND demuxed audio contains active continuous ambient noise. Verdict: `FROZEN_SEQUENCE_CANDIDATE` (High Confidence).
@@ -4700,8 +4719,9 @@ The data model implements three primary schemas for timeline analysis:
   - `POST /api/v1/vista/cfit/findings/{finding_id}/adjudicate`: Records examiner disposition (`CONFIRMED_ANOMALY`, `BENIGN_VARIATION`) into audit log.
 - **Celery Task Dispatch & Worker Ceilings:**
   - Worker memory hard limit: cgroups enforced $\le 4\text{ GB}$ resident RAM.
-  - Uncompressed frame buffer: In-memory ring buffer strictly capped at $64\text{ frames}$ ($pprox 398\text{ MB}$ for 1080p RGB). Exceeding 64 frames triggers automatic streaming to disk-backed memmaps.
+  - Uncompressed frame buffer: In-memory ring buffer strictly capped at $64\text{ frames}$ ($\approx 398\text{ MB}$ for 1080p RGB). Exceeding 64 frames triggers automatic streaming to disk-backed memmaps.
   - Execution timeout: 60 seconds container header parse; 600 seconds per 10-minute video chunk.
+- **Platform reconciliation (§ 23):** These VISTA-specific ceilings are the seeds of the versioned `VIDEO_DECODE` and `VIDEO_GPU` workload resource profiles (§ 23.9). They are applied *in addition to* the admission-scheduler budgets, and remain overridable per model/tool version; they do not constitute a universal per-worker limit and are not used as a GPU VRAM enforcement mechanism (§ 23.9, § 23.10).
 
 #### 11.12.18 Investigator Workbench & Visualisation Pipeline
 The web forensic workbench provides examiner-grade visual diagnostics:
@@ -5784,7 +5804,7 @@ class VideoEvidenceRegistrationResponse(BaseModel):
     created_at: datetime
 ```
 
-### 12.4 CCTV Context & Adaptive Questionnaire Contract
+### 12.11 CCTV Context & Adaptive Questionnaire Contract
 ```python
 class CCTVQuestionnaireResponse(BaseModel):
     evidence_id: UUID
@@ -5813,7 +5833,7 @@ class CCTVContextModel(BaseModel):
     pending_questions: List[Dict[str, Any]] = Field(default_factory=list)
 ```
 
-### 12.5 VISTA Cross-Engine Job Execution & Results Contract
+### 12.12 VISTA Cross-Engine Job Execution & Results Contract
 ```python
 class VideoJobCreateRequest(BaseModel):
     evidence_id: UUID
@@ -5900,7 +5920,7 @@ class VideoForensicReportManifest(BaseModel):
 
 ---
 
-### 12.6 AIF-GEO Geospatial Analysis, Observations & Candidate Contracts
+### 12.13 AIF-GEO Geospatial Analysis, Observations & Candidate Contracts
 
 ```python
 from datetime import datetime
@@ -6030,7 +6050,7 @@ class GeospatialAnalysisResponse(BaseModel):
     completed_at: datetime = Field(default_factory=datetime.utcnow)
 ```
 
-### 12.7 CDVF Contracts & Data Models
+### 12.14 CDVF Contracts & Data Models
 
 The Cross-Modal Deepfake Validation Framework enforces strict Pydantic v2 data models for model provenance, dataset cards, split manifests, benchmark execution records, calibration transforms, OOD gating, and scoped approval records:
 
@@ -6333,7 +6353,7 @@ class IMLLocalizationResult(BaseModel):
 
 ---
 
-### 12.8 Cross-Source Timestamp Verification (CSTV) Pydantic v2 Contract Schemas
+### 12.15 Cross-Source Timestamp Verification (CSTV) Pydantic v2 Contract Schemas
 
 ```python
 from datetime import datetime
@@ -6511,7 +6531,7 @@ class TimelineEvent(BaseModel):
     finding_ids: List[str] = Field(default_factory=list)
 ```
 
-### 12.9 Audio Edit and Splice Localisation (AESL) Pydantic v2 Contract Schemas
+### 12.16 Audio Edit and Splice Localisation (AESL) Pydantic v2 Contract Schemas
 
 ```python
 from datetime import datetime
@@ -6642,7 +6662,7 @@ class AESLAnalysisResult(BaseModel):
     software_commit_hash: str = Field(...)
 ```
 
-### 12.10 Evidence Integrity Verification (EIV) Pydantic v2 Contract Schemas
+### 12.17 Evidence Integrity Verification (EIV) Pydantic v2 Contract Schemas
 
 ```python
 from datetime import datetime
@@ -7065,7 +7085,7 @@ Archify (`https://github.com/tt-a1i/archify`) functions as the architectural and
 | **Repudiation (CCTV)**  | Defense claims camera source parameters were fabricated or altered by police. | CCTVContext versioned data model, automated pre-questioning extraction audit trail, immutable questionnaire responses. |
 | **Information Disclosure (Biometrics)** | Facial feature vectors leaked or utilized for unconstitutional mass surveillance. | AES-256-GCM encrypted feature blobs; strict 1:1 matching policy; mandatory judicial `case_authorization_token`; zero 1:N searching. |
 | **Information Disclosure (Media)** | Sensitive victim/suspect media leaked to unauthorized parties. | AES-256-GCM data at rest; strict RBAC case boundaries; ephemeral pre-signed URLs (max 15 mins); anonymized bystander crops. |
-| **Denial of Service (Image)** | Malicious 100-Megapixel decompression bomb or crafted polyglot uploaded to freeze server. | Pillow 128M pixel limit (`Image.MAX_IMAGE_PIXELS = 128_000_000`); isolated worker decoding sandbox with 2GB RAM / 30s timeout quota. |
+| **Denial of Service (Image)** | Malicious 100-Megapixel decompression bomb or crafted polyglot uploaded to freeze server. | Platform Pillow limit (`Image.MAX_IMAGE_PIXELS = 100_000_000`, 100 MP — see § 15.25 decision note); 10:1 decompression-ratio guard; isolated worker decoding sandbox with 2GB RAM / 30s timeout quota. |
 | **Denial of Service (Video)** | Malicious 100GB video bomb, recursive container atom, or infinite GOP uploaded to exhaust server workers. | Strict chunked streaming upload validation; maximum file size quotas; container allocation caps ($\le 256\text{ MB}$); worker cgroups. |
 | **Elevation of Privilege**| Worker process exploits libavformat/libjpeg-turbo buffer overflow to gain host root. | Workers execute inside unprivileged container sandboxes with seccomp profiles, AppArmor, and read-only root filesystems. |
 
@@ -7158,6 +7178,517 @@ All cryptographic processing, evidence handling, storage operations, and reporti
 6. **Fail-Closed Quarantine Invariant:** Any evidence object that fails post-write readback, retrieval verification, or scheduled fixity checks must immediately transition to the `QUARANTINED` state. Downstream analysis and export must be instantly blocked (HTTP 423 Locked). Silent repair, automatic rehashing, or overwriting reference hashes is strictly prohibited.
 7. **Verified Backup Restoration Invariant:** Restoring damaged evidence from backup media requires independent dual-hash verification of the candidate replica against the established intake `HashRecord`. A backup copy must never be restored into the active vault without verified cryptographic match against the baseline reference.
 8. **Standalone Offline Verifiability Invariant:** Every exported evidence package must be independently verifiable in an air-gapped environment using standard open-source tools (Python / OpenSSL) without requiring network connectivity, API access, or trust in the PS-05 production database.
+
+### 15.9 Security Objectives & Baseline
+
+**Scope of protection (SEC-001).** The platform security architecture must protect, as distinct classes: evidence authenticity, integrity and provenance; case confidentiality; platform availability; PostgreSQL and object-storage integrity; biometric templates and face/speaker embeddings; AI models, weights, embeddings and inference endpoints; RAG knowledge bases; forensic reports and their approval history; credentials, keys and service identities; and inter-engine communication.
+
+**Baseline (SEC-002).** The control baseline is OWASP ASVS 5.0.0 (https://owasp.org/www-project-application-security-verification-standard/) plus the OWASP 2025 LLM Application Security risks (https://genai.owasp.org/llm-top-10/).
+
+**Compliance caveat.** Nothing in this section claims that compliance with the ASVS or the LLM risk list has been achieved. Compliance may only be asserted once each mapped control is implemented and verified by an executed test (§ 15.21); until then, every control in this section is **proposed architecture** (implementation status `PLANNED`).
+
+### 15.10 Threat Model over Trust Boundaries
+
+Twelve trust boundaries are in scope (T1–T12). For each, the threat matrix below records: threat ID, affected component, attacker capability, preconditions, CIA impact, preventive controls, detection, recovery, verification test, residual risk and owner. Priorities: evidence tampering, cross-case data leakage, malicious file exploitation, privilege escalation, model supply-chain compromise, and denial of service.
+
+| Boundary | Endpoint pair |
+| :--- | :--- |
+| T1 | External users ↔ API |
+| T2 | API ↔ case-management services |
+| T3 | Evidence intake ↔ untrusted file parsers |
+| T4 | PostgreSQL ↔ task broker |
+| T5 | Orchestrator ↔ worker processes |
+| T6 | Workers ↔ model-inference runtimes |
+| T7 | Workers ↔ object storage |
+| T8 | Forensic engines ↔ RAG pipeline |
+| T9 | RAG ↔ external retrieval connectors |
+| T10 | Investigators ↔ report approval |
+| T11 | Platform ↔ third-party models / packages |
+| T12 | Production infrastructure ↔ admin interfaces |
+
+```mermaid
+flowchart TD
+    EXT["External Users and Investigators"]
+    API["API Layer - TLS - JWT - Rate Limits"]
+    CM["Case Management Services - Case and Object Level Authorization - RLS"]
+    INTAKE["Evidence Intake - Pre-flight Validation"]
+    PARSE["Isolated Parser Sandboxes - Cgroup Limits - Read-only Originals"]
+    PQ["PostgreSQL - WORM Vault - Outbox - Inbox - DLQ"]
+    BRK["Redis Task Broker - Auth - ACL - Lease - DLQ"]
+    ORCH["Orchestrator Control Plane - Admissions - Backpressure"]
+    WORK["Isolated Worker Processes - Least-privilege Identities"]
+    RUNTIME["Model Inference Runtimes - Bounded Resources - Pinned Weights"]
+    OBJSTORE["Object Storage - WORM - Object Lock - Presigned Short-lived URLs"]
+    RAG["RAG and Evidence Graph - Case-scoped Retrieval"]
+    EXTSRC["External Retrieval Connectors - Isolated - Allowlisted"]
+    EXTMODEL["Third-party Models and Packages - Provenance Pinned"]
+    ADMIN["Admin Interfaces - MFA - Break-glass Audit"]
+    PRODINFRA["Production Infrastructure - Private Networking"]
+
+    EXT -->|T1| API
+    API -->|T2| CM
+    INTAKE -->|T3| PARSE
+    PQ -->|T4| BRK
+    ORCH -->|T5| WORK
+    WORK -->|T6| RUNTIME
+    WORK -->|T7| OBJSTORE
+    CM --> PARSE
+    RUNTIME -->|T8| RAG
+    RAG -->|T9| EXTSRC
+    EXT -->|T10| CM
+    EXTMODEL -->|T11| RUNTIME
+    PRODINFRA -->|T12| ADMIN
+    EXTSRC -.->|"retrieval only - no evidence write-back"| RAG
+```
+
+**Threat matrix** (severity: H/M/L; owner names the owning bounded-context or role; all detection hooks feed the security-event store of § 15.22):
+
+| Threat ID | Boundary | Affected component | Attacker capability | Preconditions | CIA impact | Preventive controls | Detection | Recovery | Verification test | Residual risk / owner |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| TM-01 | T1, T7 | Evidence records, WORM vault | Malicious/compromised user or worker | User-upplied case/evidence/object ID, prior access | I (authenticity, provenance) | Evidence immutability, write-once originals, append-only custody ledger, object-level re-validation (§ 15.6) | Fixity-audit hash mismatch; custody chain break | Backup restoration with dual-hash verification; quarantine + new attributable custody event | Evidence overwrite / silent repair attempt | Residual: storage-admin misuse (mitigated by separate admin role + audit) — owner: EIV |
+| TM-02 | T2, T8 | Case services, RAG | Unauthorised or ID-enumerating caller | Valid credential, ID knowledge or oracle | C (cross-case leakage) | Case-level + object-level authorization, RLS, no ID trust (§ 15.11 SEC-004), case-scoped RAG isolation (§ 15.18) | Access audit trail; cross-case query denial log | Revoke credential; audit affected exports; re-scope grants | IDOR / BOLA across case and object identifiers | Residual: shared-admin over-permission; detection-time-lagged — owner: case-management / RAG |
+| TM-03 | T3 | File parsers | Untrusted file (polyglot, bomb, crafted container) | Upload accepted | A / I (DoS, exploitation) | Pre-flight gate, signature check, size/nesting limits, isolated parser sandboxes (§ 15.12) | Parser timeout, crash dump, reject-quarantine events | Quarantine with digest + reason; reschedule on fixed quota | Malicious archive / decompression-bomb exploit | Residual: parser library CVE window — owner: intake + CMMS |
+| TM-04 | T5, T6 | Workers, runtimes | Untrusted checkpoint or parser code | Compromised package or crafted input | C / I / A | Parser sandbox, cgroup limits, seccomp/read-only rootfs, model-inference isolation (§ 15.12, § 15.17) | Escaped-sandbox event; anomaly on resource usage | Isolate node; rebuild from pinned image | Privilege escalation via parser exploit | Residual: kernel/sandbox escape — owner: platform infra |
+| TM-05 | T11, T6 | Third-party models, packages, RAG index | Malicious publisher / typosquatted dependency | Automated or careless load | C / I | Model provenance record + digest pinning, safer-format loading gate (§ 15.17), RAG index versioning (§ 15.18) | Digest mismatch on load; package attestation check | Re-pin to known-good digest; rebuild; quarantine affected cases | Malicious or corrupted checkpoint loaded | Residual: unpinned or legacy-format models — owner: model-registry / supply chain |
+| TM-06 | T1, T5 | All stateful services | Volume/flood attacker | Reachability | A | Rate limiting, request-size caps, workload admission + backpressure (§ 23.9), resource quotas | Queue depth, latency SLO burn | Scale-out / shed load per admission policy | Inference or task-queue denial of service | Residual: coordinated flood within quota — owner: SRE |
+
+Trust-boundary figure and threat matrix both appear above in § 15.10. All TM-xx owners must log disposition into the security-event store (§ 15.22).
+
+### 15.11 Authentication & Authorization
+
+**Centralised contracts + RBAC (SEC-003).** One identity and claims contract across the platform; RBAC roles per bounded context; claims carry case membership and resource scope; no component trusts a caller on its own.
+
+**Never trust supplied identifiers (SEC-004).** Case, evidence, object, job and report IDs supplied by a user are untrusted; every access check re-validates both the task state and the caller's active case membership before any sensitive side effect (§ 23.4); no read or write path takes an ID at face value.
+
+**Least-privilege service identities (SEC-005).** Each bounded context (case-management, task-runner, model-runtime, RAG, storage) holds a dedicated low-privilege service identity; no shared token; permission sets are bounded and static.
+
+**Short-lived tokens, secure refresh, revocation (SEC-006).** Short-lived access tokens; signed refresh tokens; server-side revocation on credential compromise or role change; refresh-token rotation.
+
+**Rate limiting + brute-force protection (SEC-007).** Per-identity and per-endpoint rate limits; progressive back-off on failed authentication; lockout or step-up on repeated failure; alerts on credential-stuffing patterns.
+
+**MFA for privileged users (SEC-008).** MFA is mandatory where a role grants admin, retention, export, or approval capability; step-up re-authentication on sensitive operations.
+
+**Separation of duties (SEC-009).** Distinct, non-overlapping roles for investigator, reviewer, admin and auditor; an investigator cannot approve a report they authored; auditors are read-only; admin actions are break-glass and fully audited.
+
+**PostgreSQL Row-Level Security (SEC-010).** Where RLS is adopted for case scoping:
+- **Connection pooling:** every pool checkout sets `SET app.case_id` and `SET app.role` from the verified caller; every pool return resets them. No session context survives a checkout/return cycle.
+- **Session context:** policies bind to `app.case_id`; the `case_id` is bound only to the token's active case membership, never to a client-supplied value.
+- **Migration requirement:** RLS policies and their enabling are a migration-gated change; no table is exposed to the application role without an accompanying policy.
+- **Tests proving no cross-request context inheritance:** (a) a pooled connection must be verified to have its context reset after every return; (b) two sequential requests on the same pooled connection for different cases must never observe the other case's rows; (c) a request that omits context must default-deny, not default-allow.
+
+### 15.12 Evidence Intake & Hostile-File Protection
+
+**Untrusted by default (SEC-011).** Every upload is untrusted; no upload is ever executed, and no embedded script, macro or payload inside an upload is ever run during analysis.
+
+**Signature validation beyond MIME (SEC-012).** File format is established from magic bytes and container structure, never from file extension or declared MIME; polyglot files (multiple valid signatures) are rejected or quarantined where detection is feasible.
+
+**Size limits (SEC-013).** Hard limits on raw upload size and on post-decompression size; uploads exceeding either are rejected before any parser runs.
+
+**Archive nesting and expansion-ratio limits (SEC-014).** Maximum archive nesting depth and a maximum decompression expansion ratio; recursive or unbounded extraction is refused with a reject + quarantine event.
+
+**Parser timeouts + resource ceilings (SEC-015).** Every parser runs under a hard wall-clock timeout and bounded CPU / RAM / disk / file-descriptor ceilings; on breach the parser is SIGKILLed and the file is quarantined.
+
+**Isolated parser processes/containers (SEC-016).** Parsers run in unprivileged, isolated processes or containers with a read-only root filesystem, seccomp/AppArmor profiles, and no host credentials, host directories or the container socket mounted. A container alone is not a complete security boundary; the profile + no-privileged-host-mounts combination is the boundary.
+
+**Read-only original-evidence access (SEC-017).** Parsers see originals read-only; originals are never opened for write by any intake or analysis path (§ 15.6 invariants 1 and 2).
+
+**Restricted filesystem and network (SEC-018).** Parser sandboxes have a restricted, read-only filesystem scope and no network egress; no host path is reachable.
+
+**Safe temp dirs; safe symlink and archive-path handling (SEC-019).** Temp dirs are per-run, isolated and scoped; symlink targets and archive member paths are validated against path-traversal and symlink-escape before any file is opened or written.
+
+**Rejection + quarantine with audit, digest and reason (SEC-020).** Every rejected or quarantined upload records an audit event with the file's digest, the rejection reason and the responsible component; quarantine is fail-closed — no downstream analysis proceeds on a quarantined object.
+
+```mermaid
+flowchart TD
+    UP["Untrusted Upload"]
+    GATE["Pre-flight Gate"]
+    SIG["File Signature Check - Magic Bytes - Polyglot Reject List"]
+    SIZE["Size and Post-decompression Limits"]
+    QUAR["Quarantine - Audit Event - Digest - Reason - Fail-closed"]
+    SANDBOX["Isolated Parser Sandbox - Cgroup CPU RAM Disk FD - Read-only Rootfs - No Network Egress"]
+    TO["Hard Wall-clock Timeout - SIGKILL on Breach"]
+    ACCEPT["Register into WORM Vault - Pre-decode Dual Hash"]
+    DERIVED["Derived Artifacts - New Records - Never Originals"]
+
+    UP --> GATE
+    GATE --> SIG
+    SIG -->|polyglot or unrecognised| QUAR
+    SIG --> SIZE
+    SIZE -->|exceeds limit| QUAR
+    SIZE --> SANDBOX
+    SANDBOX -->|timeout or breach| QUAR
+    SANDBOX --> ACCEPT
+    ACCEPT --> DERIVED
+```
+
+Evidence-intake security figure above; all reject/quarantine paths write to the security-event store (§ 15.22).
+
+### 15.13 Crypto Keys & Secret Management
+
+**Secrets out of source (SEC-021).** No secret, key or credential is ever stored in source, config files, images or worker command-line arguments; secrets are read from a secret manager at runtime.
+
+**Secret manager (SEC-022).** A dedicated secret manager is the single source of runtime secrets; access is role-scoped and every read is audit-logged.
+
+**Data-encryption keys vs key-encryption keys (SEC-023).** Data-encryption keys (DEKs) that encrypt evidence, embeddings and model artefacts are themselves encrypted under separate key-encryption keys (KEKs) held in a KMS; DEKs never appear unencrypted at rest.
+
+**Least-privilege key access (SEC-024).** Key access is scoped per bounded context; no component holds more key material than it must; key-management operations (generate, wrap, unwrap, rotate, revoke) are separate from application key use.
+
+**Rotation + recorded key-version IDs (SEC-025).** All keys are on a rotation schedule; every encrypted object records the key-version ID used; re-encryption on rotation is supported without data loss.
+
+**Recovery / revocation (SEC-026).** Key revocation triggers re-encryption or access revocation; key recovery (deletion, expiry) is a documented, reversible-for-backups process with an audit trail.
+
+**Signing keys separate from app credentials (SEC-027).** Keys that sign evidence manifests, custody events and reports are separate from application and service authentication credentials; signing capability is a distinct, break-glass, heavily-audited privilege.
+
+**Never log secrets or private keys (SEC-028).** No secret or private key material appears in logs, error output, trace spans, request captures or crash dumps; log sinks are scrubbed for key-shaped data.
+
+**No secrets in worker command-line arguments (SEC-029).** Worker and subprocess invocations never receive secrets as arguments; arguments are inspectable by the OS process list, so all credential data is passed via the secret manager at process start.
+
+**At-rest + in-transit encryption (SEC-030).** Evidence, embeddings, model weights, reports and audit records are encrypted at rest; all inter-component and external traffic is TLS-protected in transit.
+
+**Explicit separation of cryptographic functions.** Content hashing (integrity), encryption of stored evidence (confidentiality), digital signatures + signer identity (attribution, non-repudiation), user/service authentication (identity assertion) and authorization (permission assertion) are distinct controls. A matching hash does not establish who acquired the evidence; a signature does not prove the recorded content depicts a real event; encryption alone does not guarantee chain of custody.
+
+### 15.14 Evidence Immutability & Audit Security
+
+**Write-once preservation (SEC-031).** Original evidence objects are write-once: after intake hash binding, the original bytes, container structure and metadata are not writable by any application role; object-level locks (S3 Object Lock, POSIX `0400`) enforce this.
+
+**Cryptographic fixity verification (SEC-032).** Periodic, scheduled dual-hash (SHA-256 / SHA3-512) fixity audits run against every stored original and every derived artifact; mismatches trigger quarantine, not repair.
+
+**Append-only custody events (SEC-033).** All custody actions (intake, access, export, redaction, approval, deletion-request) are new, attributable, append-only events; corrections to custody are always new appended events that reference the corrected event — never silent rewrites or in-place edits.
+
+**Provenance original → derived (SEC-034).** Every derived artifact (frame, crop, spectrogram, embedding, OCR text, report section) carries an explicit provenance chain to its original evidence ID and hash; provenance is data, not decoration.
+
+**Separate authorization for deletion / retention changes (SEC-035).** Deletion of evidence (even quarantined objects) and changes to retention policy are separate, break-glass, independently-authorized operations, not a side-effect of any routine role.
+
+**Auditing of access, export, redaction, report approval (SEC-036).** Each of these sensitive operations writes a structured security event (§ 15.22); the event store is independent of, and not writable by, the application roles it audits.
+
+**Periodic integrity checks; backup integrity verification (SEC-037).** Scheduled fixity checks plus verified-backup restoration tests: a backup is not trusted until an independent dual-hash verification against the intake baseline succeeds (§ 15.6 invariant 7).
+
+**Documented legal-hold behaviour (SEC-038).** Legal hold freezes deletion and retention expiry for the held scope; hold state is an explicit, auditable event; release of hold is a separate, attributable event.
+
+**Recovery preserving original hashes + historical events (SEC-039).** Any recovery or restoration path must restore originals at their recorded intake hashes and must preserve the full historical event chain; recovery that silently discards or rewrites history is not acceptable.
+
+**Permission separation (SEC-040).** `evidence-write` (quarantine registration, derived-artifact creation), `evidence-read` (analysis, retrieval) and `storage-admin` (vault lifecycle, legal hold, deletion) are distinct permissions; a worker that can create derived artifacts cannot overwrite originals; ordinary application accounts cannot modify or delete original evidence.
+
+**Independent audit storage.** Where justified by threat or regulatory need, the security/audit event store is a physically or logically separate system that no application role can truncate.
+
+Cross-reference: § 15.8 EIV invariants (fail-closed quarantine, verified backup restoration, standalone offline verifiability) are the enforcement surface for this subsection; this subsection adds the audit-permission structure around it.
+
+### 15.15 Network & Service Security
+
+**TLS external (SEC-041).** All external (user-facing and connector-facing) traffic is TLS-encrypted; no cleartext ingress or egress on user-facing paths.
+
+**Authenticated service-to-service (SEC-042).** Internal service-to-service calls are authenticated (mTLS or signed service tokens); unauthenticated internal calls are denied.
+
+**Private networking for DB / broker / storage (SEC-043).** PostgreSQL, Redis and object storage live on private networks; none is publicly reachable; access is by network policy and by authenticated role only.
+
+**No public exposure of worker / admin endpoints (SEC-044).** Worker endpoints, admin consoles and internal APIs are never on the public internet; admin access is via a controlled, MFA-protected, fully-audited channel (§ 15.11 MFA; § 15.22 audit).
+
+**Explicit egress policies (SEC-045).** Egress is default-deny and allow-listed per bounded context; no component has open outbound internet access unless its function explicitly requires it (retrieval connectors).
+
+**Dependency-based firewall rules (SEC-046).** Firewall / network-policy rules are derived from the declared dependency graph between bounded contexts, not ad-hoc; a rule exists only for a declared, documented dependency.
+
+**Broker auth + ACLs (SEC-047).** The task broker (Redis/Celery, § 23.6) requires authentication; queue and channel ACLs scope each producer and consumer to its own queues; no cross-tenant queue access.
+
+**DB least-privilege roles (SEC-048).** Each application role maps to a least-privilege database role; no application role holds DDL or `postgres`-superuser capability; WORM/enforcement triggers run under a separate, locked-down role.
+
+**Restricted admin access (SEC-049).** Administrative access to infrastructure is individually-identified, MFA-protected, time-boxed where feasible, and fully audited; standing (always-on) admin credentials are not the default.
+
+**Rate + request-size limits (SEC-050).** All ingestion and API endpoints enforce rate limits and request-size caps; oversized or rate-exceeded requests are rejected with structured, safe errors.
+
+**Secure CORS / CSRF (SEC-051).** Browser-facing endpoints enforce strict, origin-pinned CORS and CSRF protection; no wildcard-origin or tokenless write endpoints.
+
+**SSRF protection (SEC-052).** Any feature that fetches an external URL (retrieval connectors, enrichment adapters) uses a dedicated, restricted retrieval component (§ 15.20 covers web retrieval and external connectors; this § 15.15 item covers the general SSRF policy): the component blocks loopback, private (RFC 1918), link-local and cloud-metadata-destination addresses by default; DNS resolution is revalidated against the allow-list at fetch time (to defeat DNS-rebinding); every redirect is re-validated against the same policy before being followed; an AI model's output is never a source of service URLs — model text must not supply arbitrary internal service endpoints that the retrieval component will fetch.
+
+### 15.16 Database & Message Security
+
+**Separate DB roles by responsibility (SEC-053).** Write, read, trigger-enforcement, audit-read and admin are distinct database roles; no single application role spans more than one of these beyond its declared responsibility.
+
+**Parameterised SQL (SEC-054).** All queries are parameterised or generated by a validated ORM/query-builder; string-concatenated SQL is a code-review and lint prohibition, not a style preference.
+
+**TLS where supported (SEC-055).** PostgreSQL and Redis connections are TLS-protected where the deployment supports it; no cleartext DB or broker credentials over an untrusted network.
+
+**Protected credentials (SEC-056).** DB and broker credentials come from the secret manager (§ 15.13); they are never baked into images, `.env` files committed to source, or worker command lines.
+
+**Redis auth + network isolation (SEC-057).** Redis requires authentication; it is on a private network; no public or cross-VLAN exposure; queue-level ACLs per § 15.15 broker policy.
+
+**Message-schema validation (SEC-058).** Every message entering a queue or outbox/inbox (§ 23.6) is schema-validated at both produce and consume time; malformed or schema-violating messages are rejected to a restricted DLQ, not silently dropped.
+
+**Producer authentication + consumer authorization (SEC-059).** Producers authenticate to publish; consumers are authorized per queue; no unauthenticated publisher; no consumer reads a queue it is not authorized for.
+
+**Replay protection (SEC-060).** Message deduplication keys / lease-based processing (§ 23.6 lease and inbox design) prevent a captured or redelivered message from causing a duplicate side effect; consumers must be idempotent per § 23.5.
+
+**Payload-size limits (SEC-061).** Message payloads are size-capped; a queue message references durable task / evidence identifiers, not embedded payloads; oversized messages are rejected at produce time.
+
+**Safe deserialisation only (SEC-062).** Message deserialisation uses typed, schema-bound deserialisers only; unsafe / untyped object deserialisation (arbitrary-class instantiation from untrusted bytes) is prohibited platform-wide.
+
+**Restricted DLQ access; authorized + audited redrive (SEC-063).** The DLQ is readable only by a named, limited role; re-driving a DLQ message is an explicit, authorized, fully-audited operation; no silent auto-redrive.
+
+**No cross-case event delivery (SEC-064).** A queue message's case scope is enforced: a consumer of case A's queue cannot consume case B's events; case-scoped routing is a queue-design constraint, not an application-layer check alone.
+
+**Message identifier ≠ authorization credential (SEC-065).** A message's task / evidence identifier is a lookup key, not an authorization token; every consumer re-validates task state and its own permissions before any sensitive side effect (ties to § 15.11 SEC-004 (never trust a supplied identifier) and § 23.4 task-state re-validation). Cross-reference the DLQ design in § 23.6 — this subsection adds the authz/audit layer on top, it does not re-specify DLQ mechanics.
+
+### 15.17 AI & Model Security
+
+A shared framework applies across AURAS, AIF, VISTA, CDVF, CCHDF, case RAG and model serving.
+
+**Model provenance record (SEC-066).** Every deployed model carries a provenance record: identifier, version, source and licence, weight-file digest, publisher, acquisition record, dependency versions, supported input formats, hardware requirements, known limitations, validation results, approval status and deployment date. The record is data; it is not updated by the model or by an unattended pipeline.
+
+**No auto-loading of unverified weights or arbitrary executable formats (SEC-067).** A checkpoint is loaded only after its digest matches a pinned, approved value in the model registry; safer checkpoint formats are preferred; loading and first-inference of an untrusted or newly-acquired checkpoint run in the same restricted runtime as all other inference, with extra startup validation, not in a privileged path.
+
+**Isolation of loading + inference for untrusted checkpoints (SEC-068).** First-run / pre-approval inference on a new checkpoint is isolated from steady-state serving: same sandbox profile, no promoted status, results are marked "unverified model" until the checkpoint's approval status in the provenance record is set to approved.
+
+**Inference isolation (SEC-069).** Every inference runtime runs under a restricted service identity, bounded resource envelope, model-specific timeout, batch limit, memory/VRAM budget, input-shape and output-schema validation, an inference concurrency cap, health checks, a documented version-rollback path and auditable upgrades.
+
+**Model is not a filesystem/DB/shell/network principal (SEC-070).** An analysis engine's status as a model does not by itself grant filesystem, database, shell or network access; any of those is a separate, explicitly-granted, least-privilege capability, audited like any other.
+
+**Model outputs are results, not facts (SEC-071).** Every persisted model result records: model + checkpoint version, input reference and input hash, config version, result value and confidence, calibration status, execution timestamp, and the failure/abstention reason (abstention is a first-class outcome, not an error to be swallowed).
+
+**Deterministic application-side validation (SEC-072).** Before a model output reaches the database, the report renderer or the workflow engine, it passes deterministic application-side validation (schema check, range check, citation/source check, confidence-threshold check, OOD/abstention check); an invalid output is a rejected result, not a silently-coerced one.
+
+**Prohibited model actions (SEC-073).** No model, in any engine, may: modify original evidence, change permissions, delete records, approve a report, or perform an admin action. These are human / authorised-system actions only; a model output requesting any of these is treated as untrusted content, not as an instruction to the workflow.
+
+```mermaid
+flowchart TD
+    REQUEST["Inference Request - Bounded Batch - Model-specific Timeout - Concurrency Cap"]
+    IDENTITY["Restricted Service Identity - Bounded Resource Envelope - Memory and VRAM Budget"]
+    PROVENANCE["Checkpoint Digest Match Against Pinned Registry Value - Approved Status Checked"]
+    ISOLATE["Isolated Inference Runtime - No Filesystem, DB, Shell or Network Grant by Default"]
+    SHAPE["Input-shape and Output-schema Validation - OOD and Abstention Checks"]
+    VALIDATE["Deterministic Application-side Validation before DB, Report Renderer or Workflow Write"]
+    PERSIST["Persist Result - Model and Checkpoint Version - Input Reference and Hash - Config Version - Confidence - Timestamp - Failure or Abstention Reason"]
+
+    REQUEST --> IDENTITY
+    IDENTITY --> PROVENANCE
+    PROVENANCE -->|digest mismatch or unapproved| REJECT["Reject - Unverified or Mismatched Checkpoint - Audit Event"]
+    PROVENANCE -->|verified| ISOLATE
+    ISOLATE --> SHAPE
+    SHAPE -->|invalid shape or schema| REJECT
+    SHAPE --> VALIDATE
+    VALIDATE -->|invalid| REJECT
+    VALIDATE --> PERSIST
+    REJECT -.-> AUDIT["Security Event Log - § 15.22"]
+Cross-reference: § 23.15 canonical engine execution matrix governs the runtime execution surface of these models; § 15.17 governs their provenance, isolation and output-trust surface. Where both apply, § 23.15 is the execution contract and § 15.17 is the trust/supply-chain contract.
+
+### 15.18 RAG & Evidence Graph Security
+
+**Case-scoped retrieval (SEC-074).** Every RAG query is scoped to the caller's authorized cases at retrieval time — authorization happens before retrieval, not after generation; a generation that happens to cite an out-of-case source does not make that source authorized.
+
+**Tenant-aware vector + keyword filtering (SEC-075).** Both vector and keyword retrieval paths apply the same case/tenant filter; a filter that covers only one path is a cross-case leakage bug.
+
+**Source-evidence reference for every material claim (SEC-076).** Every material claim in a RAG answer or report that cites retrieved content must carry a resolvable reference to the source evidence object (ID + hash where available); a claim without a source reference is marked as unverified interpretation.
+
+**Trusted instructions vs untrusted content (SEC-077).** System / task instructions and tool permissions are isolated from retrieved evidence content in the prompt and in the processing pipeline; instructions do not travel through the evidence-content channel and vice-versa.
+
+**Prompt-injection resistance + adversarial testing (SEC-078).** The RAG system is designed and tested against prompt-injection in uploaded and retrieved content; a document containing "ignore previous instructions" is evidence, not a command; this residual risk cannot be eliminated by a guard alone — access control, tool permissions and data boundaries are enforced in application code (§ 15.17-SEC-070, § 15.21).
+
+**Embedding + index versioning (SEC-079).** Embeddings and the index that serves them are versioned; a new model or schema version produces a new index version; consumers pin the index version they are served from.
+
+**Safe re-indexing + deletion propagation (SEC-080).** Re-indexing is a two-phase, verifiable operation; deletion of an evidence object propagates to every index (vector, keyword, cache) that references it, and propagation completion is a recorded, auditable step, not an assumption.
+
+**No cross-case vector retrieval (SEC-081).** The vector store is partitioned such that a query against one case cannot match or return vectors from another case; this is a storage-level partition constraint, not a post-filter.
+
+**Output validation + citation verification (SEC-082).** RAG outputs are schema-validated; every citation is checked against the retrieved set before it is accepted; an unverifiable citation is dropped or flagged, not silently retained.
+
+**Bounded retrieval + token budgets (SEC-083).** Retrieval result count and prompt token budget are hard caps per request; an unbounded retrieval or an over-budget prompt is truncated with a recorded truncation event, not silently dropped.
+
+**Audit logging of sensitive retrieval (SEC-084).** Retrieval of content flagged sensitive (biometric, PII-class, legal-hold scope) writes a structured security event (§ 15.22) with the querying identity, case scope and result count.
+
+**Prohibited RAG behaviours (SEC-085).** The RAG system must not: retrieve unauthorised cases; treat a summary or generated description as original evidence; invent citations; hide or down-weight contradictory retrieved findings; treat the absence of a retrieval result as proof an event never happened; auto-identify a person as guilty from a similarity score; or auto-approve a report. Answers must distinguish, explicitly, between direct evidence, derived findings, model interpretation and unresolved uncertainty.
+
+```mermaid
+flowchart TD
+    CALLER["Authenticated Caller - Case Membership Verified"]
+    AUTHZ["Authorization Gate - Case-scoped before Retrieval - Not After Generation"]
+    VEC["Vector Index - Case Partitions - Pinned Embedding and Index Version"]
+    KW["Keyword Index - Same Case and Tenant Filter"]
+    MERGE["Merged Results - Bounded Count - Token Budget - Truncation Logged"]
+    CITATION["Citation Verification - Every Material Claim - Resolvable Source Reference"]
+    GEN["Generation - Trusted System Instructions Isolated from Untrusted Retrieved Content"]
+    AUDIT["Security Event - Sensitive Retrieval Logged - Query Identity - Case Scope - Result Count"]
+
+    CALLER --> AUTHZ
+    AUTHZ -->|denied| CALLER
+    AUTHZ -->|authorized| VEC
+    AUTHZ -->|authorized| KW
+    VEC --> MERGE
+    KW --> MERGE
+    MERGE --> CITATION
+    CITATION --> GEN
+    GEN --> AUDIT
+    MERGE -.->|"deletion propagates to all index versions"| VEC
+```
+
+### 15.19 Biometric & Identity Data
+
+**Purpose limitation + case-scoped access + minimum-necessary retention (SEC-086).** Face, speaker and other biometric embeddings, their matches, and any identity hypothesis derived from them are subject to a declared purpose, case-scoped access only, and a minimum-necessary retention schedule; retention beyond purpose is a data breach, not a storage decision.
+
+**Encryption + access auditing + restricted export (SEC-087).** Biometric data is encrypted at rest (§ 15.13) and in transit; every access, read, export or match operation is audit-logged; export is a separate, authorized, logged operation, not a default capability.
+
+**Explicit deletion + legal-hold policies (SEC-088).** Deletion of biometric data and legal holds on it are explicit, separate, auditable operations (§ 15.14 legal-hold behaviour applies).
+
+**Model-version traceability (SEC-089).** Every embedding, match or identity hypothesis stores the biometric model and checkpoint version that produced it; a version change is a provenance change, not a silent re-scoring.
+
+**False-match review + human examination (SEC-090).** Automated biometric matches at or near threshold, or any high-impact identity finding, require human examination before it is a reportable conclusion; automated output alone is not a verified identification.
+
+**Similarity-score disclaimer (SEC-091).** A face or voice similarity score is not a verified identity and is not a probability of guilt; the record must state the method, the threshold used, the model version, image/audio-quality limits, and the current review status, every time the score is surfaced.
+
+**Raw embeddings stay out of broad surfaces (SEC-092).** Raw embedding vectors never reach ordinary RAG prompts, general application logs, or unrestricted dashboard APIs; only human-readable, threshold-qualified, case-scoped summaries of a match may appear in those surfaces.
+
+**External retrieval of biometric/identity data (SEC-093).** Any external retrieval that could inform identity (legal sources, directory lookups, verified public records) is governed by an approved legal/privacy policy; no scraping of private accounts; no bypassing access controls; no identity inference from an unverified name, phone number or face match alone.
+
+### 15.20 Web Retrieval & External Connectors
+
+**Isolation from the core evidence store (SEC-094).** Retrieval connectors run as isolated services; a fetched external page or record is not a direct write-path into the evidence store without an explicit, authorized ingestion step.
+
+**Source allowlists where appropriate (SEC-095).** Where a connector has a known, bounded set of legitimate sources, it operates against an allowlist by default; open-web retrieval is a separately-authorized, more-restricted mode.
+
+**Per-source rate limits + retrieval timeouts (SEC-096).** Each source has its own rate cap; every retrieval has a hard wall-clock timeout; no source can pin a retrieval thread indefinitely.
+
+**Safe URL + redirect validation (SEC-097).** Every fetched URL and every redirect it follows is validated against the SSRF policy (§ 15.15); the validation is re-run on the final resolved address, not just the initially-requested one.
+
+**Content-type + size limits (SEC-098).** Retrieved content is type-checked and size-capped before parsing; oversized or mis-typed responses are rejected with a structured event, not truncated and parsed.
+
+**Sandboxed parsing (SEC-099).** Parsed retrieval results come from the same restricted, resource-bounded sandbox class as file parsers (§ 15.12); a hostile HTML/PDF/JSON response cannot break out of it.
+
+**Provenance on every retrieved claim (SEC-100).** Every retrieved fact or claim records its source URL, the capture timestamp, and — where lawful and technically possible — a digest of the captured response; this provenance travels with the claim into any report that uses it.
+
+**Retrieved claims ≠ verified facts (SEC-101).** Retrieved content is reported as a claim with a confidence and a provenance, not as a verified fact; a retrieved "the event did not happen" is not proof an event did not happen.
+
+**Respect applicable law, terms and access restrictions (SEC-102).** Connectors must respect robots/access policies, licence terms and applicable law for the retrieval; a retrieval that crosses a documented access restriction is a violation event, not a workaround.
+
+**No silent overwrite of investigator-supplied evidence (SEC-103).** External data never silently overwrites investigator-entered evidence; every external claim keeps its provenance and its confidence limitations attached; merging is an explicit, logged, authorized action.
+
+### 15.21 API & Application Security
+
+**Strict request-schema validation (SEC-104).** Every request body and query parameter is schema-validated at the edge; an unknown field is a reject-by-default, not a silent ignore, on security-relevant endpoints.
+
+**Output encoding (SEC-105).** All untrusted data (evidence metadata, model text, retrieved content) is encoded or parameterised before it reaches a user-facing renderer or template; no raw injection of untrusted text into a report or UI.
+
+**Parameterised queries (SEC-106).** All application-layer SQL goes through parameterised queries or a validated ORM (§ 15.16, same rule, application-layer enforcement point).
+
+**Secure download endpoints with short-lived signed URLs + authorization checks (SEC-107).** Downloads and exports use short-lived, single-use, scope-bound signed URLs; a signed URL is re-checked against the current authorization state at use time, not just at issue time; a revoked account invalidates outstanding signed URLs.
+
+**CSRF protection (SEC-108).** All browser-facing write operations require CSRF protection (§ 15.15, application-layer enforcement point).
+
+**Secure cookies / sessions (SEC-109).** Session cookies are `Secure`, `HttpOnly`, `SameSite`-restricted; session lifetimes are bounded; session fixation is prevented by re-issuance on privilege change.
+
+**Request-size + rate limits (SEC-110).** Per-endpoint request-size caps and rate limits (§ 15.15, application-layer enforcement point); a breach is a structured 429/413, not a hung connection.
+
+**Safe error responses (SEC-111).** Error responses never leak stack traces, internal file paths, credential or secret material, model-internal state or infrastructure identifiers; the internal detail stays in the audit log, not the response body.
+
+**Security headers (SEC-112).** Browser-facing responses carry the standard defensive headers (CSP, `X-Content-Type-Options: nosniff`, HSTS, `frame-ancestors` restrictions as applicable).
+
+**Dependency + container scanning (SEC-113).** Automated dependency-vulnerability and container-image scanning run on a schedule and at build time; a high-severity, unpatched, exploitable finding in a dependency blocks promotion of that build.
+
+**Secret scanning (SEC-114).** Source, CI logs and generated artefacts are scanned for accidentally-committed secrets; a hit is a build-failing, incident-graded finding.
+
+**SAST / DAST (SEC-115).** Static application-security testing is part of the normal build; dynamic application-security testing runs against a dedicated test environment on a schedule; findings feed the § 15.21 test-matrix verification record.
+
+**Regular penetration testing (SEC-116).** Scheduled, scope-limited external and internal penetration tests; findings are tracked to closure the same as any other verified vulnerability; scope and rules of engagement are documented and approved.
+
+### 15.22 Privacy-Preserving Logging & Auditing
+
+**What is never in logs (SEC-117).** Logs do not contain, by default: full audio or video content, raw biometric embedding vectors, authentication tokens, passwords, secret keys, unnecessary personal data, or the full text of sensitive evidence. Where a reference is needed, it is a stable identifier and a hash, not the content.
+
+**What every sensitive-action record contains (SEC-118).** For every sensitive action (§ 15.14, § 15.16, § 15.19, § 15.21): the acting user or service identity, the case and resource IDs touched, the action taken, the authorization outcome (granted / denied and why), the timestamp, the request/correlation ID, any artifact or manifest digest produced or consumed, success/failure, and the reason for a failure.
+
+**Restricted security-log access (SEC-119).** The security/audit event store is readable only by named, limited, break-glass roles; routine application and worker roles cannot read or write it directly.
+
+**Protection against unauthorised modification (SEC-120).** Security events are append-only and integrity-checked (hash-chained, per § 15.6/15.8 custody-ledger design); a modified or missing security event is a detection signal in its own right, escalated like any integrity alert.
+
+### 15.23 AI Tool-Use & Automation Controls
+
+Applies to future autonomous-agent, web-retrieval-tool and multi-agent-orchestration capabilities; the design is stated now so that a capability that arrives later is not retrofitted onto an un-authorized surface.
+
+**Separate capability + permission model (SEC-121).** An AI's capabilities (what it can do) and its permissions (what it may access) are separate, both explicitly granted; a capability grant does not imply a permission grant and vice-versa; the model is never the sole authority on whether a user may access a resource — the application's authorization check is the only authority.
+
+**Per-tool contract (SEC-122).** Every tool an agent or model may call has: a documented purpose; a restricted, schema-validated input contract; a dedicated service identity; minimum-necessary permissions for that tool; an explicit network policy; resource and time limits; an audit trail entry for every call; a deterministic, application-side authorization check that runs before the tool executes (not inferred from model output); and a documented failure + rollback policy.
+
+**Human approval for high-impact actions (SEC-123).** Full-case export, retention-policy changes, bulk deletion of derived records, final-dossier approval and any irreversible external action require a named human's approval step in the workflow; an agent or model cannot self-approve any of these.
+
+**No unrestricted shell, DB credentials or general-purpose admin tokens for the LLM (SEC-124).** An LLM-facing component never holds a general-purpose admin token, unrestricted shell access, or broad database credentials; it holds per-tool, scoped credentials only, and each such credential is individually auditable and revocable.
+
+### 15.24 Security Testing & Acceptance
+
+**Verification matrix (SEC-125).** A security-verification matrix maps each requirement in § 15.9–15.23 to an OWASP ASVS 5.0.0 control and, where applicable, an OWASP LLM-top-10 risk; each row records: requirement ID, threat addressed (TM-xx or named threat), preventive control, detection control, test case, expected result, evidence-of-execution reference, and implementation status.
+
+**Minimum test set (SEC-126).** At minimum, the platform's security regression suite covers:
+1. Unauthorized cross-case access (two cases, one identity, expected deny)
+2. IDOR / BOLA against case, evidence, object, job and report identifiers
+3. Privilege escalation attempts (worker-to-host, low-privilege-to-admin path)
+4. Malicious archive and decompression-bomb uploads
+5. Parser timeout / resource-exhaustion attacks
+6. SSRF via the external retrieval path (loopback, RFC-1918, link-local, cloud-metadata targets)
+7. SQL injection across every parameterised-query enforcement point
+8. Token and credential leakage in logs, error responses and worker argv
+9. Unauthorized object-storage access (signed-URL scope, expired-URL reuse, cross-case bucket access)
+10. Evidence overwrite attempts (direct write, "repair", in-place modification paths)
+11. Forged or replayed task-queue messages (replay-protection per § 15.16 (§ 15.24 test case 11))
+12. Duplicate event delivery to the DLQ and outbox/inbox paths (§ 23.6)
+13. Prompt-injection payloads in uploads, transcripts and retrieved content
+14. RAG cross-case leakage (vector + keyword paths, § 15.18)
+15. Malicious or corrupted model checkpoint loaded at runtime
+16. Unvalidated model output reaching the DB, report renderer or workflow engine
+17. Inference denial of service (batch-size, concurrency and VRAM budget exhaustion)
+18. Sensitive data (biometric vectors, tokens, secrets) appearing in any log sink
+19. Unauthorized report export (signed-URL scope and re-check on use)
+20. Backup restoration and evidence fixity verification (restore, re-hash, compare to baseline)
+
+**Evidence-of-execution rule (SEC-127).** A control is never marked "implemented" on the basis that it is documented; it is marked implemented only when a named test has been executed against the deployed system, the result matches expectation, and the execution is recorded (test run reference, date, executor) in the verification matrix.
+
+**Prohibition on unverified claims (SEC-128).** No benchmark figure, security certification, or legal-compliance claim may be recorded in the TRD as achieved unless it is the recorded result of an executed, reproducible test; proposed-architecture status is the default, "verified" status requires the evidence above.
+
+### 15.25 Deliverables, Security Priorities & Decision Notes
+
+**Deliverables checklist (SEC-129).** The security work product set, all of which this section now specifies in proposed-architecture form:
+1. Threat model (this subsection's TM-xx matrix, § 15.10)
+2. Trust-boundary diagram (§ 15.10 figure)
+3. Authentication & authorization model (§ 15.11)
+4. Evidence-storage security model (§ 15.14, cross-ref § 15.8 EIV)
+5. Parser + model sandboxing design (§ 15.12, § 15.17)  [intake sandbox and model-inference isolation]
+6. Secret + key management (§ 15.13)
+7. AI / RAG threat model (§ 15.17, § 15.18, test cases 13–17 in § 15.24)
+8. Biometric data-protection policy (§ 15.19)
+9. External-retrieval security policy (§ 15.20)
+10. Security event + audit schema (§ 15.16 record fields, § 15.22)
+11. Security test matrix (§ 15.24)
+12. Incident-response + recovery requirements (below, incident-response figure in § 15.25)
+
+**Incident-response + recovery requirements (SEC-130).** The platform must define, per security event class (integrity alert, unauthorized-access alert, supply-chain compromise, data-exposure event): detection source, triage owner, containment actions (including fail-closed quarantine per § 15.12 and § 15.14, § 15.23 tool-permission revocation), forensics (append-only, hash-verified evidence preservation, § 15.14), recovery (verified restoration per § 15.14, including backup-integrity check), and post-incident review that produces a new or updated threat-matrix row. Incident events and their disposition are themselves security events in the § 15.22 audit store.
+
+```mermaid
+flowchart TD
+    DETECT["Security Event Detected - Fixity Mismatch - Unauthorized Access - Supply-chain Alert"]
+    TRIAGE["Triage - Classify - Assign Owner - Timestamp - Correlation ID"]
+    CONTAIN["Containment - Fail-closed Quarantine - Revoke Access - Isolate Node or Service"]
+    FORENSICS["Forensics - Append-only, Hash-verified Evidence Preservation - No Silent Repair"]
+    RECOVER["Recovery - Verified Restoration - Dual-hash Check Against Baseline - Legal-hold Check"]
+    REVIEW["Post-incident Review - Update Threat Matrix - Update Test Matrix - Record Lessons"]
+    AUDITSTORE["All Steps Write to the Append-only Security Event Store - Independently Protected"]
+
+    DETECT --> TRIAGE
+    TRIAGE --> CONTAIN
+    CONTAIN --> FORENSICS
+    FORENSICS --> RECOVER
+    RECOVER --> REVIEW
+    TRIAGE -.-> AUDITSTORE
+    CONTAIN -.-> AUDITSTORE
+    FORENSICS -.-> AUDITSTORE
+    RECOVER -.-> AUDITSTORE
+    REVIEW -.-> AUDITSTORE
+```
+
+**Security implementation priorities (SEC-131).**
+
+| Priority | Items (requirement refs) | Cross-reference |
+| :--- | :--- | :--- |
+| P0 — required before handling real investigative evidence | Centralized authn + RBAC, case-level + object-level authorization (SEC-003/004); original-evidence immutability (SEC-031–040); secure secret handling (SEC-021–030); upload + parser isolation (SEC-011–020); DB + object-storage access control (SEC-043, SEC-048, SEC-064); audit logging (SEC-118–120); cross-case RAG isolation (SEC-074, SEC-081); model output validation (SEC-072); resource limits (SEC-015, SEC-069); backup + restoration verification (SEC-037, SEC-039) | PRD § 7.9 P0 summary (cross-reference only, not duplicated here) |
+| P1 — before broader deployment | Centralised security monitoring; key rotation + recovery (SEC-025, SEC-026); incident response (SEC-130, incident-response figure in § 15.25); model supply-chain verification (SEC-066–068); automated dependency + container scanning (SEC-113, SEC-114); security regression testing (SEC-126); formal retention + deletion workflows (SEC-035, SEC-088) | PHASES § 9.1 milestone M-PS05-9 (cross-reference only, not duplicated here) |
+| P2 — hardening | Stronger workload isolation where justified; anomaly detection; supply-chain attestations; adversarial AI testing (SEC-078, § 15.24 test case 13–17, at scale); independent security assessment (SEC-116, external, full-scope) | PHASES § 9.1 milestones M-PS05-10 / M-PS05-11 (cross-reference only, not duplicated here) |
+
+**Decision note — Pillow pixel limit (conflict resolution).** Two sections of this document previously stated different Pillow decompression-limit values: the platform-wide image-processing sections (§ 15.1 DoS row, § 16 IRE / image pipeline) stated `Image.MAX_IMAGE_PIXELS = 128_000_000` (128 MP), while the IMLF security subsection stated a stricter 100 MP ceiling with a 10:1 compression-ratio guard. **Decision: 100 MP is the canonical platform ceiling.** All image-processing paths — intake pre-flight, IRE deep inspection, IMLF manipulation-localisation analysis — must set `Pillow`'s `Image.MAX_IMAGE_PIXELS = 100_000_000` and enforce the 10:1 post-decompression-ratio check. The stricter bound is chosen because the 10:1 ratio guard in IMLF was already the tighter control, and harmonizing the pixel ceiling to match it removes the weaker value without weakening any existing control. This decision is recorded once, here, and the two earlier sites are updated to reference this value (§ 15.1's DoS row and the IRE/image-pipeline sections are read as "the platform Pillow limit, per § 15.25 decision note" rather than re-stating `128_000_000`).
+
+---
 
 ## 16. Cross-Media Metadata Service (CMMS) — Technical Architecture & Specification
 
@@ -8598,6 +9129,8 @@ def estimate_clock_drift(self, source_clock_id: str, anchor_ids: List[str]) -> D
     ...
 ```
 
+These signature sketches are retained for API readability. Execution of these tasks is governed by the canonical platform orchestration model of § 23: every Celery task binds to a task record (§ 23.4), a workload queue class (§ 23.9), an idempotency key (§ 23.5), and lease/checkpoint semantics (§ 23.6–§ 23.7).
+
 ### 17.12 Technology Selection and Evaluation Matrix
 
 | Capability | Evaluated Technology | Selection Status | Forensic & Engineering Rationale |
@@ -8610,7 +9143,7 @@ def estimate_clock_drift(self, source_clock_id: str, anchor_ids: List[str]) -> D
 | **Change-Point Analysis**| `ruptures` (PELT algorithm) | **SELECTED** | Optimal piecewise linear segmentation with $O(N)$ runtime complexity |
 | **Signal Correlation** | `scipy.signal.correlate` | **SELECTED** | Normalized cross-correlation for audio transient and visual onset alignment |
 | **Data Contracts**     | Pydantic v2 | **SELECTED** | Strict typing, sub-millisecond serialization, explicit JSON schema generation |
-| **Persistence**        | PostgreSQL 16 + B-tree/JSONB | **SELECTED** | Fast timestamp range indexing, native JSONB support for multi-source payloads |
+| **Persistence**        | PostgreSQL 15/16 (16 recommended, 15 minimum) + B-tree/JSONB | **SELECTED** | Fast timestamp range indexing, native JSONB support for multi-source payloads |
 | **Orchestration**      | Celery + Redis | **SELECTED** | Asynchronous execution, isolated worker memory cgroups, retry idempotency |
 
 ### 17.13 Testing, Benchmarks and Validation Protocols
@@ -9007,7 +9540,7 @@ def refine_boundaries(self, evidence_id: str, candidate_samples: List[int]) -> L
 | **Change-Point Search**| `ruptures` (PELT algorithm) | **SELECTED** | Linear time $O(N)$ change-point segmentation with $L_2$ and kernel cost functions |
 | **Copy-Move Matching** | `scipy.spatial.distance.cdist` + DTW | **SELECTED** | Efficient self-similarity matrix computation with dynamic time warping |
 | **Learned Localisation**| PyTorch (TCN / ASLNet candidate) | **SELECTED** | Multi-scale temporal receptive fields for contextual suspicion curve inference |
-| **Persistence** | PostgreSQL 16 + JSONB | **SELECTED** | Indexed sample range queries, JSONB storage for multi-detector feature arrays |
+| **Persistence** | PostgreSQL 15/16 (16 recommended, 15 minimum) + JSONB | **SELECTED** | Indexed sample range queries, JSONB storage for multi-detector feature arrays |
 | **Data Contracts** | Pydantic v2 | **SELECTED** | Sub-millisecond serialization, frozen immutable models, strict validation |
 | **Legal PDF Dossier** | `weasyprint` + Jinja2 | **SELECTED** | High-fidelity Section 65B/63 BSA certified PDF generation with vector graphics |
 
@@ -9769,7 +10302,7 @@ def assemble_export_package_task(self, evidence_id: str, output_dir: str) -> Dic
 | **Timestamp Protocol**| RFC 3161 / RFC 5816 | **SELECTED** | International standard for proof-of-existence time assertions binding hash to TSA certificate |
 | **Canonical JSON** | RFC 8785 (JCS) | **SELECTED** | Standardized, cross-language deterministic JSON byte serialization |
 | **Storage Vault** | POSIX `0400` + MinIO S3 Object Lock | **SELECTED** | Hardware-level and filesystem-level Write-Once retention locking |
-| **Database** | PostgreSQL 16 + Immutability Triggers | **SELECTED** | ACID compliance, append-only triggers, relational indexing on UUIDs and sequence numbers |
+| **Database** | PostgreSQL 15/16 (16 recommended, 15 minimum) + Immutability Triggers | **SELECTED** | ACID compliance, append-only triggers, relational indexing on UUIDs and sequence numbers |
 | **Queue / Workers** | Redis 7 + Celery 5.3+ | **SELECTED** | Asynchronous background streaming, non-blocking fixity audits, fault-tolerant retry |
 
 ---
@@ -10580,7 +11113,7 @@ class DualControlIssueConfirm(BaseModel):
 The dashboard avoids duplicating forensic detection tables or master evidence manifests. It persists only user preferences, review state annotations, search filters, and task assignments:
 
 ```sql
--- UFD Workbench Persistent Tables (PostgreSQL 16+)
+-- UFD Workbench Persistent Tables (PostgreSQL 15/16; 15 minimum, 16 recommended)
 
 -- 1. Examiner Workspace Preferences
 CREATE TABLE ufd_user_preferences (
@@ -10914,7 +11447,7 @@ To satisfy statutory requirements under Section 65B of the Indian Evidence Act, 
 
 ---
 
-### 21.4 Nine-State Report Lifecycle State Machine
+### 21.4 Ten-State Report Lifecycle State Machine
 
 ```mermaid
 stateDiagram-v2
@@ -11077,7 +11610,7 @@ class DossierManifest(BaseModel):
 ### 21.9 Database & Persistence Model
 
 ```sql
--- UFREDF Reporting Persistence Tables (PostgreSQL 16+)
+-- UFREDF Reporting Persistence Tables (PostgreSQL 15/16; 15 minimum, 16 recommended)
 
 -- 1. Reports Registry Table
 CREATE TABLE ufredf_reports (
@@ -11282,6 +11815,8 @@ class CCHDFOrchestrator:
             
         return all_findings
 ```
+
+> **§ 23.17 Reconciliation — Re-openable Evidence Stream & Durable Execution.** The `raw_stream: BinaryIO` parameter above represents the pre-reconciliation hazard: one shared cursor handed to both the universal scanner and the modality adapter, which risks file-pointer exhaustion and partial reads when the scanner's buffered seeks are followed by the adapter's sequential pass. The canonical contract replaces it with an **`EvidenceStreamHandle`** (defined in § 23.17): a re-openable, independently cursorable, evidence-bound read API with deterministic chunk IDs and bounded reads, so the scanner and adapter each obtain independent cursors over the *same immutable WORM object* and never share mutable file-pointer state. In production, `execute_investigation` is not an unbounded inline function: it is decomposed into durable workflow tasks — `cchdf.triage_scan` (checkpointed, idempotent) followed by `cchdf.adapter_run` (checkpointed per adapter batch) — executed under the § 23 platform workflow model with leases, retries and DLQ semantics. The class sketch above remains the in-process API reference; its durable execution semantics are normative in § 23.3–§ 23.10.
 
 ---
 
@@ -11706,3 +12241,685 @@ class ConcealmentFinding(BaseModel):
 | **CCHDF-34** | TRD § 22.13 | `cchdf.reporting` | Vector Store | `test_cchdf_rag_isolation.py` | `CCHDF-A0` | `PLANNED` |
 | **CCHDF-35** | TRD § 22.13 | `cchdf.reporting` | Section 63 BSA Schedule | `test_cchdf_bsa_schedule.py` | `CCHDF-A0` | `PLANNED` |
 
+
+---
+
+## 23. Platform Orchestration & Backend Reliability Architecture (Consolidated)
+
+This section consolidates the cross-platform task-execution, reliability, resource-scheduling, storage-consistency and observability contracts for PS-05. It **extends and supersedes** scattered orchestration statements in §§ 1–5, 11.11, 11.12.17, 16, 17, 19, 20.11, 21, 22, and is the single normative reference for platform-wide execution behaviour. Subsystem-internal specifications remain authoritative for their own algorithms; wherever they describe execution, queueing or failure behaviour, this section governs.
+
+### 23.1 Canonical Task-Execution & Broker Decision
+
+**CANONICAL DECISION (REO-001):** PS-05 executes all asynchronous work — evidence triage, engine dispatch, WORM fixity, media chunking, GPU inference, indexing and report compilation — through **Celery 5.3+ brokers through Redis 7+**, using Celery task classes, Celery Beat for scheduled jobs and Redis as the broker.
+
+**Rationale (short):** The platform's declared runtime dependencies (`pyproject.toml`: `celery>=5.3.6`, `redis>=5.0.2`, plus `celery_app.py` in `ps05.core`) are Celery + Redis. ARQ (Redis-asio task queue) was referenced in earlier drafts as an alternative async backend; it is **retired as of this baseline**. All terminology in this document that reads "Celery/ARQ", "Redis/ARQ" or implies an ARQ-based executor is to be read as **Celery**. No engine, subsystem or BFF path may introduce a second broker, task framework, queue system or bespoke process supervisor in parallel with Celery + Redis. Existing Celery task-signature sketches in §§ 5, 11.3.4, 16, 17.11.2, 18.13.2, 19.15 remain valid as API surfaces; their *execution semantics* (lifecycle, idempotency, leases, outbox, checkpoints, DLQ, observability) are defined here, in § 23.
+
+> Terminology fix applied at the top of this document: the System Context diagram's Redis node and the Evidence Orchestrator row in § 2 now read "Celery" only. No further dual Celery/ARQ phrasing exists after this consolidation.
+
+---
+
+### 23.2 Bounded Contexts & Runtime Planes
+
+The platform is organised as a **modular monolith with isolated worker pools**, applying DDD strategic boundaries, hexagonal / ports-and-adapters style at each context edge, and strict package-boundary enforcement (no cyclic dependencies; no direct foreign-DB-table manipulation by unrelated engine internals — all cross-context data access goes through a versioned Pydantic contract or a published domain event).
+
+Bounded contexts and their ownership:
+
+| Bounded Context | Owns | Package Boundary (canonical) |
+| :--- | :--- | :--- |
+| Case Management | Case lifecycle, FIR linkage, RBAC scopes, legal holds, examiners, dual-control assignments. | `ps05.core.cases`, `ps05.core.auth` |
+| Evidence Intake | Upload streaming, pre-decode dual hashing, WORM commitment, evidence registration, acquisition records. | `ps05.core.ingest` (existing), extended by § 23.8/§ 23.11 |
+| CEIPL / EIV | Canonical manifests, Ed25519 signatures, RFC 3161 TSA, Merkle DAG, custody ledger, WORM vault zones, continuous fixity auditing. | `ps05.core.crypto`, EIV § 19 |
+| CMMS | Universal metadata schemas, parser execution records, consistency findings, metadata snapshots. | `ps05.engines.cmms` (§ 16) |
+| CSTV | Timestamp normalisation, clock drift, event anchors, temporal conflict graph, case-wide master timeline. | `ps05.engines.cstv` (§ 17) |
+| AIF (IVE/IRE/AIM/FPA/IMLF/GEO) | Image forensic engines + geospatial correlation. | `ps05.engines.image.*` (§ 10) |
+| AURAS (ARE/MVSI/ADDE/AESL) | Audio forensic engines + audio splice localisation. | `ps05.engines.audio.*` (§§ 5–9, 18) |
+| VISTA (VRE/AFB/AVSC/VDF/VCI/CCTV/CFITSA) | Video forensic engines, CCTV profile, frame-integrity temporal forensics. | `ps05.engines.vista.*` (§ 11) |
+| ONTF | Defensive PCAP/PCAPNG ingestion, TShark/Zeek batch dissection, flow normalisation, feature extraction, attribution, threat analysis, covert timing channel analysis. | `ps05.engines.ontf` |
+| CCHDF / PSEA | Universal concealment triage, carrier-specific steganalysis adapters, inert quarantine storage, examiner extraction gate, § 23.17 evidence-stream contract. | `ps05.engines.cchdf` (§ 22) |
+| CDVF | Model registry, benchmark runs, calibration, OOD gating, selective prediction (cross-modal deepfake validation framework). | `ps05.engines.cdvf` (§ 11.B) |
+| Evidence Graph + Case RAG | Cross-engine finding correlation graph, evidence entity-relationship store, prompt-injection-defended retrieval. | `ps05.core.evidgraph`, `ps05.core.rag` (§ 11.9.4, § 22.13) |
+| UFD / UFW | Presentation plane, workspaces, BFF aggregation, RBAC dual-control UI. | `ps05.presentation` (§ 20) |
+| UFREDF | Dossier IR compilation, ten-state report lifecycle, 65B/63 BSA schedules, PDF/A-1b archival pipeline. | `ps05.reporting` (§ 21) |
+| Platform Runtime / Orchestration | Celery app, outbox/inbox, lease manager, DLQ, admission scheduler, workflow DAG engine, observability, reconciliation daemons. | `ps05.core.orchestrator`, `ps05.core.reliability`, `ps05.core.observability` |
+
+**Runtime planes** (logical boundaries; these are NOT a mandate to deploy separate services or infrastructure — one monolith with isolated worker pools is the default, and any future split must preserve the same contracts):
+
+| Plane | Contains |
+| :--- | :--- |
+| Control Plane | FastAPI gateway, auth/RBAC, case lifecycle API, intake coordination, workflow-state API, Celery task enqueuing, worker-health / resource-allocation supervisor, configuration & model-registry services, outbox publisher/dispatcher, DLQ operator console. |
+| Data Plane | Evidence streaming readers, defensive media parsers (sandboxed), CPU processing workers, GPU inference workers, network/filesystem analysis workers, derived-artifact producers, vector/keyword indexers, finding normalisation & persistence workers. |
+| Evidence Plane | Original WORM objects, derived immutable artifacts, CEIPL manifests, provenance DAG, custody log, fixity verification & backup (seven storage zones, § 19.7). |
+| Presentation Plane | UFD/UFW, Case RAG query endpoints, case-wide timeline + evidence-graph visualisation, UFREDF report generation & signature workflows. |
+
+---
+
+### 23.3 Workflow DAG Model
+
+Every investigation — from evidence upload to the signed UFREDF dossier — is a **directed acyclic dependency graph** of task nodes, executed by the platform's durable workflow engine on top of Celery. There is no single blocking function that sequentially awaits every engine; all engines that do not share a dependency edge run on parallel branches, and fan-in stages aggregate only their declared prerequisites.
+
+#### 23.3.1 DAG Primitives
+
+- **Task Node:** A unit of durable, retryable, checkpointable execution. Has a stable node ID, an engine or service owner, an input-artifact set (each bound by hash), a declared queue/workload class (§ 23.9), a declared retry policy (§ 23.10), a declared resource profile (§ 23.9), and one or more output artifacts (§ 23.4, § 23.8).
+- **Dependency Edge:** One node declares another as its prerequisite. Every edge is typed as:
+  - **Required** (`HARD`): the source's successful durable completion is a precondition. A required prerequisite that fails terminally **blocks** the dependent node (state `BLOCKED`, § 23.4.3).
+  - **Optional** (`SOFT`): the source's failure **must not** fail or block the dependent branch; the dependent node records the missing input as a data gap and proceeds, and its own output is tagged `PARTIAL_SUCCESS` if required inputs are all present but at least one soft prerequisite failed.
+  - **Recoverable** (`RETRY-ABLE-DEP`): a soft prerequisite whose transient failure will be retried in place under the source node's own retry policy before it is downgraded to a failed-soft input.
+- **Parallel Branch / Fan-out:** One node's completion can admit multiple independent successors simultaneously. Fan-out width is bounded by the admission scheduler (§ 23.9) and per-case/per-engine concurrency limits; unbounded fan-out is never permitted (REO-005).
+- **Fan-in:** A node whose every prerequisite edge must resolve (each to SUCCEEDED, or to a recorded failed-soft state) before it may execute. Fan-in nodes carry a `PARTIAL_SUCCESS` terminal state and must never report `SUCCEEDED` overall if a required prerequisite was missing or failed.
+- **Checkpoint:** A durable, persisted snapshot of a node's progress (see § 23.7). A node that reaches a checkpoint and then crashes resumes from that checkpoint, not from zero.
+- **Retry State:** `RETRY_WAIT` (§ 23.4.3) under the retry policy of § 23.10.
+- **Terminal Failure:** `FAILED_PERMANENT` or `DEAD_LETTERED`; the node no longer retries automatically. Downstream required dependents become `BLOCKED`; soft dependents record a failed-soft input.
+- **Human-Approval Gate:** A first-class DAG node type (not a bypass of the DAG). It pauses the branch until an authorised examiner dual-control action (§ 20.3.2, § 20.6) releases it. Approval gates are mandatory for quarantine payload extraction (CCHDF § 22.12), biometric reference comparison (AIF FPA, IVE-07), and report signing (UFREDF § 21.4). A gate is only released by a *different* user role than the one that requested it, per § 20.3 dual-control rules.
+
+#### 23.3.2 Refined Investigation DAG
+
+```mermaid
+flowchart TB
+    UPLOAD["Evidence Upload\n(resumable, § 23.8)"]
+    PREHASH["Pre-Decode Dual Hashing\n(SHA-256 / SHA3-512, CEIPL § 19.2)"]
+    WORMC["WORM Commitment\n(Object Lock / POSIX 0400, § 19.7)"]
+    EVIDREG["Evidence Registration\n(case/evidence records, acquisition record, manifest hash)"]
+    TRIAGE["Universal Triage\n(CCHDF § 22.2 scanner + CMMS ingestion + AIF-IVE-01 / AFB-11.1.1 pre-flight)"]
+
+    subgraph PARALLEL_ENGINES["Fan-Out: Parallel Engine Branches (required prerequisites only where marked)"]
+        CMMS["CMMS Metadata Snapshot\n(§ 16)"]
+        AIF["AIF\n(IVE/IRE/AIM/FPA/IMLF/AIF-GEO, § 10)"]
+        AURAS["AURAS\n(ARE/MVSI/ADDE, §§ 5–9)"]
+        VISTA["VISTA\n(VRE/AFB/AVSC/VDF/VCI/CCTV/CFITSA, § 11)"]
+        ONTF["ONTF\n(PCAP/PCAPNG dissection, flow and covert-timing; refs § 22.8, § 16.5.5)"]
+        CCHDFA["CCHDF Carrier Adapters\n(image/audio/video/doc/FS/network/semantic/PSEA, § 22.3–22.10)"]
+    end
+
+    AFB["AFB Audio Extraction\n(VISTA § 11.3)"]
+    VCI["VCI Content Intelligence\n(§ 11.6)"]
+    VDF["VDF Deepfake / AI-Gen Detection\n(§ 11.5)"]
+    IMLF["IMLF Manipulation Localisation\n(§ 12.4)"]
+    CSTV["CSTV Cross-Source Timestamp Verification\n(§ 17)"]
+
+    AGG["Finding Aggregation (Fan-In)\nrequired: CMMS + AIF + AURAS + VISTA + ONTF + CCHDFA + CSTV; PARTIAL_SUCCESS if any required missing"]
+    CDVFG["CDVF Model Validation and Calibration Gate\n(model registry / OOD / calibration status, § 11.B)"]
+    EGRAPH["Evidence Graph + Case RAG Projection\n(§ 11.9.4, § 22.13)"]
+    REVIEW["Human Examiner Review and Dual-Control Adjudication\n(§ 20.6 ten-state finding lifecycle)"]
+    UFREDF["UFREDF Dossier Compilation and Signing\n(§ 21)"]
+
+    UPLOAD --> PREHASH --> WORMC --> EVIDREG --> TRIAGE
+    TRIAGE --> CMMS & AIF & AURAS & VISTA & ONTF & CCHDFA
+
+    VISTA --> AFB --> AURAS
+    VISTA --> VCI
+    VISTA --> VDF
+
+    AIF --> IMLF
+
+    CMMS --> CSTV
+    AURAS --> CSTV
+    VISTA --> CSTV
+    ONTF --> CSTV
+
+    CMMS --> AGG
+    AIF --> AGG
+    AURAS --> AGG
+    VISTA --> AGG
+    ONTF --> AGG
+    CCHDFA --> AGG
+    CSTV --> AGG
+
+    AGG --> CDVFG --> EGRAPH --> REVIEW --> UFREDF
+```
+
+*Prerequisite refinement (REFINED-AGAINST-EXISTING-TRD):*
+- **VISTA → AFB → AURAS** mirrors § 11.3.4 (VISTA orchestrator dispatches AFB job to Celery/Redis queue; AFB hands off to AURAS engines). AURAS therefore has a *soft* dependency on VISTA's audio stream when the exhibit is video, and a *hard* direct dependency when the exhibit is already audio-only (triage classifies media type at `TRIAGE`).
+- **AIF → IMLF**: § 12.4's IMLF contract assumes AIF-produced detection/segmentation inputs; the IMLF node is a child of the AIF branch, not a top-level parallel engine, so IMLF never runs against an image that AIF has not yet profiled.
+- **CMMS + AURAS + VISTA + ONTF → CSTV**: § 17.1.1 / § 17.7 require CMMS-supplied capture-level metadata, AURAS-supplied ENF/speech timestamps, VISTA-supplied OSD clock regressions and ONTF-supplied packet-arrival times as input sources for clock-offset / drift estimation and event-anchor correlation; CSTV therefore fans in from all four.
+- **CCTV multi-camera correlation (§ 11.7.7)** lives inside the VISTA branch, not a new top-level node.
+- **CDVF (§ 11.B)** is a *gate*, not a parallel detector: it validates the provenance/calibration state of the detector models that produced AIF/VISTA/AURAS findings before fan-in output is trusted; it does not add new detectors.
+- **Evidence Graph + Case RAG (§ 11.9.4, § 22.13)** is built *after* fan-in so it projects over the reconciled, CDVF-gated finding set, and before human review so examiners query the graph/RAG rather than raw findings.
+
+#### 23.3.3 DAG Invariants
+
+1. A required prerequisite failure **blocks** downstream tasks; they never silently run against missing inputs.
+2. An optional engine failure **does not** fail unrelated branches, and **does not** fail the overall investigation if the failed engine is not on the critical path to `AGG`.
+3. Fan-in nodes report `PARTIAL_SUCCESS` (never `SUCCEEDED`) when any *required* input is missing or failed-soft; the overall case verdict is downgraded accordingly and the UFD workbench (§ 20.11) renders the missing modules explicitly as `UNAVAILABLE`, never as "completed with zero findings".
+4. **No false overall success:** `ANALYSIS_COMPLETED` (§ 23.4.2) is only reachable when every required prerequisite of `AGG` resolved to `SUCCEEDED` (a failed-soft prerequisite is permissible only if the downstream consumer of that specific input has declared it optional in its own DAG node definition; a blanket "engines failed but case completed OK" is forbidden).
+5. The DAG is versioned per investigation: re-running an investigation with a new analysis generation (§ 23.5) builds a fresh DAG instance, never mutates a prior DAG's terminal states.
+
+---
+
+### 23.4 State Machines
+
+#### 23.4.1 Investigation Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> CREATED
+    CREATED --> INGESTING
+    INGESTING --> INTEGRITY_VERIFICATION
+    INTEGRITY_VERIFICATION --> WORM_COMMITTED: dual hash matches + readback verified
+    WORM_COMMITTED --> EVIDENCE_REGISTERED
+    EVIDENCE_REGISTERED --> TRIAGE_PENDING
+    TRIAGE_PENDING --> ANALYSIS_PLANNED
+    ANALYSIS_PLANNED --> PROCESSING
+    PROCESSING --> PARTIAL_SUCCESS
+    PROCESSING --> ANALYSIS_COMPLETED
+    PARTIAL_SUCCESS --> REVIEW_PENDING
+    ANALYSIS_COMPLETED --> REVIEW_PENDING
+    REVIEW_PENDING --> REVIEW_COMPLETED
+    REVIEW_COMPLETED --> REPORT_PENDING
+    REPORT_PENDING --> REPORTED
+    CREATED --> CANCEL_REQUESTED
+    INGESTING --> CANCEL_REQUESTED
+    TRIAGE_PENDING --> CANCEL_REQUESTED
+    ANALYSIS_PLANNED --> CANCEL_REQUESTED
+    PROCESSING --> CANCEL_REQUESTED
+    REVIEW_PENDING --> CANCEL_REQUESTED
+    CANCEL_REQUESTED --> CANCELLED
+    CANCEL_REQUESTED --> [*]: cancel denied, resume
+    INTEGRITY_VERIFICATION --> FAILED: hash mismatch -> quarantine
+    PROCESSING --> FAILED
+    FAILED --> [*]
+    REPORTED --> [*]
+```
+
+#### 23.4.2 Investigation Lifecycle Transition Table
+
+| From | To | Performed By | DB Transaction Boundary | Audit Event |
+| :--- | :--- | :--- | :--- | :--- |
+| `[*]` | `CREATED` | Examiner / Case Admin (API) | Short PG transaction: `case` + `case_investigation` row | `CASE_CREATED`, `INVESTIGATION_CREATED` |
+| `CREATED` | `INGESTING` | API on first upload chunk | Row update on `case_investigation` | `INGEST_STARTED` |
+| `INGESTING` | `INTEGRITY_VERIFICATION` | Ingestion worker | Outbox event `EV_INGEST_COMPLETE` in same TX | `HASH_VERIFIED` or `HASH_MISMATCH` |
+| `INTEGRITY_VERIFICATION` | `WORM_COMMITTED` | WORM commit worker | Commit manifest + outbox event in one TX | `WORM_COMMITTED` |
+| `WORM_COMMITTED` | `EVIDENCE_REGISTERED` | Registration worker | Evidence record + DAG node creation in one TX | `EVIDENCE_REGISTERED` |
+| `EVIDENCE_REGISTERED` | `TRIAGE_PENDING` | Dispatcher | Outbox `EV_EVIDENCE_REGISTERED` | `TRIAGE_QUEUED` |
+| `TRIAGE_PENDING` | `ANALYSIS_PLANNED` | Triage scanner (CCHDF/CMMS) | Plan write + first fan-out edges | `TRIAGE_DONE`, `ANALYSIS_PLAN_COMMITTED` |
+| `ANALYSIS_PLANNED` | `PROCESSING` | Admission scheduler | First task `CLAIMED` | `PROCESSING_STARTED` |
+| `PROCESSING` | `PARTIAL_SUCCESS` | Fan-in node | Node transition + outbox event | `PARTIAL_SUCCESS_RECORD` |
+| `PROCESSING` | `ANALYSIS_COMPLETED` | Fan-in node | Node transition + outbox event | `ANALYSIS_DONE` |
+| `PARTIAL_SUCCESS` / `ANALYSIS_COMPLETED` | `REVIEW_PENDING` | Scheduler | Transition row | `REVIEW_QUEUED` |
+| `REVIEW_PENDING` | `REVIEW_COMPLETED` | Examiner dual-control (§ 20.6) | Finding adjudications committed | `REVIEW_COMPLETED` |
+| `REVIEW_COMPLETED` | `REPORT_PENDING` | UFREDF compilator | Report `DRAFT` row (§ 21.4) | `REPORT_DRAFTED` |
+| `REPORT_PENDING` | `REPORTED` | Examiner + reviewer signature (§ 21.4, § 21.5) | Signature + outbox event in one TX | `REPORT_ISSUED` |
+| any pre-terminal | `CANCEL_REQUESTED` | Case Admin | Row update | `CANCEL_REQUESTED` |
+| `CANCEL_REQUESTED` | `CANCELLED` | Operator confirmation | Terminal write + outbox event | `CASE_CANCELLED` |
+| `INTEGRITY_VERIFICATION` | `FAILED` | Integrity worker | Quarantine row + outbox event | `EVIDENCE_QUARANTINED` |
+| `PROCESSING` | `FAILED` | Any terminal required-branch failure | Terminal write + outbox event | `INVESTIGATION_FAILED` |
+
+**Invariants (REO-002):** Every state transition above happens inside a **single short PostgreSQL transaction** that *atomically* (a) updates the `case_investigation` / task row, (b) writes the corresponding `outbox_events` row (§ 23.6), and (c) appends the custody/audit event (§ 19.10). No transition is committed to PostgreSQL without its matching outbox event row. Transitions that would *overwrite* a terminal state (`REPORTED`, `CANCELLED`, `FAILED` at the evidence level) are rejected by a `CHECK` constraint; supersession is a separate linked report (§ 21.4), never an overwrite.
+
+#### 23.4.3 Task Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING
+    PENDING --> READY: prerequisites resolved
+    READY --> CLAIMED: worker acquires lease
+    CLAIMED --> RUNNING: lease ack'd
+    RUNNING --> CHECKPOINTED
+    CHECKPOINTED --> RUNNING
+    RUNNING --> SUCCEEDED
+    RUNNING --> FAILED_RETRYABLE
+    FAILED_RETRYABLE --> RETRY_WAIT
+    RETRY_WAIT --> READY
+    RUNNING --> FAILED_PERMANENT
+    RUNNING --> BLOCKED: required dep failed
+    FAILED_PERMANENT --> DEAD_LETTERED: max retries exhausted
+    PENDING --> CANCELLED
+    READY --> CANCELLED
+    CLAIMED --> CANCELLED
+    RUNNING --> CANCELLED
+    PENDING --> SKIPPED_OPTIONAL
+    READY --> SKIPPED_OPTIONAL
+    DEAD_LETTERED --> [*]
+    SUCCEEDED --> [*]
+    CANCELLED --> [*]
+    FAILED_PERMANENT --> [*]
+    SKIPPED_OPTIONAL --> [*]
+```
+
+| From | To | Performed By | Notes |
+| :--- | :--- | :--- | :--- |
+| `PENDING` | `READY` | Workflow engine (dependency resolution) | All HARD prereqs `SUCCEEDED`, SOFT prereqs resolved to either `SUCCEEDED` or recorded `FAILED_RETRYABLE/FAILED_PERMANENT` (recorded gap) |
+| `READY` | `CLAIMED` | Worker (lease acquisition, § 23.6) | Lease row written in same TX as task claim |
+| `CLAIMED` | `RUNNING` | Worker | First heartbeat after claim |
+| `RUNNING` | `CHECKPOINTED` | Worker | Checkpoint row persisted + outbox event (§ 23.7) |
+| `CHECKPOINTED` | `RUNNING` | Worker | Resumes from last checkpoint |
+| `RUNNING` | `SUCCEEDED` | Worker | Output artifacts persisted & verified before transition |
+| `RUNNING` | `FAILED_RETRYABLE` | Worker / exception handler | Retryable error class (§ 23.10) |
+| `FAILED_RETRYABLE` | `RETRY_WAIT` | Retry scheduler | Backoff with jitter (§ 23.10) |
+| `RETRY_WAIT` | `READY` | Retry scheduler | Re-queued with same `idempotency_key` (§ 23.5) |
+| `RUNNING` | `FAILED_PERMANENT` | Worker | Permanent error class (§ 23.10), no auto-retry |
+| `FAILED_PERMANENT` | `DEAD_LETTERED` | DLQ reaper | Max attempts / max elapsed duration exceeded |
+| `RUNNING` | `BLOCKED` | Dependency monitor | A HARD prerequisite just failed terminally |
+| `PENDING/READY` | `CANCELLED` | Examiner / operator | Cancellation signal delivered before claim or mid-run |
+| `PENDING/READY` | `SKIPPED_OPTIONAL` | Workflow engine | Explicit skip for optional branch when not requested by analysis profile |
+
+---
+
+### 23.4.4 Task Record (Canonical Schema)
+
+Every durable task node materialises one row in `platform_task_records` (PostgreSQL, part of the Control Plane's unit of work — § 23.11):
+
+| Field | Type | Meaning |
+| :--- | :--- | :--- |
+| `task_id` | UUID | Stable task identity, unique per DAG instance |
+| `analysis_run_id` | UUID | Immutable correlation ID tying this task to one analysis generation (§ 23.5); never reused across generations |
+| `case_id` | UUID | Parent case |
+| `evidence_id` | UUID | Parent evidence exhibit (NULL only for case-level tasks) |
+| `parent_task_id` | UUID | Direct DAG parent (single-edge model; fan-in is expressed via multiple children pointing at one parent through `dependency_edges`) |
+| `engine_id` | TEXT | Owning engine (§ 23.16 matrix key) |
+| `stage_id` | TEXT | Stage within the engine (e.g. `VISTA.AFB.extraction`, `ONTF.dissection.batch_3`) |
+| `input_artifact_ids` | UUID[] | Artifacts this stage consumes |
+| `input_manifest_hashes` | JSONB | Per-input SHA-256 digests (CEIPL canonical form) |
+| `idempotency_key` | TEXT | § 23.5 composite key, `UNIQUE` constraint |
+| `attempt_number` | INT | 1-based |
+| `max_attempts` | INT | From retry policy (§ 23.10) |
+| `task_deadline` | TIMESTAMPTZ | Hard wall-clock deadline for this attempt |
+| `worker_id` | TEXT | Owning worker (NULL until claimed) |
+| `lease_expires_at` | TIMESTAMPTZ | § 23.6 |
+| `heartbeat_at` | TIMESTAMPTZ | Latest heartbeat |
+| `checkpoint_id` | UUID | Last completed durable checkpoint (§ 23.7) |
+| `output_artifact_ids` | UUID[] | Artifacts this stage produced (only after `SUCCEEDED`) |
+| `model_version` | TEXT | Versioned model/checkpoint ID for ML stages (e.g. `VideoMAE-v1.2-sha256:<hex>`); NULL for non-ML stages |
+| `configuration_version` | TEXT | Analysis-configuration / schema-registry version binding |
+| `status` | TEXT | Task lifecycle state (§ 23.4.3) |
+| `error_class` | TEXT | § 23.10 taxonomy code |
+| `error_code` | TEXT | Machine detail code (e.g. `PARSE_MOOV_NOT_FOUND`) |
+
+**Provenance gap analysis — stages that currently do NOT record immutable `analysis_run_id` / `job_id` / `model_version` / `configuration_version` / input-artifact-hash, and must be brought into conformance:**
+
+1. **§ 12.2 `AudioJobResultsResponse`** — carries `job_id`, `evidence_id`, `model_manifest_hashes` but no `analysis_run_id`, no `configuration_version`, and no input-artifact digest. **GAP (REO-003a).**
+2. **§ 12.4 AIF job-result contract** — carries profile and engine flags but no `analysis_run_id` / `configuration_version` / input hash. **GAP (REO-003b).**
+3. **§ 12.5 VISTA cross-engine results** — carries `model_manifest_hashes` but no `analysis_run_id` or `configuration_version`. **GAP (REO-003c).**
+4. **§ 17.11.2 CSTV Celery signatures** — pass `config: Dict[str, Any]` opaquely; no pinned `configuration_version` or `analysis_run_id`. **GAP (REO-003d).**
+5. **§ 18.13.2 AESL Celery signatures** — same opaque-`config_dict` gap. **GAP (REO-003e).**
+6. **§ 19.15 EIV Celery signatures** — hashing/readback tasks carry no `analysis_run_id` (integrity stages are *outside* the analysis-generation model by design, but they must still record `configuration_version` for their hash-scheme pin and an explicit `integrity_batch_id`). **GAP (REO-003f).**
+7. **§ 21.9 UFREDF `ufredf_reports`** — carries `version` and `json_ir_sha256` but no `analysis_run_id` binding to *which* investigation generation the report reflects. **GAP (REO-003g).**
+
+**Requirement (REO-003):** All seven gaps are closed by extending each contract with the § 23.4.4 fields; no subsystem may publish a job result, a finding, a model score or a report without binding it to a concrete `analysis_run_id`, `configuration_version`, input-artifact digest and (where a model was executed) `model_version`. The § 23.16 engine matrix is the enforcement point.
+
+---
+
+### 23.5 Idempotency Contract
+
+The platform-wide `idempotency_key` is the canonical composite, persisted as a single `TEXT` column with a `UNIQUE` database constraint:
+
+```
+idempotency_key :=
+  sha256(
+    case_id
+    || evidence_id          (or "CASE-LEVEL" for case-wide tasks)
+    || engine_id
+    || stage_id
+    || input_artifact_digests   (deterministic order: sorted by artifact_id)
+    || configuration_version
+    || model_checkpoint_version  (or "N/A" for non-ML stages)
+    || analysis_generation       (explicit re-run identifier: "GEN-0" first run, "GEN-1" ...)
+  )
+```
+
+- **Distinct reproducible runs:** a re-run that changes *any one* of `model_checkpoint_version`, `configuration_version` or `analysis_generation` produces a **new** key and is a distinct, reproducible run (REO-004). It never overwrites, and never merges into, the prior generation's results.
+- **Duplicate delivery:** Celery at-least-once delivery may hand the same logical task to two workers. The second claim against an already-completed `idempotency_key` must be a no-op: the DB `UNIQUE` constraint on `(idempotency_key, attempt_number)` rejects it, and the workflow engine collapses it to the original row's terminal state. Findings, derived-artifact records, lineage-DAG edges and UFREDF reports each carry the same composite key and are `UNIQUE`-constrained on it (§ 23.11), so duplicate delivery of a completed task can **never** duplicate a finding, an artifact row, a lineage edge or a report row (REO-004).
+- **Checkpoint-level idempotency:** within one attempt, a stage's internal checkpoints are idempotent — re-processing a chunk whose checkpoint row already exists short-circuits to the persisted chunk output and skips recomputation (§ 23.7).
+
+---
+
+### 23.6 Transactional Outbox, Inbox & Lease / Recovery Semantics
+
+#### 23.6.1 Outbox (PostgreSQL)
+
+All state-changing writes in any bounded context are performed as: *business write* + *outbox-event insert* in **one PostgreSQL transaction**. The `platform_outbox` table:
+
+```
+platform_outbox (
+    event_id            UUID PRIMARY KEY,
+    aggregate_type      TEXT NOT NULL,        -- e.g. 'case_investigation', 'platform_task_records'
+    aggregate_id        UUID NOT NULL,
+    event_type          TEXT NOT NULL,        -- domain event, e.g. 'EV_TASK_SUCCEEDED'
+    analysis_run_id     UUID,
+    case_id             UUID,
+    payload             JSONB NOT NULL,
+    sequence_no         BIGINT NOT NULL,      -- monotonic per (aggregate_type, aggregate_id)
+    created_at          TIMESTAMPTZ NOT NULL,
+    published_at        TIMESTAMPTZ,
+    delivery_status     TEXT NOT NULL DEFAULT 'PENDING'  -- PENDING | PUBLISHED | FAILED
+)
+UNIQUE (aggregate_type, aggregate_id, sequence_no)
+```
+
+A **dispatcher** (polling + LISTEN/NOTIFY hybrid, bounded poll interval, idempotent by `event_id`) publishes `PENDING` rows to the Celery/Redis broker as `EV_*` domain events. After successful publish, the row is marked `PUBLISHED` in a *separate* short transaction. Failed publishes are retried with jitter; after the dispatcher's own max-retry budget, the row is parked as `FAILED` and surfaces to the DLQ operator console (§ 23.10) — a `PENDING`/`FAILED` outbox row is a **first-class alertable condition** (OBS-010).
+
+#### 23.6.2 Inbox / Processed-Message Registry
+
+Consuming bounded contexts keep a `platform_inbox` table:
+
+```
+platform_inbox (
+    event_id            UUID PRIMARY KEY,     -- exactly the outbox event_id, natural key
+    consumer_context    TEXT NOT NULL,
+    received_at         TIMESTAMPTZ NOT NULL,
+    processed_at        TIMESTAMPTZ,
+    dedupe_key          TEXT NOT NULL,        -- for consumers that need coarser dedupe than event_id
+    UNIQUE (consumer_context, dedupe_key)
+)
+```
+
+Consumers process at-most-once by claiming the row (INSERT … ON CONFLICT DO NOTHING), so broker redelivery of an already-processed event is a safe no-op (REO-006). Where a domain *requires* ordering (e.g. custody-log appends for one evidence item, outbox `sequence_no` within one aggregate), the consumer processes strictly in `sequence_no` order and blocks on missing predecessors rather than reordering them.
+
+#### 23.6.3 Explicit Non-ACID Boundary Between PostgreSQL and Redis
+
+**PostgreSQL and Redis do NOT form a single ACID transaction.** The outbox pattern is precisely the mechanism that *approximates* atomicity *within* PostgreSQL and *bridges* to Redis:
+
+- **Committed-but-undelivered outbox event:** a PostgreSQL commit that also committed an outbox row, followed by a Redis outage, leaves a `PENDING` outbox row. The dispatcher's redrive policy (§ 23.10 retry budget) re-publishes it after the broker recovers; consumers' `platform_inbox` dedupe guarantees the redelivery is not double-applied. **Reconciliation rule (STG-003):** a periodic (Celery Beat, § 19.7.1 Beat cron style) reconciler scans `platform_outbox WHERE delivery_status IN ('PENDING','FAILED') AND created_at < now() - threshold` and either redrives (if broker is healthy) or paged-alerts (if the outage persists beyond threshold) — it never silently drops a row.
+- **Orphaned / incomplete cross-store operation:** an evidence object committed to object/WORM storage but whose PostgreSQL metadata row was lost (crash mid-staged-write, § 23.11) is an **orphan**; a metadata row with no resolvable object is a **phantom**. Both are reconciliation states, not terminal success: a storage-catalog reconciler (§ 23.11) periodically diffs object-store listings against `derived_artifacts` / `evidence_objects` metadata and produces `ORPHAN_OBJECT` / `PHANTOM_RECORD` quarantine rows, never silently repairing or deleting either side.
+- **No distributed-ACID claim (STG-002):** the platform makes no claim of atomicity across MinIO/WORM + PostgreSQL + Redis; every cross-store operation is explicitly a *staged, verified, reconciled* pipeline (§ 23.11), and any step that cannot be durably verified (e.g. WORM readback) keeps the operation in a named reconciliation state rather than silently succeeding.
+
+#### 23.6.4 Worker Leases & Recovery
+
+| Mechanism | Contract |
+| :--- | :--- |
+| **Lease acquisition** | `READY` task claim writes a `platform_task_lease(task_id, worker_id, lease_expires_at)` row in the *same* PostgreSQL transaction as the task's transition to `CLAIMED`. No two workers can hold a live lease for one task (REO-007). |
+| **Heartbeat** | Worker refreshes `heartbeat_at` and extends `lease_expires_at` at a bounded interval (default: one-third of `lease_grant` window, configurable per workload class). Heartbeats are cheap PostgreSQL updates, batched per worker, never per-task-per-second at the API tier. |
+| **Renewal failure** | If a worker cannot renew before `lease_expires_at`, the lease is considered **expired**, not "in flight" — see below. |
+| **Expiry & death detection** | A **Stale-Task Reaper** (Celery Beat, bounded scan interval) finds `platform_task_lease` rows with `lease_expires_at < now()` whose task is still `CLAIMED`/`RUNNING` and marks them `WORKER_LOST` (§ 23.10). |
+| **Safe reassignment** | The reaper re-queues the task under `READY` with the **same** `idempotency_key` (§ 23.5) and `attempt_number` incremented — safe because every stage is idempotent at chunk/checkpoint granularity (§ 23.7), so a reassignment after a crash mid-stage re-reads the last checkpoint, not the start of the file. |
+| **Maximum attempts** | Each workload class carries its own `max_attempts` and `max_elapsed_retry_duration` (§ 23.10); exceeding either routes to `FAILED_PERMANENT` → `DEAD_LETTERED`, never to an unbounded retry loop. |
+| **Operator intervention** | DLQ operator console (control plane) exposes `DEAD_LETTERED` tasks with full failure evidence; redrive is a *deliberate, dual-control, logged* operator action (examiner or operator role, § 20.3), never an automated one (REO-008). |
+| **Recovery audit record** | Every lease-expiry → reassignment writes a `platform_task_lease_events` row (who reaped, when, prior `worker_id`, new `worker_id`, prior `checkpoint_id`); this trail is part of the evidence-plane custody log for the affected task's outputs and is retained under the case retention / legal-hold policy (§ 23.11, § 15.2). |
+
+**Recovery rule (REO-009):** a recovered task resumes from the **last completed durable checkpoint** (§ 23.7), or, for stages that are cheaply idempotent at coarse grain (e.g. re-hashing a fully-persisted WORM object), safely restarts that whole stage from scratch — it never resumes from in-memory progress or the Celery result backend, which are both explicitly **non-durable** (OBS/REO-009).
+
+---
+
+### 23.7 Checkpoints
+
+Stage-level durable checkpoints are mandatory for every long-running engine stage; a stage is **complete only when its output is (a) persisted, (b) verified (size + digest + schema), and (c) linked to its input lineage row**, all inside one PostgreSQL transaction that also writes the checkpoint outbox event. The Celery result backend and in-memory progress counters are **never** the system of record for a stage's completion (REO-010).
+
+| Checkpoint | Stage | Verification |
+| :--- | :--- | :--- |
+| `cp_upload_chunk` | Evidence upload resumable-chunk boundary (§ 23.8) | Chunk byte-count + digest match to object-store part |
+| `cp_predecode_hash` | Pre-decode dual hashing complete (§ 19.2) | SHA-256 **and** SHA3-512 both recorded |
+| `cp_worm_commit` | WORM commitment + readback (§ 19.7) | Readback digest equals committed digest |
+| `cp_container_metadata` | Container / box / metadata extraction (VRE § 11.2.1, AIF IVE-01, ONTF header parse) | Parsed manifest hash recorded |
+| `cp_video_chunk` | Per 5-minute I-frame video chunk (§ 11.11.4) | Chunk output frame-index range + digest |
+| `cp_audio_stream_extraction` | AFB lossless stream-copy extraction (§ 11.3.1) | Extracted audio SHA-256 + DAG node |
+| `cp_frame_sampling` | VCI/AVSC frame-sample batch | Sample frame IDs + digests |
+| `cp_model_inference_batch` | VDF/ADDE/AIM batched inference | Batch input hash + model checkpoint hash (§ 23.4.4) |
+| `cp_pcap_dissection_batch` | ONTF TShark/Zeek batch (§ 22.8) | Batch packet range + output flow-table digest |
+| `cp_fs_partition_inspection` | CCHDF filesystem adapter partition walk (§ 22.7) | Partition offset range + finding digest |
+| `cp_finding_normalization` | Fan-in normalizer stage (§ 23.3.2 `AGG`) | Output finding-set hash |
+| `cp_vector_index_batch` | Case RAG vector-index batch (§ 22.13) | Batch ID + doc-count + index-version |
+| `cp_report_compilation` | UFREDF § 21.6 pipeline stage boundary | Intermediate IR hash before final PDF/A seal |
+
+---
+
+### 23.8 Universal Streaming Policy (Large Media, Never-Load-Whole-File)
+
+**STG-001:** No analysis path may load a whole evidence file, PCAP, disk image or RAW archive into RAM, regardless of size. All readers are **bounded-memory streaming** readers:
+
+- **Chunk manifests** with **deterministic chunk IDs** (f(evidence_id, offset_range, media_type, chunk_version)) and explicit byte-offset ranges; chunk completion order never changes final evidence ordering (§ 11.11.4 chunk-merge rule, generalised).
+- **Resumable uploads** (§ 23.4.1 `INGESTING`): multi-part object-store upload with per-part digest verification before the final commit call.
+- **Chunk retry without duplication:** retrying a chunk re-verifies the chunk's existing object/part (idempotent re-check) before re-uploading; never silently re-uploads a verified part.
+- **Bounded parallelism:** concurrent chunk readers per case bounded by the admission scheduler (§ 23.9), not by the parser's thread count.
+- **Progress persisted at safe checkpoints** (§ 23.7) — a crashed chunked stream resumes at the last verified checkpoint, not at byte 0.
+- **Final merged-output validation:** byte-count + whole-file digest (CEIPL canonical form, § 19.4) recomputed from parts; mismatch quarantines the merge, never the underlying original.
+- **Parent–child cryptographic lineage:** every derived chunk artifact records its parent chunk manifest hash in the CEIPL DAG (§ 11.8.2).
+
+Per-media-type coordinate contracts (extend § 11.12.2's five-dimension frame identity, § 11.12.4's rational-timebase rule):
+
+| Media | Coordinate |
+| :--- | :--- |
+| Video | Time / frame-indexed chunk manifests; documented boundary-overlap window + PTS↔chunk mapping persisted per chunk (§ 11.11.4 keyframe-boundary rule, generalised) |
+| Audio | Sample indices at the canonical 16 kHz / 24 kHz timebase + original container timebase mapping preserved (§ 6.1 ingestion invariants) |
+| Network (PCAP/PCAPNG) | Packet numbers + original capture timestamps preserved through TShark/Zeek batch output (§ 22.8) |
+| Disk image / RAW / E01 | Byte offsets + sector coordinates + partition table coordinates; reads are range-bounded, whole-image reads forbidden (STG-004) |
+| Archive / document container | Per-entry offset + entry digest, no recursive whole-archive extraction into RAM |
+
+---
+
+### 23.9 Backpressure, Bulkheads & Resource Scheduling
+
+Worker pools are separated into **logical workload classes** (no mandate for separate OS processes, services or infrastructure — a single Celery app with per-class queues and per-class resource budgets is the default deployment):
+
+| Workload Class | Examples |
+| :--- | :--- |
+| `API_CONTROL_PLANE` | FastAPI request handling, RBAC, outbox dispatcher |
+| `DEFENSIVE_PARSER_SANDBOX` | Media container / box / bitstream parsing, polyglot triage (hostile-file hardening, § 16.9, § 22.2) |
+| `CPU_FORENSIC_HEAVY` | AIF classical CV, ONTF TShark/Zeek, AURAS DSP, CCHDF CPU adapters |
+| `AUDIO_DSP` | AFB stream-copy, AESL time/frequency-domain passes (§ 18) |
+| `VIDEO_DECODE_STREAM` | VRE demux/decode, CFITSA frame-integrity streaming (§ 11.11, § 11.12) |
+| `GPU_INFERENCE` | VDF/AVSC/VCI/ADDE/IMLF neural inference |
+| `NETWORK_FILESYSTEM_FORENSIC` | ONTF deep flow, CCHDF filesystem adapter (§ 22.7, § 22.8) |
+| `REPORTING_INDEXING` | UFREDF compilation, Case RAG indexer, Evidence Graph projection |
+
+**Bulkhead rule (RES-001):** A single large job in one class (e.g. a 50 GB CCTV DEEP_EXAMINATION run, § 11.11.2) must **not** be able to starve or delay a job in a *different* class (audio DSP, DB processing, other cases' investigations). This is enforced by queue isolation + per-class admission, not by CPU-priority hacks alone.
+
+**Versioned resource profiles (RES-002):** Instead of one blind memory ceiling, every heavy task type carries a **versioned `ResourceProfile`** record (PostgreSQL, `platform_engine_execution_profiles`, § 23.11) tracking, per version:
+
+`cpu_cores | host_ram_bytes | gpu_device_id | gpu_vram_bytes | disk_scratch_bytes | file_descriptor_cap | max_input_size_bytes | estimated_duration_seconds | max_active_tasks | io_bandwidth_bps | model_footprint_bytes | max_batch_size`
+
+Existing engine-specific ceilings in the document are reconciled into these profiles rather than retained as ad-hoc limits:
+- § 11.11.3 "4 GB cgroup cap / 3.5 GB flush" → the `VIDEO_DECODE_STREAM` and `DEFENSIVE_PARSER_SANDBOX` profiles' `host_ram_bytes` + `disk_scratch_bytes` fields.
+- § 11.12.17 "64-frame ring buffer, 60 s header parse, 600 s / 10-min chunk" → `VIDEO_DECODE_STREAM` profile's `max_batch_size` (frame buffer) and `task_deadline` (§ 23.4.4) seed values.
+- § 16.13.1 CMMS performance SLA targets → `CPU_FORENSIC_HEAVY` / `REPORTING_INDEXING` profile `estimated_duration_seconds` inputs.
+- § 13.3 Video/CCTV benchmark architecture → the source of any *measured* `estimated_duration_seconds` overrides (benchmarks never hard-coded, always benchmark-driven overrides with version stamps).
+
+**GPU admission control (RES-003, RES-005):** Never assume homogeneous NVIDIA VRAM across a fleet. GPU assignment is done by an **explicit scheduler + per-device VRAM budget table** (`platform_engine_execution_profiles` + live VRAM telemetry, OBS-005), not by an implicit "first GPU free" rule. Hardware-specific isolation primitives (MPS, MIG) may be used **only where the target device actually supports them**; **cgroups are NOT a universal GPU-VRAM enforcement mechanism** (they cap CPU/memory/IO, not per-process VRAM on current mainstream drivers) and must not be described as one (RES-005). CPU fallback is allowed **only** where the specific model or algorithm genuinely supports an equivalent CPU path (§ 11.11.1's `CPU_INFERENCE` rule, applied per-model, not per-engine); a model with no validated CPU path is hard-GPU-gated, not silently degraded.
+
+**Admission & fairness (RES-004):** bounded queue capacities per class; per-case / per-user / per-engine concurrency caps; priority + fairness scheduling (older jobs age, not starve, — a queue-aging counter per case caps how long a low-priority case may be held while higher-priority work runs); load-shedding of non-critical work (indexing, RAG projection) first under overload; bounded fan-out (REO-005); and an explicit backpressure signal: the admission scheduler, not the worker, decides when a new task of a class is admitted (queue depth + device availability + per-case cap all must pass).
+
+---
+
+### 23.10 Error Taxonomy & Retry Architecture
+
+| `error_class` | Meaning | Retryable | Recovery Policy |
+| :--- | :--- | :--- | :--- |
+| `INPUT_INVALID` | Corrupt, unsupported or structurally hostile input | **No** | Permanent; quarantine + examiner review, never auto-retry (§ 22.12 inert quarantine) |
+| `INTEGRITY_FAILURE` | Hash mismatch / WORM readback failure / Merkle proof failure | **No** | Permanent; blocks downstream HARD dependents; incident workflow (§ 19.9); never auto-retry |
+| `AUTHORIZATION_FAILURE` | RBAC / dual-control / legal-hold denial | **No** | Permanent; audit-logged; never auto-retry |
+| `PERMANENT_PARSER_FAILURE` | Malformed container / codec with no plausible parse | **No** | Permanent; mark evidence `PARTIAL_SUCCESS` for that modality branch |
+| `TRANSIENT_STORAGE_FAILURE` | Object-store / MinIO / WORM connectivity blip | **Yes** | Exponential backoff + jitter, then redrive; reconciler handles orphans (§ 23.6.3) |
+| `DATABASE_UNAVAILABLE` | PostgreSQL connection/pool failure | **Yes** (bounded) | Short backoff, then fail task to `FAILED_RETRYABLE`; **never** commit a "completed" state while the DB is down (STG-005) |
+| `BROKER_UNAVAILABLE` | Redis/Celery broker blip | **Yes** | Backoff; already-`CLAIMED` tasks hold their leases until re-queue; outbox rows stay `PENDING` (§ 23.6.1) |
+| `DEPENDENCY_TIMEOUT` | A declared HARD dependency missed its deadline | No (at this attempt) | Fan-in stays `BLOCKED`; the dependency itself is retried under its own policy |
+| `RESOURCE_EXHAUSTION` | Worker class queue / concurrency cap reached | **Yes** (shed) | Load-shed to a later admission window, not an immediate requeue storm |
+| `GPU_OUT_OF_MEMORY` | VRAM budget exceeded | **Yes** (batch-shrink) | Reduce `max_batch_size` to the next-lower profile step and retry, or route to a *validated* CPU fallback if one exists for that exact model (§ 11.11.1, RES-005); never silently oversubscribe a second device |
+| `WORKER_LOST` | Lease expired, no heartbeat (§ 23.6.4) | **Yes** | Reaper reassigns from last checkpoint (REO-009) |
+| `MODEL_CHECKPOINT_INVALID` | Signature / hash mismatch on a model checkpoint | **No** | Permanent; model blocked from dispatch until re-validated via CDVF gate (§ 11.B.3.1) |
+| `SCHEMA_VALIDATION_FAILURE` | Pydantic v2 contract violation at an engine boundary | **No** | Permanent; engineering defect, not a retryable condition |
+| `CANCELLED` | Examiner / operator cancellation | **No** | Terminal, by design |
+| `UNKNOWN_INTERNAL_FAILURE` | Unclassified exception | **Yes** (bounded) | One bounded retry, then route to `DEAD_LETTERED` with full evidence, never retry unboundedly |
+| `REQUIRES_EXAMINER_REVIEW` | Finding below auto-adjudication threshold, or dual-control gate | **No** | Blocks at a human-approval gate (§ 23.3.1), never auto-retried |
+
+**Retry policy (REO-011):** exponential backoff with random jitter; per-workload-class `max_attempts`, `max_elapsed_retry_duration`, and a *retry budget* (class-wide, so one runaway task cannot exhaust another task's retries); dependency-specific timeouts (storage vs DB vs broker vs peer-service all carry different budget values); **no nested uncontrolled retry loops** — a retried task that itself fails on a downstream call does not inherit a second unbounded retry on top; DLQ / failed-job quarantine with **controlled, dual-control, operator redrive only** (REO-008); and failure alerting (OBS-010, OBS-011) that always attaches the task's `error_class`, `error_code`, attempt number, last `checkpoint_id` and relevant failure evidence (not evidence payloads — § 23.13).
+
+**Hard rules:** integrity failures and authorization violations are **never** auto-retried; retries are sized so that a failing dependency is *not* amplified by them — backoff must outpace the dependency's own recovery, not hammer it (RES-006).
+
+---
+
+### 23.11 Database & Storage Consistency
+
+**PostgreSQL is the authoritative system of record for all investigation, task, finding, custody and report state. Redis is a broker + cache; it is never the source of truth for any investigation state, finding, or custody event** (STG-006).
+
+Relational models added / consolidated under this section (all in PostgreSQL, expand-and-contract migration discipline per § 23.11.4):
+
+`case_investigations` (lifecycle state, § 23.4.1) · `evidence_objects` · `acquisition_records` · `evidence_manifests` · `derived_artifacts` · `artifact_provenance_dag` (extends § 4.3 `derived_artifact_lineage`, § 11.8.2) · `analysis_runs` (one per § 23.5 generation) · `platform_workflow_definitions` + `platform_workflow_nodes` (versioned DAG, § 23.3) · `platform_task_records` (§ 23.4.4) · `platform_task_state_events` (append-only, § 23.4.3) · `platform_outbox` / `platform_inbox` (§ 23.6) · `platform_task_lease` + `platform_task_lease_events` (§ 23.6.4) · `platform_engine_execution_profiles` (§ 23.9) · `findings` (cross-engine, extends § 4.1 `FORENSIC_FINDINGS`) · `model_execution_provenance` · `platform_checkpoints` (§ 23.7) · `quarantine_outputs` (§ 22.12, § 23.10) · `indexing_jobs` (§ 23.13) · `report_snapshots` (extends § 21.9).
+
+**Consistency rules:**
+- **ACID boundaries (STG-005):** short, bounded transactions only; a DB transaction may **never** span a long GPU inference or media-analysis stage — the stage writes its *checkpoint* in a short transaction, then releases the connection for the whole inference duration (RES-007).
+- **One SQLAlchemy session per task / unit of work; no shared mutable session across concurrent workers** (STG-008). Workers check out a session, do their bounded writes, commit, release — never hand the same session object across a Celery task boundary.
+- **FK integrity + unique idempotency constraints:** every § 23.5 `idempotency_key` and every finding/artifact/lineage/report row carries the `UNIQUE` constraint that makes duplicate delivery a no-op, not a duplicate write (§ 23.4.4, § 23.6.2).
+- **Optimistic concurrency** (version column + `UPDATE … WHERE version = ?`) is the default for state-machine rows; **explicit pessimistic locks** are used only at the lease-claim and outbox-publish points where two writers genuinely race on the same row.
+- **Isolation level:** `READ COMMITTED` is the default platform-wide; any cross-aggregate invariant that requires it (e.g. the outbox `sequence_no` gap check during redrive) uses `SERIALIZABLE` scoped to that one query, not a global `SERIALIZABLE` deployment.
+- **Connection pooling + session lifecycle** (STG-008): bounded pool per workload class, idle/lease timeouts, and an explicit "session returned to pool before the next broker message is acknowledged" rule so a slow task cannot pin a pooled connection.
+- **Migration versioning (expand-and-contract, STG-009):** schema changes ship in two phases (add column / dual-write, then drop old column in a later migration) so a running fleet of workers never blocks on a hard cutover.
+- **Retention + legal-hold (STG-010):** investigation rows, task records, outbox/inbox rows, checkpoints, lease events and quarantine outputs all inherit the case's retention class and legal-hold flag; a case under legal hold (§ 15.2) freezes deletion of every one of these tables for that case, regardless of TTL.
+- **Backup + restoration + readback verification:** logical `pg_dump`-class backups on the retention schedule, plus a **restored-readback digest check** (re-hash a sampled set of restored rows' custody-log tails and compare to the pre-backup digest) — a backup that cannot be read back is a `BACKUP_UNVERIFIED` state, not a green checkmark.
+
+**Object storage vs PostgreSQL (STG-001 split, restated):** original evidence and large derived artifacts (frame batches, spectrograms, packet dumps, quarantined payloads, compiled PDFs) live in object/WORM storage. PostgreSQL stores metadata, statuses, references, digests and indexes — **never multi-gigabyte payloads** in `JSONB` or `BYTEA` (a `JSONB` finding row may reference an object URI; the bytes themselves do not move into PostgreSQL).
+
+**Staged storage workflow (STG-003, normative order):**
+1. Write to a temp / staging object location (never directly into the immutable zone).
+2. Verify byte-count **and** digest against the expected canonical form.
+3. **Commit** the object as an immutable derived artifact (object lock / POSIX 0400 mode, § 19.7).
+4. Register the metadata row + parent lineage row in PostgreSQL.
+5. **In the same PostgreSQL transaction**, insert the `platform_outbox` event announcing the new artifact (outbox-atomic, § 23.6.1).
+6. Afterwards, run cross-store reconciliation (§ 23.6.3) for any step that committed to one store but not yet to the other; incomplete cross-store operations are *named* reconciliation states (`STAGING_UNVERIFIED`, `COMMITTED_UNREGISTERED`, `REGISTERED_UNPUBLISHED`), never silent successes.
+7. **Original evidence is never overwritten — even during recovery** (STG-011). A recovery path that would require touching an original object's bytes is, by definition, the wrong recovery path; the correct action is to re-derive from the WORM original, not to patch it.
+
+---
+
+### 23.12 Failure Isolation & Partial-Success Containment Matrix
+
+Per-workflow-node prerequisite classification: **hard** (blocks the node), **optional** (missing input recorded as a data gap, node may still proceed), **recoverable** (transient, retried in place before being downgraded to optional-missing).
+
+| Failure | Contained Behaviour |
+| :--- | :--- |
+| AURAS unavailable | VISTA's independent video branch (VRE, VDF, VCI, AVSC video-side) continues; the AFB→AURAS audio sub-branch is marked `UNAVAILABLE`/deferred, not `FAILED` (REO-012). |
+| VDF model fails | VCI scene/object branch continues; only VDF's own outputs are `FAILED_RETRYABLE`/quarantined (§ 23.10 `MODEL_CHECKPOINT_INVALID`). |
+| One corrupt CCTV recording (multi-camera case) | Other camera recordings in the case continue; the corrupt exhibit is quarantined per-exhibit, not case-wide. |
+| Redis outage | New jobs are delayed at admission; **already-committed PostgreSQL workflow state is fully recoverable** — no in-flight task's durable state is lost because PostgreSQL holds it, and the outbox redrives any `PENDING` publish after the broker recovers (§ 23.6.1, § 23.6.3). |
+| PostgreSQL unavailable | **No new state transitions and no false "completed" verdicts** are written; task dispatch is paused safely (admission stops enqueuing), not "optimistically continued" — a task cannot `SUCCEED` without its success row committing (STG-005, RES-007). |
+| WORM storage unavailable | Evidence commitment stops; exhibits are **not** marked `EVIDENCE_REGISTERED` — they hold at `WORM_COMMITTED`-pending until commit + readback verify (§ 23.4.2, § 19.7). |
+| GPU OOM | Task fails / releases cleanly (§ 23.10 `GPU_OUT_OF_MEMORY`); batch size shrinks to the next profile step or the validated-CPU-fallback path is taken — never an unattended oversubscribed re-launch (RES-005). |
+| CCHDF adapter fails | Other carrier adapters and other DAG branches continue; only that adapter's branch is quarantined (§ 23.10 `PERMANENT_PARSER_FAILURE` / `INPUT_INVALID`). |
+| RAG indexer unavailable | Findings remain authoritative in PostgreSQL + object storage; the Case RAG projection is rebuilt later from the durable finding store — search is a *projection*, not the source of record (§ 23.11, STG-006). |
+| UFREDF generation fails | **Approved findings are preserved as-is**; the report is regenerated from the existing durable finding/report-snapshot state **without re-running forensic analysis** (REP-001, § 23.16). |
+
+**Hard rule (REP-002):** No partial output may be labelled a complete forensic report. A `REPORTED` verdict (§ 23.4.1) requires the underlying fan-in to be `ANALYSIS_COMPLETED` (not `PARTIAL_SUCCESS`), or an explicit examiner dual-control attestation recording which required branches were waived and why (§ 20.6).
+
+---
+
+### 23.13 Observability & SLO Targets
+
+**Instrumentation framework (OBS-001): OpenTelemetry**, vendor-neutral, embedded in the FastAPI gateway, every PostgreSQL unit of work, the outbox dispatcher, every Celery task and child task, every engine adapter's entry/exit, and the model-inference wrapper layer.
+
+**Context propagation (OBS-002):** one execution context is propagated, unchanged, across: API request → DB transaction → outbox row → broker message → Celery task → child Celery task → engine adapter call → model-inference batch → finding write → indexing job → report compilation. The context carries: `trace_id`, `span_id`, `correlation_id`, `analysis_run_id`, `case_id`, `evidence_id`, `job_id`, `task_id`, `worker_id`, `engine_id`, `model_checkpoint_hash`. No engine may start a fresh trace inside an already-traced task.
+
+**Structured logging (OBS-003):** JSON-structured logs only (no free-text-only log lines in production code paths), one record per log event, fields aligned to the OBS-002 context.
+
+**Metric groups (OBS-004):**
+
+| Group | Representative metrics |
+| :--- | :--- |
+| API | Request latency p50/p95/p99, error rate, concurrent request count, upload throughput (bytes/s) |
+| Workflow | Queued job count, queue wait time, job execution time, completion rate, retry count, DLQ count, stale-lease count, `PARTIAL_SUCCESS` rate |
+| Worker | Availability (per class), CPU%, host RAM%, **GPU utilisation% + VRAM used/total per device**, disk scratch free, process crash count, task-timeout count |
+| Database + Broker | Pool saturation, transaction failure rate, lock-wait count, deadlock count, broker up/down, queue lag, **event delivery lag** (`platform_outbox` PENDING age, OBS-010) |
+| Forensic pipeline | Evidence processing throughput (exhibits/hr), chunk completion rate, parser failure rate, model-inference failure rate, **findings persisted vs findings generated** (divergence is an alertable condition, OBS-012), index-sync lag (Case RAG / Evidence Graph vs `findings` table, OBS-012), **WORM readback verification failure count** (OBS-012) |
+
+**Alerts & SLO candidates (OBS-005/OBS-011):** The following are **explicitly marked as targets pending baseline benchmark runs — not guaranteed numbers**: p95 API latency target, queue-wait SLO per class, event-delivery-lag SLO, GPU OOM rate per device, DLQ age SLO, index-sync-lag SLO, WORM readback failure SLO. Until a baseline benchmark (§ 13) is run and its numbers recorded with their run-version stamp, every SLO line in an ops dashboard must render as `TARGET_UNBASELINED`, not as a passing green checkmark (OBS-011).
+
+**Redaction invariant (OBS-013):** Monitoring, tracing and structured logs **never** carry evidence payload bytes, private keys, biometric embeddings, raw audio/video frame buffers or sensitive case content. They carry *references* (evidence_id, artifact digest, span IDs) and *status* fields only. A trace that includes a payload sample is a defect, not a feature.
+
+---
+
+### 23.14 Requirement ID Ledger (This Section)
+
+New IDs introduced by this section, continuing from no prior `REO-`/`RES-`/`OBS-`/`STG-`/`SEC-`-prefixed requirement IDs in the TRD (grep across §§ 1–22 found zero existing `REO-`/`RES-`/`OBS-`/`STG-`/`SEC-` numbered requirements — § 15's security invariants were previously described in prose/bullet form; the § 15 security-architecture expansion task (§ 15.9–15.25 of the current document) has now introduced the `SEC-001`…`SEC-131` series, allocated in order of appearance starting from `SEC-001`, as confirmed by the `SEC-` row in the table below. This section (§ 23) itself allocates no `SEC-` IDs.)
+
+| Namespace | IDs Allocated by § 23 | Count |
+| :--- | :--- | :--- |
+| `REO-` | `REO-001` … `REO-015` (see § 23.1, § 23.3.3, § 23.4.2/§ 23.4.4, § 23.5, § 23.6.2, § 23.6.4, § 23.7, § 23.10, § 23.12, § 23.15, § 23.17) | 15 |
+| `RES-` | `RES-001` … `RES-007` (see § 23.9, § 23.10, § 23.11) | 7 |
+| `OBS-` | `OBS-001` … `OBS-013` (see § 23.13) | 13 |
+| `STG-` | `STG-001` … `STG-011` (see § 23.8, § 23.11) | 11 |
+| `SEC-` | `SEC-001` … `SEC-131` (introduced by § 15.9–15.25, allocated by the § 15 security-architecture expansion task) | 131 |
+
+**Traceability note:** `REP-001`/`REP-002` above (§ 23.12) extend the existing `REP-01`…`REP-30` UFREDF traceability series (§ 21.11); if `REP-031`/`REP-032` are claimed by a future UFREDF deepening, the § 23.12 statements should be re-anchored to those IDs. `CMMS-`, `CSTV-`, `CDVF-`, `CCHDF-`, `CEIPL-`, `GEO-`, `AVE-`/`ARE-`/`ADDE-`/`AIM-`/`IVE-`/`IRE-`/`VDF-`/`VCI-`/`VRE-`/`AFB-`/`AVSC-`, and the § 12.x numbered Pydantic contract IDs are **all preserved, untouched, and not renumbered** by this section. Note: § 15.9–15.25 (the § 15 security-architecture expansion, a separate follow-up task from § 23) does renumber § 15's previously unnumbered security invariants into the `SEC-001`…`SEC-131` series; that renumbering is scoped to § 15 only and does not touch any `REO-`/`RES-`/`OBS-`/`STG-`/`REP-`/engine-prefixed ID anywhere else in this document.
+
+---
+
+### 23.15 Canonical Engine Execution Matrix
+
+One matrix, one owner, no duplicate execution engine or duplicate queue for the same workload without a documented workload-isolation reason (REO-013). Each row: inputs / dependencies (hard →, optional ←) / execution type / queue + workload class (§ 23.9) / max resource requirement (points to its § 23.9 profile, not a raw number) / timeout (from `task_deadline`, § 23.4.4) / retry policy (points to § 23.10 class) / idempotency contract (§ 23.5 key shape) / checkpoint strategy (§ 23.7) / output artifacts / failure behaviour (§ 23.12) / health & telemetry hook (OBS-004) / test requirement (§ 13 + subsystem's own test-suite section).
+
+| Engine / Service | Inputs & Deps | Exec. Type | Queue / Class | Resource Profile Ref | Retry Class (§ 23.10) | Checkpoints (§ 23.7) | Output Artifacts | Failure Behaviour (§ 23.12) | Telemetry Hook | Test Suite Ref |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **AURAS-ARE** | WORM audio object; ← no hard dep outside intake | CPU heavy DSP | `audio_heavy` → `CPU_FORENSIC_HEAVY`/`AUDIO_DSP` | `AURAS_ARE_v1` | `TRANSIENT_STORAGE_FAILURE` (retriable), `PERMANENT_PARSER_FAILURE` (not) | `cp_audio_stream_extraction` (shared w/ AFB), stage-internal change-point checkpoint | Splice/ENF/change-point findings | Independent audio branch; never blocks VISTA video-side work | OBS-004 audio worker group | § 13.1 + § 18.15 |
+| **AURAS-MVSI** | 16 kHz mono derived stream (AFB output) | CPU + light GPU (speaker embedding) | `audio_diarization` → `AUDIO_DSP` | `MVSI_v1` | same | `cp_frame_sampling`-analog (diarization batch checkpoint) | Speaker segments, LID | Soft-dep for AFB audio sub-branch only | OBS-004 | § 13.1 |
+| **AURAS-ADDE** | 16 kHz windowed slices | GPU inference | `audio_gpu` → `GPU_INFERENCE` | `ADDE_v1` | `GPU_OUT_OF_MEMORY` (batch-shrink/retriable), `MODEL_CHECKPOINT_INVALID` (not) | `cp_model_inference_batch` | Deepfake probability curves, OOD flags | Independent; VCI/VDF video-side unaffected | OBS-004 GPU group | § 13.1 + § 11.B.5 |
+| **AURAS-AESL** (§ 18) | ARE/MVSI outputs + WORM audio | CPU heavy | `audio_heavy` → `CPU_FORENSIC_HEAVY` | `AESL_v1` | `TRANSIENT_STORAGE_FAILURE` | stage-internal multi-resolution checkpoint (§ 18.3) | Suspicious-boundary intervals | Independent audio-forensic branch | OBS-004 | § 18.15 |
+| **AIF-IVE** | WORM image / RAW | CPU + GPU | `image_triage` → `DEFENSIVE_PARSER_SANDBOX` + `CPU_FORENSIC_HEAVY` | `IVE_v1` | `PERMANENT_PARSER_FAILURE` (decompression-bomb path, § 10.2 — *not* retriable), `TRANSIENT_STORAGE_FAILURE` | `cp_container_metadata` | 150-category tags, boxes, counts, OCR | Independent image branch; one corrupt image never touches audio/video | OBS-004 image group | § 13.2 |
+| **AIF-IRE** | Raw bitstream + ICC planes | CPU heavy | `image_heavy` → `CPU_FORENSIC_HEAVY` | `IRE_v1` | `PERMANENT_PARSER_FAILURE`, `TRANSIENT_STORAGE_FAILURE` | `cp_container_metadata` | EXIF/XMP anomalies, PRNU coefficient | Independent | OBS-004 | § 13.2 |
+| **AIF-AIM** | Normalised patches, face crops | GPU | `image_gpu` → `GPU_INFERENCE` | `AIM_v1` | `GPU_OUT_OF_MEMORY`, `MODEL_CHECKPOINT_INVALID` | `cp_model_inference_batch` | AI-gen score, inpaint heatmaps, steganalysis alerts | Independent; quarantine path for hostile payloads (§ 10.5 AIM-05, § 23.10 `INPUT_INVALID`) | OBS-004 GPU group | § 13.2 |
+| **AIF-FPA** | Face crops + authorised reference | GPU | `image_gpu` → `GPU_INFERENCE` | `FPA_v1` | `MODEL_CHECKPOINT_INVALID` (auth-reference gate, § 10.1 IVE-07) | `cp_model_inference_batch` | Cosine similarity + legal disclaimer | **Human-approval gate is hard** (dual-control, § 23.3.1); no auto-adjudication of a biometric match ever | OBS-004 GPU group | § 13.2 |
+| **AIF-IMLF** | AIF IVE/IRE/AIM outputs | GPU/CPU mixed | `image_localisation` → `GPU_INFERENCE`/`CPU_FORENSIC_HEAVY` | `IMLF_v1` | `MODEL_CHECKPOINT_INVALID` | `cp_model_inference_batch` | Manipulation-localisation heatmaps | Child of AIF branch only (§ 23.3.2 refinement); never runs against an un-profiled image | OBS-004 | § 13.2 |
+| **AIF-GEO** | EXIF GPS + offline gazetteer/DEM cache + (optional) authorised track logs | CPU heavy + I/O | `geospatial` → `CPU_FORENSIC_HEAVY` | `GEO_v1` | `TRANSIENT_STORAGE_FAILURE` (offline enrichment cache miss is *not* retriable, it's a data gap, optional-dep) | `cp_container_metadata` + offline-enrichment-batch checkpoint | Conflict graph, track correlation, solar/shadow checks | Air-gap invariant (§ 15.3, § 10.10 GEO-26) — no network egress from the engine itself | OBS-004 | § 13.4 |
+| **VISTA-VRE** | WORM video / CCTV | CPU + light I/O | `video_triage` → `DEFENSIVE_PARSER_SANDBOX` | `VRE_v1` | `PERMANENT_PARSER_FAILURE` (moov-at-end native read, § 11.2.1 — handled as a data condition, not retried), `TRANSIENT_STORAGE_FAILURE` | `cp_container_metadata` | PTS/DTS cadence, scene cuts, re-encode traces | Independent video-integrity branch; CFITSA (§ 11.12) sub-branch inherits VRE's checkpoint | OBS-004 video group | § 13.3 + § 11.12.19 |
+| **VISTA-AFB** | VRE demuxed audio track | I/O + CPU | `video_audio_bridge` → `AUDIO_DSP` | `AFB_v1` | `TRANSIENT_STORAGE_FAILURE` | `cp_audio_stream_extraction` | Extracted 16 kHz stream + DAG node | Soft-dep hand-off to AURAS; AURAS unavailable ⇒ AFB marks its dispatch target `UNAVAILABLE`, not failed (§ 23.12) | OBS-004 audio group | § 13.3 |
+| **VISTA-AVSC** | Decoded frames + AFB audio | GPU | `video_avsync` → `GPU_INFERENCE` | `AVSC_v1` | `GPU_OUT_OF_MEMORY`, `MODEL_CHECKPOINT_INVALID` | `cp_model_inference_batch` (lip-sync window batch) | $\Delta t_{global}$, lip-sync curves | Independent video-branch work continues if VDF fails (§ 23.12) | OBS-004 GPU group | § 13.3 |
+| **VISTA-VDF** | Normalised face crops, 16-frame windows | GPU | `video_deepfake` → `GPU_INFERENCE` | `VDF_v1` | `GPU_OUT_OF_MEMORY`, `MODEL_CHECKPOINT_INVALID` | `cp_model_inference_batch` | Deepfake probability, OOD flag | VCI scene/object branch is *not* coupled to VDF's model health (§ 23.12) | OBS-004 GPU group | § 13.3 + § 11.B.6 |
+| **VISTA-VCI** | Sampled frames | GPU + CPU | `video_content` → `GPU_INFERENCE` + `CPU_FORENSIC_HEAVY` | `VCI_v1` | `GPU_OUT_OF_MEMORY` | `cp_frame_sampling` | Taxonomy, tracklets, OSD clocks, ALPR | Independent; one corrupt CCTV recording quarantines only that exhibit (§ 23.12) | OBS-004 | § 13.3 |
+| **VISTA-CCTV** | Raw surveillance + sidecars | CPU + light GPU | `video_cctv` → `VIDEO_DECODE_STREAM` | `CCTV_v1` | `TRANSIENT_STORAGE_FAILURE` | `cp_video_chunk` (5-min I-frame chunks, § 11.11.4) | Triage score, drift curve, ONVIF seal status | Multi-camera: per-exhibit isolation (§ 23.12) | OBS-004 | § 13.3 |
+| **ONTF** | WORM PCAP/PCAPNG | CPU heavy + I/O | `network_dissection` → `DEFENSIVE_PARSER_SANDBOX` + `NETWORK_FILESYSTEM_FORENSIC` | `ONTF_v1` | `PERMANENT_PARSER_FAILURE` (truncated capture is a data condition), `TRANSIENT_STORAGE_FAILURE` | `cp_pcap_dissection_batch` | Flow tables, Zeek logs, reassembled payloads, covert-timing features (§ 22.8) | Independent branch; CCHDF network adapter (§ 22.8) is a *consumer* of ONTF output, not a duplicate ONTF executor (REO-013) | OBS-004 | § 22.8 + § 13.3 analog |
+| **CCHDF / PSEA** | Any WORM object + triage profile | CPU heavy + parser sandbox | `cchdf_triage` → `DEFENSIVE_PARSER_SANDBOX`; per-adapter class (§ 22.3–22.10) | `CCHDF_v1` | `INPUT_INVALID` (never retried), `PERMANENT_PARSER_FAILURE` | `cp_container_metadata` + per-adapter-batch checkpoint; **§ 23.17 `EvidenceStreamHandle` contract is the required read primitive for every adapter** | `ConcealmentFinding` rows, quarantined payload URIs | One adapter failure isolates to that adapter's branch only (§ 23.12) | OBS-004 | § 22.15 + § 23.17 |
+| **CMMS** | Any WORM object | CPU + I/O | `metadata_snap` → `CPU_FORENSIC_HEAVY` | `CMMS_v1` | `TRANSIENT_STORAGE_FAILURE`, `PERMANENT_PARSER_FAILURE` (unparseable container) | `cp_container_metadata` | `cmms_metadata_snapshots` + anomaly findings (§ 16.11) | Feeds CSTV; CMMS outage delays CSTV, not the parallel AIF/AURAS/VISTA/ONTF branches (§ 23.3.2) | OBS-004 | § 16.13 |
+| **CSTV** | CMMS + AURAS + VISTA + ONTF time sources (§ 23.3.2) | CPU | `temporal_cpu`/`temporal_heavy` → `CPU_FORENSIC_HEAVY` | `CSTV_v1` | `TRANSIENT_STORAGE_FAILURE`; dependency timeout on a source = `DEPENDENCY_TIMEOUT`, blocks only the fan-in, not the source's own branch | `cp_finding_normalization`-analog (per-timeline-build checkpoint) | `temporal_sources`/`event_anchors`/`clock_calibration_models` (§ 17.10), master timeline | One missing time source ⇒ `PARTIAL_SUCCESS` timeline with the gap explicitly recorded, never a silently-complete timeline (§ 23.3.3) | OBS-004 | § 17.13 |
+| **CDVF** (gate, not a parallel detector) | Model registry state for every model that produced a finding in the current `analysis_run` | CPU + I/O (benchmark runs are GPU) | `model_gate` → `CPU_FORENSIC_HEAVY`; benchmark sub-tasks → `GPU_INFERENCE` | `CDVF_v1` | `MODEL_CHECKPOINT_INVALID` (hard, no retry), `TRANSIENT_STORAGE_FAILURE` | `cp_model_inference_batch` for benchmark sub-runs only | Calibration / OOD / lifecycle gate status (§ 11.B.3) | **Gates `AGG`** — a model that fails CDVF blocks that model's findings from being treated as trustworthy at fan-in, but does not re-run the model | OBS-004 | § 11.B.14 |
+| **Case RAG / Evidence Graph** | `findings` + `derived_artifacts` + `artifact_provenance_dag` | CPU + I/O | `rag_index` → `REPORTING_INDEXING` | `RAG_v1` | `TRANSIENT_STORAGE_FAILURE` (index rebuild is retriable, cheap); indexer outage never loses data (§ 23.12, STG-006) | `cp_vector_index_batch` | Vector index + evidence-graph projection | **Projection only** — findings stay authoritative in PostgreSQL regardless of indexer state | OBS-012 (index-sync lag) | § 13.5 analog + § 22.13 |
+| **UFD / UFW + BFF** | Read-only consumers of every engine's stable state + outbox event stream | CPU, API tier | `api_control_plane` → `API_CONTROL_PLANE` | `UFD_v1` | `DEPENDENCY_TIMEOUT` on any single backend module ⇒ `PARTIAL_SUCCESS` response (§ 20.11), never a 5xx cascade to the whole dashboard | n/a (read-only) | `CaseOverviewResponse` with per-module `OK`/`UNAVAILABLE` status | Circuit-breaker + per-module isolation already specified § 20.11; this section adds the durable-state guarantee behind it: a backend being down can never corrupt what the BFF *successfully* read, because it only ever reads PostgreSQL-durable state, never broker-in-flight state (STG-006) | OBS-004 API group | § 20.11 + § 20.12 |
+| **UFREDF** | Fan-in `findings` + `report_snapshots` + custody/audit logs | CPU + I/O | `report_compile` → `REPORTING_INDEXING` | `UFREDF_v1` | `TRANSIENT_STORAGE_FAILURE` on PDF/A write; **regeneration path is re-run from `report_snapshots`, never a forensic re-run** (REP-001, § 23.12) | `cp_report_compilation` | PDF/A-1b + JSON IR + Ed25519/PAdES signatures (§ 21.5–21.6) | Human-approval gate (signing) is hard (§ 23.3.1, § 21.4) | OBS-004 | § 21.11 + § 23.13 |
+| **CEIPL / EIV (shared, § 19)** | Every other engine's raw I/O | CPU + I/O + cryptographic | `eiv_integrity` → `DEFENSIVE_PARSER_SANDBOX` (hashing) + `CPU_FORENSIC_HEAVY` (Merkle/fixity) | `CEIPL_v1` | `INTEGRITY_FAILURE` — **never retried**, hard-blocks all downstream HARD dependents (§ 23.10, § 23.12); `TRANSIENT_STORAGE_FAILURE` on WORM readback is the one retriable EIV failure class | `cp_predecode_hash`, `cp_worm_commit` | Manifests, Merkle DAG nodes, custody events | Whole-investigation quarantine on a hard integrity failure (§ 19.9), not per-engine | OBS-012 (WORM readback failure count) | § 19.17 |
+
+**Matrix invariants:**
+- No two engines own the *same* raw-execution responsibility for one input modality; where a later engine consumes an earlier engine's output (IMLF←AIF, AESL←ARE/MVSI, CCHDF-network-adapter←ONTF, RAG←findings, UFREDF←findings), the dependency is expressed as a **data contract + DAG edge**, never a duplicated executor (REO-013).
+- Every engine's row is the single source of truth for that engine's queue, class, retry behaviour and checkpoint shape; subsystem-internal sections (§§ 5–22) may *elaborate* but may not *contradict* this row. Where a contradiction exists, this matrix + § 23 governs, and the subsystem section is to be corrected in a follow-up pass against this baseline.
+
+---
+
+### 23.16 § 1 (Top-Level Context) & § 3 (Package Architecture) Reconciliation Note
+
+The top-level context diagram in § 1 has been **extended in place** (not duplicated with a parallel diagram) to add: `ONTF` and `CCHDF` engine nodes inside the `ENGINES` subgraph, a new `SHARED_SERVICES` subgraph (`CMMS`, `CSTV`), `UFD`/`UFW` as first-class presentation-plane participants, and explicit edges for: engines → `CMMS` → `CSTV` → `PG`, `ONTF`/`CCHDF` → `CSTV`, `CCHDF` quarantined-payload edge to the derived-artifact DAG, and `UFREDF`-compiled reports consumed by `UFD` before reaching the client. The § 3 package tree already lists `ps05.engines.*` submodules; this section's bounded-context table (§ 23.2) is the authority for **which** engine lives in **which** package and which cross-package data access is allowed (only via versioned Pydantic contract or published domain event — no cyclic imports, no cross-context direct table writes, per the § 23.2 hexagonal/ports-adapters rule). No new top-level package was invented; `ONTF`'s and `CCHDF`'s package boundaries are declared here for the first time as part of this consolidation.
+
+---
+
+### 23.17 CCHDF Re-openable / Independently Readable Evidence-Stream Contract (Fixing § 22.1)
+
+§ 22.1's `CCHDFOrchestrator.execute_investigation(evidence_id, case_id, raw_stream: BinaryIO)` passes **one** shared, stateful `BinaryIO` cursor to both `UniversalTriageScanner.scan(...)` and, later, `BaseConcealmentAdapter.analyze(..., raw_stream, ...)`. Once the scanner's internal buffered reads advance the shared file pointer, the adapter's subsequent sequential pass starts from whatever position the scanner left it at — producing **file-pointer exhaustion** (adapter sees an already-consumed stream) and **partial reads** (adapter's expected byte range is silently truncated or shifted). This is the exact "one blocking function that sequences two passes over one stream" anti-pattern § 23.3 calls out.
+
+**Replaced contract — `EvidenceStreamHandle` (REO-014):**
+
+```python
+class EvidenceStreamHandle(Protocol):
+    """Re-openable, independently cursorable, evidence-bound read primitive.
+
+    A handle is bound to one immutable WORM object (evidence_id) and one
+    canonical byte-range view. It is NOT a shared file descriptor; every
+    cursor is independent, and reads are bounded and chunk-ID-keyed so that
+    no consumer can accidentally consume another consumer's byte range.
+    """
+    evidence_id: UUID
+    total_bytes: int
+
+    def read_chunk(self, chunk_id: str) -> bytes:
+        """Deterministic chunk ID (see STG-001): f(evidence_id, offset_range, media_type, chunk_version).
+
+        Bounded read: each call returns exactly one chunk's bytes (chunk size
+        is a per-media-type constant declared in the § 23.9 resource profile for
+        the calling adapter), never the whole file.
+        """
+        ...
+
+    def open_cursor(self, start_offset: int = 0) -> "EvidenceChunkCursor":
+        """Independent cursor; multiple simultaneous cursors over the same
+        handle are safe and do not interfere with each other's position.
+        """
+        ...
+
+    def chunk_ids_in_range(self, start_offset: int, end_offset: int) -> List[str]:
+        ...
+
+class EvidenceChunkCursor(Protocol):
+    def seek(self, chunk_id: str) -> None: ...
+    def read_next(self) -> bytes: ...
+    def close(self) -> None: ...
+```
+
+**Execution model (REO-015):** `execute_investigation` is no longer one unbounded inline orchestration. It is decomposed into **durable workflow tasks** under the § 23.3 DAG:
+1. `cchdf.triage_scan` — consumes `EvidenceStreamHandle.open_cursor()` cursor #1, checkpoints at `cp_container_metadata` + a triage-specific batch checkpoint, writes `UniversalTriageProfile` + triage findings, **closes its own cursor**, never touches cursor #2.
+2. `cchdf.adapter_run.<carrier>` — one task per selected carrier adapter (image/audio/video/document/filesystem/network/semantic/PSEA, § 22.3–22.10), each opening its **own** independent cursor (#2, #3, …) over the same handle, checkpointed per adapter batch (§ 23.7), idempotency-keyed (§ 23.5), retried under its own § 23.10 class, and **able to fail or be quarantined in isolation without affecting any other adapter's task** (§ 23.12, CCHDF row).
+
+Because every adapter task re-opens its own cursor over the same immutable WORM object, there is no shared mutable file-pointer state, no exhaustion across the scanner→adapter boundary, and no partial-read hazard: each read is bounded, chunk-ID-keyed, digest-verifiable (§ 23.8), and its output is checkpointed (§ 23.7) before the task can be re-queued after a worker-loss event (§ 23.6.4). The § 22.1 class sketch is retained as the *in-process API reference* (adapter registry, `register_adapter`), while its *execution* is normative under this section and the § 23.15 CCHDF/PSEA row.
+
+> **Note on scope of the § 22.1 fix:** only the orchestrator's execution model and stream contract change. The adapter *interfaces* themselves (`BaseConcealmentAdapter.analyze`'s signature) gain one parameter — an `EvidenceStreamHandle` + their own cursor, in place of a bare `BinaryIO` — and are updated in § 22.3–22.10 accordingly in the same pass. No adapter's forensic algorithm changes.
+
+---

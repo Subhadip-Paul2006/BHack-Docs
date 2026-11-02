@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "project": "Digital Evidence Authenticity & Integrity Verification Platform (PS-05)",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "archify": {
     "version": "0.4.2",
     "engine": "offline-static",
