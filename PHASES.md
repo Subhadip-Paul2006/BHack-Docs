@@ -276,7 +276,7 @@ flowchart TD
 | **CDVF-A6** | VISTA Video & CCTV Deepfake Validation Suite | CDVF VISTA Suite | `PLANNED` | CDVF-A3 Gate | Task VID-1..5, temporal aggregation, CCTV low-quality surveillance suite |
 | **CDVF-A7** | Cross-Dataset (Modes A-G) & Unseen-Generator Protocols | CDVF Protocols | `PLANNED` | CDVF-A4..A6 Gates | Transfer gap delta-AUC, unseen generator vulnerability (UG-Score) |
 | **CDVF-A8** | Confidence Calibration Engine & OOD Domain Shift Gating | CDVF Calibration | `PLANNED` | CDVF-A7 Gate | Platt/Temp/Isotonic scaling, 15-bin ECE <= 0.05, Mahalanobis OOD gating |
-| **CDVF-A9** | First-Class Abstention Policy & Cross-Modal Fusion DAG | CDVF Abstention | `PLANNED` | CDVF-A8 Gate | 7 canonical states, risk vs coverage, DAG anti-averaging fusion |
+| **CDVF-A9** | First-Class Abstention Policy & Cross-Modal Fusion DAG | CDVF Abstention | `PLANNED` | CDVF-A8 Gate | 8 canonical decision states, risk vs coverage, DAG anti-averaging fusion |
 | **CDVF-A10** | Subgroup Fairness, Robustness & 6-Gate Scoped Model Approval | CDVF Governance | `PLANNED` | CDVF-A9 Gate | Subgroup disparity audit, 6-gate release review, Ed25519 approval record |
 | **CDVF-A11** | Continuous Regression, 24-Item WORM Bundle & Release Readiness| CDVF Release | `PLANNED` | CDVF-A10 Gate | Automated regression test, 24-item WORM bundle, Sec 65B/63 BSA dossier |
 | **CMMS-A0** | Repository Discovery, Architecture Baseline & Integration Map | Shared Core / CMMS | `PLANNED` | Phase 0 Gate | Existing metadata capabilities audit, integration boundary map, zero duplicate architecture |
@@ -309,7 +309,8 @@ flowchart TD
 | **CCHDF-A6** | Network Covert Timing Channel & Inter-Arrival Analysis | ONTF | `PLANNED` | CCHDF-A0 Gate | Flow packet inter-arrival time (IAT) series, autocorrelation covert signal detection, Kolmogorov-Smirnov baseline variance scoring |
 | **CCHDF-A7** | Semantic, Nomenclator & Linguistic Obfuscation Engine | Semantic Adapter | `PLANNED` | CCHDF-A0 Gate | Historical cipher & narcotics codebook matcher, Sentence-BERT contextual semantic dissonance, masked LM alternative perplexity scoring |
 | **CCHDF-A8** | Physical Side-Channel & Emissions Analysis (PSEA Specialist) | PSEA Specialist | `PLANNED` | CCHDF-A0 Gate | Laboratory measurement provenance validator, SDR I/Q spectrogram demodulation, Van Eck phreaking / TEMPEST reconstruction, thermal profile analysis |
-| **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15, NA13, GA10, CDVF-A11, CCHDF-A8 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
+| **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15, NA13, GA10, CDVF-A11, CEIPL-EIV-10, CCHDF-A8 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
+| **M-PS05-1 … M-PS05-11** | Platform Orchestration, Reliability & Tiered Security Milestones | Platform Orchestration / Shared Core | `NOT_STARTED` | M-1 blocks M-2…M-4; M-2 & M-4 gate M-5; M-3 gates M-6; M-9 gates first real-evidence processing; M-10/M-11 after broader deployment | Workflow DAG, state machines, outbox/inbox durability, worker leases, resource admission, cross-store consistency, streaming contracts, engine execution matrix, observability, failure-isolation matrix, P0/P1/P2 security controls (Section 9.1) |
 | **UFREDF-A0** | Reporting Architecture & Legal Standards Discovery | UFREDF / Core | `PLANNED` | Phase 0 Gate | Section 65B/63 BSA legal checklist, Archify IR integration map |
 | **UFREDF-A1** | Canonical JSON IR Schema & RFC 8785 Serializer | UFREDF / Core | `PLANNED` | UFREDF-A0 Gate | RFC 8785 JCS canonical serializer, Pydantic v2 schemas |
 | **UFREDF-A2** | Evidence Inventory & CEIPL Fixity Attestation | UFREDF / Data | `PLANNED` | UFREDF-A1 Gate | Intake schedule compiler, dual-hash tables, Merkle custody parser |
@@ -1898,7 +1899,7 @@ Ingest Bitstream -> Open via Defensive PyAV -> Demux Packets -> Extract PTS/DTS/
 - Inter-Frame Presentation Intervals: $\Delta t_i = t_i - t_{i-1}$.
 - Non-Parametric Interval Statistics: Vectorized median and $MAD$ calculation.
 - Modified Z-Score: Handling $MAD=0$ and low-variance surveillance streams.
-- Piecewise Cadence Segmentation: PELT change-point detection with penalty $eta = 2\ln(N)$.
+- Piecewise Cadence Segmentation: PELT change-point detection with penalty $\beta = 2\ln(N)$.
 - Stream Cadence Classification: Classifying streams as CFR, VFR-Stable, or VFR-Erratic.
 **5. Exact Tasks:**
 1. Implement `CadenceAnalyzer` in `src/ps05/engines/vista/vre/temporal/cadence.py`.
@@ -2063,12 +2064,12 @@ Presentation Frames -> PTS Monotonicity Audit -> Optical Flow Vector Testing -> 
 
 **1. Phase ID & Title:** `VISTA-CFI-06: Codec/GOP Forensics, CCTV OSD Clock & DVR Log Corroboration`
 **2. Current Status:** `PLANNED`
-**3. Purpose:** Implement codec-level bitstream forensics and correlate visual frames with burned-in CCTV OSD clocks. Track GOP keyframe cadence and macroblock QP variance. Fit linear drift model $\delta(t) = lpha + eta t + \epsilon(t)$ on PaddleOCR clock strings $T_{\text{ocr}}(t)$ against container $t_{\text{pts}}$, detecting step jumps and stalls. Ingest companion DVR event logs.
+**3. Purpose:** Implement codec-level bitstream forensics and correlate visual frames with burned-in CCTV OSD clocks. Track GOP keyframe cadence and macroblock QP variance. Fit linear drift model $\delta(t) = \alpha + \beta t + \epsilon(t)$ on PaddleOCR clock strings $T_{\text{ocr}}(t)$ against container $t_{\text{pts}}$, detecting step jumps and stalls. Ingest companion DVR event logs.
 **4. Topics & Subtopics:**
 - Bitstream GOP Forensics: IDR periodicity, SPS/PPS transitions, broken reference pictures.
 - Macroblock QP Distribution: Variance $\sigma^2_{\text{QP}}(t)$ and double-compression GOP pulsing.
 - OSD Clock OCR Extraction: PaddleOCR corner margin detection and datetime normalisation.
-- Clock Drift Regression: Linear model $\delta(t)$ estimating offset $lpha$ and drift slope $eta$.
+- Clock Drift Regression: Linear model $\delta(t)$ estimating offset $\alpha$ and drift slope $\beta$.
 - Companion DVR Manifest Parsing: Ingesting JSON/XML export logs without proprietary credentials.
 **5. Exact Tasks:**
 1. Implement `BitstreamForensicAnalyzer` in `src/ps05/engines/vista/vre/temporal/bitstream_forensics.py`.
@@ -3885,8 +3886,6 @@ All 11 IMLF phases completed, all 44 checkpoints verified, end-to-end regression
 
 ---
 
----
-
 ## 6. Dedicated Geospatial Forensics Engineering Playbook (AIF-GEO-00 through AIF-GEO-10)
 
 The **AIF-GEO** workstream delivers end-to-end geospatial evidence extraction, geographic coordinate normalization, track-to-image correlation, visual location recovery, solar/shadow verification, environmental consistency auditing, multi-image clustering, and cross-evidence conflict graphing within the PS-05 platform. It integrates natively with CEIPL for cryptographic provenance and reuses core AIF visual processing infrastructure.
@@ -3921,7 +3920,7 @@ flowchart TD
   4. Write architectural decision records (ADR) for PostGIS spatial indexing and local SQLite gazetteer caches.
 - **Dependencies:** Phase 0 (Architecture Baseline & Standards), AIF-A0 (AIF Architecture Baseline).
 - **Recommended Technologies:** Python 3.11/3.12, Pydantic v2, PostgreSQL 15+ / PostGIS 3.3+.
-- **Expected Artefacts:** `ps05/engines/image/geo/schemas.py`, `tests/unit/test_geo_schemas.py`.
+- **Expected Artifacts:** `ps05/engines/image/geo/schemas.py`, `tests/unit/test_geo_schemas.py`.
 - **Validation & Testing:** Schema serialization/deserialization tests; PostGIS connection tests (`test_geo_schemas.py`).
 - **Failure Modes:** Malformed schemas causing serialization errors; PostGIS extension unavailable on target system (triggers relational float fallback).
 - **Security & Privacy:** Enforce extra-field forbidding on Pydantic models; ensure no telemetry or external DNS resolution occurs.
@@ -3953,7 +3952,7 @@ flowchart TD
   4. Integrate CEIPL raw-byte observation preservation (exact tag names, raw bytes, normalized values).
 - **Dependencies:** AIF-GEO-00, AIF-A1 (CEIPL Foundation), AIF-A7 (Metadata Audit Baseline).
 - **Recommended Technologies:** ExifTool 12.70+, Python `subprocess`, Pydantic v2.
-- **Expected Artefacts:** `ps05/engines/image/geo/metadata_parser.py`, `ps05/engines/image/geo/validator.py`, `tests/unit/test_geo_exif_deep.py`.
+- **Expected Artifacts:** `ps05/engines/image/geo/metadata_parser.py`, `ps05/engines/image/geo/validator.py`, `tests/unit/test_geo_exif_deep.py`.
 - **Validation & Testing:** 200 multi-device sample images with synthetic anomalies (`test_geo_exif_deep.py`, `test_geo_anomalies.py`).
 - **Failure Modes:** Corrupt IFD headers; division-by-zero rationals; process timeouts on pathological image headers.
 - **Security & Privacy:** Command array execution prevents shell injection; memory limits prevent decompression exploits; input files treated as read-only.
@@ -3984,7 +3983,7 @@ flowchart TD
   3. Implement temporal normalization engine resolving timezones, UTC conversions, and clock drift.
 - **Dependencies:** AIF-GEO-00, AIF-GEO-01.
 - **Recommended Technologies:** `pyproj` 3.6+, NumPy, SciPy.
-- **Expected Artefacts:** `ps05/engines/image/geo/geodesy.py`, `tests/unit/test_geo_geodesy.py`.
+- **Expected Artifacts:** `ps05/engines/image/geo/geodesy.py`, `tests/unit/test_geo_geodesy.py`.
 - **Validation & Testing:** National Geodetic Survey (NGS) reference baselines; synthetic clock drift regression fixtures (`test_geo_geodesy.py`, `test_geo_temporal.py`).
 - **Failure Modes:** Numerical instability on near-antipodal coordinates; ambiguous local timezones without offset tags.
 - **Security & Privacy:** Mathematical operations execute in deterministic memory; no external network calls.
@@ -4016,7 +4015,7 @@ flowchart TD
   4. Write network isolation test suite verifying zero socket emissions in air-gap mode.
 - **Dependencies:** AIF-GEO-01, AIF-GEO-02.
 - **Recommended Technologies:** SQLite, `shapely`, `geopandas`, MapLibre GL JS, Leaflet.
-- **Expected Artefacts:** `ps05/engines/image/geo/geocoder.py`, `ps05/engines/image/geo/map_interface.py`, `tests/integration/test_geo_airgap_isolation.py`.
+- **Expected Artifacts:** `ps05/engines/image/geo/geocoder.py`, `ps05/engines/image/geo/map_interface.py`, `tests/integration/test_geo_airgap_isolation.py`.
 - **Validation & Testing:** Offline reverse geocoding accuracy tests; packet capture network isolation verification (`test_geo_airgap_isolation.py`).
 - **Failure Modes:** Local gazetteer missing rural village names; external API rate limit exhaustion (gracefully caught with offline fallback).
 - **Security & Privacy:** Strictly prohibit transmission of image pixels; query coordinates truncated to 4 decimal places; append-only audit logging for external queries.
@@ -4048,7 +4047,7 @@ flowchart TD
   4. Implement discrete linear Kalman filter state estimation for track sequences.
 - **Dependencies:** AIF-GEO-01, AIF-GEO-02.
 - **Recommended Technologies:** `gpxpy`, `pyproj`, NumPy, SciPy.
-- **Expected Artefacts:** `ps05/engines/image/geo/track_correlator.py`, `tests/unit/test_geo_tracks.py`.
+- **Expected Artifacts:** `ps05/engines/image/geo/track_correlator.py`, `tests/unit/test_geo_tracks.py`.
 - **Validation & Testing:** Track correlation test suite with known offsets, sparse points, and synthetic teleportations (`test_geo_tracks.py`).
 - **Failure Modes:** Malformed XML in GPX; non-monotonic track timestamps; tracks with temporal gaps exceeding interpolation limits.
 - **Security & Privacy:** Track files parsed in isolated memory; never extrapolate beyond track bounds.
@@ -4081,7 +4080,7 @@ flowchart TD
   4. Benchmark GeoCLIP / regional models (classified as `CANDIDATE_NOT_YET_VALIDATED` pending Indian regional evaluation).
 - **Dependencies:** AIF-GEO-00, AIF-A4 (Object Detection), AIF-A6 (PaddleOCR Baseline), AIF-A8 (SIFT/RANSAC Baseline).
 - **Recommended Technologies:** OpenCV 4.9+, PaddleOCR, SigLIP / CLIP, `pyproj`.
-- **Expected Artefacts:** `ps05/engines/image/geo/visual_locator.py`, `ps05/engines/image/geo/orientation.py`, `tests/benchmarks/test_geo_visual_loc.py`.
+- **Expected Artifacts:** `ps05/engines/image/geo/visual_locator.py`, `ps05/engines/image/geo/orientation.py`, `tests/benchmarks/test_geo_visual_loc.py`.
 - **Validation & Testing:** 150-sample curated Bihar landmark benchmark; synthetic affine homography test set (`test_geo_visual_loc.py`, `test_geo_homography.py`).
 - **Failure Modes:** Low-resolution unreadable signboards; visually repetitive architectural styles (e.g. generic retail storefronts); severe perspective distortion.
 - **Security & Privacy:** Local offline inference; no raw images sent to cloud vision APIs; candidate scores reported as uncalibrated ranks unless benchmark-calibrated.
@@ -4113,7 +4112,7 @@ flowchart TD
   4. Implement classification logic for inconclusive solar/weather conditions (night, diffuse lighting, elevated bridges).
 - **Dependencies:** AIF-GEO-01, AIF-GEO-02, AIF-A3 (Scene Triage).
 - **Recommended Technologies:** `pvlib-python`, `rasterio` (GDAL), `xarray` / `netcdf4`, `pyproj`.
-- **Expected Artefacts:** `ps05/engines/image/geo/environment.py`, `tests/unit/test_geo_solar_shadow.py`, `tests/unit/test_geo_terrain_elevation.py`.
+- **Expected Artifacts:** `ps05/engines/image/geo/environment.py`, `tests/unit/test_geo_solar_shadow.py`, `tests/unit/test_geo_terrain_elevation.py`.
 - **Validation & Testing:** USNO solar table comparison across 500 coordinates; SRTM/Copernicus elevation ground-truth tests (`test_geo_solar_shadow.py`, `test_geo_terrain_elevation.py`).
 - **Failure Modes:** Night captures or diffuse overcast lighting (correctly tagged `SOLAR_ANALYSIS_INCONCLUSIVE`); photos taken inside high-rise buildings exceeding DEM terrain height.
 - **Security & Privacy:** Solar and elevation calculations operate 100% offline; weather reanalysis uses local historical cache by default.
@@ -4146,7 +4145,7 @@ flowchart TD
   4. Implement `ps05/engines/image/geo/provenance.py` auditing camera serials and executing PRNU wavelet denoising.
 - **Dependencies:** AIF-GEO-01, AIF-GEO-02, AIF-GEO-05, AIF-A7 (Metadata Audit), AIF-A9 (CMFD & PRNU Baseline).
 - **Recommended Technologies:** OpenCV 4.9+, `imagehash`, PyTorch, SciPy.
-- **Expected Artefacts:** `ps05/engines/image/geo/manipulation.py`, `ps05/engines/image/geo/clustering.py`, `ps05/engines/image/geo/provenance.py`.
+- **Expected Artifacts:** `ps05/engines/image/geo/manipulation.py`, `ps05/engines/image/geo/clustering.py`, `ps05/engines/image/geo/provenance.py`.
 - **Validation & Testing:** Curated location-spoofed test corpus; duplicate discovery benchmark on transformed images (`test_geo_manipulation_flags.py`, `test_geo_duplicate_scenes.py`).
 - **Failure Modes:** Legitimate photos of remote travel posters (detected via moiré analysis); social-media recompression destroying PRNU sensor noise.
 - **Security & Privacy:** Typed findings clearly distinguish anomalous metadata from deliberate fraud; no uncalibrated claims of guilt.
@@ -4179,7 +4178,7 @@ flowchart TD
   4. Implement spatial search query builder executing parameterized PostGIS queries with RLS case boundaries.
 - **Dependencies:** AIF-GEO-01, AIF-GEO-03, AIF-GEO-04, AIF-GEO-07, CEIPL (AIF-A13).
 - **Recommended Technologies:** `c2pa-python`, `networkx`, PostGIS, SQLAlchemy 2.0.
-- **Expected Artefacts:** `ps05/engines/image/geo/conflict_graph.py`, `tests/integration/test_geo_conflict_graph.py`, `tests/integration/test_geo_spatial_search.py`.
+- **Expected Artifacts:** `ps05/engines/image/geo/conflict_graph.py`, `tests/integration/test_geo_conflict_graph.py`, `tests/integration/test_geo_spatial_search.py`.
 - **Validation & Testing:** Multi-camera case clustering tests; C2PA signature validation suite; PostGIS query performance benchmark (`test_geo_c2pa_provenance.py`, `test_geo_conflict_graph.py`).
 - **Failure Modes:** Untrusted C2PA certificate roots; complex graph cycles with circular contradictions; query timeouts on massive unindexed spatial tables.
 - **Security & Privacy:** Enforce strict case-level authorization on all spatial queries; do not leak exhibits across unauthorized case boundaries.
@@ -4211,7 +4210,7 @@ flowchart TD
   4. Integrate reviewer disposition workflow allowing investigators to accept, reject, or mark findings as inconclusive.
 - **Dependencies:** AIF-GEO-03, AIF-GEO-08, AIF-A14 (Reporting Baseline).
 - **Recommended Technologies:** FastAPI, Jinja2, WeasyPrint, Archify IR, MapLibre GL JS.
-- **Expected Artefacts:** `src/ps05/api/v1/geo.py`, `src/ps05/reporting/templates/geospatial_section.html`, `tests/integration/test_geo_reporting.py`.
+- **Expected Artifacts:** `src/ps05/api/v1/geo.py`, `src/ps05/reporting/templates/geospatial_section.html`, `tests/integration/test_geo_reporting.py`.
 - **Validation & Testing:** End-to-end report generation test; Section 65B legal compliance audit; Archify JSON IR validation (`test_geo_reporting.py`).
 - **Failure Modes:** WeasyPrint PDF layout overflow on long coordinate lists; missing thumbnail derivatives during PDF compilation.
 - **Security & Privacy:** Redact private coordinates from public-facing report summaries unless explicitly certified by investigator; verify digital signature sealing on output PDFs.
@@ -4243,7 +4242,7 @@ flowchart TD
   4. Perform documentation parity audit ensuring complete consistency across README, PRD, TRD, and PHASES.
 - **Dependencies:** AIF-GEO-01 through AIF-GEO-09.
 - **Recommended Technologies:** `pytest`, `pytest-cov`, `tcpdump`, Docker isolated network namespace.
-- **Expected Artefacts:** `tests/benchmarks/benchmark_geo_full.py`, `docs/audits/aif_geo_release_audit.md`.
+- **Expected Artifacts:** `tests/benchmarks/benchmark_geo_full.py`, `docs/audits/aif_geo_release_audit.md`.
 - **Validation & Testing:** Full test suite execution with code coverage $\ge 90\%$; packet capture log audit; determinism verification.
 - **Failure Modes:** Memory leaks during batch processing of 1,000+ case exhibits; non-deterministic candidate ranking across runs.
 - **Security & Privacy:** Complete verification of all 8 Geospatial Security Invariants defined in TRD Section 15.3.
@@ -4972,7 +4971,7 @@ Reporting engine implemented and passing all dossier compilation and cryptograph
 | :--- | :--- | :--- | :--- | :--- |
 | **ONTF-CP-12-01** | 11-Part Legal Dossier PDF Compilation | Compiles complete Section 65B/63 BSA PDF with all 11 sections | `NOT_STARTED` | Awaits phase activation |
 | **ONTF-CP-12-02** | Cryptographic Sealing & TSA Verification | Ed25519 signature and RFC 3161 timestamp verify successfully | `NOT_STARTED` | Awaits phase activation |
-| **ONTF-CP-06-03** | Mandatory Evidentiary Caveat Inclusion | All 9 attribution and evidence limitations explicitly rendered | `NOT_STARTED` | Awaits phase activation |
+| **ONTF-CP-12-03** | Mandatory Evidentiary Caveat Inclusion | All 9 attribution and evidence limitations explicitly rendered | `NOT_STARTED` | Awaits phase activation |
 | **ONTF-CP-12-04** | Machine-Readable JSON-LD Manifest | Structured JSON-LD evidence manifest validates against schema | `NOT_STARTED` | Awaits phase activation |
 
 ---
@@ -5085,7 +5084,7 @@ flowchart TD
 - **Acceptance Criteria:** 100% of existing detection models inventoried with verified SHA-256 hashes and clear ownership boundaries.
 - **Exit Criteria:** Zero unresolved architectural collisions; formal sign-off from subsystem leads.
 - **Risks:** Unclear ownership of multimodal synchronization scripts (resolved by assigning lip-sync to VISTA and voice spoofing to AURAS).
-- **Current Status:** `PLANNED`
+- **Current Status:** `IMPLEMENTED_AND_VERIFIED`
 
 ---
 
@@ -5329,6 +5328,9 @@ flowchart TD
 - **Exit Criteria:** CDVF certified for production deployment across PS-05 forensic platform.
 - **Risks:** PDF rendering inconsistencies across platforms (mitigated via standardized WeasyPrint Docker environment).
 - **Current Status:** `PLANNED`
+
+---
+
 ## 8.B Dedicated Cross-Media Metadata Service Engineering Playbook (CMMS-A0 through CMMS-A9)
 
 The Cross-Media Metadata Service (CMMS) is the shared, cross-cutting metadata extraction, normalization, consistency-analysis, and correlation engine of the PS-05 platform. It services all forensic modalities (AIF images, AURAS audio, VISTA video/CCTV, ONTF network captures, and AIF-GEO geospatial) without duplicating specialized detection logic.
@@ -5590,6 +5592,8 @@ flowchart TD
 - **Known Risks:** Hardware performance discrepancies between development and evaluation environments.
 - **Deferred Work:** Continuous post-release model drift monitoring handled in platform maintenance.
 
+---
+
 ## 9. Unified Platform Delivery & Security Milestones
 
 The platform delivery, dashboard, and hackathon packaging milestones synthesize findings across all forensic domains (AURAS Audio, VISTA Video, AIF Image, ONTF Offline Network Traffic, and CDVF Shared Validation):
@@ -5610,6 +5614,101 @@ The platform delivery, dashboard, and hackathon packaging milestones synthesize 
 - **Status:** `PLANNED`
 - **Scope:** End-to-end platform validation, automated demonstration script (`scripts/run_demo.py`), curated multi-modal evidence showcase (audio, video, image, network capture, and CDVF validation reports), and technical presentation defense.
 
+### 9.1 PS-05 Platform Orchestration & Reliability Milestones
+
+Milestones **M-PS05-1 through M-PS05-11** define the platform-level orchestration, durability, resource management, data-consistency, streaming-contract, engine-execution, observability, failure-isolation, and tiered security-control work for PS-05. They attach to the existing platform delivery structure of Section 9 (Phases 7–10) and act as prerequisite gates for the workstream phases registered in the Section 2 inventory; **no existing phase is reordered or renumbered**.
+
+- **Status convention:** all eleven milestones are `NOT_STARTED` (checkpoint-level marker used by every playbook in this document; `PLANNED` at the Section 2 inventory level denotes the parent delivery phases, not these milestones).
+- **Requirements traceability:** milestones reference TRD requirement namespaces — `REO-*` (orchestration), `RES-*` (resources), `OBS-*` (observability), `STG-*` (storage). Exact requirement numbers are **pending TRD consolidation** and will be filled in when the TRD.md namespaces are finalized.
+- **Dependency graph:** M-PS05-1 blocks M-PS05-2…M-PS05-4; M-PS05-2 and M-PS05-4 gate M-PS05-5; M-PS05-3 gates M-PS05-6; M-PS05-9 gates first real-evidence processing; M-PS05-10 and M-PS05-11 follow broader deployment.
+
+```mermaid
+flowchart TD
+    M1["M-PS05-1 Orchestration Core"] --> M2["M-PS05-2 Durability"]
+    M1 --> M3["M-PS05-3 Resources"]
+    M1 --> M4["M-PS05-4 Consistency"]
+    M2 & M4 --> M5["M-PS05-5 Streaming Contracts"]
+    M3 --> M6["M-PS05-6 Engine Execution Matrix"]
+    M1 --> M7["M-PS05-7 Observability"]
+    M2 & M3 & M4 --> M8["M-PS05-8 Failure-Isolation Verification"]
+    M6 --> M9["M-PS05-9 P0 Security Controls"]
+    M9 --> M10["M-PS05-10 P1 Security Controls"]
+    M10 --> M11["M-PS05-11 P2 Hardening"]
+    M9 --> EV["First Real-Evidence Processing (all subsystems)"]
+```
+
+#### M-PS05-1: Orchestration Core
+- **Status:** `NOT_STARTED` — **Prerequisite:** Phase 1 shared core (dual-hashing, WORM vault, Celery worker base)
+- **Scope:** Investigation-level workflow DAG model; investigation and task state machines (canonical state sets, legal transitions, and terminal states); task record schema (task identity, parent DAG node, engine, input/output evidence pointers, state, attempt count, timestamps, operator identity).
+- **Acceptance criteria:** DAG model and both state machines are fully specified in the TRD with all legal transitions tabled; task record schema validated as a Pydantic v2 / JSON-Schema contract; a synthetic investigation DAG executes to a terminal state through the state machine without manual DB mutation.
+- **Requirements reference:** TRD `REO-*` (exact requirement numbers pending TRD consolidation).
+- **Gates:** M-PS05-2, M-PS05-3, M-PS05-4.
+
+#### M-PS05-2: Durability
+- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-1
+- **Scope:** Transactional outbox/inbox between the orchestration core and worker queue; worker leases with expiry and a stale-task reaper; stage checkpoints (resumable in-engine stage boundaries); dead-letter-queue (DLQ) quarantine and operator-driven redrive workflow.
+- **Acceptance criteria:** Every queued task transition is outbox-recorded before dispatch and recoverable after a simulated worker death; reaper reclaims expired leases without duplicate execution (inbox dedup proven by a test); resuming a failed stage restarts at the last checkpoint, not the task start; DLQ entries are quarantined read-only and redrive only via a two-person operator action that is audit-logged.
+- **Requirements reference:** TRD `REO-*` (exact requirement numbers pending TRD consolidation).
+- **Gates:** M-PS05-5 (with M-PS05-4), M-PS05-8.
+
+#### M-PS05-3: Resources
+- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-1
+- **Scope:** Versioned workload profiles per engine class (CPU, RAM, VRAM, wall-clock, and artifact-size ceilings); worker-class pools mapped to profiles; admission control at task submission; backpressure signals from saturated pools to the DAG scheduler; GPU admission with automatic CPU fallback profiles.
+- **Acceptance criteria:** Each engine class has a versioned, registry-stored profile; a task exceeding its pool's admission limits is rejected with a defined queue/poll state rather than running unbounded; sustained load above pool capacity produces backpressure (scheduling slowdown, not OOM); a GPU-admission failure falls back to the declared CPU profile and records the fallback in the task record.
+- **Requirements reference:** TRD `RES-*` (exact requirement numbers pending TRD consolidation).
+- **Gates:** M-PS05-6, M-PS05-8.
+
+#### M-PS05-4: Consistency
+- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-1
+- **Scope:** PostgreSQL as the single authoritative store with schema expansion for investigations, tasks, and evidence lineage; staged object-storage workflow (staging area, verified promotion to WORM, and no in-place mutation); cross-store reconciliation job comparing database records against object-storage manifests.
+- **Acceptance criteria:** All authoritative state is queryable from PostgreSQL with object storage holding only immutable blobs; the staging→WORM promotion path is the only write path to the vault; reconciliation reports zero unexplained divergence on a seeded test corpus and flags any divergence it does find as quarantined findings, not silent errors.
+- **Requirements reference:** TRD `STG-*` (exact requirement numbers pending TRD consolidation).
+- **Gates:** M-PS05-5 (with M-PS05-2), M-PS05-8.
+
+#### M-PS05-5: Streaming Contracts
+- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-2 and M-PS05-4
+- **Scope:** Chunk manifests for video, audio, network capture, and disk-image streams (chunk index, offsets, per-chunk digest, producer/engine identity); re-openable CCHDF evidence stream contract (seekable, resumable, hash-attested byte streams consumable by concealment triage without re-acquisition).
+- **Acceptance criteria:** Each of the four media types exposes a chunk manifest that an engine can consume without full-file copies; a CCHDF stream closed mid-read re-opens to the same logical offset with digests still validating; manifest schema is a shared, versioned contract referenced by the CCHDF-A0 triage scanner.
+- **Requirements reference:** TRD `STG-*` / `REO-*` (exact requirement numbers pending TRD consolidation).
+
+#### M-PS05-6: Engine Execution Matrix Completed
+- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-3
+- **Scope:** The engine execution matrix (engine × task-profile × resource-profile × failure-behavior) is completed for all engines: AURAS, AIF, VISTA (incl. AFB/VCI/VDF), ONTF, CMMS, CSTV, CDVF, CCHDF/PSEA, RAG/graph, UFD/UFW, and UFREDF.
+- **Acceptance criteria:** Every engine row in the matrix is filled and verified against M-PS05-3 profiles (submission, admission, checkpoint, failure, and fallback behavior each specified); no engine ships to Phase 7 aggregation without a completed matrix row; matrix is a reviewed, versioned artifact in the repo docs.
+- **Requirements reference:** TRD `REO-*` / `RES-*` (exact requirement numbers pending TRD consolidation).
+- **Gates:** M-PS05-9.
+
+#### M-PS05-7: Observability
+- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-1 (traced entities: DAG nodes, tasks, state transitions)
+- **Scope:** OpenTelemetry context propagation across API, DAG scheduler, outbox/inbox, and worker boundaries; defined metric groups per milestone area (queue depth, lease expiry, DLQ size, reconciliation divergence, pool utilization, fallback count); alert definitions and SLO candidates.
+- **Acceptance criteria:** A single trace ID follows one task from submission through engine execution to result publication; all defined metric groups emit and are dashboard-visible; alerts fire on injected failures; SLO targets are explicitly labelled **candidates, benchmarked before any numbers are guaranteed** (no SLO is asserted as met by this milestone).
+- **Requirements reference:** TRD `OBS-*` (exact requirement numbers pending TRD consolidation).
+
+#### M-PS05-8: Failure-Isolation Verification
+- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-2, M-PS05-3, M-PS05-4
+- **Scope:** A per-scenario containment matrix, each scenario exercised and recorded: (1) AURAS engine down; (2) VDF model inference failure; (3) corrupt CCTV clip input; (4) Redis outage; (5) PostgreSQL outage; (6) WORM storage outage; (7) GPU OOM during deepfake inference; (8) CCHDF evidence-stream adapter failure; (9) RAG indexer outage; (10) UFREDF report generation failure.
+- **Acceptance criteria:** For each scenario, the defined containment behavior is observed (failing scope stays quarantined; unrelated DAG branches and investigations continue or halt only at their declared gates; failure lands in DLQ/quarantine with an operator-visible record; no partial or unattested artifacts are published); results recorded in the matrix as pass/fail evidence, not assumed.
+- **Requirements reference:** TRD `OBS-*` / `REO-*` (exact requirement numbers pending TRD consolidation).
+
+#### M-PS05-9: P0 Security Controls
+- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-6 — **Gate:** first real-evidence processing in any subsystem
+- **Scope:** P0 baseline controls: authentication and case-level authorization; evidence immutability enforcement (WORM + read-only paths); secret handling (no secrets in task payloads, environment or vault-backed only); parser isolation for untrusted inputs; storage access control (stage vs. WORM); audit logging of state transitions and operator actions; RAG cross-case index isolation; model output validation before findings publication; resource-limit enforcement; backup/restore verification drill.
+- **Acceptance criteria:** Each control has a testable check (authorization probe, mutation-failure probe, secret-scan of task payloads, cross-case RAG isolation test, output-validation rejection test, restore-from-backup drill) that passes; no real evidence is processed before M-PS05-9 passes.
+- **Requirements reference:** TRD security requirements (namespace pending TRD consolidation).
+- **Gates:** M-PS05-10; first real-evidence processing.
+
+#### M-PS05-10: P1 Security Controls
+- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-9; scheduled after broader deployment (following Phase 9-style deployment states)
+- **Scope:** Centralised security monitoring; key rotation and recovery procedures; incident response runbooks; model supply-chain verification; automated dependency and container scanning in CI; security regression test suite; retention and deletion workflows for case-scoped data.
+- **Acceptance criteria:** Security events from all components reach a single monitored sink; key rotation executed in a drill without case-data loss and with a recovery path demonstrated; an incident response runbook executed against a tabletop scenario; dependencies and containers scanned on every CI run with blocking policy; retention/deletion workflow demonstrated end-to-end on a test case with audit records.
+- **Requirements reference:** TRD security requirements (namespace pending TRD consolidation).
+- **Gates:** M-PS05-11.
+
+#### M-PS05-11: P2 Security Hardening
+- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-10; scheduled after broader deployment
+- **Scope:** Stronger workload isolation where the failure-isolation matrix justifies it; anomaly detection on platform telemetry; supply-chain attestations for engine and model artifacts; adversarial AI testing (model-robustness red teaming); independent security assessment before release.
+- **Acceptance criteria:** Isolation strengthened only where M-PS05-8 evidence justifies it (documented rationale per change); anomaly detection produces reviewable alerts without unactionable alert floods; attestations verifiable for every shipped engine/model artifact; adversarial test results recorded; independent assessment completed with findings dispositioned before Phase 10 release.
+- **Requirements reference:** TRD security requirements (namespace pending TRD consolidation).
 
 ---
 
@@ -5655,7 +5754,7 @@ gantt
     VISTA-A13: End-to-End Video Benchmark   :         va13, 2026-11-09, 2026-11-10
 
     section Image Forensics Subsystem (AIF)
-    Phase 4: Image Forensics Subsystem (IFS):         p4, 2026-10-24, 2026-10-28
+    Phase 4: AIF Image Forensics Subsystem (AIF-A0..A15):        p4, 2026-10-24, 2026-10-28
 
     section AIF-IML Image Localisation Workstream
     AIF-IML-00: Audit & Localisation Contracts:done,   ia0, 2026-10-21, 2026-10-22
@@ -5839,6 +5938,9 @@ Every Cross-Modal Deepfake Validation Framework requirement (`CDVF-01` through `
 | **CDVF-98** | Automated Regression Runner | PRD §13.6 | TRD §11.B.14 | **CDVF-A11** | `CDVF-CP-11-01` | Continuous regression runner blocks promotion if $\Delta\operatorname{AUC} < -0.01$ or $\Delta\operatorname{ECE} > +0.01$ | `PLANNED` | `CDVF-A10` |
 | **CDVF-99** | RFC 8785 24-Item WORM Bundle | PRD §13.6 | TRD §11.B.15 | **CDVF-A11** | `CDVF-CP-11-01` | Serializes complete benchmark execution into 24-item canonical JSON bundle in WORM vault | `PLANNED` | `CDVF-A10` |
 | **CDVF-100**| Section 65B/63 BSA Dossier | PRD §13.6 | TRD §11.B.16 | **CDVF-A11** | `CDVF-CP-11-01` | Generates structured PDF dossier with reliability diagrams, ROC curves, and examiner sign-off | `PLANNED` | `CDVF-A10` |
+
+---
+
 ## 12. IMLF Master Requirement Traceability Matrix (IML-01 through IML-22)
 
 The following master traceability matrix maps every canonical Image Manipulation Localisation Framework requirement (`IML-01` through `IML-22`) to its authoritative specification in `PRD.md`, its technical contract in `TRD.md`, its designated implementation phase in `PHASES.md`, its primary verification checkpoint, and the mandatory empirical evidence required for approval:
@@ -6883,6 +6985,8 @@ Every Audio Edit and Splice Localisation requirement (`AESL-01` through `AESL-90
 | **AESL-89** | Controlled 500-Fixture Evaluation Dataset | PRD §18.6 | TRD §18.15 | **AURAS-AESL-10** | `AESL-CP-10-01` | 500 ground-truth fixtures evaluated | `PLANNED` |
 | **AESL-90** | Region-Level IoU & Boundary MAE Metrics | PRD §18.6 | TRD §18.15 | **AURAS-AESL-10** | `AESL-CP-10-02` | $\text{tIoU} \ge 0.75$, $\text{MAE} \le 15\text{ms}$ | `PLANNED` |
 
+---
+
 ## 19. Dedicated Evidence Integrity Verification Engineering Playbook (CEIPL-EIV-00 through CEIPL-EIV-10)
 
 ```mermaid id="eivroadmap"
@@ -6925,7 +7029,7 @@ flowchart TD
 - **Acceptance Criteria:** Architectural gap analysis signed off; zero duplicate hashing logic in AIF, AURAS, or VISTA.
 - **Exit Criteria:** Clear development path established for Phase `CEIPL-EIV-01`.
 - **Risks & Mitigations:** Hidden direct disk writes in external libraries (e.g. OpenCV / FFmpeg). *Mitigation:* Sandbox file access with read-only file descriptors.
-- **Current Status:** `NOT_STARTED`
+- **Current Status:** `PLANNED`
 
 ---
 
@@ -6953,7 +7057,7 @@ flowchart TD
 - **Acceptance Criteria:** Full 10-entity identity model validated; duplicate files preserve separate provenance.
 - **Exit Criteria:** Ingestion contracts ready for streaming hashing integration.
 - **Risks & Mitigations:** High UUID generation load during bulk seizures. *Mitigation:* High-performance C-accelerated UUIDv7 library.
-- **Current Status:** `NOT_STARTED`
+- **Current Status:** `PLANNED`
 
 ---
 
@@ -6981,7 +7085,7 @@ flowchart TD
 - **Acceptance Criteria:** Dual hashes computed strictly before decoding; throughput $\ge 150 \text{ MB/s}$; memory bounded $\le 64 \text{ MB}$.
 - **Exit Criteria:** Hasher outputs ready for manifest binding and cryptographic signing.
 - **Risks & Mitigations:** CPU throttling during simultaneous multi-file intake. *Mitigation:* Multi-process worker pool for hashing.
-- **Current Status:** `NOT_STARTED`
+- **Current Status:** `PLANNED`
 
 ---
 
@@ -7009,7 +7113,7 @@ flowchart TD
 - **Acceptance Criteria:** Manifests canonicalized deterministically; detached signatures verifiable; TSA tokens validated.
 - **Exit Criteria:** Manifests ready for WORM storage commitment.
 - **Risks & Mitigations:** TSA server unreachable in field operations. *Mitigation:* Graceful offline mode with deferred queuing.
-- **Current Status:** `NOT_STARTED`
+- **Current Status:** `PLANNED`
 
 ---
 
@@ -7038,7 +7142,7 @@ flowchart TD
 - **Acceptance Criteria:** Storage-enforced immutability proven via automated penetration testing; legal hold verified.
 - **Exit Criteria:** Vault ready for post-write readback and lifecycle verification.
 - **Risks & Mitigations:** Storage admin root credentials used maliciously. *Mitigation:* Dual-custody administrative approval and remote audit logging.
-- **Current Status:** `NOT_STARTED`
+- **Current Status:** `PLANNED`
 
 ---
 
@@ -7068,7 +7172,7 @@ flowchart TD
 - **Acceptance Criteria:** All 12 lifecycle verification gates operational; fixity audit sustained $\ge 200 \text{ MB/s}$; quarantine isolation proven.
 - **Exit Criteria:** System ready for custody ledger integration.
 - **Risks & Mitigations:** Fixity job saturating disk I/O during business hours. *Mitigation:* Nice-level disk I/O scheduling and off-peak execution.
-- **Current Status:** `NOT_STARTED`
+- **Current Status:** `PLANNED`
 
 ---
 
@@ -7097,7 +7201,7 @@ flowchart TD
 - **Acceptance Criteria:** Custody ledger completely append-only; tampering detected with 100% accuracy; sequence gaps impossible.
 - **Exit Criteria:** Ledger ready for derivative artifact lineage binding.
 - **Risks & Mitigations:** Database sequence contention under high concurrent writes. *Mitigation:* Advisory locks and batch sequence reservation.
-- **Current Status:** `NOT_STARTED`
+- **Current Status:** `PLANNED`
 
 ---
 
@@ -7125,7 +7229,7 @@ flowchart TD
 - **Acceptance Criteria:** Multi-generational Merkle DAG operational; multi-file package manifests verified; path traversal eliminated.
 - **Exit Criteria:** Evidence packages ready for standalone offline verification.
 - **Risks & Mitigations:** Complex deep lineage graphs causing slow report queries. *Mitigation:* Indexed recursive CTEs in PostgreSQL.
-- **Current Status:** `NOT_STARTED`
+- **Current Status:** `PLANNED`
 
 ---
 
@@ -7153,7 +7257,7 @@ flowchart TD
 - **Acceptance Criteria:** Standalone verifier runs air-gapped; backup restoration verified; all 15 REST endpoints operational.
 - **Exit Criteria:** Subsystem ready for cross-engine forensic integration.
 - **Risks & Mitigations:** OpenSSL version drift across Linux distributions affecting CLI. *Mitigation:* Use pure Python Ed25519/SHA implementations as fallback.
-- **Current Status:** `NOT_STARTED`
+- **Current Status:** `PLANNED`
 
 ---
 
@@ -7181,7 +7285,7 @@ flowchart TD
 - **Acceptance Criteria:** All forensic engines integrated; structured Section 63 BSA dossiers generated with cryptographic audit annexures.
 - **Exit Criteria:** System ready for release security hardening and performance benchmarking.
 - **Risks & Mitigations:** Large PDF dossier size due to extensive hash tables. *Mitigation:* Compact tabular formatting and vector annexures.
-- **Current Status:** `NOT_STARTED`
+- **Current Status:** `PLANNED`
 
 ---
 
@@ -7209,7 +7313,9 @@ flowchart TD
 - **Acceptance Criteria:** 100% pass on mutation and benchmark suites; RBAC security validated; air-gapped container verified.
 - **Exit Criteria:** Production-ready EIV capability integrated into PS-05 platform release.
 - **Risks & Mitigations:** Hardware differences in field workstations affecting throughput. *Mitigation:* Auto-tuning chunk buffers based on system RAM.
-- **Current Status:** `NOT_STARTED`
+- **Current Status:** `PLANNED`
+
+---
 
 ## 20. EIV Master Requirement Traceability Matrix (EIV-01 through EIV-100)
 
@@ -7373,12 +7479,12 @@ flowchart LR
 - **Prerequisites:** Phase UFD-A0 discovery completed.
 - **Scope:** Application shell, navigation router, breadcrumbs, geometric status indicators, typography, and layout tokens.
 - **Detailed Tasks:**
-  1. Implement the UFW application shell with collapsible sidebar navigation, persistent active-case header, and breadcrumbs.
+  1. Implement the UFD application shell with collapsible sidebar navigation, persistent active-case header, and breadcrumbs.
   2. Implement semantic status tokens pairing distinct colors with text and geometric iconography (Green Circle for `VERIFIED`, Amber Triangle for `WARNING`, Red Octagon for `FAILED`, Purple Rhombus for `INCONCLUSIVE`).
   3. Build high-density data table components supporting server-side pagination, sorting, column toggling, and keyboard navigation.
   4. Implement an accessible focus indicator ring ($\ge 3:1$ contrast) and skip-to-content navigation links.
 - **Dependencies:** Phase UFD-A0.
-- **Deliverables:** UFW UI Design System Library, React Router Navigation Shell, Geometric Status Token Engine.
+- **Deliverables:** UFD UI Design System Library, React Router Navigation Shell, Geometric Status Token Engine.
 - **Unit Tests:** `test_status_badge_icon_rendering()`, `test_table_pagination_logic()`.
 - **Integration Tests:** `test_route_preservation_on_page_refresh()`, `test_breadcrumb_navigation_flow()`.
 - **Security Tests:** `test_xss_sanitization_in_labels()`, `test_dompurify_token_sanitization()`.
@@ -7976,7 +8082,7 @@ flowchart LR
 - **Prerequisites:** Phase UFREDF-A4.
 - **Scope:** Review state transitions, technical reviewer approval gate, dual-control sign-off, and Ed25519/PAdES signers.
 - **Detailed Tasks:**
-  1. Implement the nine-state report lifecycle machine (`DRAFT` through `APPROVED`, `SIGNED`, and `ISSUED`).
+  1. Implement the ten-state report lifecycle machine (`DRAFT` through `APPROVED`, `SIGNED`, and `ISSUED`).
   2. Implement the independent technical review gate requiring formal sign-off from `ROLE-TECHREV`.
   3. Build the examiner annotation editor recording free-text observations bound cryptographically to the report snapshot.
   4. Implement detached RFC 8032 Ed25519 digital signing of the compiled report SHA-256 digest.
@@ -8098,7 +8204,7 @@ flowchart LR
   1. Audit template compilation engines, implementing strict sandboxing against SSTI, local file inclusion, and SSRF.
   2. Implement worker resource limits (max $2\text{ GB}$ RAM, max $30\text{ s}$ CPU time) to defend against algorithmic complexity attacks.
   3. Conduct packet capture audits to guarantee zero outbound network calls during report compilation.
-  4. Implement strict output encoding preventing XSS when report previews are rendered in the UFW web interface.
+  4. Implement strict output encoding preventing XSS when report previews are rendered in the UFD web interface.
 - **Dependencies:** Phase UFREDF-A8.
 - **Deliverables:** Sandboxed Report Worker Environment, Resource Quota Enforcement Guard, Security Audit Report.
 - **Unit Tests:** `test_ssti_injection_payload_rejection()`, `test_memory_quota_enforcement()`.
