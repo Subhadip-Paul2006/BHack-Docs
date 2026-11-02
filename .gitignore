@@ -24,12 +24,12 @@ dist/
 build/
 *.egg-info/
 
-# Graphify temporary caches and sidecars (persistent graph.json, report, html, and wiki remain tracked)
-graphify-out/cache/
-graphify-out/.graphify_*
-graphify-out/.needs_update
+# Graphify output & caches
+graphify-out/
 
 # IDE & agent local scratch / caches
 .gemini/
 .codex/
+.agents/
+
 
