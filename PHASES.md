@@ -177,9 +177,35 @@ flowchart TD
 
 ## 2. Master Implementation Status Inventory
 
+> [!IMPORTANT]
+> ### Master Implementation Progress Summary (%)
+>
+> | # | Workstream / Subsystem | Track Code | Total Phases / Milestones | Completed & Verified | In Progress / Planned | % Completed | Implemented Deliverables & Evidence |
+> | :-: | :--- | :--- | :-: | :-: | :-: | :---: | :--- |
+> | 1 | **Platform Orchestration Milestones** | `M-PS05-1 .. M-PS05-11` | 11 | 7 | 4 | **63.64%** | `M-PS05-1` to `M-PS05-7` in `ps05.core`, `ps05.infra`, `ps05.shared` |
+> | 2 | **Platform Foundation & Core Delivery** | `Phase 0, 1, 7, 8, 9, 10` | 6 | 2 | 4 | **33.33%** | Phase 0 & Phase 1 verified; Phases 7–10 planned |
+> | - | *(Subtotal Platform Core + Orchestration)* | `Phases 0,1,7..10 + M-1..11` | *17* | *9* | *8* | ***52.94%*** | *Combined core platform layer* |
+> | 3 | **AURAS Audio Forensics Subsystem** | `AURAS-A0 .. AURAS-A10` | 11 | 0 | 11 | **0.00%** | Downstream of core platform foundation (Section 3) |
+> | 4 | **AURAS-AESL Audio Edit & Splice** | `AURAS-AESL-00 .. AESL-10` | 11 | 0 | 11 | **0.00%** | Planned in Section 17 |
+> | 5 | **VISTA Video Forensics Subsystem** | `VISTA-A0 .. VISTA-A13` | 14 | 0 | 14 | **0.00%** | Downstream of core platform foundation (Section 4) |
+> | 6 | **VISTA-CFI CCTV Frame Integrity** | `VISTA-CFI-00 .. CFI-09` | 10 | 0 | 10 | **0.00%** | Planned in Section 4.B |
+> | 7 | **AIF Image Forensics Subsystem** | `AIF-A0 .. AIF-A15` | 16 | 0 | 16 | **0.00%** | Downstream of core platform foundation (Section 5) |
+> | 8 | **AIF-IML Manipulation Localisation** | `AIF-IML-00 .. IML-10` | 11 | 1 | 10 | **9.09%** | `AIF-IML-00` verified (`IMPLEMENTED_AND_VERIFIED`) |
+> | 9 | **AIF-GEO Geospatial Forensics** | `AIF-GEO-00 .. GEO-10` | 11 | 0 | 11 | **0.00%** | Planned in Section 6 |
+> | 10 | **ONTF Network Traffic Forensics** | `ONTF-A0 .. ONTF-A13` | 14 | 0 | 14 | **0.00%** | `ontf.py` schema adapter in place; deep analysis planned |
+> | 11 | **CDVF Cross-Modal Deepfake Validation** | `CDVF-A0 .. CDVF-A11` | 12 | 1 | 11 | **8.33%** | `CDVF-A0` verified (`IMPLEMENTED_AND_VERIFIED`) |
+> | 12 | **CMMS Cross-Media Metadata Service** | `CMMS-A0 .. CMMS-A9` | 10 | 0 | 10 | **0.00%** | `cmms.py` schema adapter in place; deep extractors planned |
+> | 13 | **CSTV Cross-Source Timestamp Verif.** | `CSTV-A0 .. CSTV-A10` | 11 | 0 | 11 | **0.00%** | Planned in Section 15 |
+> | 14 | **CEIPL-EIV Evidence Integrity Verif.** | `CEIPL-EIV-00 .. EIV-10` | 11 | 0 | 11 | **0.00%** | Cryptographic core landed in Phase 1; full EIV track planned |
+> | 15 | **CCHDF Cross-Channel Concealment** | `CCHDF-A0 .. CCHDF-A8` | 9 | 0 | 9 | **0.00%** | `triage.py` & `cchdf.py` adapters in place |
+> | 16 | **UFREDF Statutory Legal Reporting** | `UFREDF-A0 .. UFREDF-A10` | 11 | 0 | 11 | **0.00%** | Planned in Section 23 |
+> | 17 | **UFD Unified Forensic Dashboard** | `UFD-A0 .. UFD-A11` | 12 | 0 | 12 | **0.00%** | Planned in Section 21 |
+> | **TOTAL** | **All 17 Unique Master Tracks** | **ALL** | **195** | **11** | **184** | **5.64%** | **Grand Platform Implementation Completion** |
+
 | Phase ID | Phase Name | Subsystem / Workstream | Status | Prerequisite Gates | Primary Deliverables |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Phase 0** | Architecture Baseline & Repo Standards | All Subsystems / Docs | `IMPLEMENTED_AND_VERIFIED` | None | PRD, TRD, PHASES, AI_INSTRUCTIONS, pyproject.toml |
+| **Phase 1** | Shared Core, CEIPL Crypto & WORM Foundation | Shared Core / Platform | `IMPLEMENTED_AND_VERIFIED` | Phase 0 Gate | Dual-hasher (SHA-256/SHA3-512), WORM vault, Merkle tree root, append-only custody ledger, Celery base |
 | **AURAS-A0**| Audio Evidence Contracts & Ingestion | Shared Core / AURAS | `PLANNED` | Phase 0 Gate | Dual-hasher, WORM vault, artifact manifests, decoder |
 | **AURAS-A1**| ARE Baseline: Signal & Spectral Profiling | ARE Engine | `PLANNED` | AURAS-A0 Gate | RMS/clipping metrics, STFT, Welch PSD, spectral flux |
 | **AURAS-A2**| ARE Advanced: Splicing, Noise & ENF | ARE Engine | `PLANNED` | AURAS-A1 Gate | PELT splice detector, noise floor tracker, FAISS, ENF |
@@ -289,6 +315,8 @@ flowchart TD
 | **CMMS-A7** | Rule-Based Consistency Analysis & Cross-Evidence Correlation | CMMS Consistency | `PLANNED` | CMMS-A6 Gate | 18-finding code engine, multi-source candidate timeline, CCTV recording window containment |
 | **CMMS-A8** | CEIPL Provenance Lineage, UFREDF Reporting & Sandbox Security | CMMS Core/Sec | `PLANNED` | CMMS-A7 Gate | RFC 8785 snapshot hashing, CEIPL DAG registration, Linux cgroup sandbox, Sec 63 BSA annexure |
 | **CMMS-A9** | Testing Suite, Adversarial Fixtures, Benchmarking & Release | Validation/Release | `PLANNED` | CMMS-A8 Gate | 500-fixture corpus, malformed file fuzzing suite, latency SLAs, air-gap packet audit |
+| **CSTV-A0 … CSTV-A10** | Cross-Source Timestamp Verification Engineering Track | CSTV Subsystem | `PLANNED` | Phase 0 Gate | Clock drift regression, Allen algebra, timeline reconstruction (Section 15) |
+| **AURAS-AESL-00 … AESL-10** | Audio Edit and Splice Localisation Engineering Track | AURAS Subsystem | `PLANNED` | AURAS-A0 Gate | Boundary localisation, multi-resolution segmentation, Sec 63 BSA dossier (Section 17) |
 | **CEIPL-EIV-00** | Repo & Integrity Architecture Discovery | CEIPL / EIV | `PLANNED` | Phase 0 Gate | Architectural gap analysis, boundary specs |
 | **CEIPL-EIV-01** | Evidence Identity & Acquisition Contract | CEIPL / EIV | `PLANNED` | EIV-00 Gate | Decoupled 10-entity UUIDs, Pydantic v2 contracts |
 | **CEIPL-EIV-02** | Pre-Decode Dual-Hashing Pipeline | CEIPL / EIV | `PLANNED` | EIV-01 Gate | Streaming SHA-256 + SHA3-512, 4MB Merkle trees |
@@ -310,7 +338,8 @@ flowchart TD
 | **CCHDF-A7** | Semantic, Nomenclator & Linguistic Obfuscation Engine | Semantic Adapter | `PLANNED` | CCHDF-A0 Gate | Historical cipher & narcotics codebook matcher, Sentence-BERT contextual semantic dissonance, masked LM alternative perplexity scoring |
 | **CCHDF-A8** | Physical Side-Channel & Emissions Analysis (PSEA Specialist) | PSEA Specialist | `PLANNED` | CCHDF-A0 Gate | Laboratory measurement provenance validator, SDR I/Q spectrogram demodulation, Van Eck phreaking / TEMPEST reconstruction, thermal profile analysis |
 | **Phase 7** | Platform Cross-Engine Reporting | Core Reporting | `PLANNED` | A10, VA13, IA15, NA13, GA10, CDVF-A11, CEIPL-EIV-10, CCHDF-A8 Gates| Section 65B IEA / Section 63 BSA unified multi-modal certificate |
-| **M-PS05-1 … M-PS05-11** | Platform Orchestration, Reliability & Tiered Security Milestones | Platform Orchestration / Shared Core | `NOT_STARTED` | M-1 blocks M-2…M-4; M-2 & M-4 gate M-5; M-3 gates M-6; M-9 gates first real-evidence processing; M-10/M-11 after broader deployment | Workflow DAG, state machines, outbox/inbox durability, worker leases, resource admission, cross-store consistency, streaming contracts, engine execution matrix, observability, failure-isolation matrix, P0/P1/P2 security controls (Section 9.1) |
+| **M-PS05-1 … M-PS05-7** | Platform Orchestration, Reliability & Observability Milestones | Platform Orchestration / Shared Core | `IMPLEMENTED_AND_VERIFIED` | Phase 1 Gate | Workflow DAG, state machines, outbox/inbox durability, worker leases, resource admission, cross-store consistency, streaming contracts, engine execution matrix, observability (Section 9.1) |
+| **M-PS05-8 … M-PS05-11** | Failure-Isolation & Tiered Security Milestones | Platform Reliability / Security | `NOT_STARTED` | M-PS05-7 Gate | Failure-isolation matrix, P0/P1/P2 security controls (Section 9.1) |
 | **UFREDF-A0** | Reporting Architecture & Legal Standards Discovery | UFREDF / Core | `PLANNED` | Phase 0 Gate | Section 65B/63 BSA legal checklist, Archify IR integration map |
 | **UFREDF-A1** | Canonical JSON IR Schema & RFC 8785 Serializer | UFREDF / Core | `PLANNED` | UFREDF-A0 Gate | RFC 8785 JCS canonical serializer, Pydantic v2 schemas |
 | **UFREDF-A2** | Evidence Inventory & CEIPL Fixity Attestation | UFREDF / Data | `PLANNED` | UFREDF-A1 Gate | Intake schedule compiler, dual-hash tables, Merkle custody parser |
@@ -5638,48 +5667,48 @@ flowchart TD
 ```
 
 #### M-PS05-1: Orchestration Core
-- **Status:** `NOT_STARTED` — **Prerequisite:** Phase 1 shared core (dual-hashing, WORM vault, Celery worker base)
+- **Status:** `IMPLEMENTED_AND_VERIFIED` — **Prerequisite:** Phase 1 shared core (dual-hashing, WORM vault, Celery worker base)
 - **Scope:** Investigation-level workflow DAG model; investigation and task state machines (canonical state sets, legal transitions, and terminal states); task record schema (task identity, parent DAG node, engine, input/output evidence pointers, state, attempt count, timestamps, operator identity).
 - **Acceptance criteria:** DAG model and both state machines are fully specified in the TRD with all legal transitions tabled; task record schema validated as a Pydantic v2 / JSON-Schema contract; a synthetic investigation DAG executes to a terminal state through the state machine without manual DB mutation.
 - **Requirements reference:** TRD `REO-*` (exact requirement numbers pending TRD consolidation).
 - **Gates:** M-PS05-2, M-PS05-3, M-PS05-4.
 
 #### M-PS05-2: Durability
-- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-1
+- **Status:** `IMPLEMENTED_AND_VERIFIED` — **Prerequisite:** M-PS05-1
 - **Scope:** Transactional outbox/inbox between the orchestration core and worker queue; worker leases with expiry and a stale-task reaper; stage checkpoints (resumable in-engine stage boundaries); dead-letter-queue (DLQ) quarantine and operator-driven redrive workflow.
 - **Acceptance criteria:** Every queued task transition is outbox-recorded before dispatch and recoverable after a simulated worker death; reaper reclaims expired leases without duplicate execution (inbox dedup proven by a test); resuming a failed stage restarts at the last checkpoint, not the task start; DLQ entries are quarantined read-only and redrive only via a two-person operator action that is audit-logged.
 - **Requirements reference:** TRD `REO-*` (exact requirement numbers pending TRD consolidation).
 - **Gates:** M-PS05-5 (with M-PS05-4), M-PS05-8.
 
 #### M-PS05-3: Resources
-- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-1
+- **Status:** `IMPLEMENTED_AND_VERIFIED` — **Prerequisite:** M-PS05-1
 - **Scope:** Versioned workload profiles per engine class (CPU, RAM, VRAM, wall-clock, and artifact-size ceilings); worker-class pools mapped to profiles; admission control at task submission; backpressure signals from saturated pools to the DAG scheduler; GPU admission with automatic CPU fallback profiles.
 - **Acceptance criteria:** Each engine class has a versioned, registry-stored profile; a task exceeding its pool's admission limits is rejected with a defined queue/poll state rather than running unbounded; sustained load above pool capacity produces backpressure (scheduling slowdown, not OOM); a GPU-admission failure falls back to the declared CPU profile and records the fallback in the task record.
 - **Requirements reference:** TRD `RES-*` (exact requirement numbers pending TRD consolidation).
 - **Gates:** M-PS05-6, M-PS05-8.
 
 #### M-PS05-4: Consistency
-- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-1
+- **Status:** `IMPLEMENTED_AND_VERIFIED` — **Prerequisite:** M-PS05-1
 - **Scope:** PostgreSQL as the single authoritative store with schema expansion for investigations, tasks, and evidence lineage; staged object-storage workflow (staging area, verified promotion to WORM, and no in-place mutation); cross-store reconciliation job comparing database records against object-storage manifests.
 - **Acceptance criteria:** All authoritative state is queryable from PostgreSQL with object storage holding only immutable blobs; the staging→WORM promotion path is the only write path to the vault; reconciliation reports zero unexplained divergence on a seeded test corpus and flags any divergence it does find as quarantined findings, not silent errors.
 - **Requirements reference:** TRD `STG-*` (exact requirement numbers pending TRD consolidation).
 - **Gates:** M-PS05-5 (with M-PS05-2), M-PS05-8.
 
 #### M-PS05-5: Streaming Contracts
-- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-2 and M-PS05-4
+- **Status:** `IMPLEMENTED_AND_VERIFIED` — **Prerequisite:** M-PS05-2 and M-PS05-4
 - **Scope:** Chunk manifests for video, audio, network capture, and disk-image streams (chunk index, offsets, per-chunk digest, producer/engine identity); re-openable CCHDF evidence stream contract (seekable, resumable, hash-attested byte streams consumable by concealment triage without re-acquisition).
 - **Acceptance criteria:** Each of the four media types exposes a chunk manifest that an engine can consume without full-file copies; a CCHDF stream closed mid-read re-opens to the same logical offset with digests still validating; manifest schema is a shared, versioned contract referenced by the CCHDF-A0 triage scanner.
 - **Requirements reference:** TRD `STG-*` / `REO-*` (exact requirement numbers pending TRD consolidation).
 
 #### M-PS05-6: Engine Execution Matrix Completed
-- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-3
+- **Status:** `IMPLEMENTED_AND_VERIFIED` — **Prerequisite:** M-PS05-3
 - **Scope:** The engine execution matrix (engine × task-profile × resource-profile × failure-behavior) is completed for all engines: AURAS, AIF, VISTA (incl. AFB/VCI/VDF), ONTF, CMMS, CSTV, CDVF, CCHDF/PSEA, RAG/graph, UFD/UFW, and UFREDF.
 - **Acceptance criteria:** Every engine row in the matrix is filled and verified against M-PS05-3 profiles (submission, admission, checkpoint, failure, and fallback behavior each specified); no engine ships to Phase 7 aggregation without a completed matrix row; matrix is a reviewed, versioned artifact in the repo docs.
 - **Requirements reference:** TRD `REO-*` / `RES-*` (exact requirement numbers pending TRD consolidation).
 - **Gates:** M-PS05-9.
 
 #### M-PS05-7: Observability
-- **Status:** `NOT_STARTED` — **Prerequisite:** M-PS05-1 (traced entities: DAG nodes, tasks, state transitions)
+- **Status:** `IMPLEMENTED_AND_VERIFIED` — **Prerequisite:** M-PS05-1 (traced entities: DAG nodes, tasks, state transitions)
 - **Scope:** OpenTelemetry context propagation across API, DAG scheduler, outbox/inbox, and worker boundaries; defined metric groups per milestone area (queue depth, lease expiry, DLQ size, reconciliation divergence, pool utilization, fallback count); alert definitions and SLO candidates.
 - **Acceptance criteria:** A single trace ID follows one task from submission through engine execution to result publication; all defined metric groups emit and are dashboard-visible; alerts fire on injected failures; SLO targets are explicitly labelled **candidates, benchmarked before any numbers are guaranteed** (no SLO is asserted as met by this milestone).
 - **Requirements reference:** TRD `OBS-*` (exact requirement numbers pending TRD consolidation).
@@ -5722,7 +5751,8 @@ gantt
 
     section Foundation
     Phase 0: Architecture Baseline          :done,    p0, 2026-10-20, 2026-10-20
-    Phase 1: Shared Core, CEIPL & WORM      :active,  p1, 2026-10-21, 2026-10-23
+    Phase 1: Shared Core, CEIPL & WORM      :done,    p1, 2026-10-21, 2026-10-23
+    Milestones M-PS05-1 .. M-PS05-7         :done,    m1_7, 2026-10-23, 2026-10-31
 
     section AURAS Audio Workstream
     AURAS-A0: Audio Contracts & Preprocess  :         a0, 2026-10-21, 2026-10-23
